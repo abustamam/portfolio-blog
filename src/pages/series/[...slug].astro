@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { getSeriesPosts } from '../../utils/series';
+
+export async function getStaticPaths() {
+	const seriesList = await getCollection('series');
+	return seriesList.map((s) => ({
+		params: { slug: s.id },
+		props: { series: s },
+	}));
+}
+
+const { series } = Astro.props;
+const { posts } = await getSeriesPosts(series.id);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={series.data.title} description={series.data.description} />
+		<style>
+			main {
+				width: 960px;
+				max-width: calc(100% - 2em);
+				margin: 0 auto;
+				padding: 1em;
+			}
+			.hero-image {
+				width: 100%;
+				margin-bottom: 1.5rem;
+			}
+			.hero-image img {
+				display: block;
+				margin: 0 auto;
+				border-radius: 12px;
+				box-shadow: var(--box-shadow);
+			}
+			.series-header {
+				margin-bottom: 2rem;
+			}
+			.series-header h1 {
+				margin: 0 0 0.5em 0;
+			}
+			.series-description {
+				color: rgb(var(--gray-dark));
+				line-height: 1.6;
+			}
+			.posts-list {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.posts-list li {
+				margin-bottom: 1rem;
+				padding-bottom: 1rem;
+				border-bottom: 1px solid rgba(var(--gray), 0.2);
+			}
+			.posts-list li:last-child {
+				border-bottom: none;
+			}
+			.posts-list a {
+				text-decoration: none;
+				color: rgb(var(--black));
+			}
+			.posts-list a:hover {
+				color: rgb(var(--accent));
+			}
+			.posts-list .date {
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			{series.data.heroImage && (
+				<div class="hero-image">
+					<Image width={1020} height={510} src={series.data.heroImage} alt="" />
+				</div>
+			)}
+			<section class="series-header">
+				<h1>{series.data.title}</h1>
+				<div class="series-description">
+					{series.data.description}
+				</div>
+			</section>
+			<section>
+				<ol class="posts-list">
+					{posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								<strong>{post.data.title}</strong>
+								<p class="date">
+									<FormattedDate date={post.data.pubDate} />
+								</p>
+							</a>
+						</li>
+					))}
+				</ol>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -6,9 +6,23 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface SeriesInfo {
+	id: string;
+	title: string;
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+interface PrevNextPost {
+	id: string;
+	title: string;
+}
+
+type Props = Omit<CollectionEntry<'blog'>['data'], 'series'> & {
+	series?: SeriesInfo;
+	prevPost?: PrevNextPost | null;
+	nextPost?: PrevNextPost | null;
+};
+
+const { title, description, pubDate, updatedDate, heroImage, series, prevPost, nextPost } = Astro.props;
 ---
 
 <html lang="en">
@@ -52,6 +66,45 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			.last-updated-on {
 				font-style: italic;
 			}
+			.series-link {
+				margin-bottom: 0.5em;
+				font-size: 0.95em;
+			}
+			.series-link a {
+				color: rgb(var(--accent));
+				text-decoration: none;
+			}
+			.series-link a:hover {
+				text-decoration: underline;
+			}
+			.series-nav {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+				margin: 1.5rem 0;
+				padding: 1rem 0;
+				border-top: 1px solid rgba(var(--gray), 0.2);
+				border-bottom: 1px solid rgba(var(--gray), 0.2);
+				font-size: 0.95em;
+			}
+			.series-nav a {
+				color: rgb(var(--accent));
+				text-decoration: none;
+				max-width: 45%;
+			}
+			.series-nav a:hover {
+				text-decoration: underline;
+			}
+			.series-nav .nav-prev::before {
+				content: '← ';
+			}
+			.series-nav .nav-next {
+				text-align: right;
+				margin-left: auto;
+			}
+			.series-nav .nav-next::after {
+				content: ' →';
+			}
 		</style>
 	</head>
 
@@ -64,6 +117,11 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				</div>
 				<div class="prose">
 					<div class="title">
+						{series && (
+							<div class="series-link">
+								Part of: <a href={`/series/${series.id}/`}>{series.title}</a>
+							</div>
+						)}
 						<div class="date">
 							<FormattedDate date={pubDate} />
 							{
@@ -75,9 +133,37 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 							}
 						</div>
 						<h1>{title}</h1>
+						{(prevPost || nextPost) && (
+							<nav class="series-nav" aria-label="Series navigation">
+								{prevPost ? (
+									<a class="nav-prev" href={`/blog/${prevPost.id}/`}>{prevPost.title}</a>
+								) : (
+									<span />
+								)}
+								{nextPost ? (
+									<a class="nav-next" href={`/blog/${nextPost.id}/`}>{nextPost.title}</a>
+								) : (
+									<span />
+								)}
+							</nav>
+						)}
 						<hr />
 					</div>
 					<slot />
+					{(prevPost || nextPost) && (
+						<nav class="series-nav" aria-label="Series navigation">
+							{prevPost ? (
+								<a class="nav-prev" href={`/blog/${prevPost.id}/`}>{prevPost.title}</a>
+							) : (
+								<span />
+							)}
+							{nextPost ? (
+								<a class="nav-next" href={`/blog/${nextPost.id}/`}>{nextPost.title}</a>
+							) : (
+								<span />
+							)}
+						</nav>
+					)}
 				</div>
 			</article>
 		</main>
