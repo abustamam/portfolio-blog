@@ -1,16 +1,31 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import logoDark from '../assets/bustamam-tech-logo-dark.png';
+import logoWhite from '../assets/bustamam-tech-logo-white.png';
 ---
 
 <header>
 	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<a href="/" class="logo-link" aria-label={SITE_TITLE}>
+			<img src={logoDark.src} alt={SITE_TITLE} class="logo logo-light" width={180} height={40} />
+			<img src={logoWhite.src} alt={SITE_TITLE} class="logo logo-dark" width={180} height={40} />
+		</a>
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/blog">Blog</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
 			<a href="https://bustamam.tech" target="_blank" rel="noreferrer">Portfolio</a>
+		</div>
+		<div class="nav-right">
+			<button type="button" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+				<span class="theme-icon sun" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+				</span>
+				<span class="theme-icon moon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+				</span>
+			</button>
 		</div>
 		<div class="social-links">
 			<a href="https://m.webtoo.ls/@astro" target="_blank">
@@ -43,34 +58,88 @@ import HeaderLink from './HeaderLink.astro';
 		</div>
 	</nav>
 </header>
+<script>
+	function initThemeToggle() {
+		const html = document.documentElement;
+		const btn = document.querySelector('.theme-toggle');
+		if (!btn) return;
+
+		btn.addEventListener('click', () => {
+			const isDark = html.classList.toggle('dark');
+			localStorage.setItem('theme', isDark ? 'dark' : 'light');
+		});
+	}
+	initThemeToggle();
+</script>
 <style>
 	header {
 		margin: 0;
 		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		background: var(--header-bg);
+		box-shadow: var(--header-shadow);
 	}
-	h2 {
-		margin: 0;
-		font-size: 1em;
-	}
-
-	h2 a,
-	h2 a.active {
+	.logo-link {
+		display: flex;
+		align-items: center;
 		text-decoration: none;
+		padding: 0.75em 0.5em;
+	}
+	.logo {
+		height: 2rem;
+		width: auto;
+		display: block;
+	}
+	.logo-dark {
+		display: none;
+	}
+	html.dark .logo-light {
+		display: none;
+	}
+	html.dark .logo-dark {
+		display: block;
 	}
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 0.5rem;
 	}
-	nav a {
+	.nav-right {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.theme-toggle {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.5em;
+		border-radius: 6px;
+		color: rgb(var(--header-text));
+		line-height: 0;
+	}
+	.theme-toggle:hover {
+		background: rgba(var(--header-text), 0.1);
+	}
+	.theme-icon {
+		display: block;
+	}
+	.theme-icon.moon {
+		display: none;
+	}
+	html.dark .theme-icon.sun {
+		display: none;
+	}
+	html.dark .theme-icon.moon {
+		display: block;
+	}
+	nav a:not(.logo-link) {
 		padding: 1em 0.5em;
-		color: var(--black);
+		color: rgb(var(--header-text));
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
 	}
-	nav a.active {
+	nav a:not(.logo-link).active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
 	}
