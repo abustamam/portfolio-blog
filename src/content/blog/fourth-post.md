@@ -2,7 +2,7 @@
 title: 'Fourth post'
 description: 'Lorem ipsum dolor sit amet'
 pubDate: 'Jul 29 2022'
-series: getting-started-with-distributed-systems
+series: scaling-software-learn-in-public
 seriesOrder: 4
 ---
 
