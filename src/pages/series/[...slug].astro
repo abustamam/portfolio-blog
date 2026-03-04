@@ -8,7 +8,7 @@ import Header from '../../components/Header.astro';
 import { getSeriesPosts } from '../../utils/series';
 
 export async function getStaticPaths() {
-	const seriesList = await getCollection('series');
+	const seriesList = await getCollection('series', ({ data }) => !data.draft);
 	return seriesList.map((s) => ({
 		params: { slug: s.id },
 		props: { series: s },

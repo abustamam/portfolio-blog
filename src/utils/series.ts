@@ -10,7 +10,7 @@ export async function getSeriesPosts(seriesId: string): Promise<{
 	posts: CollectionEntry<'blog'>[];
 	getPrevNext: (currentSlug: string) => PrevNext;
 }> {
-	const allPosts = await getCollection('blog');
+	const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 	const posts = allPosts
 		.filter((p) => p.data.series === seriesId)
 		.sort((a, b) => {

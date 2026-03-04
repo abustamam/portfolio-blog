@@ -15,6 +15,7 @@ const blog = defineCollection({
 			heroImage: image().optional(),
 			series: z.string().optional(),
 			seriesOrder: z.number().optional(),
+			draft: z.boolean().optional(),
 		}),
 });
 
@@ -25,6 +26,7 @@ const series = defineCollection({
 			title: z.string(),
 			description: z.string(),
 			heroImage: image().optional(),
+			draft: z.boolean().optional(),
 		}),
 });
 
