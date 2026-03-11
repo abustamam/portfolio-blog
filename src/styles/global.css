@@ -37,6 +37,8 @@ html.dark {
 	--color-text: rgb(var(--gray-light));
 	--color-heading: rgb(var(--gray-light));
 	--color-muted: rgb(148, 163, 184);
+	/* Lighter accent for dark mode (~7:1 contrast) */
+	--accent: #7b93ff;
 }
 
 html.dark {
