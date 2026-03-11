@@ -20,6 +20,10 @@
 	--header-bg: #fff;
 	--header-text: 15, 18, 25;
 	--header-shadow: 0 2px 8px rgba(15, 18, 25, 0.05);
+	/* Semantic text colors */
+	--color-text: rgb(var(--gray-dark));
+	--color-heading: rgb(var(--black));
+	--color-muted: rgb(var(--gray));
 }
 
 html.dark {
@@ -29,6 +33,10 @@ html.dark {
 	--header-bg: rgb(15, 18, 25);
 	--header-text: 255, 255, 255;
 	--header-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	/* Semantic text colors for dark mode */
+	--color-text: rgb(var(--gray-light));
+	--color-heading: rgb(var(--gray-light));
+	--color-muted: rgb(148, 163, 184);
 }
 
 html.dark {
@@ -39,16 +47,6 @@ html.dark body {
 	background-color: rgb(15, 18, 25);
 	background-image: linear-gradient(var(--gray-gradient)) no-repeat;
 	background-size: 100% 600px;
-	color: rgb(229, 233, 240);
-}
-
-html.dark h1,
-html.dark h2,
-html.dark h3,
-html.dark h4,
-html.dark h5,
-html.dark h6 {
-	color: rgb(229, 233, 240);
 }
 
 html.dark code {
@@ -85,7 +83,7 @@ body {
 	background-size: 100% 600px;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
+	color: var(--color-text);
 	font-size: 20px;
 	line-height: 1.7;
 }
@@ -102,7 +100,7 @@ h4,
 h5,
 h6 {
 	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
+	color: var(--color-heading);
 	line-height: 1.2;
 }
 h1 {

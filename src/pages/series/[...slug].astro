@@ -50,7 +50,7 @@ const { posts } = await getSeriesPosts(series.id);
 				margin: 0 0 0.5em 0;
 			}
 			.series-description {
-				color: rgb(var(--gray-dark));
+				color: var(--color-text);
 				line-height: 1.6;
 			}
 			.posts-list {
@@ -68,13 +68,13 @@ const { posts } = await getSeriesPosts(series.id);
 			}
 			.posts-list a {
 				text-decoration: none;
-				color: rgb(var(--black));
+				color: var(--color-heading);
 			}
 			.posts-list a:hover {
 				color: rgb(var(--accent));
 			}
 			.posts-list .date {
-				color: rgb(var(--gray));
+				color: var(--color-muted);
 				font-size: 0.9em;
 			}
 			.series-body {
