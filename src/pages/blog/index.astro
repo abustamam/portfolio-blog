@@ -5,9 +5,11 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
+import DraftBadge from '../../components/DraftBadge.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { isPublished } from '../../utils/content';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+const posts = (await getCollection('blog', ({ data }) => isPublished(data))).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
@@ -98,7 +100,10 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
 									{post.data.heroImage && (
 										<Image width={720} height={360} src={post.data.heroImage} alt="" />
 									)}
-									<h4 class="title">{post.data.title}</h4>
+									<h4 class="title">
+										<DraftBadge draft={post.data.draft} />
+										{post.data.title}
+									</h4>
 									<p class="date">
 										<FormattedDate date={post.data.pubDate} />
 									</p>

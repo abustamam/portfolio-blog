@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
+import { isPublished } from './content';
 
 export interface PrevNext {
 	prev: { id: string; title: string } | null;
@@ -10,7 +11,7 @@ export async function getSeriesPosts(seriesId: string): Promise<{
 	posts: CollectionEntry<'blog'>[];
 	getPrevNext: (currentSlug: string) => PrevNext;
 }> {
-	const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+	const allPosts = await getCollection('blog', ({ data }) => isPublished(data));
 	const posts = allPosts
 		.filter((p) => p.data.series === seriesId)
 		.sort((a, b) => {
