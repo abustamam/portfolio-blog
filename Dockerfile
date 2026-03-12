@@ -1,10 +1,10 @@
 # Stage 1: build the static site
-FROM node:22-alpine AS builder
+FROM oven/bun:alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 COPY . .
-RUN npm run build
+RUN bun run build
 
 # Stage 2: serve with nginx
 FROM nginx:alpine
