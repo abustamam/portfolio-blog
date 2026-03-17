@@ -145,6 +145,20 @@ input {
 }
 table {
 	width: 100%;
+	border-collapse: collapse;
+	margin: 1.5em 0;
+}
+
+table th,
+table td {
+	border: 1px solid rgb(var(--gray-light));
+	padding: 0.5em 0.75em;
+	text-align: left;
+}
+
+html.dark table th,
+html.dark table td {
+	border-color: rgba(148, 163, 184, 0.4);
 }
 img {
 	max-width: 100%;
