@@ -4,7 +4,7 @@ description: "Phase 1 of Systems Design in Practice: a Hono + Postgres URL short
 pubDate: '2026-03-04'
 series: url-shortener-systems-design
 seriesOrder: 1
-heroImage: '../../assets/url-shortener-cover.png'
+heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
 ---
 
 *TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. This post establishes the baseline latency you'll use as a reference point throughout the series.
@@ -30,7 +30,7 @@ GET  /:slug     — looks up the slug, redirects to the original URL
 
 That's it. Everything in this series is about making these two endpoints faster, more resilient, and more observable. Keeping the app trivial is a feature — it means every new concept gets your full attention.
 
-![simple request/response diagram — POST /shorten returns {"slug": "abc123"}, GET /abc123 returns 301 to original URL](../../assets/url-shortener-phase-1-endpoints.png)
+![simple request/response diagram — POST /shorten returns {"slug": "abc123"}, GET /abc123 returns 301 to original URL](../../assets/series/url-shortener/url-shortener-phase-1-endpoints.png)
 
 ## Why Hono
 
@@ -63,7 +63,7 @@ I think the columns are pretty self-explanatory, but let's talk about `hitCount`
 
 One other decision worth noting: slug has a UNIQUE constraint, so the database enforces no collisions. The application layer doesn't need to worry about it.
 
-![simple ERD / table diagram showing the urls table columns and types](../../assets/url-shortener-phase-1-url-table.png)
+![simple ERD / table diagram showing the urls table columns and types](../../assets/series/url-shortener/url-shortener-phase-1-url-table.png)
 
 ## Slug generation: three approaches
 
@@ -116,8 +116,8 @@ const shortenRoute = createRoute({
 ```
 I've always appreciated when API providers provide some sort of interactive playground. I can see the schema of inputs and outputs and run tests without touching my code. The result is a clean way to see all of your app's endpoints, and you can add whatever additional information necessary for your users, like when to use it, whether it's deprecated (and what to use instead), or any auth requirements, giving us a clean, self-documenting view of every endpoint.
 
-![screenshot of the Swagger UI at /docs showing the two endpoints](../../assets/url-shortener-phase-1-swagger.png)
-![screenshot of the Swagger UI at /docs showing the /shorten endpoint](../../assets/url-shortener-phase-1-swagger-shorten.png)
+![screenshot of the Swagger UI at /docs showing the two endpoints](../../assets/series/url-shortener/url-shortener-phase-1-swagger.png)
+![screenshot of the Swagger UI at /docs showing the /shorten endpoint](../../assets/series/url-shortener/url-shortener-phase-1-swagger-shorten.png)
 
 ## The full endpoints
 
@@ -317,7 +317,7 @@ shrtn.bustamam.tech {
 }
 ```
 
-![architecture diagram — browser → Caddy → Hono app → Postgres, all on one VPS.](../../assets/url-shortener-phase-1-vps-architecture.png)
+![architecture diagram — browser → Caddy → Hono app → Postgres, all on one VPS.](../../assets/series/url-shortener/url-shortener-phase-1-vps-architecture.png)
 
 A single-node setup is exactly right for Phase 1. It makes the baseline latency measurement meaningful — there's no load balancer, no network hops between services, nothing to confuse the numbers.
 
@@ -332,27 +332,39 @@ I'm going to use k6 because it natively outputs p50/p95/p99 in its summary, and 
 I wrote this script:
 
 ```k6-baseline.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+/**
+ * k6 load test for the URL shortener.
+ *
+ * Usage:
+ *   k6 run --env BASE_URL=https://yourdomain.com --env SLUG=abc123 scripts/load-test.js
+ *
+ * Optional env vars:
+ *   VUS       — number of virtual users (default: 50)
+ *   DURATION  — test duration (default: 30s)
+ *
+ * At the end of the run k6 prints a summary including p50/p95/p99 for
+ * http_req_duration. Copy those numbers into your blog post / phase notes.
+ */
 
-// Replace with a real slug from your database before running
-const SLUG = 'insert_slug_here';
-const BASE_URL = 'insert_url_here';
+import http from 'k6/http';
+import { check } from 'k6';
+
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
+const SLUG = __ENV.SLUG;
+
+if (!SLUG) {
+  throw new Error('Set --env SLUG=<your-slug> before running');
+}
 
 export const options = {
-  vus: 50,
-  duration: '30s',
+  vus: parseInt(__ENV.VUS || '50', 10),
+  duration: __ENV.DURATION || '30s',
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
 };
 
 export default function () {
-  const res = http.get(`${BASE_URL}/${SLUG}`, {
-    redirects: 0, // measure the redirect response, not the final destination
-  });
-
-  check(res, {
-    'status is 301 or 302': (r) => r.status === 301 || r.status === 302,
-  });
+  const res = http.get(`${BASE_URL}/${SLUG}`, { redirects: 0 });
+  check(res, { 'status is 301 or 302': (r) => r.status === 301 || r.status === 302 });
 }
 ```
 
@@ -367,7 +379,7 @@ k6 run scripts/k6-baseline.js
 
 You'll see a lot of stuff here. But you'll want to pay attention to `http_req_duration` because it represents the time from sending the request to receiving the response. `iteration_duration` includes any overhead around the request like setting up k6 on each iteration. 
 
-![k6 run on local machine against deployed URL shortener service](../../assets/url-shortener-phase-1-run.png)
+![k6 run on local machine against deployed URL shortener service](../../assets/series/url-shortener/url-shortener-phase-1-run.png)
 
 | Percentile | Latency |
 |------------|---------|
@@ -379,7 +391,7 @@ The distribution is pretty tight! 19ms between p50 and p99. The 170ms is almost 
 
 If we want to disregard network latency and just test our Postgresql query, we can run this exact thing on our Hetzner box.
 
-![k6 run on hetzner box](../../assets/url-shortener-phase-1-run-2.png)
+![k6 run on hetzner box](../../assets/series/url-shortener/url-shortener-phase-1-run-2.png)
 
 | Percentile | Latency |
 |------------|---------|

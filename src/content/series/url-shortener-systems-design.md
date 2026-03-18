@@ -1,7 +1,7 @@
 ---
 title: "Systems Design in Practice: A URL Shortener"
 description: "A progressive infrastructure lab built on the simplest possible application — two endpoints, one concept per phase. Covers caching, rate limiting, horizontal scaling, observability, and database replication."
-heroImage: "../../assets/url-shortener.png"
+heroImage: "../../assets/series/url-shortener/url-shortener.png"
 ---
 
 ## Systems Design for Full-Stack Developers
@@ -32,7 +32,7 @@ At the end of the series, if you've followed along, you'll have built a fully sc
 
 ## What we're building
 
-![End-state architecture: Browser → Caddy LB → Hono Nodes → Redis, Postgres Primary/Replica, Grafana LGTM Stack](../../assets/url-shortener-map.png)
+![End-state architecture: Browser → Caddy LB → Hono Nodes → Redis, Postgres Primary/Replica, Grafana LGTM Stack](../../assets/series/url-shortener/url-shortener-map.png)
 
 | Phase | Concept | What gets added |
 |-------|---------|-----------------|
