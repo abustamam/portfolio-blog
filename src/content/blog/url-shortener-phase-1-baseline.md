@@ -199,7 +199,11 @@ A single-node setup is exactly right for Phase 1. It makes the baseline latency 
 
 ## Measuring the baseline
 
-Before doing anything else, I measured redirect latency. This number will be referenced in every subsequent phase. It's the thing every optimization gets compared against. I'm going to use k6 because it natively outputs p50/p95/p99 in its summary, and it's scriptable in JS. There are plenty of other tools you could use, feel free to experiment.
+Before doing anything else, let's measure redirect latency. These will be referenced in every subsequent phase, and every optimization will be compared against these values.
+
+We'll get our baseline values by load-testing our app in order to get a bunch of latency values, then do some math to determine statistical latencies. These are commonly called p50, p90, p95, p99. In p*n*, we are just talking about the *n*th percentile. This may sound like jargon, but it's just statistics, and fortunately, the math is simple. To get these numbers, we sort, then grab the value at the specified rank. So if we say p50, we look at the number that is at the 50% mark. Half of all entries will be lower, half will be higher. If we say p99, we are looking at the highest 1% of latencies, and this is where we typically want to spend our time optimizing as we scale. 1% of 100 is only 1, but 1% of 100,000 is 1,000. Those are real users who may be having real problems with your app.  
+
+I'm going to use k6 because it natively outputs p50/p95/p99 in its summary, and it's scriptable in JS. There are plenty of other tools you could use, feel free to experiment.
 
 I wrote this script:
 
