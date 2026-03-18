@@ -13,7 +13,7 @@ Have you ever been in an interview and they asked you, "Design a URL shortener."
 
 That's it. That's the question. What was your answer? Was it anything like mine, which was just "two endpoints -- one to shorten, one to redirect, and that's it! Can I have a job now?"
 
-There's a reason this is a classic interview question. It's not a trick question, but it is a weeder question. Many developers may fall into the trap of not understanding how complex a URL shortener actually could be. It's easy to think that it's just two endpoints and a single database table and that's all we need. What about what happens when there's a million requests per day against your API? Will your 1 vCPU VPS be able to handle it, or will you just keep adding more RAM and vCPU?
+There's a reason this is a classic interview question. It's not a trick question, but it is a weeder question. Many developers may fall into the trap of not understanding how complex a URL shortener actually could be. It's easy to think that it's just two endpoints and a single database table and that's all we need. What happens when there's a million requests per day against your API? Will your 1 vCPU VPS be able to handle it, or will you just keep adding more RAM and vCPU?
 
 The goal of this series is to learn infrastructure concepts hands-on — not by following a curriculum, but by building something real and breaking it. A URL shortener is the perfect vehicle: it's trivial enough to understand in five minutes, and interesting enough to keep adding layers to.
 
@@ -43,19 +43,23 @@ That second point matters a lot, which I'll get to in a moment.
 
 ## Schema design
 
-The database has one table:
+The database has one table, codified here as a drizzle schema:
 
-```sql
-CREATE TABLE urls (
-  id         SERIAL PRIMARY KEY,
-  slug       TEXT NOT NULL UNIQUE,
-  target_url TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  hit_count  INTEGER NOT NULL DEFAULT 0
-);
+```ts
+import { pgTable, serial, text, timestamp, integer, index } from 'drizzle-orm/pg-core'
+
+export const urls = pgTable('urls', {
+  id: serial('id').primaryKey(),
+  slug: text('slug').notNull().unique(),
+  originalUrl: text('original_url').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  hitCount: integer('hit_count').default(0).notNull(),
+}, (table) => [
+  index('slug_idx').on(table.slug),
+])
 ```
 
-I think the columns are pretty self-explanatory, but let's talk about `hit_count` for a second. `hit_count` just represents how often people are hitting this link. Under concurrency, two requests could both read the same count, increment it, and write back, losing one update. That's fine for a baseline. We'll fix it later.
+I think the columns are pretty self-explanatory, but let's talk about `hitCount` for a second. `hitCount` just represents how often people are hitting this link. We'll talk a bit more about this column in the implementation section.
 
 One other decision worth noting: slug has a UNIQUE constraint, so the database enforces no collisions. The application layer doesn't need to worry about it.
 
@@ -71,7 +75,7 @@ There are three common ways to generate slugs, each with different tradeoffs:
 | **Hash of URL** | `sha256(url)[:7]` | Deterministic — same URL, same slug | Hash collisions require handling; leaks URL structure |
 | **Sequential** | `0001`, `0002` | Short, predictable length | Requires coordination; enumerable (privacy concern) |
 
-I went with nanoid (random). Sequential didn't seem appropriate because it makes concurrency difficult since we'd have to generate unique IDs without a central counter. Hash vs random was a toss-up, but random had fewer downsides. The right choice depends on whether leaking the URL structure is fine or not.
+I went with nanoid (random). Sequential is a privacy concern -- if someone gives you a short URL ending in 00100, you can probably enumerate 00001-00099. Not ideal. Hash vs random was a toss-up, but random had fewer downsides. The right choice depends on whether leaking the URL structure is fine or not.
 
 ```ts
 import { customAlphabet } from 'nanoid';
@@ -110,16 +114,136 @@ const shortenRoute = createRoute({
   },
 });
 ```
-I've always appreciated when API providers provide some sort of interactive playground. I can see the schema of inputs and outputs and run tests without touching my code. The result is a clean way to see all of your app's endpoints, and you can add whatever additional information necessary for your users, like when to use it, whether it's deprecated (and what to use instead), or any auth requirements. The result is a clean, self-documenting view of every endpoint.
+I've always appreciated when API providers provide some sort of interactive playground. I can see the schema of inputs and outputs and run tests without touching my code. The result is a clean way to see all of your app's endpoints, and you can add whatever additional information necessary for your users, like when to use it, whether it's deprecated (and what to use instead), or any auth requirements, giving us a clean, self-documenting view of every endpoint.
 
 ![screenshot of the Swagger UI at /docs showing the two endpoints](../../assets/url-shortener-phase-1-swagger.png)
 ![screenshot of the Swagger UI at /docs showing the /shorten endpoint](../../assets/url-shortener-phase-1-swagger-shorten.png)
+
+## The full endpoints
+
+Here's the full implementation of the URL shortener. The only non-obvious decision is in `redirect.ts`: hit count tracking is fire-and-forget, so a slow or failed counter update never delays the redirect. This is fine for our low-scale demo as a baseline, because the redirect matters more than the counter.
+
+The `/redirect` endpoint:
+
+```redirect.ts
+import { createRoute, z } from '@hono/zod-openapi'
+import { OpenAPIHono } from '@hono/zod-openapi'
+import { eq, sql } from 'drizzle-orm'
+import { db } from '../db'
+import { urls } from '../db/schema'
+
+const SlugParamSchema = z.object({
+  slug: z.string().openapi({ example: 'abc12345' }),
+})
+
+const ErrorSchema = z.object({
+  error: z.string(),
+})
+
+const redirectRoute = createRoute({
+  method: 'get',
+  path: '/{slug}',
+  request: {
+    params: SlugParamSchema,
+  },
+  responses: {
+    301: {
+      description: 'Redirect to the original URL',
+    },
+    404: {
+      content: { 'application/json': { schema: ErrorSchema } },
+      description: 'Slug not found',
+    },
+  },
+})
+
+export const redirectRouter = new OpenAPIHono()
+
+redirectRouter.openapi(redirectRoute, async (c) => {
+  const { slug } = c.req.valid('param')
+
+  const result = await db
+    .select()
+    .from(urls)
+    .where(eq(urls.slug, slug))
+    .limit(1)
+
+  if (result.length === 0) {
+    return c.json({ error: 'Slug not found' }, 404)
+  }
+
+  // Fire-and-forget: increment hit count without blocking the redirect
+  db.update(urls)
+    .set({ hitCount: sql`${urls.hitCount} + 1` })
+    .where(eq(urls.slug, slug))
+    .execute()
+    .catch(() => {}) // swallow errors — redirect is more important than the counter
+
+  return c.redirect(result[0].originalUrl, 301)
+})
+```
+
+The `/shorten` endpoint is a lot simpler. No fire-and-forget, just insert the record and return the slug.
+
+```shorten.ts
+import { createRoute, z } from '@hono/zod-openapi'
+import { OpenAPIHono } from '@hono/zod-openapi'
+import { nanoid } from 'nanoid'
+import { db } from '../db'
+import { urls } from '../db/schema'
+
+const ShortenBodySchema = z.object({
+  url: z.string().url().openapi({ example: 'https://example.com' }),
+})
+
+const ShortenResponseSchema = z.object({
+  slug: z.string().openapi({ example: 'abc12345' }),
+})
+
+const ErrorSchema = z.object({
+  error: z.string(),
+})
+
+const shortenRoute = createRoute({
+  method: 'post',
+  path: '/shorten',
+  request: {
+    body: {
+      content: { 'application/json': { schema: ShortenBodySchema } },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { 'application/json': { schema: ShortenResponseSchema } },
+      description: 'URL shortened successfully',
+    },
+    400: {
+      content: { 'application/json': { schema: ErrorSchema } },
+      description: 'Invalid URL',
+    },
+  },
+})
+
+export const shortenRouter = new OpenAPIHono()
+
+shortenRouter.openapi(shortenRoute, async (c) => {
+  const { url } = c.req.valid('json')
+  const slug = nanoid(8)
+
+  await db.insert(urls).values({ slug, originalUrl: url })
+
+  return c.json({ slug }, 201)
+})
+```
+
+That's it. This app is intentionally simple because the complexity isn't in the code, it's what happens when it runs at scale, and that is what the rest of this series is going to take you through.
 
 ## Deployment: single VPS behind Caddy
 
 The deployment is intentionally simple: one Hetzner VPS, Caddy as a reverse proxy. Caddy handles TLS automatically. The app runs in a Docker container.
 
-I'm using a 4vCPU and 8GB RAM Ubuntu box in a Helsinki datacenter ($5.99/mo) because that's just my lab box. But you probably don't even need that much; try it with the smallest you can get and if it doesn't work then you can always rescale. 
+I'm using a 4vCPU and 8GB RAM Ubuntu box in a Helsinki datacenter ($5.99/mo) because that's just what I use for all my labs, but you probably don't even need that much; try it with the smallest you can get. If it doesn't work then you can always rescale. 
 
 We'll be using docker compose to manage services. My docker-compose.yml looks like this:
 
@@ -283,7 +407,7 @@ The planning time is the time postgres took to optimize the query. The execution
 
 The important thing isn't the absolute numbers, it's having them. Every subsequent phase will change something about the system and we'll compare against this baseline.
 
-The Postgres query takes 0.091ms to execute, so we can probably infer that Postgres is not the problem. The $40ms on the VPS is the full request pipeline, which includes Caddy, Docker networking, Hono, connection pool to Postgres, etc.
+The Postgres query takes 0.091ms to execute, so we can probably infer that Postgres is not the problem. The ~40ms on the VPS is the full request pipeline, which includes Caddy, Docker networking, Hono, connection pool to Postgres, etc.
 
 ## What's next
 
