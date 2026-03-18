@@ -1,5 +1,5 @@
 ---
-title: "I built a URL shortener in a weekend"
+title: "A URL Shortener Is Not Just Two Endpoints"
 description: "Phase 1 of Systems Design in Practice: a Hono + Postgres URL shortener with two endpoints, Swagger UI, and a baseline latency measurement you'll reference for every phase that follows."
 pubDate: '2026-03-04'
 series: url-shortener-systems-design
