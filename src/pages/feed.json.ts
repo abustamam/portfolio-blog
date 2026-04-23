@@ -11,7 +11,7 @@ export async function GET(context: { site: URL }) {
     description: SITE_DESCRIPTION,
     home_page_url: context.site.href,
     feed_url: new URL('/feed.json', context.site).href,
-    authors: [{ name: 'Rasheed Bustamam', url: 'https://bustamam.technology' }],
+    authors: [{ name: 'Rasheed Bustamam', url: 'https://bustamam.tech' }],
     items: posts.map(post => ({
       id: new URL(`/blog/${post.id}/`, context.site).href,
       url: new URL(`/blog/${post.id}/`, context.site).href,
