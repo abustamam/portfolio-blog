@@ -1,0 +1,27 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import TerminalChrome from '../components/TerminalChrome.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  chromePath?: string;
+}
+
+const { title, description, chromePath = '/writing' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body>
+    <TerminalChrome path={chromePath} />
+    <SiteHeader />
+    <slot />
+    <SiteFooter />
+  </body>
+</html>
