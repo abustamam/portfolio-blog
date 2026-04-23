@@ -1,0 +1,31 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  path?: string;
+}
+const { path = '/writing' } = Astro.props;
+---
+
+<div style="display:flex; align-items:center; height:34px; border-bottom:1px solid var(--line); background:var(--surface); font-family:var(--font-mono); font-size:11px; color:var(--mute);">
+  <!-- Traffic lights -->
+  <div style="display:flex; align-items:center; gap:6px; padding:0 14px; border-right:1px solid var(--line); height:100%;">
+    <span style="width:7px; height:7px; border-radius:50%; background:var(--danger);"></span>
+    <span style="width:7px; height:7px; border-radius:50%; background:var(--faint);"></span>
+    <span style="width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+  </div>
+  <!-- Breadcrumb -->
+  <div style="padding:0 14px; border-right:1px solid var(--line); height:100%; display:flex; align-items:center; color:var(--ink); letter-spacing:-.01em;">
+    rasheed@bustamam <span style="color:var(--faint); margin:0 6px;">·</span> ~/journal{path}
+  </div>
+  <div style="flex:1;"></div>
+  <!-- Right: availability + theme toggle -->
+  <div style="padding:0 14px; border-left:1px solid var(--line); height:100%; display:flex; align-items:center; gap:12px;">
+    <span style="display:inline-flex; align-items:center; gap:6px;">
+      <span style="width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>
+      <span style="color:var(--ink);">available · Q3</span>
+    </span>
+    <span style="color:var(--faint);">·</span>
+    <ThemeToggle />
+  </div>
+</div>
