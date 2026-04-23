@@ -1,0 +1,37 @@
+---
+// SiteHeader.astro — no props
+---
+
+<header style="display:flex; align-items:center; justify-content:space-between; padding:22px var(--gutter); border-bottom:1px solid var(--line); background:var(--bg);">
+  <!-- Brand -->
+  <div style="display:flex; align-items:center; gap:14px;">
+    <a href="/" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
+      <!-- Bustamam mark: two offset stacked bars forming a B-like shape -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="3" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
+        <rect x="7" y="13.5" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
+      </svg>
+      <div style="font-family:var(--font-mono); font-size:13px; color:var(--ink); font-weight:500; letter-spacing:-.01em;">
+        bustamam<span style="color:var(--accent);">.</span>technology
+      </div>
+    </a>
+    <div style="height:14px; width:1px; background:var(--line); margin:0 4px;"></div>
+    <div style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">/journal</div>
+  </div>
+  <!-- Nav -->
+  <nav style="display:flex; align-items:center; gap:28px; font-family:var(--font-mono); font-size:12px;">
+    <a href="/" style="color:var(--ink); text-decoration:none;">writing</a>
+    <a href="/work" style="color:var(--mute); text-decoration:none;">work</a>
+    <a href="/about" style="color:var(--mute); text-decoration:none;">about</a>
+    <a href="/contact" style="color:var(--mute); text-decoration:none;">contact</a>
+    <!-- Search hint — '/' key and ⌘K wired in SearchFilter on index -->
+    <div style="display:flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--line); border-radius:2px; color:var(--faint); font-size:11px; cursor:default;">
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span>search</span>
+      <span style="font-size:10px; padding:1px 5px; background:var(--kbd); border-radius:2px; color:var(--mute);">⌘K</span>
+    </div>
+  </nav>
+</header>
