@@ -16,6 +16,12 @@ const blog = defineCollection({
 			series: z.string().optional(),
 			seriesOrder: z.number().optional(),
 			draft: z.boolean().optional(),
+			// New Terminal Sharp fields
+			dek: z.string().optional(),        // subtitle / pull quote
+			tag: z.string().optional(),        // primary topic tag
+			kind: z.string().optional(),       // Essay | Teardown | Case Study
+			readMin: z.number().optional(),    // estimated reading time in minutes
+			words: z.number().optional(),      // approximate word count
 		}),
 });
 
