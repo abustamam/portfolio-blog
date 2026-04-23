@@ -1,0 +1,20 @@
+---
+// SiteFooter.astro — no props
+const year = new Date().getFullYear();
+---
+
+<footer style="padding:28px var(--gutter); border-top:1px solid var(--line); background:var(--surface); display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:11px; color:var(--mute);">
+  <div style="display:flex; gap:20px; align-items:center;">
+    <span>© {year} bustamam.technology</span>
+    <a href="/rss.xml" style="color:var(--mute); text-decoration:none;">rss</a>
+    <a href="/feed.json" style="color:var(--mute); text-decoration:none;">json feed</a>
+    <a href="/colophon" style="color:var(--mute); text-decoration:none;">colophon</a>
+  </div>
+  <div style="display:flex; gap:20px; align-items:center;">
+    <span style="color:var(--faint);">built with astro · one-person practice</span>
+    <span style="display:inline-flex; align-items:center; gap:6px;">
+      <span style="width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>
+      all systems nominal
+    </span>
+  </div>
+</footer>
