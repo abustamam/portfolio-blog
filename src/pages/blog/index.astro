@@ -1,12 +1,9 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
 import DraftBadge from '../../components/DraftBadge.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import { isPublished } from '../../utils/content';
 
 const posts = (await getCollection('blog', ({ data }) => isPublished(data))).sort(
@@ -14,10 +11,8 @@ const posts = (await getCollection('blog', ({ data }) => isPublished(data))).sor
 );
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION} chromePath="/writing">
+	<main>
 		<style>
 			ul {
 				display: flex;
@@ -84,33 +79,27 @@ const posts = (await getCollection('blog', ({ data }) => isPublished(data))).sor
 				}
 			}
 		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">
-										<DraftBadge draft={post.data.draft} />
-										{post.data.title}
-									</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+		<section>
+			<ul>
+				{
+					posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								{post.data.heroImage && (
+									<Image width={720} height={360} src={post.data.heroImage} alt="" />
+								)}
+								<h4 class="title">
+									<DraftBadge draft={post.data.draft} />
+									{post.data.title}
+								</h4>
+								<p class="date">
+									{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+								</p>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</section>
+	</main>
+</BaseLayout>

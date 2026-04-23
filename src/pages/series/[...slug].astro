@@ -1,11 +1,8 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
 import DraftBadge from '../../components/DraftBadge.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getSeriesPosts } from '../../utils/series';
 import { isPublished } from '../../utils/content';
 
@@ -22,10 +19,8 @@ const { Content } = await render(series);
 const { posts } = await getSeriesPosts(series.id);
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={series.data.title} description={series.data.description} />
+<BaseLayout title={series.data.title} description={series.data.description} chromePath={`/series/${series.id}`}>
+	<main>
 		<style>
 			main {
 				width: 960px;
@@ -82,43 +77,37 @@ const { posts } = await getSeriesPosts(series.id);
 				line-height: 1.7;
 			}
 		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			{series.data.heroImage && (
-				<div class="hero-image">
-					<Image width={1020} height={510} src={series.data.heroImage} alt="" />
-				</div>
-			)}
-			<section class="series-header">
-				<h1>{series.data.title}</h1>
-				<div class="series-description">
-					{series.data.description}
-				</div>
-			</section>
-			<div class="series-body">
-				<Content />
+		{series.data.heroImage && (
+			<div class="hero-image">
+				<Image width={1020} height={510} src={series.data.heroImage} alt="" />
 			</div>
-			<section>
-				<h2>Posts in this series</h2>
-				<ol class="posts-list">
-					{posts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								<strong>
-									<DraftBadge draft={post.data.draft} />
-									{post.data.title}
-								</strong>
-								<p class="date">
-									<FormattedDate date={post.data.pubDate} />
-								</p>
-							</a>
-						</li>
-					))}
-				</ol>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+		)}
+		<section class="series-header">
+			<h1>{series.data.title}</h1>
+			<div class="series-description">
+				{series.data.description}
+			</div>
+		</section>
+		<div class="series-body">
+			<Content />
+		</div>
+		<section>
+			<h2>Posts in this series</h2>
+			<ol class="posts-list">
+				{posts.map((post) => (
+					<li>
+						<a href={`/blog/${post.id}/`}>
+							<strong>
+								<DraftBadge draft={post.data.draft} />
+								{post.data.title}
+							</strong>
+							<p class="date">
+								{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+							</p>
+						</a>
+					</li>
+				))}
+			</ol>
+		</section>
+	</main>
+</BaseLayout>

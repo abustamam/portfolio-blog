@@ -1,9 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import Header from '../../components/Header.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getSeriesPosts } from '../../utils/series';
 import { isPublished } from '../../utils/content';
 
@@ -19,10 +17,8 @@ const seriesWithCounts = await Promise.all(
 );
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title="Series" description="Multi-part deep dives into distributed systems topics." />
+<BaseLayout title="Series" description="Multi-part deep dives into distributed systems topics." chromePath="/series">
+	<main>
 		<style>
 			.series-list {
 				list-style: none;
@@ -84,33 +80,27 @@ const seriesWithCounts = await Promise.all(
 				}
 			}
 		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>Series</h1>
-			<ul class="series-list">
-				{seriesWithCounts.map(({ series, postCount }) => (
-					<li>
-						<a href={`/series/${series.id}/`} class="series-card">
-							{series.data.heroImage && (
-								<Image
-									width={320}
-									height={180}
-									src={series.data.heroImage}
-									alt=""
-								/>
-							)}
-							<div class="series-info">
-								<h2 class="series-title">{series.data.title}</h2>
-								<p class="series-description">{series.data.description}</p>
-								<span class="series-meta">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
-							</div>
-						</a>
-					</li>
-				))}
-			</ul>
-		</main>
-		<Footer />
-	</body>
-</html>
+		<h1>Series</h1>
+		<ul class="series-list">
+			{seriesWithCounts.map(({ series, postCount }) => (
+				<li>
+					<a href={`/series/${series.id}/`} class="series-card">
+						{series.data.heroImage && (
+							<Image
+								width={320}
+								height={180}
+								src={series.data.heroImage}
+								alt=""
+							/>
+						)}
+						<div class="series-info">
+							<h2 class="series-title">{series.data.title}</h2>
+							<p class="series-description">{series.data.description}</p>
+							<span class="series-meta">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
+						</div>
+					</a>
+				</li>
+			))}
+		</ul>
+	</main>
+</BaseLayout>
