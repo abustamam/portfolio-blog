@@ -1,32 +1,229 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AuthorBio from '../components/AuthorBio.astro';
+
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+function fmtDate(date: Date): string {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d = new Date(date);
+  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')} ${d.getFullYear()}`;
+}
+
+const rawTags = allPosts.map(p => p.data.tag).filter((t): t is string => Boolean(t));
+const uniqueTags = Array.from(new Set(rawTags));
+const tags = ['All', ...uniqueTags];
+
+const latestTitle = allPosts[0]?.data.title.toLowerCase() ?? 'no posts yet';
+const latestSlug = allPosts[0]?.id ?? '';
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>Learning Distributed Systems in Public</h1>
-			<p>
-				I'm <strong>Rasheed Bustamam</strong>, an applications consultant specializing in web and
-				mobile. This is where I document my journey learning distributed systems—the concepts,
-				the trade-offs, and the things that don't make it into the happy-path diagrams.
-			</p>
-			<p>
-				To get started, check out my <a href="/series">learn in public series</a>.
-			</p>
-			<p>
-				If you need help with web or mobile applications, visit
-				<a href="https://bustamam.tech" target="_blank" rel="noreferrer">bustamam.tech</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
-</html>
+<BaseLayout title="Rasheed Bustamam — Engineering Journal" description="Long-form writing on software craft, distributed systems, and independent consulting.">
+
+  <!-- Hero -->
+  <section style="padding:64px var(--gutter) 52px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1.15fr 1fr; gap:72px; align-items:end;">
+    <!-- Left -->
+    <div>
+      <div style="display:inline-flex; align-items:center; gap:10px; padding:5px 12px; background:var(--accent-bg); color:var(--accent-ink); border-radius:2px; font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:32px;">
+        <span style="width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>
+        journal · vol 04 · spring 2026
+      </div>
+      <h1 style="font-family:var(--font-serif); font-weight:500; font-size:68px; line-height:.96; margin:0; color:var(--ink); letter-spacing:-.028em;">
+        I build software<br/>
+        that doesn't <em style="font-style:italic; color:var(--accent); font-weight:500;">page you</em><br/>
+        on a Sunday.
+      </h1>
+      <p style="margin-top:26px; max-width:500px; font-family:var(--font-serif); font-size:18px; line-height:1.55; color:var(--mute);">
+        I'm <span style="color:var(--ink);">Rasheed Bustamam</span> — an independent software
+        consultant based in California. This is my notebook.
+        Writing on the craft and the decisions behind the code.
+      </p>
+      <div style="display:flex; gap:14px; margin-top:32px;">
+        <a href={latestSlug ? `/blog/${latestSlug}/` : '/'} style="background:var(--ink); color:var(--bg); border:1px solid var(--ink); padding:9px 16px; border-radius:2px; cursor:pointer; font-family:var(--font-mono); font-size:12px; letter-spacing:.02em; text-decoration:none;">
+          $ read latest <span style="color:var(--accent); margin-left:4px;">→</span>
+        </a>
+        <a href="mailto:rasheed@bustamam.technology" style="background:transparent; color:var(--ink); border:1px solid var(--line); padding:9px 16px; border-radius:2px; font-family:var(--font-mono); font-size:12px; letter-spacing:.02em; text-decoration:none;">
+          $ hire me
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: terminal card -->
+    <div style="background:var(--code); border:1px solid var(--line); border-radius:4px; font-family:var(--font-mono); font-size:12px; overflow:hidden;">
+      <div style="padding:8px 14px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; color:var(--faint); font-size:10px; letter-spacing:.08em; text-transform:uppercase;">
+        <span>whoami.sh</span><span>● online</span>
+      </div>
+      <div style="padding:18px 16px 20px;">
+        <div style="display:flex; gap:10px; margin-bottom:10px; color:var(--mute);">
+          <span class="term-ts" style="color:var(--faint);"></span>
+          <span style="color:var(--ink);">[WHO]</span>
+          <span>rasheed bustamam · independent consultant · california</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:10px; color:var(--mute);">
+          <span class="term-ts" style="color:var(--faint);"></span>
+          <span style="color:var(--ink);">[IDX]</span>
+          <span>engineering journal · since 2019</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:10px; color:var(--mute);">
+          <span class="term-ts" style="color:var(--faint);"></span>
+          <span style="color:var(--accent); font-weight:600;">[NEW]</span>
+          <span style="color:var(--ink);">{latestTitle}</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:10px; color:var(--mute);">
+          <span class="term-ts" style="color:var(--faint);"></span>
+          <span style="color:var(--accent); font-weight:600;">[OPEN]</span>
+          <span style="color:var(--ink);">taking on new engagements for q3 2026</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:14px; color:var(--ink); align-items:center;">
+          <span style="color:var(--accent);">$</span>
+          <span>cat journal/latest.md<span style="display:inline-block; width:7px; height:13px; background:var(--accent); margin-left:4px; vertical-align:middle; animation:termBlink 1s step-end infinite;"></span></span>
+        </div>
+      </div>
+      <div style="padding:12px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:10px; color:var(--faint); letter-spacing:.08em; text-transform:uppercase;">
+        <span style="color:var(--ink); font-family:var(--font-mono); letter-spacing:0; font-size:13px; font-weight:500;">since 2019</span>
+        <span>·</span>
+        <span>an engineering journal</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter bar -->
+  <div style="padding:22px var(--gutter); border-bottom:1px solid var(--line); background:var(--bg); display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line); border-radius:2px; background:var(--surface); min-width:280px; flex:1; max-width:360px;">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:var(--mute); flex-shrink:0;" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input id="search-input" placeholder="grep titles, tags, years..." style="border:none; outline:none; background:transparent; flex:1; font-family:var(--font-mono); font-size:12px; color:var(--ink); width:100%;" />
+      <span style="font-family:var(--font-mono); font-size:10px; padding:2px 6px; background:var(--kbd); color:var(--mute); border-radius:2px; flex-shrink:0;">/</span>
+    </div>
+    <div style="height:18px; width:1px; background:var(--line);"></div>
+    <div id="tag-filters" style="display:flex; gap:6px; flex-wrap:wrap;">
+      {tags.map((tag, i) => (
+        <button
+          data-tag={tag}
+          class="tag-pill"
+          style={`font-family:var(--font-mono); font-size:11px; letter-spacing:.02em; padding:5px 10px; border-radius:2px; cursor:pointer; border:1px solid ${i === 0 ? 'var(--ink)' : 'var(--line)'}; background:${i === 0 ? 'var(--ink)' : 'transparent'}; color:${i === 0 ? 'var(--bg)' : 'var(--mute)'};`}
+        >
+          {tag.toLowerCase()}
+        </button>
+      ))}
+    </div>
+    <div style="margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--faint);">
+      sort: <span style="color:var(--ink);">recent ↓</span>
+    </div>
+  </div>
+
+  <!-- Column headers -->
+  <div style="display:grid; grid-template-columns:48px 110px 1fr 150px 90px 24px; gap:24px; padding:14px var(--gutter); border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase;">
+    <div>№</div><div>date</div><div>title · dek</div><div>tag</div><div style="text-align:right;">length</div><div></div>
+  </div>
+
+  <!-- Post list -->
+  <div id="post-list">
+    {allPosts.map((post, i) => (
+      <a
+        href={`/blog/${post.id}/`}
+        class="post-row"
+        data-title={post.data.title.toLowerCase()}
+        data-tag={post.data.tag ?? ''}
+        data-kind={post.data.kind ?? ''}
+        style={`display:grid; grid-template-columns:48px 110px 1fr 150px 90px 24px; gap:24px; align-items:baseline; padding:24px var(--gutter); border-bottom:1px solid var(--line-soft); background:${i === 0 ? 'var(--surface)' : 'transparent'}; cursor:pointer; text-decoration:none; color:inherit;`}
+      >
+        <div style="font-family:var(--font-mono); font-size:11px; color:var(--faint); letter-spacing:.05em; font-variant-numeric:tabular-nums;">
+          {String(i + 1).padStart(3, '0')}
+        </div>
+        <div style="font-family:var(--font-mono); font-size:11px; color:var(--mute); font-variant-numeric:tabular-nums;">
+          {fmtDate(post.data.pubDate)}
+        </div>
+        <div>
+          <div style="margin:0; font-family:var(--font-serif); font-size:23px; line-height:1.15; font-weight:500; color:var(--ink); letter-spacing:-.012em;">
+            {post.data.title}
+          </div>
+          <div style="margin:6px 0 0; font-family:var(--font-serif); font-size:14px; line-height:1.5; color:var(--mute); max-width:640px;">
+            {post.data.dek ?? post.data.description}
+          </div>
+        </div>
+        <div style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">
+          {post.data.tag && (
+            <span style="padding:2px 7px; border:1px solid var(--line); color:var(--ink); border-radius:2px; letter-spacing:.04em; font-size:10px; text-transform:uppercase;">
+              {post.data.tag}
+            </span>
+          )}
+        </div>
+        <div style="font-family:var(--font-mono); font-size:11px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; font-variant-numeric:tabular-nums;">
+          {post.data.readMin && <span style="color:var(--ink);">{post.data.readMin} min</span>}
+          {post.data.words && <span style="color:var(--faint);">{post.data.words.toLocaleString()} w</span>}
+        </div>
+        <div class="post-arrow" style="color:var(--faint); font-family:var(--font-mono); font-size:14px; align-self:center; text-align:right;">→</div>
+      </a>
+    ))}
+  </div>
+
+  <AuthorBio />
+
+</BaseLayout>
+
+<script>
+  // ── Search + Tag filter ─────────────────────────────
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const tagPills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
+  const rows = document.querySelectorAll<HTMLAnchorElement>('.post-row');
+
+  let activeTag = 'All';
+
+  function filterPosts() {
+    const q = searchInput ? searchInput.value.toLowerCase() : '';
+    rows.forEach(row => {
+      const titleMatch = !q || (row.dataset.title ?? '').includes(q);
+      const tagMatch = activeTag === 'All'
+        || row.dataset.tag === activeTag
+        || row.dataset.kind === activeTag;
+      (row as HTMLElement).style.display = (titleMatch && tagMatch) ? 'grid' : 'none';
+    });
+  }
+
+  tagPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      activeTag = pill.dataset.tag ?? 'All';
+      tagPills.forEach(p => {
+        const on = p.dataset.tag === activeTag;
+        p.style.border = `1px solid ${on ? 'var(--ink)' : 'var(--line)'}`;
+        p.style.background = on ? 'var(--ink)' : 'transparent';
+        p.style.color = on ? 'var(--bg)' : 'var(--mute)';
+      });
+      filterPosts();
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', filterPosts);
+  }
+
+  // '/' and ⌘K focus search
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (!searchInput) return;
+    const focused = document.activeElement;
+    if (e.key === '/' && focused !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+
+  // ── Terminal timestamps (1.8s interval) ────────────
+  function updateTerminalTimestamps() {
+    const tsList = document.querySelectorAll<HTMLElement>('.term-ts');
+    tsList.forEach((el, i) => {
+      const ts = new Date(Date.now() - (tsList.length - i) * 2000);
+      el.textContent = ts.toISOString().slice(11, 19);
+    });
+  }
+  updateTerminalTimestamps();
+  setInterval(updateTerminalTimestamps, 1800);
+</script>
