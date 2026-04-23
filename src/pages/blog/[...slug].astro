@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 let series: { id: string; title: string } | undefined;
 let prevPost: { id: string; title: string } | null = null;
@@ -34,6 +34,8 @@ if (post.data.series) {
 
 <BlogPost
 	{...post.data}
+	slug={post.id}
+	headings={headings}
 	{series}
 	prevPost={prevPost}
 	nextPost={nextPost}
