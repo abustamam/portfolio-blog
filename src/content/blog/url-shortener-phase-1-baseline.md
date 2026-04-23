@@ -5,6 +5,11 @@ pubDate: '2026-03-04'
 series: url-shortener-systems-design
 seriesOrder: 1
 heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
+dek: "Two endpoints, one table, and a load test — everything that follows is measured against this baseline."
+tag: "Infrastructure"
+kind: "Case Study"
+readMin: 13
+words: 2556
 ---
 
 *TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. This post establishes the baseline latency you'll use as a reference point throughout the series.

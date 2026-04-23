@@ -3,8 +3,13 @@ title: "I added Redis to my URL shortener and had to think hard about cache inva
 description: "Phase 2 of Systems Design in Practice"
 pubDate: '2026-03-18'
 series: url-shortener-systems-design
-seriesOrder: 1
+seriesOrder: 2
 heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
+dek: "Adding Redis is the easy part — the real work is deciding what to do when your cached data becomes stale."
+tag: "Infrastructure"
+kind: "Case Study"
+readMin: 9
+words: 1682
 ---
 
 > *Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
