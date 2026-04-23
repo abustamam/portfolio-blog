@@ -10,7 +10,15 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://blog.bustamam.tech',
   integrations: [mdx(), sitemap()],
-
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      defaultColor: false,
+    },
+  },
   vite: {
     plugins: [tailwindcss()],
   },
