@@ -1,0 +1,46 @@
+---
+// CopyButton.astro — no props.
+// Include once in PostLayout; script auto-attaches to all pre elements.
+---
+<script>
+  // Find all pre elements that aren't already wrapped
+  document.querySelectorAll<HTMLElement>('article.post-prose pre').forEach(pre => {
+    // Build wrapper
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'margin:28px 0; background:var(--code); border:1px solid var(--line); border-radius:4px; overflow:hidden; font-family:var(--font-mono); font-size:13px;';
+
+    // Header strip
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px 14px; border-bottom:1px solid var(--line); font-size:10px; color:var(--faint); letter-spacing:.08em; text-transform:uppercase;';
+
+    // Language label from class e.g. language-go
+    const code = pre.querySelector('code');
+    const langClass = code?.className.match(/language-(\w+)/)?.[1] ?? '';
+    const langLabel = document.createElement('span');
+    langLabel.textContent = langClass;
+    header.appendChild(langLabel);
+
+    // Copy button
+    const btn = document.createElement('button');
+    btn.textContent = 'copy';
+    btn.style.cssText = 'background:transparent; border:1px solid var(--line); color:var(--mute); cursor:pointer; font-family:var(--font-mono); font-size:10px; padding:2px 8px; border-radius:2px; letter-spacing:.05em; text-transform:uppercase;';
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.textContent ?? '');
+        btn.textContent = '✓ copied';
+        setTimeout(() => { btn.textContent = 'copy'; }, 1200);
+      } catch {
+        btn.textContent = 'failed';
+      }
+    });
+    header.appendChild(btn);
+
+    // Re-style pre to remove its own background/border (handled by wrapper now)
+    pre.style.cssText = 'margin:0; padding:16px 18px; line-height:1.65; overflow:auto; background:transparent; border:none; border-radius:0;';
+
+    // Wrap
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(header);
+    wrapper.appendChild(pre);
+  });
+</script>
