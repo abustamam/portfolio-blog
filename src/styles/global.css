@@ -80,6 +80,19 @@
   line-height: 1;
 }
 
+/* Terminal chrome bar — narrow truncation */
+.term-chrome__avail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 28vw;
+}
+@media (min-width: 640px) {
+  .term-chrome__avail {
+    max-width: none;
+  }
+}
+
 /* ── Base reset ───────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
