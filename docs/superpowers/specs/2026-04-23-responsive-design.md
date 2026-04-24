@@ -127,6 +127,8 @@ Make the site **fully responsive** with a **mobile-first** CSS strategy: solid f
 
 ## 8. Testing checklist (acceptance)
 
+Implementation: `docs/superpowers/plans/2026-04-23-responsive-layout.md` (landed on `main`).
+
 Manual pass at widths **360, 390, 768, 1024, 1280, 1440+** (or browser device mode):
 
 - [ ] No unintended **horizontal page scroll** on home, post, series index/detail, `/blog`, about.
