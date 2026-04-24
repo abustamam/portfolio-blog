@@ -7,7 +7,7 @@ import Wordmark from './Wordmark.astro';
   <div class="site-header__inner" style="padding:22px var(--gutter-x); display:flex; align-items:center; justify-content:space-between; gap:1rem; max-width:100%; min-width:0;">
     <!-- Brand -->
     <div style="display:flex; align-items:center; gap:14px; min-width:0;">
-      <a href="/" style="display:flex; align-items:center; text-decoration:none; min-width:0;">
+      <a href="/" style="display:flex; align-items:center; text-decoration:none; min-width:0; padding:8px 0;">
         <Wordmark size="13px" />
       </a>
       <div class="site-header__slash" style="height:14px; width:1px; background:var(--line); margin:0 4px; flex-shrink:0;"></div>
@@ -181,3 +181,11 @@ import Wordmark from './Wordmark.astro';
     });
   })();
 </script>
+
+<style>
+  .site-header a[href="/"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+</style>
