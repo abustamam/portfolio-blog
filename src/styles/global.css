@@ -337,6 +337,32 @@ html.nav-open body {
   }
 }
 
+/* Author bio */
+.author-bio {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 3.5rem var(--gutter-x);
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .author-bio {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 56px;
+    padding: 56px var(--gutter-x);
+  }
+}
+.author-bio__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 639px) {
+  .author-bio__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Base reset ───────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
