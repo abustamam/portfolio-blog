@@ -392,15 +392,29 @@ html.nav-open body {
 @media (min-width: 1024px) {
   .post-body-grid {
     display: grid;
-    grid-template-columns: 220px 1fr 220px;
-    gap: 56px;
+    /* Narrower rails so the prose column keeps more width inside the shell */
+    grid-template-columns: minmax(0, 180px) minmax(0, 1fr) minmax(0, 180px);
+    gap: 40px;
     padding: 56px 0 64px;
+    /* Start-align rows so the TOC grid cell isn’t stretched; sticky lives on .post-toc-details */
+    align-items: start;
   }
-  .post-aside-left,
   .post-aside-right {
     position: sticky;
     top: 20px;
     align-self: start;
+  }
+}
+@media (min-width: 1280px) {
+  .post-body-grid {
+    grid-template-columns: minmax(0, 200px) minmax(0, 1fr) minmax(0, 200px);
+    gap: 48px;
+  }
+}
+@media (min-width: 1440px) {
+  .post-body-grid {
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 220px);
+    gap: 56px;
   }
 }
 
@@ -426,8 +440,13 @@ html.nav-open body {
   .post-toc-details > .post-toc-details__summary {
     display: none !important;
   }
+  /* Real box + sticky on the grid item (TOC lives inside <details>; sticky on inner aside broke) */
   .post-toc-details {
-    display: contents;
+    display: block;
+    min-width: 0;
+    position: sticky;
+    top: 20px;
+    align-self: start;
   }
 }
 

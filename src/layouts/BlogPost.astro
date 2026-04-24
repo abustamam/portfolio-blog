@@ -102,6 +102,16 @@ const readMinNum = readMin ?? 0;
 
       <!-- Left sidebar: TOC + progress (collapsible below lg) -->
       <details class="post-toc-details">
+        <!-- Sync during parse: desktop TOC visible before paint (deferred module runs too late). -->
+        <script is:inline>
+          (function () {
+            var s = document.currentScript;
+            var root = s && s.parentElement;
+            if (root && root.tagName === 'DETAILS' && typeof window !== 'undefined') {
+              root.open = window.innerWidth >= 1024;
+            }
+          })();
+        </script>
         <summary class="post-toc-details__summary">§ contents</summary>
         <aside class="post-aside-left">
           <div class="post-toc-eyebrow" style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:14px;">
@@ -320,6 +330,14 @@ const readMinNum = readMin ?? 0;
 </style>
 
 <script define:vars={{ readMinNum }}>
+  const tocDetails = document.querySelector('.post-toc-details');
+  if (tocDetails instanceof HTMLDetailsElement) {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    mq.addEventListener('change', () => {
+      tocDetails.open = mq.matches;
+    });
+  }
+
   // Reading progress bar
   const progressBar = document.getElementById('progress-bar');
   const progressLabel = document.getElementById('progress-label');
