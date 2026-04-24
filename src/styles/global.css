@@ -63,12 +63,12 @@
   padding-right: var(--gutter-x);
 }
 
-@media (min-width: 1600px) {
-  .page-shell {
-    padding-left: max(var(--gutter-x), calc((100vw - 1280px) / 2));
-    padding-right: max(var(--gutter-x), calc((100vw - 1280px) / 2));
-  }
-}
+/*
+ * Do not add (100vw - 1280px) / 2 as padding here: .page-shell already has
+ * max-width: 1280px + margin: auto, which centers the column in the viewport.
+ * Extra “viewport centering” padding would sit *inside* the 1280px box and shrink
+ * the content area to ~640px on wide screens, collapsing the post grid.
+ */
 
 .display-hero {
   font-size: clamp(2rem, 8vw, 4.25rem);
@@ -392,29 +392,38 @@ html.nav-open body {
 @media (min-width: 1024px) {
   .post-body-grid {
     display: grid;
-    /* Narrower rails so the prose column keeps more width inside the shell */
-    grid-template-columns: minmax(0, 180px) minmax(0, 1fr) minmax(0, 180px);
-    gap: 40px;
+    /*
+     * 5 columns: side 1fr absorb extra shell width (keeps 1065 look, scales to ultrawide
+     * without a huge empty band inside the “article” track).
+     * Middle three: toc | reading (capped) | meta
+     */
+    /* Fixed rails; center track must not use min 0 (competing 1fr columns would starve it). */
+    grid-template-columns:
+      minmax(0, 1fr)
+      200px
+      minmax(22rem, 48rem)
+      220px
+      minmax(0, 1fr);
+    column-gap: clamp(1rem, 1.75vw, 1.5rem);
+    row-gap: 0;
     padding: 56px 0 64px;
-    /* Start-align rows so the TOC grid cell isn’t stretched; sticky lives on .post-toc-details */
     align-items: start;
   }
+  .post-toc-details {
+    grid-column: 2;
+  }
+  .post-prose {
+    grid-column: 3;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
   .post-aside-right {
+    grid-column: 4;
     position: sticky;
     top: 20px;
     align-self: start;
-  }
-}
-@media (min-width: 1280px) {
-  .post-body-grid {
-    grid-template-columns: minmax(0, 200px) minmax(0, 1fr) minmax(0, 200px);
-    gap: 48px;
-  }
-}
-@media (min-width: 1440px) {
-  .post-body-grid {
-    grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 220px);
-    gap: 56px;
+    min-width: 0;
   }
 }
 
