@@ -1,0 +1,336 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('work', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: entry,
+  }));
+}
+
+type Props = CollectionEntry<'work'>;
+
+const entry = Astro.props;
+const { Content } = await render(entry);
+
+const {
+  company, projectName, role, type, period, location,
+  companyMission, skills, logo, darkLogo, badges, additionalRoles,
+} = entry.data;
+
+const badgeLabels: Record<string, string> = {
+  acquired: 'acquired',
+  zeroToOne: '0→1',
+};
+---
+
+<BaseLayout
+  title={`${company}${projectName ? ` · ${projectName}` : ''} — Work`}
+  description={`${role} at ${company}. ${period}.`}
+  chromePath="/work"
+>
+  <main class="work-detail">
+    <!-- Back link -->
+    <nav class="work-detail__back">
+      <a href="/work/">← Work</a>
+    </nav>
+
+    <div class="work-detail__layout">
+      <!-- Main content -->
+      <article class="work-detail__main">
+        <header class="work-detail__header animate-fade-up" style="--delay:0">
+          {logo && (
+            <div class="work-detail__logo-wrap">
+              <Image
+                src={logo}
+                alt={`${company} logo`}
+                width={56}
+                height={56}
+                class:list={['work-logo', darkLogo && 'is-dark']}
+              />
+            </div>
+          )}
+          <div>
+            <h1 class="work-detail__company">
+              {company}
+              {projectName && <span class="work-detail__project"> · {projectName}</span>}
+            </h1>
+            <div class="work-detail__role">{role}</div>
+          </div>
+        </header>
+
+        {companyMission && (
+          <blockquote class="work-detail__mission animate-fade-up" style="--delay:80">
+            {companyMission}
+          </blockquote>
+        )}
+
+        <div class="work-detail__body animate-fade-up" style="--delay:160">
+          <Content />
+        </div>
+
+        {additionalRoles && additionalRoles.length > 0 && (
+          <section class="work-detail__roles animate-fade-up" style="--delay:240">
+            <h2 class="work-detail__roles-heading">Additional Roles</h2>
+            {additionalRoles.map((r) => (
+              <div class="work-detail__role-item">
+                <div class="work-detail__role-meta">
+                  <span class="work-detail__role-title">{r.role}</span>
+                  <span class="work-detail__role-period">{r.period}</span>
+                </div>
+                <p class="work-detail__role-desc">{r.description}</p>
+              </div>
+            ))}
+          </section>
+        )}
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="work-detail__sidebar animate-fade-up" style="--delay:80">
+        <dl class="work-detail__meta-list">
+          <div class="work-detail__meta-item">
+            <dt>Period</dt>
+            <dd>{period}</dd>
+          </div>
+
+          {location && (
+            <div class="work-detail__meta-item">
+              <dt>Location</dt>
+              <dd>{location}</dd>
+            </div>
+          )}
+
+          <div class="work-detail__meta-item">
+            <dt>Type</dt>
+            <dd style="text-transform:capitalize">{type}</dd>
+          </div>
+
+          {badges.length > 0 && (
+            <div class="work-detail__meta-item">
+              <dt>Badges</dt>
+              <dd class="work-detail__badge-wrap">
+                {badges.map((b) => (
+                  <span class="work-card__badge">{badgeLabels[b] ?? b}</span>
+                ))}
+              </dd>
+            </div>
+          )}
+
+          {skills.length > 0 && (
+            <div class="work-detail__meta-item">
+              <dt>Skills</dt>
+              <dd class="work-detail__skill-wrap">
+                {skills.map((s) => (
+                  <span class="work-card__skill">{s}</span>
+                ))}
+              </dd>
+            </div>
+          )}
+        </dl>
+      </aside>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .work-detail {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+  .work-detail__back a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--mute);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    display: inline-block;
+    margin-bottom: 2rem;
+  }
+  .work-detail__back a:hover {
+    color: var(--ink);
+  }
+  .work-detail__layout {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 3rem;
+    align-items: start;
+  }
+  .work-detail__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 1.5rem;
+  }
+  .work-detail__logo-wrap {
+    flex-shrink: 0;
+  }
+  .work-logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+  .work-detail__company {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .work-detail__project {
+    font-weight: 400;
+    color: var(--mute);
+  }
+  .work-detail__role {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--mute);
+    letter-spacing: 0.04em;
+  }
+  .work-detail__mission {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--mute);
+    border-left: 3px solid var(--accent);
+    margin: 0 0 1.5rem;
+    padding: 0.5rem 0 0.5rem 1rem;
+    line-height: 1.6;
+  }
+  .work-detail__body {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .work-detail__body p {
+    margin: 0 0 1rem;
+  }
+  .work-detail__roles {
+    margin-top: 2rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+  }
+  .work-detail__roles-heading {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0 0 1rem;
+  }
+  .work-detail__role-item {
+    margin-bottom: 1.25rem;
+  }
+  .work-detail__role-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .work-detail__role-title {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .work-detail__role-period {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--faint);
+  }
+  .work-detail__role-desc {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--mute);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Sidebar */
+  .work-detail__sidebar {
+    position: sticky;
+    top: 2rem;
+  }
+  .work-detail__meta-list {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 16px 18px;
+    background: var(--surface);
+  }
+  .work-detail__meta-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .work-detail__meta-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .work-detail__meta-item:first-child {
+    padding-top: 0;
+  }
+  .work-detail__meta-item dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 4px;
+  }
+  .work-detail__meta-item dd {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink);
+    margin: 0;
+  }
+  .work-detail__badge-wrap,
+  .work-detail__skill-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+  }
+
+  /* Reuse pill styles from WorkCard */
+  .work-card__badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    background: var(--accent-bg);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent);
+  }
+  .work-card__skill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--mute);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 2px 7px;
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 700px) {
+    .work-detail {
+      padding: 1.5rem 1.25rem 3rem;
+    }
+    .work-detail__layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .work-detail__sidebar {
+      position: static;
+      order: -1;
+    }
+  }
+</style>

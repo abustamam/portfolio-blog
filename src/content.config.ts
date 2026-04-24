@@ -36,4 +36,51 @@ const series = defineCollection({
 		}),
 });
 
-export const collections = { blog, series };
+const work = defineCollection({
+	loader: glob({ base: './src/content/work', pattern: '**/*.{md,mdx}' }),
+	schema: ({ image }) =>
+		z.object({
+			// Core identity
+			company:     z.string(),
+			projectName: z.string().optional(),
+			role:        z.string(),
+			type:        z.enum(['consulting', 'employment']),
+
+			// Dates — store ISO strings, coerce to Date for sorting
+			startDate: z.coerce.date(),
+			endDate:   z.coerce.date().optional(), // omit = present
+			period:    z.string(), // human-readable: "Aug 2023 – Present"
+
+			// Employment-only
+			location: z.string().optional(),
+
+			// companyMission renders separately from body
+			companyMission: z.string().optional(),
+
+			// Skills
+			skills: z.array(z.string()).default([]),
+
+			// Branding
+			logo:     image().optional(),
+			darkLogo: z.boolean().default(false),
+
+			// Badges
+			badges: z.array(z.enum(['acquired', 'zeroToOne'])).default([]),
+
+			// Multi-role (employment only)
+			additionalRoles: z
+				.array(z.object({
+					role:        z.string(),
+					period:      z.string(),
+					description: z.string(),
+				}))
+				.optional(),
+
+			// Display controls
+			order:    z.number().optional(),
+			featured: z.boolean().default(false),
+			draft:    z.boolean().default(false),
+		}),
+});
+
+export const collections = { blog, series, work };
