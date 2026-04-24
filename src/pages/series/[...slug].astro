@@ -24,9 +24,10 @@ const { posts } = await getSeriesPosts(series.id);
 		<style>
 			main {
 				width: 960px;
-				max-width: calc(100% - 2em);
+				max-width: min(960px, 100% - 2 * var(--gutter-x, 16px));
 				margin: 0 auto;
-				padding: 1em;
+				padding: 1rem var(--gutter-x, 16px);
+				box-sizing: border-box;
 			}
 			.hero-image {
 				width: 100%;
