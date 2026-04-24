@@ -93,6 +93,26 @@
   }
 }
 
+/* Site footer — stack on narrow */
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+@media (max-width: 1023px) {
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (min-width: 1024px) {
+  .site-footer {
+    flex-wrap: nowrap;
+  }
+}
+
 /* ── Base reset ───────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
