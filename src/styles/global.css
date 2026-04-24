@@ -553,3 +553,30 @@ img { max-width: 100%; height: auto; }
 [data-theme="dark"] .work-logo.is-dark {
   filter: invert(1) brightness(2);
 }
+
+/* ── Dialog animation ─────────────────────────────── */
+dialog[open] {
+  animation: dialogIn 0.18s ease-out both;
+}
+@keyframes dialogIn {
+  from { opacity: 0; scale: 0.93; }
+  to   { opacity: 1; scale: 1; }
+}
+@starting-style {
+  dialog[open] { opacity: 0; scale: 0.93; }
+}
+
+/* ── Text shimmer utility ─────────────────────────── */
+@keyframes shimmer {
+  from { background-position: 0 0; }
+  to   { background-position: -200% 0; }
+}
+.text-shimmer {
+  background: linear-gradient(
+    90deg, var(--ink) 40%, var(--accent) 50%, var(--ink) 60%
+  ) 200% 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 2.5s linear infinite;
+}
