@@ -1,37 +1,188 @@
 ---
-// SiteHeader.astro — no props
+// SiteHeader.astro — responsive primary nav + drawer below lg
 ---
 
-<header style="display:flex; align-items:center; justify-content:space-between; padding:22px var(--gutter); border-bottom:1px solid var(--line); background:var(--bg);">
-  <!-- Brand -->
-  <div style="display:flex; align-items:center; gap:14px;">
-    <a href="/" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
-      <!-- Bustamam mark: two offset stacked bars forming a B-like shape -->
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="3" y="3" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
-        <rect x="7" y="13.5" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
-      </svg>
-      <div style="font-family:var(--font-mono); font-size:13px; color:var(--ink); font-weight:500; letter-spacing:-.01em;">
-        bustamam<span style="color:var(--accent);">.</span>tech
-      </div>
-    </a>
-    <div style="height:14px; width:1px; background:var(--line); margin:0 4px;"></div>
-    <div style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">/journal</div>
-  </div>
-  <!-- Nav -->
-  <nav style="display:flex; align-items:center; gap:28px; font-family:var(--font-mono); font-size:12px;">
-    <a href="/" style="color:var(--ink); text-decoration:none;">writing</a>
-    <a href="/work" style="color:var(--mute); text-decoration:none;">work</a>
-    <a href="/about" style="color:var(--mute); text-decoration:none;">about</a>
-    <a href="/contact" style="color:var(--mute); text-decoration:none;">contact</a>
-    <!-- Search hint — '/' key and ⌘K wired in SearchFilter on index -->
-    <div style="display:flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--line); border-radius:2px; color:var(--faint); font-size:11px; cursor:default;">
-      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span>search</span>
-      <span style="font-size:10px; padding:1px 5px; background:var(--kbd); border-radius:2px; color:var(--mute);">⌘K</span>
+<header class="site-header" style="border-bottom:1px solid var(--line); background:var(--bg);">
+  <div class="site-header__inner" style="padding:22px var(--gutter-x); display:flex; align-items:center; justify-content:space-between; gap:1rem; max-width:100%; min-width:0;">
+    <!-- Brand -->
+    <div style="display:flex; align-items:center; gap:14px; min-width:0;">
+      <a href="/" style="display:flex; align-items:center; gap:14px; text-decoration:none; min-width:0;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="flex-shrink:0;">
+          <rect x="3" y="3" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
+          <rect x="7" y="13.5" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
+        </svg>
+        <div style="font-family:var(--font-mono); font-size:13px; color:var(--ink); font-weight:500; letter-spacing:-.01em; white-space:nowrap;">
+          bustamam<span style="color:var(--accent);">.</span>tech
+        </div>
+      </a>
+      <div class="site-header__slash" style="height:14px; width:1px; background:var(--line); margin:0 4px; flex-shrink:0;"></div>
+      <div class="site-header__journal" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); flex-shrink:0;">/journal</div>
     </div>
-  </nav>
+
+    <button
+      type="button"
+      class="site-header__menu-btn"
+      id="site-nav-open"
+      aria-expanded="false"
+      aria-controls="site-nav-panel"
+      aria-label="Open menu"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <nav class="site-header__nav site-header__nav--desktop" aria-label="Primary" style="font-family:var(--font-mono); font-size:12px;">
+      <a href="/" style="color:var(--ink); text-decoration:none;">writing</a>
+      <a href="/work" style="color:var(--mute); text-decoration:none;">work</a>
+      <a href="/about" style="color:var(--mute); text-decoration:none;">about</a>
+      <a href="/contact" style="color:var(--mute); text-decoration:none;">contact</a>
+      <div style="display:flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--line); border-radius:2px; color:var(--faint); font-size:11px; cursor:default;">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>search</span>
+        <span style="font-size:10px; padding:1px 5px; background:var(--kbd); border-radius:2px; color:var(--mute);">⌘K</span>
+      </div>
+    </nav>
+  </div>
 </header>
+
+<button type="button" id="site-nav-backdrop" class="site-nav-backdrop" hidden aria-label="Close menu"></button>
+
+<div
+  id="site-nav-panel"
+  class="site-nav-panel"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="site-nav-title"
+  hidden
+>
+  <p id="site-nav-title" class="sr-only">Site navigation</p>
+  <div class="site-nav-panel__top" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.5rem;">
+    <span style="font-family:var(--font-mono); font-size:12px; color:var(--faint); letter-spacing:0.08em; text-transform:uppercase;">menu</span>
+    <button type="button" class="site-nav-panel__close" aria-label="Close menu" style="font-family:var(--font-mono); font-size:12px; padding:8px 12px; border:1px solid var(--line); border-radius:2px; background:var(--surface); color:var(--ink); cursor:pointer;">
+      close
+    </button>
+  </div>
+  <nav class="site-nav-panel__links" aria-label="Mobile primary" style="display:flex; flex-direction:column; gap:4px; font-family:var(--font-mono); font-size:14px;">
+    <a href="/" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">writing</a>
+    <a href="/work" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">work</a>
+    <a href="/about" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">about</a>
+    <a href="/contact" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">contact</a>
+  </nav>
+  <div style="margin-top:1.25rem;">
+    <label for="nav-search-input" style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:0.1em; text-transform:uppercase; display:block; margin-bottom:8px;">search posts</label>
+    <input
+      id="nav-search-input"
+      type="search"
+      enterkeyhint="search"
+      placeholder="grep titles, tags…"
+      autocomplete="off"
+      style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line); border-radius:2px; background:var(--surface); font-family:var(--font-mono); font-size:13px; color:var(--ink);"
+    />
+  </div>
+</div>
+
+<script>
+  (function () {
+    const btn = document.getElementById('site-nav-open');
+    const panel = document.getElementById('site-nav-panel');
+    const backdrop = document.getElementById('site-nav-backdrop');
+    const closeBtn = document.querySelector('.site-nav-panel__close');
+    const navInput = document.getElementById('nav-search-input');
+    const mainSearch = document.getElementById('search-input');
+    if (!btn || !panel || !backdrop) return;
+
+    function focusables() {
+      return Array.from(
+        panel.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+    }
+
+    function openNav() {
+      btn.setAttribute('aria-expanded', 'true');
+      backdrop.removeAttribute('hidden');
+      panel.removeAttribute('hidden');
+      document.documentElement.classList.add('nav-open');
+      const first = focusables()[0];
+      if (first) first.focus();
+    }
+
+    function closeNav() {
+      btn.setAttribute('aria-expanded', 'false');
+      backdrop.setAttribute('hidden', '');
+      panel.setAttribute('hidden', '');
+      document.documentElement.classList.remove('nav-open');
+      btn.focus();
+    }
+
+    function isOpen() {
+      return btn.getAttribute('aria-expanded') === 'true';
+    }
+
+    btn.addEventListener('click', () => {
+      if (isOpen()) closeNav();
+      else openNav();
+    });
+    closeBtn?.addEventListener('click', closeNav);
+    backdrop.addEventListener('click', closeNav);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen()) {
+        e.preventDefault();
+        closeNav();
+      }
+      if (!isOpen() || e.key !== 'Tab') return;
+      const list = focusables();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    if (navInput && mainSearch) {
+      const syncToMain = () => {
+        mainSearch.value = navInput.value;
+        mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+      const syncToNav = () => {
+        navInput.value = mainSearch.value;
+      };
+      navInput.addEventListener('input', syncToMain);
+      mainSearch.addEventListener('input', syncToNav);
+    }
+
+    navInput?.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const path = window.location.pathname;
+      const onJournalHome = path === '/' || path === '';
+      if (onJournalHome && mainSearch) {
+        mainSearch.focus();
+        closeNav();
+        return;
+      }
+      try {
+        sessionStorage.setItem('journal:focus-search', '1');
+      } catch {
+        /* ignore */
+      }
+      window.location.href = '/';
+    });
+  })();
+</script>
