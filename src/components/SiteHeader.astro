@@ -1,19 +1,14 @@
 ---
 // SiteHeader.astro — responsive primary nav + drawer below lg
+import Wordmark from './Wordmark.astro';
 ---
 
 <header class="site-header" style="border-bottom:1px solid var(--line); background:var(--bg);">
   <div class="site-header__inner" style="padding:22px var(--gutter-x); display:flex; align-items:center; justify-content:space-between; gap:1rem; max-width:100%; min-width:0;">
     <!-- Brand -->
     <div style="display:flex; align-items:center; gap:14px; min-width:0;">
-      <a href="/" style="display:flex; align-items:center; gap:14px; text-decoration:none; min-width:0;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="flex-shrink:0;">
-          <rect x="3" y="3" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
-          <rect x="7" y="13.5" width="14" height="7.5" rx="1" stroke="var(--ink)" stroke-width="1.6"/>
-        </svg>
-        <div style="font-family:var(--font-mono); font-size:13px; color:var(--ink); font-weight:500; letter-spacing:-.01em; white-space:nowrap;">
-          bustamam<span style="color:var(--accent);">.</span>tech
-        </div>
+      <a href="/" style="display:flex; align-items:center; text-decoration:none; min-width:0;">
+        <Wordmark size="13px" />
       </a>
       <div class="site-header__slash" style="height:14px; width:1px; background:var(--line); margin:0 4px; flex-shrink:0;"></div>
       <div class="site-header__journal" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); flex-shrink:0;">/journal</div>
