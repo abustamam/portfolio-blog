@@ -23,14 +23,14 @@ const latestSlug = allPosts[0]?.id ?? '';
 <BaseLayout title="Rasheed Bustamam — Engineering Journal" description="Long-form writing on software craft, distributed systems, and independent consulting.">
 
   <!-- Hero -->
-  <section style="padding:64px var(--gutter) 52px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1.15fr 1fr; gap:72px; align-items:end;">
+  <section class="home-hero">
     <!-- Left -->
     <div>
       <div style="display:inline-flex; align-items:center; gap:10px; padding:5px 12px; background:var(--accent-bg); color:var(--accent-ink); border-radius:2px; font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:32px;">
         <span style="width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>
         journal · vol 04 · spring 2026
       </div>
-      <h1 style="font-family:var(--font-serif); font-weight:500; font-size:68px; line-height:.96; margin:0; color:var(--ink); letter-spacing:-.028em;">
+      <h1 class="display-hero" style="font-family:var(--font-serif); font-weight:500; margin:0; color:var(--ink); letter-spacing:-.028em;">
         I build software<br/>
         that doesn't <em style="font-style:italic; color:var(--accent); font-weight:500;">page you</em><br/>
         on a Sunday.
@@ -90,7 +90,7 @@ const latestSlug = allPosts[0]?.id ?? '';
   </section>
 
   <!-- Filter bar -->
-  <div style="padding:22px var(--gutter); border-bottom:1px solid var(--line); background:var(--bg); display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+  <div class="home-filter">
     <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line); border-radius:2px; background:var(--surface); min-width:280px; flex:1; max-width:360px;">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:var(--mute); flex-shrink:0;" aria-hidden="true">
         <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
@@ -111,13 +111,13 @@ const latestSlug = allPosts[0]?.id ?? '';
         </button>
       ))}
     </div>
-    <div style="margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--faint);">
+    <div class="home-filter__sort">
       sort: <span style="color:var(--ink);">recent ↓</span>
     </div>
   </div>
 
   <!-- Column headers -->
-  <div style="display:grid; grid-template-columns:48px 110px 1fr 150px 90px 24px; gap:24px; padding:14px var(--gutter); border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase;">
+  <div class="post-list-header">
     <div>№</div><div>date</div><div>title · dek</div><div>tag</div><div style="text-align:right;">length</div><div></div>
   </div>
 
@@ -130,34 +130,42 @@ const latestSlug = allPosts[0]?.id ?? '';
         data-title={post.data.title.toLowerCase()}
         data-tag={post.data.tag ?? ''}
         data-kind={post.data.kind ?? ''}
-        style={`display:grid; grid-template-columns:48px 110px 1fr 150px 90px 24px; gap:24px; align-items:baseline; padding:24px var(--gutter); border-bottom:1px solid var(--line-soft); background:${i === 0 ? 'var(--surface)' : 'transparent'}; cursor:pointer; text-decoration:none; color:inherit;`}
+        style={`background:${i === 0 ? 'var(--surface)' : 'transparent'};`}
       >
-        <div style="font-family:var(--font-mono); font-size:11px; color:var(--faint); letter-spacing:.05em; font-variant-numeric:tabular-nums;">
+        <div class="post-row__idx" style="font-family:var(--font-mono); font-size:11px; color:var(--faint); letter-spacing:.05em; font-variant-numeric:tabular-nums;">
           {String(i + 1).padStart(3, '0')}
         </div>
-        <div style="font-family:var(--font-mono); font-size:11px; color:var(--mute); font-variant-numeric:tabular-nums;">
+        <div class="post-row__date" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); font-variant-numeric:tabular-nums;">
           {fmtDate(post.data.pubDate)}
         </div>
-        <div>
-          <div style="margin:0; font-family:var(--font-serif); font-size:23px; line-height:1.15; font-weight:500; color:var(--ink); letter-spacing:-.012em;">
+        <div class="post-row__main">
+          <div class="post-row__title" style="margin:0; font-family:var(--font-serif); font-size:23px; line-height:1.15; font-weight:500; color:var(--ink); letter-spacing:-.012em;">
             {post.data.title}
           </div>
-          <div style="margin:6px 0 0; font-family:var(--font-serif); font-size:14px; line-height:1.5; color:var(--mute); max-width:640px;">
+          <div class="post-row__dek">
             {post.data.dek ?? post.data.description}
           </div>
+          <div class="post-row__compact-meta">
+            {fmtDate(post.data.pubDate)}
+            {post.data.tag && ` · ${post.data.tag}`}
+            {post.data.readMin != null && ` · ${post.data.readMin} min`}
+            {post.data.words != null && (
+              <span class="post-row__words"> · {post.data.words.toLocaleString()} w</span>
+            )}
+          </div>
         </div>
-        <div style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">
+        <div class="post-row__tag" style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">
           {post.data.tag && (
             <span style="padding:2px 7px; border:1px solid var(--line); color:var(--ink); border-radius:2px; letter-spacing:.04em; font-size:10px; text-transform:uppercase;">
               {post.data.tag}
             </span>
           )}
         </div>
-        <div style="font-family:var(--font-mono); font-size:11px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; font-variant-numeric:tabular-nums;">
+        <div class="post-row__len" style="font-family:var(--font-mono); font-size:11px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; font-variant-numeric:tabular-nums;">
           {post.data.readMin && <span style="color:var(--ink);">{post.data.readMin} min</span>}
           {post.data.words && <span style="color:var(--faint);">{post.data.words.toLocaleString()} w</span>}
         </div>
-        <div class="post-arrow" style="color:var(--faint); font-family:var(--font-mono); font-size:14px; align-self:center; text-align:right;">→</div>
+        <div class="post-row__arrow post-arrow" style="color:var(--faint); font-family:var(--font-mono); font-size:14px; align-self:center; text-align:right;">→</div>
       </a>
     ))}
   </div>
@@ -171,8 +179,13 @@ const latestSlug = allPosts[0]?.id ?? '';
   const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
   const tagPills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
   const rows = document.querySelectorAll<HTMLAnchorElement>('.post-row');
+  const mqRows = window.matchMedia('(min-width: 1024px)');
 
   let activeTag = 'All';
+
+  function rowLayoutDisplay() {
+    return mqRows.matches ? 'grid' : 'flex';
+  }
 
   function filterPosts() {
     const q = searchInput ? searchInput.value.toLowerCase() : '';
@@ -181,8 +194,19 @@ const latestSlug = allPosts[0]?.id ?? '';
       const tagMatch = activeTag === 'All'
         || row.dataset.tag === activeTag
         || row.dataset.kind === activeTag;
-      (row as HTMLElement).style.display = (titleMatch && tagMatch) ? 'grid' : 'none';
+      (row as HTMLElement).style.display = (titleMatch && tagMatch) ? rowLayoutDisplay() : 'none';
     });
+  }
+
+  mqRows.addEventListener('change', filterPosts);
+
+  try {
+    if (sessionStorage.getItem('journal:focus-search')) {
+      sessionStorage.removeItem('journal:focus-search');
+      queueMicrotask(() => searchInput?.focus());
+    }
+  } catch {
+    /* private mode */
   }
 
   tagPills.forEach(pill => {
