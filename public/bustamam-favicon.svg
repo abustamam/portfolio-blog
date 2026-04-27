@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .bg { fill: #1f2328; }
+      .letter { fill: white; }
+
+      @media (prefers-color-scheme: dark) {
+        .bg { fill: white; }
+        .letter { fill: #1f2328; }
+      }
+    </style>
+  </defs>
+  <rect width="128" height="128" rx="24" class="bg"/>
+  <text x="64" y="96" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="96" class="letter">B</text>
+</svg>
