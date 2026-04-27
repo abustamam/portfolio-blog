@@ -9,8 +9,8 @@ const requiredSnippets = [
   'href="/favicon-32.png"',
   'href="/favicon.ico"',
   'href="/apple-touch-icon.png"',
-  'src="/bustamam-technology-wordmark.svg"',
-  'class="brand-logo"',
+  'bustamam-technology-wordmark.svg',
+  'brand-logo-svg',
   'property="og:image"',
   'property="twitter:image"'
 ];

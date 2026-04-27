@@ -1,6 +1,4 @@
 ---
-import { CANONICAL_LOGO } from '../consts/brand';
-
 interface Props {
   alt?: string;
   width?: number;
@@ -16,21 +14,50 @@ const {
 } = Astro.props;
 ---
 
-<img
-  src={CANONICAL_LOGO}
-  alt={alt}
-  width={width}
-  height={height}
-  class:list={['brand-logo', className]}
-  loading="eager"
-  decoding="async"
-/>
+<span class:list={['brand-logo-wrap', className]} role="img" aria-label={alt}>
+  <svg
+    class="brand-logo-svg"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1542 430"
+    width={width}
+    height={height}
+    fill="none"
+    aria-hidden="true"
+  >
+    <text
+      x="771"
+      y="292"
+      text-anchor="middle"
+      font-family="Arial Black, Impact, sans-serif"
+      font-weight="900"
+      font-size="256"
+      letter-spacing="-4"
+      fill="currentColor"
+    >BUSTAMAM</text>
+    <text
+      x="783"
+      y="370"
+      text-anchor="middle"
+      font-family="Arial, Helvetica, sans-serif"
+      font-weight="400"
+      font-size="46"
+      letter-spacing="22"
+      fill="currentColor"
+    >TECHNOLOGY</text>
+  </svg>
+</span>
 
 <style>
-  .brand-logo {
+  .brand-logo-wrap {
     display: block;
+    color: var(--ink);
     inline-size: clamp(120px, 16vw, 170px);
     max-inline-size: 170px;
+  }
+
+  .brand-logo-svg {
+    display: block;
+    inline-size: 100%;
     block-size: auto;
   }
 </style>

@@ -1,14 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1542" height="430" viewBox="0 0 1542 430">
   <style>
-    .logo-bg { fill: #ffffff; }
     .logo-text { fill: #1f2328; }
-
     @media (prefers-color-scheme: dark) {
-      .logo-bg { fill: #1f2328; }
-      .logo-text { fill: #f5f7fa; }
+      .logo-text { fill: #eceae3; }
     }
   </style>
-  <rect width="1542" height="430" class="logo-bg"/>
   <text
     x="771"
     y="292"
