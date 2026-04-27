@@ -1,0 +1,36 @@
+---
+import { CANONICAL_LOGO } from '../consts/brand';
+
+interface Props {
+  alt?: string;
+  width?: number;
+  height?: number;
+  class?: string;
+}
+
+const {
+  alt = 'Bustamam Technology logo',
+  width = 154,
+  height = 43,
+  class: className
+} = Astro.props;
+---
+
+<img
+  src={CANONICAL_LOGO}
+  alt={alt}
+  width={width}
+  height={height}
+  class:list={['brand-logo', className]}
+  loading="eager"
+  decoding="async"
+/>
+
+<style>
+  .brand-logo {
+    display: block;
+    inline-size: clamp(120px, 16vw, 170px);
+    max-inline-size: 170px;
+    block-size: auto;
+  }
+</style>

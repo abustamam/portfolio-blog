@@ -3,35 +3,30 @@
 // all pages through the use of the <BaseHead /> component.
 import '../styles/global.css';
 import type { ImageMetadata } from 'astro';
-import FallbackImage from '../assets/site/blog-placeholder-1.jpg';
 import { SITE_TITLE } from '../consts';
+import { CANONICAL_FAVICON_SVG, SOCIAL_FALLBACK_IMAGE } from '../consts/brand';
 
 interface Props {
 	title: string;
 	description: string;
-	image?: ImageMetadata;
+	image?: ImageMetadata | string;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = FallbackImage } = Astro.props;
+const { title, description, image = SOCIAL_FALLBACK_IMAGE } = Astro.props;
+const imageUrl = typeof image === 'string' ? image : image.src;
 ---
 
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<!-- Primary SVG favicon — switches automatically between light/dark -->
-<link rel="icon" type="image/svg+xml" href="/bustamam-favicon.svg" />
-	
-<!-- ICO fallback for older browsers (IE, older Safari) -->
-<link rel="alternate icon" href="/favicon.ico" />
-	
-<!-- iOS home screen icon -->
+<link rel="icon" type="image/svg+xml" href={CANONICAL_FAVICON_SVG} />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-	
-<!-- Optional: theme color matches your dark bg for browser chrome on mobile -->
-<meta name="theme-color" content="#1f2328" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1f2328" media="(prefers-color-scheme: dark)" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link
 	rel="alternate"
@@ -54,13 +49,13 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image.src, Astro.url)} />
+<meta property="og:image" content={new URL(imageUrl, Astro.url)} />
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={Astro.url} />
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+<meta property="twitter:image" content={new URL(imageUrl, Astro.url)} />
 
 <!-- Theme: prevent flash — ThemeToggle.astro handles this via data-theme on <html> -->

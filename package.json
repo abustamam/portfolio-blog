@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "verify:brand": "npm run build && node scripts/verify-brand-metadata.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",

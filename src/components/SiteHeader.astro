@@ -1,6 +1,6 @@
 ---
 // SiteHeader.astro — responsive primary nav + drawer below lg
-import Wordmark from './Wordmark.astro';
+import BrandLogo from './BrandLogo.astro';
 ---
 
 <header class="site-header" style="border-bottom:1px solid var(--line); background:var(--bg);">
@@ -8,7 +8,7 @@ import Wordmark from './Wordmark.astro';
     <!-- Brand -->
     <div style="display:flex; align-items:center; gap:14px; min-width:0;">
       <a href="/" style="display:flex; align-items:center; text-decoration:none; min-width:0; padding:8px 0;">
-        <Wordmark size="13px" />
+        <BrandLogo />
       </a>
       <div class="site-header__slash" style="height:14px; width:1px; background:var(--line); margin:0 4px; flex-shrink:0;"></div>
       <div class="site-header__journal" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); flex-shrink:0;">/journal</div>

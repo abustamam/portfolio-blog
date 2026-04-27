@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1542" height="430" viewBox="0 0 1542 430">
+  <style>
+    .logo-bg { fill: #ffffff; }
+    .logo-text { fill: #1f2328; }
+
+    @media (prefers-color-scheme: dark) {
+      .logo-bg { fill: #1f2328; }
+      .logo-text { fill: #f5f7fa; }
+    }
+  </style>
+  <rect width="1542" height="430" class="logo-bg"/>
+  <text
+    x="771"
+    y="292"
+    text-anchor="middle"
+    font-family="Arial Black, Impact, sans-serif"
+    font-weight="900"
+    font-size="256"
+    letter-spacing="-4"
+    class="logo-text"
+  >BUSTAMAM</text>
+  <text
+    x="783"
+    y="370"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-weight="400"
+    font-size="46"
+    letter-spacing="22"
+    class="logo-text"
+  >TECHNOLOGY</text>
+</svg>
