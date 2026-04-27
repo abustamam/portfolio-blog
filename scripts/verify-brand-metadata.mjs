@@ -25,4 +25,25 @@ if (missingSnippets.length > 0) {
   process.exit(1);
 }
 
-console.log('Brand metadata verification passed: all required snippets are present in dist/index.html.');
+// Post with heroImage: og:image must use the resolved asset, not the wordmark fallback
+const postPath = resolve(process.cwd(), 'dist/blog/url-shortener-phase-1-baseline/index.html');
+const postHtml = readFileSync(postPath, 'utf8');
+const ogPost = postHtml.match(/property="og:image"[^>]*content="([^"]+)"/);
+if (!ogPost) {
+  console.error('Brand metadata verification failed: missing og:image on sample post page');
+  process.exit(1);
+}
+if (!ogPost[1].includes('_astro/url-shortener-cover')) {
+  console.error(
+    `Brand metadata verification failed: expected hero cover in og:image, got: ${ogPost[1]}`
+  );
+  process.exit(1);
+}
+if (ogPost[1].includes('bustamam-technology-wordmark')) {
+  console.error('Brand metadata verification failed: sample post og:image should not use wordmark');
+  process.exit(1);
+}
+
+console.log(
+  'Brand metadata verification passed: homepage dist/index.html + sample post og:image checks OK.'
+);

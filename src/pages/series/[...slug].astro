@@ -19,7 +19,12 @@ const { Content } = await render(series);
 const { posts } = await getSeriesPosts(series.id);
 ---
 
-<BaseLayout title={series.data.title} description={series.data.description} chromePath={`/series/${series.id}`}>
+<BaseLayout
+	title={series.data.title}
+	description={series.data.description}
+	chromePath={`/series/${series.id}`}
+	image={series.data.heroImage}
+>
 	<main>
 		<style>
 			main {

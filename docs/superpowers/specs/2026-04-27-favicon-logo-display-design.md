@@ -76,9 +76,7 @@ URLs remain absolute by constructing from current site URL context.
 
 ### 4) Header logo rendering
 
-Update header branding to use canonical logo asset (`/bustamam-technology-wordmark.svg`) through the existing component flow.
-
-No duplicate logo implementation should be introduced.
+Header uses `BrandLogo.astro`: inline SVG with `fill="currentColor"` and `color: var(--ink)` so the mark tracks **site** light/dark (`data-theme` on `<html>`), with no background rectangle. The file `/bustamam-technology-wordmark.svg` remains the canonical **social fallback** asset (transparent, `prefers-color-scheme` for crawlers). One component owns the header; no duplicate raster/wordmark paths in the nav.
 
 ## Light/Dark Mode Requirements
 
@@ -88,20 +86,15 @@ No duplicate logo implementation should be introduced.
 
 ### Header logo
 
-`/bustamam-technology-wordmark.svg` must support both themes. Update the SVG so it renders with appropriate contrast in light and dark mode using internal SVG styling/media query rules (`prefers-color-scheme`).
-
-Resulting behavior:
-
-- Light mode: dark text/logo treatment on light context
-- Dark mode: light text/logo treatment on dark context
+In-page: inline SVG follows `var(--ink)` (site theme toggle). Public SVG (when used as `og:image` URL): transparent background; text contrast via `prefers-color-scheme` for link-preview clients that fetch the URL as an image.
 
 ## Data Flow (Post-Implementation)
 
 1. Layout renders `BaseHead`.
 2. `BaseHead` imports brand constants and emits normalized favicon + social metadata.
-3. Pages/posts pass image when available; fallback resolves to canonical logo.
-4. Header component references canonical logo path.
-5. Browser theme preference controls SVG visual variant for favicon and logo.
+3. `BaseLayout` passes optional `image` into `BaseHead` (blog `heroImage`, series `heroImage`, work `logo`); otherwise fallback is canonical wordmark URL.
+4. Header renders `BrandLogo` (inline SVG, theme via CSS variables).
+5. Tab favicon: `prefers-color-scheme` inside `/bustamam-favicon.svg`; OG wordmark file uses `prefers-color-scheme` when loaded as an image.
 
 ## Error Handling and Edge Cases
 

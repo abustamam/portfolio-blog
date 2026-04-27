@@ -340,3 +340,17 @@ git add -A
 git commit -m "chore: finalize favicon and logo consistency rollout"
 ```
 
+---
+
+## Execution complete (2026-04-27)
+
+Shipped on branch `feat/favicon-logo-consistency` (see git log). Summary vs. original tasks:
+
+| Task | Status | Notes |
+|------|--------|--------|
+| 1 | Done | `src/consts/brand.ts`, `BaseHead` favicon + social fallback, `verify:brand` |
+| 2 | Done | `BrandLogo` is inline SVG + `SiteHeader`; public wordmark for OG only |
+| 3 | Done | `verify:brand` script + `package.json` script; verifier asserts homepage + sample post `og:image` |
+| 4 | Done | **Per-page `image`:** `BaseLayout` accepts optional `image` → `BaseHead`. Wired: `BlogPost` (`heroImage`), `series/[...slug]` (`heroImage`), `work/[...slug]` (`logo`). Spec doc synced to shipped behavior. |
+
+**Manual browser checks** (Task 4 step 6): run `npm run dev` and confirm favicon + header in light/dark toggle; CI-equivalent is `npm run verify:brand`.

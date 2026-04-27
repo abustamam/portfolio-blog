@@ -24,7 +24,7 @@ type Props = Omit<CollectionEntry<'blog'>['data'], 'series'> & {
 
 const {
   title, description, pubDate, updatedDate, draft,
-  dek, tag, kind, readMin, words,
+  dek, tag, kind, readMin, words, heroImage,
   slug, series, prevPost, nextPost,
   headings = [],
 } = Astro.props;
@@ -46,7 +46,7 @@ const toc = headings.filter(h => h.depth === 2);
 const readMinNum = readMin ?? 0;
 ---
 
-<BaseLayout title={title} description={dek ?? description} chromePath={`/writing/${slug}`}>
+<BaseLayout title={title} description={dek ?? description} chromePath={`/writing/${slug}`} image={heroImage}>
 
   <!-- Title block -->
   <div class="post-title-block">
