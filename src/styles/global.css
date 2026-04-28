@@ -42,7 +42,8 @@
 }
 
 /* ── Dark mode token overrides (on .dark class on <html>) ── */
-.dark {
+.dark,
+[data-theme='dark'] {
   --color-bg:         #0a0c10;
   --color-surface:    #10141a;
   --color-ink:        #eceae3;
@@ -171,7 +172,8 @@
   background: rgba(12, 15, 20, 0.45);
   cursor: pointer;
 }
-.dark .site-nav-backdrop {
+.dark .site-nav-backdrop,
+[data-theme='dark'] .site-nav-backdrop {
   background: rgba(0, 0, 0, 0.55);
 }
 .site-nav-backdrop[hidden] {
