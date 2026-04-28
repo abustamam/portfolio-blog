@@ -50,7 +50,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
         <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ design</div>
         <div class="font-serif text-base leading-relaxed text-ink">
-          <p class="m-0">Two themes — light and dark — controlled by a <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">.dark</code> class on the root element, toggled without JavaScript flicker via an inline script that reads <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">localStorage</code> before paint. Accent color is a deep red. Type scale is fluid using <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">clamp()</code>.</p>
+          <p class="m-0">Two themes — light and dark — are driven primarily by a <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">.dark</code> class on the root element, toggled without JavaScript flicker via an inline script that reads <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">localStorage</code> before paint; the implementation also keeps <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">data-theme</code> compatibility during the migration. Accent color is a deep red. Type scale is fluid using <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">clamp()</code>.</p>
         </div>
       </div>
 
