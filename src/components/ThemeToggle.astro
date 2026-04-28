@@ -16,7 +16,7 @@
   (function() {
     var saved = localStorage.getItem('theme');
     var theme = saved === 'dark' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
   })();
 </script>
 
@@ -28,7 +28,7 @@
     var labelDark = btn.querySelector('.theme-label-dark');
 
     function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark', theme === 'dark');
       localStorage.setItem('theme', theme);
       var isDark = theme === 'dark';
       if (labelLight) labelLight.style.display = isDark ? 'none' : 'inline';
@@ -36,11 +36,11 @@
     }
 
     // Sync initial state with whatever the inline script set
-    var current = document.documentElement.getAttribute('data-theme') || 'light';
+    var current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     applyTheme(current);
 
     btn.addEventListener('click', function() {
-      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      var next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(next);
     });
   }
