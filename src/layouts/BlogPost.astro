@@ -23,7 +23,7 @@ type Props = Omit<CollectionEntry<'blog'>['data'], 'series'> & {
 };
 
 const {
-  title, description, pubDate, updatedDate, draft,
+  title, description, pubDate, updatedDate,
   dek, tag, kind, readMin, words, heroImage,
   slug, series, prevPost, nextPost,
   headings = [],
@@ -53,7 +53,7 @@ const readMinNum = readMin ?? 0;
     <div class="page-shell">
       <!-- Breadcrumb row -->
       <div style="display:flex; gap:14px; font-family:var(--font-mono); font-size:11px; color:var(--mute); letter-spacing:.04em; margin-bottom:28px; align-items:center; flex-wrap:wrap;">
-        <a href="/" style="color:var(--mute); text-decoration:none;">← /writing</a>
+        <a href="/writing" style="color:var(--mute); text-decoration:none;">← /writing</a>
         {tag && (
           <>
             <span style="color:var(--faint);">/</span>
@@ -329,7 +329,7 @@ const readMinNum = readMin ?? 0;
   }
 </style>
 
-<script define:vars={{ readMinNum }}>
+<script is:inline define:vars={{ readMinNum }}>
   const tocDetails = document.querySelector('.post-toc-details');
   if (tocDetails instanceof HTMLDetailsElement) {
     const mq = window.matchMedia('(min-width: 1024px)');

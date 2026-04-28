@@ -28,7 +28,7 @@ import BrandLogo from './BrandLogo.astro';
     </button>
 
     <nav class="site-header__nav site-header__nav--desktop" aria-label="Primary" style="font-family:var(--font-mono); font-size:12px;">
-      <a href="/" style="color:var(--ink); text-decoration:none;">writing</a>
+      <a href="/writing" style="color:var(--ink); text-decoration:none;">writing</a>
       <a href="/work" style="color:var(--mute); text-decoration:none;">work</a>
       <a href="/about" style="color:var(--mute); text-decoration:none;">about</a>
       <a href="/contact" style="color:var(--mute); text-decoration:none;">contact</a>
@@ -62,7 +62,7 @@ import BrandLogo from './BrandLogo.astro';
     </button>
   </div>
   <nav class="site-nav-panel__links" aria-label="Mobile primary" style="display:flex; flex-direction:column; gap:4px; font-family:var(--font-mono); font-size:14px;">
-    <a href="/" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">writing</a>
+    <a href="/writing" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">writing</a>
     <a href="/work" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">work</a>
     <a href="/about" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">about</a>
     <a href="/contact" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">contact</a>
@@ -166,8 +166,8 @@ import BrandLogo from './BrandLogo.astro';
       if (e.key !== 'Enter') return;
       e.preventDefault();
       const path = window.location.pathname;
-      const onJournalHome = path === '/' || path === '';
-      if (onJournalHome && mainSearch) {
+      const onWritingIndex = path === '/' || path === '' || path === '/writing' || path === '/writing/';
+      if (onWritingIndex && mainSearch) {
         mainSearch.focus();
         closeNav();
         return;
@@ -177,7 +177,7 @@ import BrandLogo from './BrandLogo.astro';
       } catch {
         /* ignore */
       }
-      window.location.href = '/';
+      window.location.href = '/writing';
     });
   })();
 </script>
