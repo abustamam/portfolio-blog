@@ -137,31 +137,6 @@
   }
 }
 
-/* Site header + mobile nav drawer */
-.site-header__menu-btn {
-  flex-shrink: 0;
-}
-@media (min-width: 1024px) {
-  .site-header__menu-btn {
-    display: none !important;
-  }
-}
-.site-header__nav--desktop {
-  display: none;
-  align-items: center;
-  gap: 28px;
-}
-@media (min-width: 1024px) {
-  .site-header__nav--desktop {
-    display: flex;
-  }
-}
-@media (max-width: 639px) {
-  .site-header__journal {
-    display: none;
-  }
-}
-
 .site-nav-backdrop {
   position: fixed;
   inset: 0;
