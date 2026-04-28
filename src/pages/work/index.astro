@@ -18,10 +18,10 @@ const consulting = allWork.filter((e) => e.data.type === 'consulting');
 ---
 
 <BaseLayout title="Work" description="A record of consulting engagements and employment — what I built, where, and with whom." chromePath="/work">
-  <main class="work-index">
-    <header class="work-index__header animate-fade-up" style="--delay:0">
-      <h1 class="work-index__title">Work</h1>
-      <p class="work-index__dek">
+  <main class="max-w-4xl mx-auto px-8 pt-12 pb-16 sm:px-5 sm:pt-8 sm:pb-12">
+    <header class="animate-fade-up mb-12" style="--delay:0">
+      <h1 class="font-serif text-[clamp(2rem,5vw,3rem)] font-medium tracking-tight text-ink m-0 mb-3">Work</h1>
+      <p class="font-serif text-lg text-mute leading-relaxed m-0 max-w-md">
         A record of consulting engagements and employment — what I built, where, and with whom.
       </p>
     </header>
@@ -45,35 +45,3 @@ const consulting = allWork.filter((e) => e.data.type === 'consulting');
     )}
   </main>
 </BaseLayout>
-
-<style>
-  .work-index {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 3rem 2rem 4rem;
-  }
-  .work-index__header {
-    margin-bottom: 3rem;
-  }
-  .work-index__title {
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-    margin: 0 0 0.75rem;
-  }
-  .work-index__dek {
-    font-family: var(--font-serif);
-    font-size: 1.1rem;
-    color: var(--mute);
-    line-height: 1.6;
-    margin: 0;
-    max-width: 520px;
-  }
-  @media (max-width: 639px) {
-    .work-index {
-      padding: 2rem 1.25rem 3rem;
-    }
-  }
-</style>
