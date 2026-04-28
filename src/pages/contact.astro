@@ -7,81 +7,50 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   description="Get in touch with Rasheed Bustamam for consulting engagements, collaborations, or general inquiries."
   chromePath="/contact"
 >
-  <div class="page-shell contact-page">
-    <div style="margin-bottom:28px; font-family:var(--font-mono); font-size:11px; color:var(--mute); letter-spacing:.04em;">
-      <a href="/" style="color:var(--mute); text-decoration:none;">← home</a>
+  <div class="page-shell pt-12 pb-20">
+    <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/" class="text-mute no-underline">← home</a>
     </div>
 
-    <h1 style="font-family:var(--font-serif); font-size:clamp(2.5rem,6vw,4rem); font-weight:500; letter-spacing:-.028em; color:var(--ink); margin:0 0 16px;">
+    <h1 class="font-serif text-[clamp(2.5rem,6vw,4rem)] font-medium tracking-[-0.028em] text-ink m-0 mb-4">
       Contact.
     </h1>
-    <p style="font-family:var(--font-serif); font-size:19px; color:var(--mute); margin:0 0 48px; line-height:1.5; max-width:560px;">
+    <p class="font-serif text-lg text-mute m-0 mb-12 leading-[1.5] max-w-[560px]">
       For consulting inquiries, collaborations, or just to say hello.
     </p>
 
-    <div class="contact-grid">
-      <div class="contact-card">
-        <div style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px;">§ email</div>
-        <a href="mailto:admin@bustamam.tech" style="font-family:var(--font-mono); font-size:15px; color:var(--accent); text-decoration:none;">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl">
+      <div class="p-6 border border-line rounded bg-surface">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-[18px]">§ email</div>
+        <a href="mailto:admin@bustamam.tech" class="font-mono text-[15px] text-accent no-underline">
           admin@bustamam.tech
         </a>
-        <p style="font-family:var(--font-serif); font-size:15px; color:var(--mute); margin:14px 0 0; line-height:1.55;">
+        <p class="font-serif text-[15px] text-mute m-[14px_0_0] leading-[1.55]">
           Best for consulting inquiries and project discussions. I typically respond within one business day.
         </p>
       </div>
 
-      <div class="contact-card">
-        <div style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px;">§ elsewhere</div>
-        <div style="display:flex; flex-direction:column; gap:12px; font-family:var(--font-mono); font-size:13px;">
-          <a href="https://github.com/abustamam" target="_blank" rel="noreferrer" style="color:var(--ink); text-decoration:none;">
-            github <span style="color:var(--faint);">→ github.com/abustamam</span>
+      <div class="p-6 border border-line rounded bg-surface">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-[18px]">§ elsewhere</div>
+        <div class="flex flex-col gap-3 font-mono text-13">
+          <a href="https://github.com/abustamam" target="_blank" rel="noreferrer" class="text-ink no-underline">
+            github <span class="text-faint">→ github.com/abustamam</span>
           </a>
-          <a href="/rss.xml" style="color:var(--ink); text-decoration:none;">
-            rss <span style="color:var(--faint);">→ /rss.xml</span>
+          <a href="/rss.xml" class="text-ink no-underline">
+            rss <span class="text-faint">→ /rss.xml</span>
           </a>
         </div>
       </div>
 
-      <div class="contact-card contact-card--full">
-        <div style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px;">§ consulting</div>
-        <p style="font-family:var(--font-serif); font-size:17px; color:var(--ink); margin:0 0 14px; line-height:1.6;">
+      <div class="sm:col-span-2 p-6 border border-line rounded bg-surface">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-[18px]">§ consulting</div>
+        <p class="font-serif text-base leading-relaxed text-ink m-0 mb-3.5">
           I take on a small number of consulting engagements each quarter. If you're building something in the web or mobile space and need a senior engineer who can think across the full stack, let's talk.
         </p>
-        <p style="font-family:var(--font-serif); font-size:17px; color:var(--mute); margin:0; line-height:1.6;">
-          For a full picture of past work, see the <a href="/work" style="color:var(--accent);">work page</a>.
+        <p class="font-serif text-base leading-relaxed text-mute m-0">
+          For a full picture of past work, see the <a href="/work" class="text-accent">work page</a>.
         </p>
       </div>
     </div>
   </div>
 </BaseLayout>
-
-<style>
-  .contact-page {
-    padding-top: 48px;
-    padding-bottom: 80px;
-  }
-
-  .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    max-width: 760px;
-  }
-
-  .contact-card {
-    padding: 24px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    background: var(--surface);
-  }
-
-  .contact-card--full {
-    grid-column: 1 / -1;
-  }
-
-  @media (max-width: 600px) {
-    .contact-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
