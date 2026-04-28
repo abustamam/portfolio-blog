@@ -12,11 +12,11 @@ interface Props {
 const { title, entries, animated = true, indexOffset = 0 } = Astro.props;
 ---
 
-<section class="work-section">
-  <h2 class="work-section__heading animate-fade-up" style="--delay:100">
+<section class="mb-12">
+  <h2 class="animate-fade-up font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-5 pb-2 border-b border-line" style="--delay:100">
     {title}
   </h2>
-  <div class="work-section__grid">
+  <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
     {entries.map((entry, i) => (
       <WorkCard
         entry={entry}
@@ -26,30 +26,3 @@ const { title, entries, animated = true, indexOffset = 0 } = Astro.props;
     ))}
   </div>
 </section>
-
-<style>
-  .work-section {
-    margin-bottom: 3rem;
-  }
-  .work-section__heading {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--faint);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin: 0 0 1.25rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--line);
-  }
-  .work-section__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-  }
-  @media (max-width: 639px) {
-    .work-section__grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>

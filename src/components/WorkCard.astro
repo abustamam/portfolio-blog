@@ -20,166 +20,57 @@ const badgeLabels: Record<string, string> = {
 
 <a
   href={`/work/${entry.id}/`}
-  class:list={['work-card', animated && 'animate-fade-up']}
+  class:list={[
+    'block no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-colors duration-150 hover:border-accent hover:shadow-sm',
+    animated && 'animate-fade-up',
+  ]}
   style={animated ? `--delay:${delay}` : undefined}
 >
-  <div class="work-card__header">
-    <div class="work-card__logo-wrap">
+  <div class="flex items-center gap-3.5 mb-2.5">
+    <div class="w-10 h-10 shrink-0 flex items-center justify-center">
       {logo ? (
         <Image
           src={logo}
           alt={`${company} logo`}
           width={40}
           height={40}
-          class:list={['work-logo', darkLogo && 'is-dark']}
+          class:list={['work-logo w-10 h-10 object-contain rounded', darkLogo && 'is-dark']}
         />
       ) : (
-        <div class="work-card__logo-placeholder">
+        <div class="w-10 h-10 rounded bg-accent-bg text-accent-ink font-mono text-xs font-semibold flex items-center justify-center">
           {company.slice(0, 2).toUpperCase()}
         </div>
       )}
     </div>
-    <div class="work-card__meta">
-      <div class="work-card__company">
-        {company}{projectName && <span class="work-card__project"> · {projectName}</span>}
+    <div class="flex-1 min-w-0">
+      <div class="font-sans text-sm font-semibold text-ink whitespace-nowrap overflow-hidden text-ellipsis">
+        {company}{projectName && <span class="font-normal text-mute"> · {projectName}</span>}
       </div>
-      <div class="work-card__role">{role}</div>
+      <div class="font-mono text-11 text-mute mt-0.5 tracking-snug">{role}</div>
     </div>
   </div>
 
-  <div class="work-card__period">
-    {period}{location && <span class="work-card__location"> · {location}</span>}
+  <div class="font-mono text-11 text-faint tracking-snug mb-3">
+    {period}{location && <span class="text-faint"> · {location}</span>}
   </div>
 
   {badges.length > 0 && (
-    <div class="work-card__badges">
+    <div class="flex flex-wrap gap-1.5 mb-2.5">
       {badges.map((b) => (
-        <span class="work-card__badge">{badgeLabels[b] ?? b}</span>
+        <span class="font-mono text-10 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">
+          {badgeLabels[b] ?? b}
+        </span>
       ))}
     </div>
   )}
 
   {skills.length > 0 && (
-    <div class="work-card__skills">
+    <div class="flex flex-wrap gap-1.5">
       {skills.map((s) => (
-        <span class="work-card__skill">{s}</span>
+        <span class="font-mono text-10 text-mute bg-bg border border-line rounded-sm py-0.5 px-1.75 tracking-snug">
+          {s}
+        </span>
       ))}
     </div>
   )}
 </a>
-
-<style>
-  .work-card {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 20px 24px;
-    background: var(--surface);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .work-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  }
-  .work-card__header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 10px;
-  }
-  .work-card__logo-wrap {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .work-logo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    border-radius: 4px;
-  }
-  .work-card__logo-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    background: var(--accent-bg);
-    color: var(--accent-ink);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .work-card__meta {
-    flex: 1;
-    min-width: 0;
-  }
-  .work-card__company {
-    font-family: var(--font-sans);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .work-card__project {
-    font-weight: 400;
-    color: var(--mute);
-  }
-  .work-card__role {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--mute);
-    margin-top: 2px;
-    letter-spacing: 0.02em;
-  }
-  .work-card__period {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--faint);
-    letter-spacing: 0.02em;
-    margin-bottom: 12px;
-  }
-  .work-card__location {
-    color: var(--faint);
-  }
-  .work-card__badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-  .work-card__badge {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 2px;
-    background: var(--accent-bg);
-    color: var(--accent-ink);
-    border: 1px solid var(--accent);
-  }
-  .work-card__skills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .work-card__skill {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--mute);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    padding: 2px 7px;
-    letter-spacing: 0.02em;
-  }
-</style>

@@ -492,7 +492,7 @@ img { max-width: 100%; height: auto; }
 }
 
 /* Dark logo invert */
-[data-theme="dark"] .work-logo.is-dark {
+.dark .work-logo.is-dark {
   filter: invert(1) brightness(2);
 }
 
