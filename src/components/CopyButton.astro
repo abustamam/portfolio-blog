@@ -2,16 +2,63 @@
 // CopyButton.astro — no props.
 // Include once in PostLayout; script auto-attaches to all pre elements.
 ---
+<style is:global>
+  .copy-wrapper {
+    margin: 28px 0;
+    background: var(--color-code);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .copy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 10px;
+    color: var(--color-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--color-line);
+    color: var(--color-mute);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .copy-pre {
+    margin: 0;
+    padding: 16px 18px;
+    line-height: 1.65;
+    overflow: auto;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+</style>
+
 <script>
   // Find all pre elements that aren't already wrapped
   document.querySelectorAll<HTMLElement>('article.post-prose pre').forEach(pre => {
     // Build wrapper
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'margin:28px 0; background:var(--code); border:1px solid var(--line); border-radius:4px; overflow:hidden; font-family:var(--font-mono); font-size:13px;';
+    wrapper.className = 'copy-wrapper';
 
     // Header strip
     const header = document.createElement('div');
-    header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px 14px; border-bottom:1px solid var(--line); font-size:10px; color:var(--faint); letter-spacing:.08em; text-transform:uppercase;';
+    header.className = 'copy-header';
 
     // Language label from class e.g. language-go
     const code = pre.querySelector('code');
@@ -23,7 +70,7 @@
     // Copy button
     const btn = document.createElement('button');
     btn.textContent = 'copy';
-    btn.style.cssText = 'background:transparent; border:1px solid var(--line); color:var(--mute); cursor:pointer; font-family:var(--font-mono); font-size:10px; padding:2px 8px; border-radius:2px; letter-spacing:.05em; text-transform:uppercase;';
+    btn.className = 'copy-btn';
     btn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(pre.textContent ?? '');
@@ -36,7 +83,7 @@
     header.appendChild(btn);
 
     // Re-style pre to remove its own background/border (handled by wrapper now)
-    pre.style.cssText = 'margin:0; padding:16px 18px; line-height:1.65; overflow:auto; background:transparent; border:none; border-radius:0;';
+    pre.className = 'copy-pre';
 
     // Wrap
     pre.parentNode?.insertBefore(wrapper, pre);
