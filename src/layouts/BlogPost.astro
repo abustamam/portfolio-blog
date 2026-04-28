@@ -147,10 +147,10 @@ const readMinNum = readMin ?? 0;
         {series && (prevPost || nextPost) && (
           <nav class="flex justify-between gap-4 mb-8 pb-6 border-b border-line-soft font-mono text-xs">
             {prevPost ? (
-              <a href={`/blog/${prevPost.id}/`} class="text-accent no-underline overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">← {prevPost.title}</a>
+              <a href={`/writing/${prevPost.id}/`} class="text-accent no-underline overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">← {prevPost.title}</a>
             ) : <span />}
             {nextPost ? (
-              <a href={`/blog/${nextPost.id}/`} class="text-accent no-underline text-right overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">{nextPost.title} →</a>
+              <a href={`/writing/${nextPost.id}/`} class="text-accent no-underline text-right overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">{nextPost.title} →</a>
             ) : <span />}
           </nav>
         )}
@@ -158,10 +158,10 @@ const readMinNum = readMin ?? 0;
         {series && (prevPost || nextPost) && (
           <nav class="flex justify-between gap-4 mt-8 pt-6 border-t border-line-soft font-mono text-xs">
             {prevPost ? (
-              <a href={`/blog/${prevPost.id}/`} class="text-accent no-underline overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">← {prevPost.title}</a>
+              <a href={`/writing/${prevPost.id}/`} class="text-accent no-underline overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">← {prevPost.title}</a>
             ) : <span />}
             {nextPost ? (
-              <a href={`/blog/${nextPost.id}/`} class="text-accent no-underline text-right overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">{nextPost.title} →</a>
+              <a href={`/writing/${nextPost.id}/`} class="text-accent no-underline text-right overflow-hidden text-ellipsis whitespace-nowrap max-w-[42vw] md:max-w-none md:whitespace-normal">{nextPost.title} →</a>
             ) : <span />}
           </nav>
         )}
@@ -198,7 +198,7 @@ const readMinNum = readMin ?? 0;
         </div>
         <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {allPosts.map(p => (
-            <a href={`/blog/${p.id}/`} class="block p-5 pb-5.5 border border-line rounded bg-bg no-underline text-inherit">
+            <a href={`/writing/${p.id}/`} class="block p-5 pb-5.5 border border-line rounded bg-bg no-underline text-inherit">
               <div class="flex justify-between font-mono text-10 text-faint tracking-loose uppercase mb-3.5">
                 <span>{p.data.tag?.toLowerCase() ?? ''}</span>
                 {p.data.readMin && <span>{p.data.readMin} min</span>}

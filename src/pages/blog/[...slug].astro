@@ -12,8 +12,8 @@ export async function getStaticPaths() {
 const slug = Astro.params.slug;
 
 if (!slug) {
-	return Astro.redirect('/writing', 301);
+	return Astro.redirect('/writing/', 301);
 }
 
-return Astro.redirect(`/writing/${slug}`, 301);
+return Astro.redirect(`/writing/${slug}/`, 301);
 ---
