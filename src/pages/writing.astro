@@ -141,8 +141,8 @@ const tags = ['All', ...uniqueTags];
   mqRows.addEventListener('change', filterPosts);
 
   try {
-    if (sessionStorage.getItem('journal:focus-search')) {
-      sessionStorage.removeItem('journal:focus-search');
+    if (sessionStorage.getItem('site:focus-search')) {
+      sessionStorage.removeItem('site:focus-search');
       queueMicrotask(() => searchInput?.focus());
     }
   } catch {
