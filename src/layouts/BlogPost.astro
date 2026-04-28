@@ -143,7 +143,7 @@ const readMinNum = readMin ?? 0;
       </details>
 
       <!-- Article prose -->
-      <article class="post-prose" style="font-family:var(--font-serif); font-size:18px; line-height:1.65; color:var(--ink); min-width:0;">
+      <article class="post-prose" style="font-family:var(--font-serif); font-size:18px; line-height:1.65; color:var(--color-ink); min-width:0;">
         {series && (prevPost || nextPost) && (
           <nav class="flex justify-between gap-4 mb-8 pb-6 border-b border-line-soft font-mono text-xs">
             {prevPost ? (
@@ -168,21 +168,21 @@ const readMinNum = readMin ?? 0;
       </article>
 
       <!-- Right sidebar: margin notes -->
-      <aside class="post-aside-right" style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">
-        <div style="padding:14px; background:var(--surface); border:1px solid var(--line); border-radius:3px; margin-bottom:14px;">
-          <div style="font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ about this post</div>
-          {kind && <div style="margin-bottom:4px; color:var(--ink);">{kind}</div>}
-          {words && <div style="color:var(--faint);">{words.toLocaleString()} words</div>}
+      <aside class="post-aside-right" style="font-family:var(--font-mono); font-size:11px; color:var(--color-mute);">
+        <div style="padding:14px; background:var(--color-surface); border:1px solid var(--color-line); border-radius:3px; margin-bottom:14px;">
+          <div style="font-size:10px; color:var(--color-faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ about this post</div>
+          {kind && <div style="margin-bottom:4px; color:var(--color-ink);">{kind}</div>}
+          {words && <div style="color:var(--color-faint);">{words.toLocaleString()} words</div>}
           {updatedDate && (
-            <div style="margin-top:8px; font-size:10px; color:var(--faint);">
+            <div style="margin-top:8px; font-size:10px; color:var(--color-faint);">
               updated {fmtDate(updatedDate)}
             </div>
           )}
         </div>
         {series && (
-          <div style="padding:14px; background:var(--surface); border:1px solid var(--line); border-radius:3px;">
-            <div style="font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ series</div>
-            <a href={`/series/${series.id}/`} style="color:var(--accent-ink); text-decoration:none; line-height:1.55;">{series.title}</a>
+          <div style="padding:14px; background:var(--color-surface); border:1px solid var(--color-line); border-radius:3px;">
+            <div style="font-size:10px; color:var(--color-faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ series</div>
+            <a href={`/series/${series.id}/`} style="color:var(--color-accent-ink); text-decoration:none; line-height:1.55;">{series.title}</a>
           </div>
         )}
       </aside>
@@ -231,7 +231,7 @@ const readMinNum = readMin ?? 0;
     line-height: .85;
     font-weight: 500;
     padding: 6px 10px 0 0;
-    color: var(--accent);
+    color: var(--color-accent);
   }
   @media (max-width: 767px) {
     .post-prose > p:first-of-type::first-letter {
@@ -247,7 +247,7 @@ const readMinNum = readMin ?? 0;
     margin: 44px 0 14px;
     letter-spacing: -.015em;
     line-height: 1.15;
-    color: var(--ink);
+    color: var(--color-ink);
   }
 
   .post-prose h3 {
@@ -257,7 +257,7 @@ const readMinNum = readMin ?? 0;
     margin: 36px 0 12px;
     letter-spacing: -.015em;
     line-height: 1.2;
-    color: var(--ink);
+    color: var(--color-ink);
   }
   @media (max-width: 767px) {
     .post-prose h2 {
@@ -269,21 +269,21 @@ const readMinNum = readMin ?? 0;
     }
   }
 
-  .post-prose a { color: var(--accent); }
+  .post-prose a { color: var(--color-accent); }
 
   .post-prose code {
     font-family: var(--font-mono);
     font-size: .85em;
-    background: var(--code);
+    background: var(--color-code);
     padding: 1px 6px;
     border-radius: 2px;
-    color: var(--accent-ink);
+    color: var(--color-accent-ink);
   }
 
   .post-prose pre {
     margin: 28px 0;
-    background: var(--code);
-    border: 1px solid var(--line);
+    background: var(--color-code);
+    border: 1px solid var(--color-line);
     border-radius: 4px;
     padding: 16px 18px;
     overflow: auto;
@@ -302,19 +302,19 @@ const readMinNum = readMin ?? 0;
   .post-prose pre code {
     background: none;
     padding: 0;
-    color: var(--ink);
+    color: var(--color-ink);
     font-size: 13px;
   }
 
   .post-prose blockquote {
     margin: 28px 0;
     padding: 16px 22px;
-    border-left: 2px solid var(--accent);
+    border-left: 2px solid var(--color-accent);
     font-family: var(--font-serif);
     font-size: 19px;
     font-style: italic;
-    color: var(--ink);
-    background: var(--surface);
+    color: var(--color-ink);
+    background: var(--color-surface);
   }
 
   .post-prose img {
@@ -326,8 +326,8 @@ const readMinNum = readMin ?? 0;
 
   /* TOC active state */
   .toc-link.active {
-    color: var(--ink) !important;
-    border-left-color: var(--accent) !important;
+    color: var(--color-ink) !important;
+    border-left-color: var(--color-accent) !important;
   }
 </style>
 

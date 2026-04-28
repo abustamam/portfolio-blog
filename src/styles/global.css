@@ -61,32 +61,13 @@
   --color-kbd:        #181c24;
 }
 
-/* ── Compat aliases — OLD token names pointing to NEW names.
-   Remove this block once every component uses Tailwind utilities. ─── */
-:root {
-  --bg:        var(--color-bg);
-  --surface:   var(--color-surface);
-  --ink:       var(--color-ink);
-  --mute:      var(--color-mute);
-  --faint:     var(--color-faint);
-  --line:      var(--color-line);
-  --line-soft: var(--color-line-soft);
-  --accent:    var(--color-accent);
-  --accent-bg: var(--color-accent-bg);
-  --accent-ink:var(--color-accent-ink);
-  --code:      var(--color-code);
-  --danger:    var(--color-danger);
-  --kbd:       var(--color-kbd);
-  --gutter-x:  var(--spacing-gutter);
-}
-
 .page-shell {
   width: 100%;
   max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--gutter-x);
-  padding-right: var(--gutter-x);
+  padding-left: var(--spacing-gutter);
+  padding-right: var(--spacing-gutter);
 }
 
 /*
@@ -128,8 +109,8 @@
   position: fixed;
   z-index: 201;
   box-sizing: border-box;
-  background: var(--bg);
-  color: var(--ink);
+  background: var(--color-bg);
+  color: var(--color-ink);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -144,7 +125,7 @@
     width: 100%;
     max-width: none;
     min-height: 100dvh;
-    padding: 1.25rem var(--gutter-x) 2rem;
+    padding: 1.25rem var(--spacing-gutter) 2rem;
   }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -154,8 +135,8 @@
     bottom: 0;
     left: auto;
     width: min(400px, 100vw);
-    padding: 1.25rem var(--gutter-x) 2rem;
-    border-left: 1px solid var(--line);
+    padding: 1.25rem var(--spacing-gutter) 2rem;
+    border-left: 1px solid var(--color-line);
     box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
   }
 }
@@ -175,11 +156,11 @@ html.nav-open body {
   display: grid;
   grid-template-columns: 48px 110px 1fr 150px 90px 24px;
   gap: 24px;
-  padding: 14px var(--gutter-x);
-  border-bottom: 1px solid var(--line);
+  padding: 14px var(--spacing-gutter);
+  border-bottom: 1px solid var(--color-line);
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--faint);
+  color: var(--color-faint);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -194,8 +175,8 @@ html.nav-open body {
   grid-template-columns: 48px 110px 1fr 150px 90px 24px;
   gap: 24px;
   align-items: baseline;
-  padding: 24px var(--gutter-x);
-  border-bottom: 1px solid var(--line-soft);
+  padding: 24px var(--spacing-gutter);
+  border-bottom: 1px solid var(--color-line-soft);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -212,7 +193,7 @@ html.nav-open body {
     flex-direction: column;
     align-items: stretch;
     gap: 0.35rem;
-    padding: 1.25rem var(--gutter-x);
+    padding: 1.25rem var(--spacing-gutter);
   }
   .post-row__idx,
   .post-row__arrow,
@@ -225,7 +206,7 @@ html.nav-open body {
     display: block !important;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--mute);
+    color: var(--color-mute);
     order: 2;
   }
   .post-row__main {
@@ -249,7 +230,7 @@ html.nav-open body {
   font-family: var(--font-serif);
   font-size: 14px;
   line-height: 1.5;
-  color: var(--mute);
+  color: var(--color-mute);
   max-width: 640px;
 }
 @media (max-width: 1023px) {
@@ -315,7 +296,7 @@ html.nav-open body {
 .post-toc-details__summary {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--faint);
+  color: var(--color-faint);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
@@ -349,21 +330,21 @@ html.nav-open body {
 
 html {
   font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--ink);
+  background: var(--color-bg);
+  color: var(--color-ink);
 }
 
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
-  color: var(--ink);
+  background: var(--color-bg);
+  color: var(--color-ink);
   min-height: 100vh;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-a { color: var(--accent); }
+a { color: var(--color-accent); }
 img { max-width: 100%; height: auto; }
 
 .sr-only {
@@ -387,13 +368,13 @@ img { max-width: 100%; height: auto; }
 .astro-code,
 .astro-code span {
   color: var(--shiki-light) !important;
-  background-color: var(--code) !important;
+  background-color: var(--color-code) !important;
 }
 
 [data-theme="dark"] .astro-code,
 [data-theme="dark"] .astro-code span {
   color: var(--shiki-dark) !important;
-  background-color: var(--code) !important;
+  background-color: var(--color-code) !important;
 }
 
 /* ── Work / Portfolio animations ──────────────────── */
@@ -430,7 +411,7 @@ dialog[open] {
 }
 .text-shimmer {
   background: linear-gradient(
-    90deg, var(--ink) 40%, var(--accent) 50%, var(--ink) 60%
+    90deg, var(--color-ink) 40%, var(--color-accent) 50%, var(--color-ink) 60%
   ) 200% 0 / 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
