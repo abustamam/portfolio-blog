@@ -45,7 +45,7 @@ const { posts } = await getSeriesPosts(series.id);
 			<ol class="m-0 list-none p-0">
 				{posts.map((post) => (
 					<li class="mb-4 border-b border-line pb-4 last:border-b-0">
-						<a href={`/blog/${post.id}/`} class="text-ink no-underline hover:text-accent">
+						<a href={`/writing/${post.id}/`} class="text-ink no-underline hover:text-accent">
 							<strong>
 								<DraftBadge draft={post.data.draft} />
 								{post.data.title}
