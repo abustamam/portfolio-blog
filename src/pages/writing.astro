@@ -21,46 +21,48 @@ const tags = ['All', ...uniqueTags];
   description="Long-form writing on software craft, distributed systems, and independent consulting."
   chromePath="/writing"
 >
-  <div class="page-shell writing-page">
-    <div class="writing-header">
-      <h1 style="font-family:var(--font-serif); font-size:clamp(2rem,5vw,3.5rem); font-weight:500; letter-spacing:-.028em; color:var(--ink); margin:0 0 10px;">
+  <div class="page-shell pt-12 pb-20">
+    <div class="mb-10">
+      <h1 class="font-serif text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-tight text-ink m-0 mb-2.5">
         Writing.
       </h1>
-      <p style="font-family:var(--font-serif); font-size:18px; color:var(--mute); margin:0; line-height:1.5;">
+      <p class="font-serif text-lg text-mute m-0 leading-[1.5]">
         Notes on distributed systems, software craft, and independent consulting.
       </p>
     </div>
 
     <!-- Filter bar -->
-    <div class="home-filter">
-      <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line); border-radius:2px; background:var(--surface); min-width:280px; flex:1; max-width:360px;">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:var(--mute); flex-shrink:0;" aria-hidden="true">
+    <div class="px-gutter py-5.5 border-b border-line bg-bg flex items-center gap-5 flex-wrap">
+      <div class="flex items-center gap-2 py-1.5 px-2.5 border border-line rounded-sm bg-surface min-w-[280px] flex-1 max-w-[360px]">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="text-mute shrink-0" aria-hidden="true">
           <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
           <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <input id="search-input" placeholder="grep titles, tags, years..." style="border:none; outline:none; background:transparent; flex:1; font-family:var(--font-mono); font-size:12px; color:var(--ink); width:100%;" />
-        <span style="font-family:var(--font-mono); font-size:10px; padding:2px 6px; background:var(--kbd); color:var(--mute); border-radius:2px; flex-shrink:0;">/</span>
+        <input id="search-input" placeholder="grep titles, tags, years..." class="border-none outline-none bg-transparent flex-1 font-mono text-xs text-ink w-full" />
+        <span class="font-mono text-10 py-0.5 px-1.5 bg-kbd text-mute rounded-sm shrink-0">/</span>
       </div>
-      <div style="height:18px; width:1px; background:var(--line);"></div>
-      <div id="tag-filters" style="display:flex; gap:6px; flex-wrap:wrap;">
+      <div class="h-4.5 w-px bg-line"></div>
+      <div id="tag-filters" class="flex gap-1.5 flex-wrap">
         {tags.map((tag, i) => (
           <button
             data-tag={tag}
-            class="tag-pill"
-            style={`font-family:var(--font-mono); font-size:11px; letter-spacing:.02em; padding:5px 10px; border-radius:2px; cursor:pointer; border:1px solid ${i === 0 ? 'var(--ink)' : 'var(--line)'}; background:${i === 0 ? 'var(--ink)' : 'transparent'}; color:${i === 0 ? 'var(--bg)' : 'var(--mute)'};`}
+            class:list={['tag-pill font-mono text-11 tracking-snug py-1.25 px-2.5 rounded-sm cursor-pointer border transition-colors',
+              i === 0
+                ? 'border-ink bg-ink text-bg'
+                : 'border-line bg-transparent text-mute']}
           >
             {tag.toLowerCase()}
           </button>
         ))}
       </div>
-      <div class="home-filter__sort">
-        sort: <span style="color:var(--ink);">recent ↓</span>
+      <div class="w-full ml-0 lg:w-auto lg:ml-auto font-mono text-11 text-faint">
+        sort: <span class="text-ink">recent ↓</span>
       </div>
     </div>
 
     <!-- Column headers -->
     <div class="post-list-header">
-      <div>№</div><div>date</div><div>title · dek</div><div>tag</div><div style="text-align:right;">length</div><div></div>
+      <div>№</div><div>date</div><div>title · dek</div><div>tag</div><div class="text-right">length</div><div></div>
     </div>
 
     <!-- Post list -->
@@ -68,20 +70,19 @@ const tags = ['All', ...uniqueTags];
       {allPosts.map((post, i) => (
         <a
           href={`/blog/${post.id}/`}
-          class="post-row"
+          class:list={['post-row', i === 0 && 'bg-surface']}
           data-title={post.data.title.toLowerCase()}
           data-tag={post.data.tag ?? ''}
           data-kind={post.data.kind ?? ''}
-          style={`background:${i === 0 ? 'var(--surface)' : 'transparent'};`}
         >
-          <div class="post-row__idx" style="font-family:var(--font-mono); font-size:11px; color:var(--faint); letter-spacing:.05em; font-variant-numeric:tabular-nums;">
+          <div class="post-row__idx font-mono text-11 text-faint tracking-snug tabular-nums">
             {String(i + 1).padStart(3, '0')}
           </div>
-          <div class="post-row__date" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); font-variant-numeric:tabular-nums;">
+          <div class="post-row__date font-mono text-11 text-mute tabular-nums">
             {fmtDate(post.data.pubDate)}
           </div>
           <div class="post-row__main">
-            <div class="post-row__title" style="margin:0; font-family:var(--font-serif); font-size:23px; line-height:1.15; font-weight:500; color:var(--ink); letter-spacing:-.012em;">
+            <div class="post-row__title m-0 font-serif text-2xl leading-tight font-medium text-ink tracking-tight">
               {post.data.title}
             </div>
             <div class="post-row__dek">
@@ -96,34 +97,23 @@ const tags = ['All', ...uniqueTags];
               )}
             </div>
           </div>
-          <div class="post-row__tag" style="font-family:var(--font-mono); font-size:11px; color:var(--mute);">
+          <div class="post-row__tag font-mono text-11 text-mute">
             {post.data.tag && (
-              <span style="padding:2px 7px; border:1px solid var(--line); color:var(--ink); border-radius:2px; letter-spacing:.04em; font-size:10px; text-transform:uppercase;">
+              <span class="py-0.5 px-1.75 border border-line text-ink rounded-sm tracking-wider text-10 uppercase">
                 {post.data.tag}
               </span>
             )}
           </div>
-          <div class="post-row__len" style="font-family:var(--font-mono); font-size:11px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; font-variant-numeric:tabular-nums;">
-            {post.data.readMin && <span style="color:var(--ink);">{post.data.readMin} min</span>}
-            {post.data.words && <span style="color:var(--faint);">{post.data.words.toLocaleString()} w</span>}
+          <div class="post-row__len font-mono text-11 flex flex-col items-end gap-0.5 text-right tabular-nums">
+            {post.data.readMin && <span class="text-ink">{post.data.readMin} min</span>}
+            {post.data.words && <span class="text-faint">{post.data.words.toLocaleString()} w</span>}
           </div>
-          <div class="post-row__arrow post-arrow" style="color:var(--faint); font-family:var(--font-mono); font-size:14px; align-self:center; text-align:right;">→</div>
+          <div class="post-row__arrow post-arrow text-faint font-mono text-sm self-center text-right">→</div>
         </a>
       ))}
     </div>
   </div>
 </BaseLayout>
-
-<style>
-  .writing-page {
-    padding-top: 48px;
-    padding-bottom: 80px;
-  }
-
-  .writing-header {
-    margin-bottom: 40px;
-  }
-</style>
 
 <script>
   const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
@@ -164,9 +154,12 @@ const tags = ['All', ...uniqueTags];
       activeTag = pill.dataset.tag ?? 'All';
       tagPills.forEach(p => {
         const on = p.dataset.tag === activeTag;
-        p.style.border = `1px solid ${on ? 'var(--ink)' : 'var(--line)'}`;
-        p.style.background = on ? 'var(--ink)' : 'transparent';
-        p.style.color = on ? 'var(--bg)' : 'var(--mute)';
+        p.classList.toggle('border-ink', on);
+        p.classList.toggle('bg-ink', on);
+        p.classList.toggle('text-bg', on);
+        p.classList.toggle('border-line', !on);
+        p.classList.toggle('bg-transparent', !on);
+        p.classList.toggle('text-mute', !on);
       });
       filterPosts();
     });
