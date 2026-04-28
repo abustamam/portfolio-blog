@@ -11,8 +11,6 @@ export default defineConfig({
   site: 'https://blog.bustamam.tech',
   integrations: [mdx(), sitemap()],
   redirects: {
-    '/blog': '/writing',
-    '/blog/': '/writing/',
     '/blog/:slug': '/writing/:slug',
   },
   markdown: {
