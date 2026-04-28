@@ -16,7 +16,7 @@ const { title, entries, animated = true, indexOffset = 0 } = Astro.props;
   <h2 class="animate-fade-up font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-5 pb-2 border-b border-line" style="--delay:100">
     {title}
   </h2>
-  <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+  <div class="grid grid-cols-1 gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
     {entries.map((entry, i) => (
       <WorkCard
         entry={entry}
