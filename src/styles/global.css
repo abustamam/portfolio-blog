@@ -170,46 +170,7 @@ html.nav-open body {
   overflow: hidden;
 }
 
-/* Home — hero, filter, post list */
-.home-hero {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 2.5rem var(--gutter-x) 2rem;
-  border-bottom: 1px solid var(--line);
-  align-items: end;
-}
-@media (min-width: 768px) {
-  .home-hero {
-    grid-template-columns: 1.15fr 1fr;
-    gap: 72px;
-    padding: 64px var(--gutter-x) 52px;
-  }
-}
-
-.home-filter {
-  padding: 22px var(--gutter-x);
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.home-filter__sort {
-  width: 100%;
-  margin-left: 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--faint);
-}
-@media (min-width: 1024px) {
-  .home-filter__sort {
-    width: auto;
-    margin-left: auto;
-  }
-}
-
+/* Home — post list */
 .post-list-header {
   display: grid;
   grid-template-columns: 48px 110px 1fr 150px 90px 24px;
