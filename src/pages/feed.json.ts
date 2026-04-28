@@ -13,8 +13,8 @@ export async function GET(context: { site: URL }) {
     feed_url: new URL('/feed.json', context.site).href,
     authors: [{ name: 'Rasheed Bustamam', url: 'https://bustamam.tech' }],
     items: posts.map(post => ({
-      id: new URL(`/blog/${post.id}/`, context.site).href,
-      url: new URL(`/blog/${post.id}/`, context.site).href,
+      id: new URL(`/writing/${post.id}/`, context.site).href,
+      url: new URL(`/writing/${post.id}/`, context.site).href,
       title: post.data.title,
       summary: post.data.dek ?? post.data.description,
       date_published: post.data.pubDate.toISOString(),
