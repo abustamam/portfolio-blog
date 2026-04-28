@@ -25,89 +25,32 @@ const { posts } = await getSeriesPosts(series.id);
 	chromePath={`/series/${series.id}`}
 	image={series.data.heroImage}
 >
-	<main>
-		<style>
-			main {
-				width: 960px;
-				max-width: min(960px, 100% - 2 * var(--gutter-x, 16px));
-				margin: 0 auto;
-				padding: 1rem var(--gutter-x, 16px);
-				box-sizing: border-box;
-			}
-			.hero-image {
-				width: 100%;
-				margin-bottom: 1.5rem;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.series-header {
-				margin-bottom: 2rem;
-			}
-			.series-header h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.series-description {
-				color: var(--color-text);
-				line-height: 1.6;
-			}
-			.posts-list {
-				list-style: none;
-				margin: 0;
-				padding: 0;
-			}
-			.posts-list li {
-				margin-bottom: 1rem;
-				padding-bottom: 1rem;
-				border-bottom: 1px solid rgba(var(--gray), 0.2);
-			}
-			.posts-list li:last-child {
-				border-bottom: none;
-			}
-			.posts-list a {
-				text-decoration: none;
-				color: var(--color-heading);
-			}
-			.posts-list a:hover {
-				color: rgb(var(--accent));
-			}
-			.posts-list .date {
-				color: var(--color-muted);
-				font-size: 0.9em;
-			}
-			.series-body {
-				margin-bottom: 2.5rem;
-				line-height: 1.7;
-			}
-		</style>
+	<main class="mx-auto box-border w-[960px] max-w-[min(960px,100%-2*var(--gutter-x,16px))] px-gutter py-4">
 		{series.data.heroImage && (
-			<div class="hero-image">
-				<Image width={1020} height={510} src={series.data.heroImage} alt="" />
+			<div class="mb-6 w-full">
+				<Image width={1020} height={510} src={series.data.heroImage} alt="" class="mx-auto block rounded-xl shadow-soft" />
 			</div>
 		)}
-		<section class="series-header">
-			<h1>{series.data.title}</h1>
-			<div class="series-description">
+		<section class="mb-8">
+			<h1 class="m-0 mb-[0.5em]">{series.data.title}</h1>
+			<div class="leading-[1.6] text-mute">
 				{series.data.description}
 			</div>
 		</section>
-		<div class="series-body">
+		<div class="mb-10 leading-[1.7]">
 			<Content />
 		</div>
 		<section>
 			<h2>Posts in this series</h2>
-			<ol class="posts-list">
+			<ol class="m-0 list-none p-0">
 				{posts.map((post) => (
-					<li>
-						<a href={`/blog/${post.id}/`}>
+					<li class="mb-4 border-b border-line pb-4 last:border-b-0">
+						<a href={`/blog/${post.id}/`} class="text-ink no-underline hover:text-accent">
 							<strong>
 								<DraftBadge draft={post.data.draft} />
 								{post.data.title}
 							</strong>
-							<p class="date">
+							<p class="text-[0.9em] text-faint">
 								{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 							</p>
 						</a>
