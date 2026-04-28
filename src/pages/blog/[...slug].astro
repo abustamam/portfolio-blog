@@ -11,9 +11,26 @@ export async function getStaticPaths() {
 
 const slug = Astro.params.slug;
 
-if (!slug) {
-	return Astro.redirect('/writing/', 301);
-}
-
-return Astro.redirect(`/writing/${slug}/`, 301);
+const target = slug ? `/writing/${slug}/` : '/writing/';
 ---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Redirecting…</title>
+		<meta http-equiv="refresh" content={`0;url=${target}`} />
+		<link rel="canonical" href={target} />
+	</head>
+	<body>
+		<script is:inline define:vars={{ target }}>
+			location.replace(target + location.search + location.hash);
+		</script>
+		<noscript>
+			<p>
+				This page has moved to <a href={target}>{target}</a>.
+			</p>
+		</noscript>
+	</body>
+</html>
