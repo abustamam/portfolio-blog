@@ -39,6 +39,7 @@
 
   /* Gutter spacing — clamp-based, generates px-gutter, py-gutter */
   --spacing-gutter: clamp(1rem, 4vw, 3.5rem);
+  --spacing-28vw: 28vw;
 }
 
 /* ── Dark mode token overrides (on .dark class on <html>) ── */
@@ -102,19 +103,6 @@
 .display-post-title {
   font-size: clamp(2rem, 7vw, 4.25rem);
   line-height: 1;
-}
-
-/* Terminal chrome bar — narrow truncation */
-.term-chrome__avail {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 28vw;
-}
-@media (min-width: 640px) {
-  .term-chrome__avail {
-    max-width: none;
-  }
 }
 
 .site-nav-backdrop {

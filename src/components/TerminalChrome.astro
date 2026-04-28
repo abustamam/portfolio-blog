@@ -7,26 +7,26 @@ interface Props {
 const { path = '/writing' } = Astro.props;
 ---
 
-<div class="term-chrome" style="display:flex; align-items:center; height:34px; border-bottom:1px solid var(--line); background:var(--surface); font-family:var(--font-mono); font-size:11px; color:var(--mute); min-width:0;">
+<div class="flex items-center h-8.5 border-b border-line bg-surface font-mono text-11 text-mute min-w-0">
   <!-- Traffic lights -->
-  <div style="display:flex; align-items:center; gap:6px; padding:0 14px; border-right:1px solid var(--line); height:100%; flex-shrink:0;">
-    <span style="width:7px; height:7px; border-radius:50%; background:var(--danger);"></span>
-    <span style="width:7px; height:7px; border-radius:50%; background:var(--faint);"></span>
-    <span style="width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+  <div class="flex items-center gap-1.5 px-3.5 border-r border-line h-full shrink-0">
+    <span class="w-1.75 h-1.75 rounded-full bg-danger"></span>
+    <span class="w-1.75 h-1.75 rounded-full bg-faint"></span>
+    <span class="w-1.75 h-1.75 rounded-full bg-accent"></span>
   </div>
   <!-- Breadcrumb -->
-  <div class="term-chrome__crumb" style="padding:0 14px; border-right:1px solid var(--line); height:100%; display:flex; align-items:center; color:var(--ink); letter-spacing:-.01em; flex:1; min-width:0;">
-    <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-      rasheed@bustamam <span style="color:var(--faint);"> · </span>~/journal{path}
+  <div class="px-3.5 border-r border-line h-full flex items-center text-ink tracking-tight flex-1 min-w-0">
+    <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+      rasheed@bustamam <span class="text-faint"> · </span>~/journal{path}
     </span>
   </div>
   <!-- Right: availability + theme toggle -->
-  <div class="term-chrome__right" style="padding:0 14px; border-left:1px solid var(--line); height:100%; display:flex; align-items:center; gap:12px; flex-shrink:0; min-width:0;">
-    <span style="display:inline-flex; align-items:center; gap:6px; min-width:0;">
-      <span style="width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0;"></span>
-      <span class="term-chrome__avail" style="color:var(--ink);">available · Q3</span>
+  <div class="px-3.5 border-l border-line h-full flex items-center gap-3 shrink-0 min-w-0">
+    <span class="inline-flex items-center gap-1.5 min-w-0">
+      <span class="w-1.5 h-1.5 rounded-full bg-accent shrink-0"></span>
+      <span class="hidden sm:inline text-ink overflow-hidden text-ellipsis whitespace-nowrap max-w-28vw sm:max-w-none">available · Q3</span>
     </span>
-    <span style="color:var(--faint);">·</span>
+    <span class="text-faint">·</span>
     <ThemeToggle />
   </div>
 </div>
