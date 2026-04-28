@@ -3,7 +3,7 @@
 // Include once in PostLayout; script auto-attaches to all pre elements.
 ---
 <style is:global>
-  .copy-wrapper {
+  article.post-prose .copy-wrapper {
     margin: 28px 0;
     background: var(--color-code);
     border: 1px solid var(--color-line);
@@ -13,7 +13,7 @@
     font-size: 13px;
   }
 
-  .copy-header {
+  article.post-prose .copy-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -25,7 +25,7 @@
     text-transform: uppercase;
   }
 
-  .copy-btn {
+  article.post-prose .copy-btn {
     background: transparent;
     border: 1px solid var(--color-line);
     color: var(--color-mute);
@@ -38,7 +38,7 @@
     text-transform: uppercase;
   }
 
-  .copy-pre {
+  article.post-prose pre.copy-pre {
     margin: 0;
     padding: 16px 18px;
     line-height: 1.65;
@@ -83,7 +83,7 @@
     header.appendChild(btn);
 
     // Re-style pre to remove its own background/border (handled by wrapper now)
-    pre.className = 'copy-pre';
+    pre.classList.add('copy-pre');
 
     // Wrap
     pre.parentNode?.insertBefore(wrapper, pre);
