@@ -58,4 +58,4 @@ const imageUrl = typeof image === 'string' ? image : image.src;
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(imageUrl, Astro.url)} />
 
-<!-- Theme: prevent flash — ThemeToggle.astro handles this via data-theme on <html> -->
+<!-- Theme: prevent flash — ThemeToggle.astro handles this via .dark class on <html> -->

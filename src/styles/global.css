@@ -44,8 +44,7 @@
 }
 
 /* ── Dark mode token overrides (on .dark class on <html>) ── */
-.dark,
-[data-theme='dark'] {
+.dark {
   --color-bg:         #0a0c10;
   --color-surface:    #10141a;
   --color-ink:        #eceae3;
@@ -97,8 +96,7 @@
   background: rgba(12, 15, 20, 0.45);
   cursor: pointer;
 }
-.dark .site-nav-backdrop,
-[data-theme='dark'] .site-nav-backdrop {
+.dark .site-nav-backdrop {
   background: rgba(0, 0, 0, 0.55);
 }
 .site-nav-backdrop[hidden] {
@@ -371,8 +369,8 @@ img { max-width: 100%; height: auto; }
   background-color: var(--color-code) !important;
 }
 
-[data-theme="dark"] .astro-code,
-[data-theme="dark"] .astro-code span {
+.dark .astro-code,
+.dark .astro-code span {
   color: var(--shiki-dark) !important;
   background-color: var(--color-code) !important;
 }
