@@ -33,56 +33,56 @@ const badgeLabels: Record<string, string> = {
   chromePath="/work"
   image={logo}
 >
-  <main class="work-detail">
+  <main class="max-w-4xl mx-auto px-8 pt-10 pb-16 max-[700px]:px-5 max-[700px]:pt-6 max-[700px]:pb-12">
     <!-- Back link -->
-    <nav class="work-detail__back">
-      <a href="/work/">← Work</a>
+    <nav>
+      <a href="/work/" class="font-mono text-11 text-mute no-underline tracking-snug inline-block mb-8 hover:text-ink">← Work</a>
     </nav>
 
-    <div class="work-detail__layout">
+    <div class="grid grid-cols-[1fr_220px] gap-12 items-start max-[700px]:grid-cols-1 max-[700px]:gap-8">
       <!-- Main content -->
-      <article class="work-detail__main">
-        <header class="work-detail__header animate-fade-up" style="--delay:0">
+      <article>
+        <header class="flex items-center gap-4 mb-6 animate-fade-up" style="--delay:0">
           {logo && (
-            <div class="work-detail__logo-wrap">
+            <div class="shrink-0">
               <Image
                 src={logo}
                 alt={`${company} logo`}
                 width={56}
                 height={56}
-                class:list={['work-logo', darkLogo && 'is-dark']}
+                class:list={['w-14 h-14 object-contain rounded-md', darkLogo && 'dark:invert dark:brightness-200']}
               />
             </div>
           )}
           <div>
-            <h1 class="work-detail__company">
+            <h1 class="font-serif text-[clamp(1.5rem,4vw,2rem)] font-medium tracking-tight text-ink m-0 mb-1">
               {company}
-              {projectName && <span class="work-detail__project"> · {projectName}</span>}
+              {projectName && <span class="font-normal text-mute"> · {projectName}</span>}
             </h1>
-            <div class="work-detail__role">{role}</div>
+            <div class="font-mono text-xs text-mute tracking-snug">{role}</div>
           </div>
         </header>
 
         {companyMission && (
-          <blockquote class="work-detail__mission animate-fade-up" style="--delay:80">
+          <blockquote class="font-serif text-base italic text-mute border-l-3 border-accent m-0 mb-6 py-2 pl-4 leading-relaxed animate-fade-up" style="--delay:80">
             {companyMission}
           </blockquote>
         )}
 
-        <div class="work-detail__body animate-fade-up" style="--delay:160">
+        <div class="font-serif text-base leading-[1.7] text-ink animate-fade-up [&_p]:m-0 [&_p]:mb-4" style="--delay:160">
           <Content />
         </div>
 
         {additionalRoles && additionalRoles.length > 0 && (
-          <section class="work-detail__roles animate-fade-up" style="--delay:240">
-            <h2 class="work-detail__roles-heading">Additional Roles</h2>
+          <section class="mt-8 border-t border-line pt-6 animate-fade-up" style="--delay:240">
+            <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-4">Additional Roles</h2>
             {additionalRoles.map((r) => (
-              <div class="work-detail__role-item">
-                <div class="work-detail__role-meta">
-                  <span class="work-detail__role-title">{r.role}</span>
-                  <span class="work-detail__role-period">{r.period}</span>
+              <div class="mb-5">
+                <div class="flex items-baseline gap-3 mb-1">
+                  <span class="font-sans text-sm font-semibold text-ink">{r.role}</span>
+                  <span class="font-mono text-11 text-faint">{r.period}</span>
                 </div>
-                <p class="work-detail__role-desc">{r.description}</p>
+                <p class="font-serif text-sm text-mute leading-relaxed m-0">{r.description}</p>
               </div>
             ))}
           </section>
@@ -90,42 +90,42 @@ const badgeLabels: Record<string, string> = {
       </article>
 
       <!-- Sidebar -->
-      <aside class="work-detail__sidebar animate-fade-up" style="--delay:80">
-        <dl class="work-detail__meta-list">
-          <div class="work-detail__meta-item">
-            <dt>Period</dt>
-            <dd>{period}</dd>
+      <aside class="sticky top-8 animate-fade-up max-[700px]:static max-[700px]:order-[-1]" style="--delay:80">
+        <dl class="border border-line rounded-[3px] py-4 px-[18px] bg-surface">
+          <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
+            <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Period</dt>
+            <dd class="font-mono text-xs text-ink m-0">{period}</dd>
           </div>
 
           {location && (
-            <div class="work-detail__meta-item">
-              <dt>Location</dt>
-              <dd>{location}</dd>
+            <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
+              <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Location</dt>
+              <dd class="font-mono text-xs text-ink m-0">{location}</dd>
             </div>
           )}
 
-          <div class="work-detail__meta-item">
-            <dt>Type</dt>
-            <dd style="text-transform:capitalize">{type}</dd>
+          <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
+            <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Type</dt>
+            <dd class="font-mono text-xs text-ink m-0 capitalize">{type}</dd>
           </div>
 
           {badges.length > 0 && (
-            <div class="work-detail__meta-item">
-              <dt>Badges</dt>
-              <dd class="work-detail__badge-wrap">
+            <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
+              <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Badges</dt>
+              <dd class="flex flex-wrap gap-1.25 mt-1 m-0">
                 {badges.map((b) => (
-                  <span class="work-card__badge">{badgeLabels[b] ?? b}</span>
+                  <span class="font-mono text-10 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">{badgeLabels[b] ?? b}</span>
                 ))}
               </dd>
             </div>
           )}
 
           {skills.length > 0 && (
-            <div class="work-detail__meta-item">
-              <dt>Skills</dt>
-              <dd class="work-detail__skill-wrap">
+            <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
+              <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Skills</dt>
+              <dd class="flex flex-wrap gap-1.25 mt-1 m-0">
                 {skills.map((s) => (
-                  <span class="work-card__skill">{s}</span>
+                  <span class="font-mono text-10 text-mute bg-bg border border-line rounded-sm py-0.5 px-1.75 tracking-snug">{s}</span>
                 ))}
               </dd>
             </div>
@@ -135,203 +135,3 @@ const badgeLabels: Record<string, string> = {
     </div>
   </main>
 </BaseLayout>
-
-<style>
-  .work-detail {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2.5rem 2rem 4rem;
-  }
-  .work-detail__back a {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--mute);
-    text-decoration: none;
-    letter-spacing: 0.04em;
-    display: inline-block;
-    margin-bottom: 2rem;
-  }
-  .work-detail__back a:hover {
-    color: var(--ink);
-  }
-  .work-detail__layout {
-    display: grid;
-    grid-template-columns: 1fr 220px;
-    gap: 3rem;
-    align-items: start;
-  }
-  .work-detail__header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 1.5rem;
-  }
-  .work-detail__logo-wrap {
-    flex-shrink: 0;
-  }
-  .work-logo {
-    width: 56px;
-    height: 56px;
-    object-fit: contain;
-    border-radius: 6px;
-  }
-  .work-detail__company {
-    font-family: var(--font-serif);
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-    margin: 0 0 4px;
-  }
-  .work-detail__project {
-    font-weight: 400;
-    color: var(--mute);
-  }
-  .work-detail__role {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--mute);
-    letter-spacing: 0.04em;
-  }
-  .work-detail__mission {
-    font-family: var(--font-serif);
-    font-size: 1rem;
-    font-style: italic;
-    color: var(--mute);
-    border-left: 3px solid var(--accent);
-    margin: 0 0 1.5rem;
-    padding: 0.5rem 0 0.5rem 1rem;
-    line-height: 1.6;
-  }
-  .work-detail__body {
-    font-family: var(--font-serif);
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--ink);
-  }
-  .work-detail__body p {
-    margin: 0 0 1rem;
-  }
-  .work-detail__roles {
-    margin-top: 2rem;
-    border-top: 1px solid var(--line);
-    padding-top: 1.5rem;
-  }
-  .work-detail__roles-heading {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--faint);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin: 0 0 1rem;
-  }
-  .work-detail__role-item {
-    margin-bottom: 1.25rem;
-  }
-  .work-detail__role-meta {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 4px;
-  }
-  .work-detail__role-title {
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .work-detail__role-period {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--faint);
-  }
-  .work-detail__role-desc {
-    font-family: var(--font-serif);
-    font-size: 14px;
-    color: var(--mute);
-    line-height: 1.6;
-    margin: 0;
-  }
-
-  /* Sidebar */
-  .work-detail__sidebar {
-    position: sticky;
-    top: 2rem;
-  }
-  .work-detail__meta-list {
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 16px 18px;
-    background: var(--surface);
-  }
-  .work-detail__meta-item {
-    padding: 8px 0;
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .work-detail__meta-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  .work-detail__meta-item:first-child {
-    padding-top: 0;
-  }
-  .work-detail__meta-item dt {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin-bottom: 4px;
-  }
-  .work-detail__meta-item dd {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--ink);
-    margin: 0;
-  }
-  .work-detail__badge-wrap,
-  .work-detail__skill-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 4px;
-  }
-
-  /* Reuse pill styles from WorkCard */
-  .work-card__badge {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 2px;
-    background: var(--accent-bg);
-    color: var(--accent-ink);
-    border: 1px solid var(--accent);
-  }
-  .work-card__skill {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--mute);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    padding: 2px 7px;
-    letter-spacing: 0.02em;
-  }
-
-  @media (max-width: 700px) {
-    .work-detail {
-      padding: 1.5rem 1.25rem 3rem;
-    }
-    .work-detail__layout {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-    .work-detail__sidebar {
-      position: static;
-      order: -1;
-    }
-  }
-</style>

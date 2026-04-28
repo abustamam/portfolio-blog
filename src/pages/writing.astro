@@ -1,0 +1,184 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+function fmtDate(date: Date): string {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d = new Date(date);
+  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')} ${d.getFullYear()}`;
+}
+
+const rawTags = allPosts.map(p => p.data.tag).filter((t): t is string => Boolean(t));
+const uniqueTags = Array.from(new Set(rawTags));
+const tags = ['All', ...uniqueTags];
+---
+
+<BaseLayout
+  title="Writing — Rasheed Bustamam"
+  description="Long-form writing on software craft, distributed systems, and independent consulting."
+  chromePath="/writing"
+>
+  <div class="page-shell pt-12 pb-20">
+    <div class="mb-10">
+      <h1 class="display-hero font-serif font-medium tracking-tight text-ink m-0 mb-2.5">
+        Writing.
+      </h1>
+      <p class="font-serif text-lg text-mute m-0 leading-[1.5]">
+        Notes on distributed systems, software craft, and independent consulting.
+      </p>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-gutter py-5.5 border-b border-line bg-bg flex items-center gap-5 flex-wrap">
+      <div class="flex items-center gap-2 py-1.5 px-2.5 border border-line rounded-sm bg-surface min-w-[280px] flex-1 max-w-[360px]">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="text-mute shrink-0" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input id="search-input" placeholder="grep titles, tags, years..." class="border-none outline-none bg-transparent flex-1 font-mono text-xs text-ink w-full" />
+        <span class="font-mono text-10 py-0.5 px-1.5 bg-kbd text-mute rounded-sm shrink-0">/</span>
+      </div>
+      <div class="h-4.5 w-px bg-line"></div>
+      <div id="tag-filters" class="flex gap-1.5 flex-wrap">
+        {tags.map((tag, i) => (
+          <button
+            data-tag={tag}
+            class:list={['tag-pill font-mono text-11 tracking-snug py-1.25 px-2.5 rounded-sm cursor-pointer border transition-colors',
+              i === 0
+                ? 'border-ink bg-ink text-bg'
+                : 'border-line bg-transparent text-mute']}
+          >
+            {tag.toLowerCase()}
+          </button>
+        ))}
+      </div>
+      <div class="w-full ml-0 lg:w-auto lg:ml-auto font-mono text-11 text-faint">
+        sort: <span class="text-ink">recent ↓</span>
+      </div>
+    </div>
+
+    <!-- Column headers -->
+    <div class="post-list-header">
+      <div>№</div><div>date</div><div>title · dek</div><div>tag</div><div class="text-right">length</div><div></div>
+    </div>
+
+    <!-- Post list -->
+    <div id="post-list">
+      {allPosts.map((post, i) => (
+        <a
+          href={`/blog/${post.id}/`}
+          class:list={['post-row', i === 0 && 'bg-surface']}
+          data-title={post.data.title.toLowerCase()}
+          data-tag={post.data.tag ?? ''}
+          data-kind={post.data.kind ?? ''}
+        >
+          <div class="post-row__idx font-mono text-11 text-faint tracking-snug tabular-nums">
+            {String(i + 1).padStart(3, '0')}
+          </div>
+          <div class="post-row__date font-mono text-11 text-mute tabular-nums">
+            {fmtDate(post.data.pubDate)}
+          </div>
+          <div class="post-row__main">
+            <div class="post-row__title m-0 font-serif text-2xl leading-tight font-medium text-ink tracking-tight">
+              {post.data.title}
+            </div>
+            <div class="post-row__dek">
+              {post.data.dek ?? post.data.description}
+            </div>
+            <div class="post-row__compact-meta">
+              {fmtDate(post.data.pubDate)}
+              {post.data.tag && ` · ${post.data.tag}`}
+              {post.data.readMin != null && ` · ${post.data.readMin} min`}
+              {post.data.words != null && (
+                <span class="post-row__words"> · {post.data.words.toLocaleString()} w</span>
+              )}
+            </div>
+          </div>
+          <div class="post-row__tag font-mono text-11 text-mute">
+            {post.data.tag && (
+              <span class="py-0.5 px-1.75 border border-line text-ink rounded-sm tracking-wider text-10 uppercase">
+                {post.data.tag}
+              </span>
+            )}
+          </div>
+          <div class="post-row__len font-mono text-11 flex flex-col items-end gap-0.5 text-right tabular-nums">
+            {post.data.readMin && <span class="text-ink">{post.data.readMin} min</span>}
+            {post.data.words && <span class="text-faint">{post.data.words.toLocaleString()} w</span>}
+          </div>
+          <div class="post-row__arrow post-arrow text-faint font-mono text-sm self-center text-right">→</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const tagPills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
+  const rows = document.querySelectorAll<HTMLAnchorElement>('.post-row');
+  const mqRows = window.matchMedia('(min-width: 1024px)');
+
+  let activeTag = 'All';
+
+  function rowLayoutDisplay() {
+    return mqRows.matches ? 'grid' : 'flex';
+  }
+
+  function filterPosts() {
+    const q = searchInput ? searchInput.value.toLowerCase() : '';
+    rows.forEach(row => {
+      const titleMatch = !q || (row.dataset.title ?? '').includes(q);
+      const tagMatch = activeTag === 'All'
+        || row.dataset.tag === activeTag
+        || row.dataset.kind === activeTag;
+      (row as HTMLElement).style.display = (titleMatch && tagMatch) ? rowLayoutDisplay() : 'none';
+    });
+  }
+
+  mqRows.addEventListener('change', filterPosts);
+
+  try {
+    if (sessionStorage.getItem('journal:focus-search')) {
+      sessionStorage.removeItem('journal:focus-search');
+      queueMicrotask(() => searchInput?.focus());
+    }
+  } catch {
+    /* private mode */
+  }
+
+  tagPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      activeTag = pill.dataset.tag ?? 'All';
+      tagPills.forEach(p => {
+        const on = p.dataset.tag === activeTag;
+        p.classList.toggle('border-ink', on);
+        p.classList.toggle('bg-ink', on);
+        p.classList.toggle('text-bg', on);
+        p.classList.toggle('border-line', !on);
+        p.classList.toggle('bg-transparent', !on);
+        p.classList.toggle('text-mute', !on);
+      });
+      filterPosts();
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', filterPosts);
+  }
+
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (!searchInput) return;
+    const focused = document.activeElement;
+    if (e.key === '/' && focused !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+</script>

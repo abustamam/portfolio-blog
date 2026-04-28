@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Colophon — Rasheed Bustamam"
+  description="How this site is built — the stack, tools, fonts, and decisions behind bustamam.tech."
+  chromePath="/colophon"
+>
+  <div class="page-shell pt-12 pb-20 max-w-2xl">
+    <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/" class="text-mute no-underline">← home</a>
+    </div>
+
+    <h1 class="font-serif text-[clamp(2.5rem,6vw,4rem)] font-medium tracking-[-0.028em] text-ink m-0 mb-4">
+      Colophon.
+    </h1>
+    <p class="font-serif text-lg text-mute m-0 mb-12 leading-[1.5] max-w-[560px]">
+      How this site is made — the honest accounting of tools, type, and decisions.
+    </p>
+
+    <div class="flex flex-col">
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ framework</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0">Built with <a href="https://astro.build" target="_blank" rel="noreferrer" class="text-accent no-underline">Astro</a>. Content is authored in Markdown and MDX. No client-side framework — just HTML with a handful of small vanilla scripts for the theme toggle, search filter, and reading progress bar.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ styling</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0"><a href="https://tailwindcss.com" target="_blank" rel="noreferrer" class="text-accent no-underline">Tailwind CSS v4</a> via the Vite plugin for utility classes. Most of the layout and component styling is written as scoped CSS or inline styles to keep specificity predictable.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ typography</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0">
+            <strong class="font-semibold">Serif:</strong> <a href="https://fonts.google.com/specimen/Newsreader" target="_blank" rel="noreferrer" class="text-accent no-underline">Newsreader</a> (variable) — used for headlines and body prose.<br />
+            <strong class="font-semibold">Mono:</strong> <a href="https://www.jetbrains.com/lp/mono/" target="_blank" rel="noreferrer" class="text-accent no-underline">JetBrains Mono</a> (variable) — used for UI labels, metadata, and code.<br />
+            <strong class="font-semibold">Sans:</strong> <a href="https://vercel.com/font" target="_blank" rel="noreferrer" class="text-accent no-underline">Geist</a> (variable) — reserved for occasional UI elements.<br />
+            All fonts served from <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">@fontsource</code> — no Google Fonts requests.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ design</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0">Two themes — light and dark — are driven by a <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">.dark</code> class on the root element, toggled without JavaScript flicker via an inline script that reads <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">localStorage</code> before paint. Accent color is a deep red. Type scale is fluid using <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">clamp()</code>.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ hosting</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0">Hosted on a <a href="https://www.hetzner.com" target="_blank" rel="noreferrer" class="text-accent no-underline">Hetzner</a> VPS. On push to <code class="font-mono text-[.85em] bg-code py-px px-1.5 rounded-sm text-accent-ink">main</code>, GitHub Actions builds a Docker image and pushes it to the GitHub Container Registry. <a href="https://caddyserver.com" target="_blank" rel="noreferrer" class="text-accent no-underline">Caddy</a> handles TLS and reverse proxies to the running container.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ ai tooling</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0">Built with <a href="https://claude.ai/code" target="_blank" rel="noreferrer" class="text-accent no-underline">Claude Code</a> — design, implementation, and QA. Powered by <a href="https://github.com/obra/superpowers" target="_blank" rel="noreferrer" class="text-accent no-underline">Obra Superpowers</a> for structured AI workflows, <a href="https://github.com/garrytan/gstack" target="_blank" rel="noreferrer" class="text-accent no-underline">gstack</a> for headless browser QA and site auditing, and Claude Design for visual design review and UI iteration.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-6 py-7 border-t border-line-soft">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase pt-1">§ feeds</div>
+        <div class="font-serif text-base leading-relaxed text-ink">
+          <p class="m-0">
+            Full-content <a href="/rss.xml" class="text-accent no-underline">RSS feed</a> and <a href="/feed.json" class="text-accent no-underline">JSON Feed</a> are available. Both include the complete post body, not summaries.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>

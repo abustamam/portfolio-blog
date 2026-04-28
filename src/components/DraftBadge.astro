@@ -7,27 +7,7 @@ const { draft } = Astro.props;
 ---
 
 {draft && (
-	<span class="draft-badge">Draft</span>
+	<span class="inline-block py-0.5 px-2 mr-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-400 rounded align-middle uppercase tracking-wider dark:text-amber-400 dark:bg-amber-400/12 dark:border-amber-400/40">
+		Draft
+	</span>
 )}
-
-<style>
-	.draft-badge {
-		display: inline-block;
-		padding: 0.15em 0.5em;
-		margin-right: 0.5em;
-		font-size: 0.75em;
-		font-weight: 600;
-		color: #b45309;
-		background: #fef3c7;
-		border: 1px solid #f59e0b;
-		border-radius: 4px;
-		vertical-align: middle;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-	:global(html.dark) .draft-badge {
-		color: #fbbf24;
-		background: rgba(251, 191, 36, 0.12);
-		border-color: rgba(251, 191, 36, 0.4);
-	}
-</style>

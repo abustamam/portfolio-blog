@@ -58,7 +58,7 @@ const posts = (await getCollection('blog', ({ data }) => isPublished(data))).sor
 			}
 			ul li a:hover h4,
 			ul li a:hover .date {
-				color: rgb(var(--accent));
+				color: var(--color-accent);
 			}
 			ul a:hover img {
 				box-shadow: var(--box-shadow);

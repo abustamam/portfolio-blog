@@ -5,7 +5,7 @@
 <button
   id="theme-toggle"
   aria-label="Toggle theme"
-  style="background:transparent; border:1px solid var(--line); color:var(--ink); cursor:pointer; font-family:var(--font-mono); font-size:10px; padding:3px 8px; border-radius:2px; letter-spacing:.05em; text-transform:uppercase;"
+  class="bg-transparent border border-line text-ink cursor-pointer font-mono text-10 py-0.75 px-2 rounded-sm tracking-wider uppercase"
 >
   <span class="theme-label-light">☾ dark</span>
   <span class="theme-label-dark" style="display:none">☀ light</span>
@@ -16,7 +16,8 @@
   (function() {
     var saved = localStorage.getItem('theme');
     var theme = saved === 'dark' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+    var root = document.documentElement;
+    root.classList.toggle('dark', theme === 'dark');
   })();
 </script>
 
@@ -28,7 +29,8 @@
     var labelDark = btn.querySelector('.theme-label-dark');
 
     function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
+      var root = document.documentElement;
+      root.classList.toggle('dark', theme === 'dark');
       localStorage.setItem('theme', theme);
       var isDark = theme === 'dark';
       if (labelLight) labelLight.style.display = isDark ? 'none' : 'inline';
@@ -36,11 +38,11 @@
     }
 
     // Sync initial state with whatever the inline script set
-    var current = document.documentElement.getAttribute('data-theme') || 'light';
+    var current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     applyTheme(current);
 
     btn.addEventListener('click', function() {
-      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      var next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(next);
     });
   }

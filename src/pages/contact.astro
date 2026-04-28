@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Contact — Rasheed Bustamam"
+  description="Get in touch with Rasheed Bustamam for consulting engagements, collaborations, or general inquiries."
+  chromePath="/contact"
+>
+  <div class="page-shell pt-12 pb-20">
+    <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/" class="text-mute no-underline">← home</a>
+    </div>
+
+    <h1 class="font-serif text-[clamp(2.5rem,6vw,4rem)] font-medium tracking-[-0.028em] text-ink m-0 mb-4">
+      Contact.
+    </h1>
+    <p class="font-serif text-lg text-mute m-0 mb-12 leading-[1.5] max-w-[560px]">
+      For consulting inquiries, collaborations, or just to say hello.
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl">
+      <div class="p-6 border border-line rounded bg-surface">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-[18px]">§ email</div>
+        <a href="mailto:admin@bustamam.tech" class="font-mono text-[15px] text-accent no-underline">
+          admin@bustamam.tech
+        </a>
+        <p class="font-serif text-[15px] text-mute m-[14px_0_0] leading-[1.55]">
+          Best for consulting inquiries and project discussions. I typically respond within one business day.
+        </p>
+      </div>
+
+      <div class="p-6 border border-line rounded bg-surface">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-[18px]">§ elsewhere</div>
+        <div class="flex flex-col gap-3 font-mono text-13">
+          <a href="https://github.com/abustamam" target="_blank" rel="noreferrer" class="text-ink no-underline">
+            github <span class="text-faint">→ github.com/abustamam</span>
+          </a>
+          <a href="/rss.xml" class="text-ink no-underline">
+            rss <span class="text-faint">→ /rss.xml</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sm:col-span-2 p-6 border border-line rounded bg-surface">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-[18px]">§ consulting</div>
+        <p class="font-serif text-base leading-relaxed text-ink m-0 mb-3.5">
+          I take on a small number of consulting engagements each quarter. If you're building something in the web or mobile space and need a senior engineer who can think across the full stack, let's talk.
+        </p>
+        <p class="font-serif text-base leading-relaxed text-mute m-0">
+          For a full picture of past work, see the <a href="/work" class="text-accent no-underline">work page</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

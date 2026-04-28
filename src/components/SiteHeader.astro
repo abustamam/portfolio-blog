@@ -3,20 +3,20 @@
 import BrandLogo from './BrandLogo.astro';
 ---
 
-<header class="site-header" style="border-bottom:1px solid var(--line); background:var(--bg);">
-  <div class="site-header__inner" style="padding:22px var(--gutter-x); display:flex; align-items:center; justify-content:space-between; gap:1rem; max-width:100%; min-width:0;">
+<header class="border-b border-line bg-bg">
+  <div class="px-gutter py-5.5 flex items-center justify-between gap-4 min-w-0">
     <!-- Brand -->
-    <div style="display:flex; align-items:center; gap:14px; min-width:0;">
-      <a href="/" style="display:flex; align-items:center; text-decoration:none; min-width:0; padding:8px 0;">
+    <div class="flex items-center gap-3.5 min-w-0">
+      <a href="/" class="flex items-center no-underline min-w-0 py-2">
         <BrandLogo />
       </a>
-      <div class="site-header__slash" style="height:14px; width:1px; background:var(--line); margin:0 4px; flex-shrink:0;"></div>
-      <div class="site-header__journal" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); flex-shrink:0;">/journal</div>
+      <div class="h-3.5 w-px bg-line mx-1 shrink-0"></div>
+      <div class="hidden sm:block font-mono text-11 text-mute shrink-0">/journal</div>
     </div>
 
     <button
       type="button"
-      class="site-header__menu-btn"
+      class="lg:hidden shrink-0"
       id="site-nav-open"
       aria-expanded="false"
       aria-controls="site-nav-panel"
@@ -27,18 +27,18 @@ import BrandLogo from './BrandLogo.astro';
       </svg>
     </button>
 
-    <nav class="site-header__nav site-header__nav--desktop" aria-label="Primary" style="font-family:var(--font-mono); font-size:12px;">
-      <a href="/" style="color:var(--ink); text-decoration:none;">writing</a>
-      <a href="/work" style="color:var(--mute); text-decoration:none;">work</a>
-      <a href="/about" style="color:var(--mute); text-decoration:none;">about</a>
-      <a href="/contact" style="color:var(--mute); text-decoration:none;">contact</a>
-      <div style="display:flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--line); border-radius:2px; color:var(--faint); font-size:11px; cursor:default;">
+    <nav class="hidden lg:flex items-center gap-7 font-mono text-xs" aria-label="Primary">
+      <a href="/writing" class="text-ink no-underline">writing</a>
+      <a href="/work" class="text-mute no-underline">work</a>
+      <a href="/about" class="text-mute no-underline">about</a>
+      <a href="/contact" class="text-mute no-underline">contact</a>
+      <div class="flex items-center gap-1.5 py-1.25 px-2.5 border border-line rounded-sm text-faint text-11 cursor-default">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
           <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         <span>search</span>
-        <span style="font-size:10px; padding:1px 5px; background:var(--kbd); border-radius:2px; color:var(--mute);">⌘K</span>
+        <span class="text-10 py-px px-1.25 bg-kbd rounded-sm text-mute">⌘K</span>
       </div>
     </nav>
   </div>
@@ -55,27 +55,27 @@ import BrandLogo from './BrandLogo.astro';
   hidden
 >
   <p id="site-nav-title" class="sr-only">Site navigation</p>
-  <div class="site-nav-panel__top" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.5rem;">
-    <span style="font-family:var(--font-mono); font-size:12px; color:var(--faint); letter-spacing:0.08em; text-transform:uppercase;">menu</span>
-    <button type="button" class="site-nav-panel__close" aria-label="Close menu" style="font-family:var(--font-mono); font-size:12px; padding:8px 12px; border:1px solid var(--line); border-radius:2px; background:var(--surface); color:var(--ink); cursor:pointer;">
+  <div class="flex items-center justify-between gap-4 mb-2">
+    <span class="font-mono text-xs text-faint tracking-loose uppercase">menu</span>
+    <button type="button" class="site-nav-panel__close font-mono text-xs py-2 px-3 border border-line rounded-sm bg-surface text-ink cursor-pointer" aria-label="Close menu">
       close
     </button>
   </div>
-  <nav class="site-nav-panel__links" aria-label="Mobile primary" style="display:flex; flex-direction:column; gap:4px; font-family:var(--font-mono); font-size:14px;">
-    <a href="/" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">writing</a>
-    <a href="/work" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">work</a>
-    <a href="/about" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">about</a>
-    <a href="/contact" style="color:var(--ink); text-decoration:none; padding:12px 0; border-bottom:1px solid var(--line-soft);">contact</a>
+  <nav class="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
+    <a href="/writing" class="text-ink no-underline py-3 border-b border-line-soft">writing</a>
+    <a href="/work" class="text-ink no-underline py-3 border-b border-line-soft">work</a>
+    <a href="/about" class="text-ink no-underline py-3 border-b border-line-soft">about</a>
+    <a href="/contact" class="text-ink no-underline py-3 border-b border-line-soft">contact</a>
   </nav>
-  <div style="margin-top:1.25rem;">
-    <label for="nav-search-input" style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:0.1em; text-transform:uppercase; display:block; margin-bottom:8px;">search posts</label>
+  <div class="mt-5">
+    <label for="nav-search-input" class="font-mono text-10 text-faint tracking-caps uppercase block mb-2">search posts</label>
     <input
       id="nav-search-input"
       type="search"
       enterkeyhint="search"
       placeholder="grep titles, tags…"
       autocomplete="off"
-      style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line); border-radius:2px; background:var(--surface); font-family:var(--font-mono); font-size:13px; color:var(--ink);"
+      class="w-full box-border py-2.5 px-3 border border-line rounded-sm bg-surface font-mono text-13 text-ink"
     />
   </div>
 </div>
@@ -166,8 +166,8 @@ import BrandLogo from './BrandLogo.astro';
       if (e.key !== 'Enter') return;
       e.preventDefault();
       const path = window.location.pathname;
-      const onJournalHome = path === '/' || path === '';
-      if (onJournalHome && mainSearch) {
+      const onWritingIndex = path === '/' || path === '' || path === '/writing' || path === '/writing/';
+      if (onWritingIndex && mainSearch) {
         mainSearch.focus();
         closeNav();
         return;
@@ -177,14 +177,14 @@ import BrandLogo from './BrandLogo.astro';
       } catch {
         /* ignore */
       }
-      window.location.href = '/';
+      window.location.href = '/writing';
     });
   })();
 </script>
 
 <style>
   .site-header a[href="/"]:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
     border-radius: 2px;
   }

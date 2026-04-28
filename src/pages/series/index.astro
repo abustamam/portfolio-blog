@@ -19,86 +19,26 @@ const seriesWithCounts = await Promise.all(
 
 <BaseLayout title="Series" description="Multi-part deep dives into distributed systems topics." chromePath="/series">
 	<main>
-		<style>
-			.series-list {
-				list-style: none;
-				margin: 0;
-				padding: 0;
-				display: flex;
-				flex-direction: column;
-				gap: 2rem;
-			}
-			.series-card {
-				display: flex;
-				gap: 1.5rem;
-				text-decoration: none;
-				color: inherit;
-				border-bottom: 1px solid rgba(var(--gray), 0.2);
-				padding-bottom: 2rem;
-			}
-			.series-card:last-child {
-				border-bottom: none;
-				padding-bottom: 0;
-			}
-			.series-card img {
-				width: 160px;
-				height: 90px;
-				object-fit: cover;
-				border-radius: 8px;
-				flex-shrink: 0;
-			}
-			.series-info {
-				flex: 1;
-			}
-			.series-title {
-				margin: 0 0 0.4em 0;
-				font-size: 1.25em;
-				color: var(--color-heading);
-				line-height: 1.2;
-			}
-			.series-card:hover .series-title {
-				color: var(--accent);
-			}
-			.series-description {
-				margin: 0 0 0.5em 0;
-				color: var(--color-text);
-				font-size: 0.95em;
-				line-height: 1.5;
-			}
-			.series-meta {
-				font-size: 0.85em;
-				color: var(--color-muted);
-			}
-			@media (max-width: 639px) {
-				.series-card {
-					flex-direction: column;
-					gap: 0.75rem;
-				}
-				.series-card img {
-					width: 100%;
-					height: auto;
-					aspect-ratio: 16 / 9;
-					object-fit: cover;
-				}
-			}
-		</style>
 		<h1>Series</h1>
-		<ul class="series-list">
+		<ul class="m-0 flex list-none flex-col gap-8 p-0">
 			{seriesWithCounts.map(({ series, postCount }) => (
-				<li>
-					<a href={`/series/${series.id}/`} class="series-card">
+				<li class="border-b border-line pb-8 last:border-b-0 last:pb-0">
+					<a href={`/series/${series.id}/`} class="group flex gap-6 text-inherit no-underline max-sm:flex-col max-sm:gap-3">
 						{series.data.heroImage && (
 							<Image
 								width={320}
 								height={180}
 								src={series.data.heroImage}
 								alt=""
+								class="h-[90px] w-40 shrink-0 rounded-lg object-cover max-sm:h-auto max-sm:w-full max-sm:aspect-video"
 							/>
 						)}
-						<div class="series-info">
-							<h2 class="series-title">{series.data.title}</h2>
-							<p class="series-description">{series.data.description}</p>
-							<span class="series-meta">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
+						<div class="flex-1">
+							<h2 class="m-0 mb-[0.4em] text-[1.25em] leading-[1.2] text-ink transition-colors group-hover:text-accent">
+								{series.data.title}
+							</h2>
+							<p class="m-0 mb-[0.5em] text-[0.95em] leading-[1.5] text-mute">{series.data.description}</p>
+							<span class="text-[0.85em] text-faint">{postCount} {postCount === 1 ? 'post' : 'posts'}</span>
 						</div>
 					</a>
 				</li>

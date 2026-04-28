@@ -3,17 +3,17 @@
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer" style="padding:28px var(--gutter-x); border-top:1px solid var(--line); background:var(--surface); font-family:var(--font-mono); font-size:11px; color:var(--mute);">
-  <div class="site-footer__group" style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+<footer class="px-gutter py-7 border-t border-line bg-surface font-mono text-11 text-mute flex flex-col items-start gap-4 lg:flex-row lg:justify-between lg:items-center lg:flex-nowrap">
+  <div class="flex gap-5 items-center flex-wrap">
     <span>© {year} bustamam.tech</span>
-    <a href="/rss.xml" style="color:var(--mute); text-decoration:none;">rss</a>
-    <a href="/feed.json" style="color:var(--mute); text-decoration:none;">json feed</a>
-    <a href="/colophon" style="color:var(--mute); text-decoration:none;">colophon</a>
+    <a href="/rss.xml" class="text-mute no-underline">rss</a>
+    <a href="/feed.json" class="text-mute no-underline">json feed</a>
+    <a href="/colophon" class="text-mute no-underline">colophon</a>
   </div>
-  <div class="site-footer__group" style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
-    <span style="color:var(--faint);">built with astro · one-person practice</span>
-    <span style="display:inline-flex; align-items:center; gap:6px;">
-      <span style="width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>
+  <div class="flex gap-5 items-center flex-wrap max-lg:flex-col max-lg:items-start">
+    <span class="text-faint">built with astro · one-person practice</span>
+    <span class="inline-flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
       all systems nominal
     </span>
   </div>

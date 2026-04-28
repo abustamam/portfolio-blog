@@ -2,65 +2,65 @@
 // AuthorBio.astro — no props
 ---
 
-<section class="author-bio" style="border-top:1px solid var(--line); background:var(--surface);">
+<section class="grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-8 md:gap-14 px-gutter py-14 md:py-14 items-start border-t border-line bg-surface">
   <!-- Left: author profile -->
   <div>
-    <div style="font-family:var(--font-mono); font-size:10px; color:var(--faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px;">
+    <div class="font-mono text-10 text-faint tracking-caps uppercase mb-4.5">
       § about the author
     </div>
-    <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-      <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--ink)); display:flex; align-items:center; justify-content:center; color:var(--bg); font-family:var(--font-mono); font-weight:600; font-size:18px; letter-spacing:-.02em; flex-shrink:0;">
+    <div class="flex items-center gap-4 mb-4">
+      <div class="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-ink flex items-center justify-center text-bg font-mono font-semibold text-lg tracking-tight shrink-0">
         RB
       </div>
       <div>
-        <div style="font-family:var(--font-serif); font-size:24px; color:var(--ink); font-weight:500; letter-spacing:-.015em;">Rasheed Bustamam</div>
-        <div style="font-family:var(--font-mono); font-size:11px; color:var(--faint); margin-top:4px; letter-spacing:.02em;">
+        <div class="font-serif text-2xl text-ink font-medium tracking-tight">Rasheed Bustamam</div>
+        <div class="font-mono text-11 text-faint mt-1 tracking-snug">
           independent consultant · California
         </div>
       </div>
     </div>
-    <p style="font-family:var(--font-serif); font-size:16px; line-height:1.6; color:var(--mute); margin:0; max-width:380px;">
+    <p class="font-serif text-base leading-relaxed text-mute m-0 max-w-95">
       I'm a one-person software consultancy based in California. This is my notebook —
       writing on the craft and the decisions behind the code.
     </p>
-    <div style="margin-top:20px; display:flex; gap:14px; font-family:var(--font-mono); font-size:11px;">
-      <a href="/rss.xml" style="color:var(--ink); text-decoration:none;">rss</a>
-      <a href="https://github.com/rasheed-bustamam" style="color:var(--mute); text-decoration:none;">github</a>
-      <a href="mailto:admin@bustamam.tech" style="color:var(--mute); text-decoration:none;">email</a>
+    <div class="mt-5 flex gap-3.5 font-mono text-11">
+      <a href="/rss.xml" class="text-ink no-underline">rss</a>
+      <a href="https://github.com/abustamam" class="text-mute no-underline">github</a>
+      <a href="mailto:admin@bustamam.tech" class="text-mute no-underline">email</a>
     </div>
   </div>
 
   <!-- Right: availability card -->
-  <div style="border:1px solid var(--line); border-radius:3px; padding:24px 28px; background:var(--bg);">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
-      <span style="width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--accent-bg);"></span>
-      <span style="font-family:var(--font-mono); font-size:11px; color:var(--accent-ink); letter-spacing:.1em; text-transform:uppercase; background:var(--accent-bg); padding:3px 8px; border-radius:2px;">
+  <div class="border border-line rounded p-6 px-7 bg-bg">
+    <div class="flex items-center gap-2.5 mb-4.5">
+      <span class="w-1.75 h-1.75 rounded-full bg-accent shadow-[0_0_0_3px_var(--color-accent-bg)]"></span>
+      <span class="font-mono text-11 text-accent-ink tracking-loose uppercase bg-accent-bg py-0.75 px-2 rounded-sm">
         accepting new work
       </span>
     </div>
-    <p style="font-family:var(--font-serif); font-size:22px; color:var(--ink); line-height:1.35; letter-spacing:-.01em; margin:0 0 22px;">
-      Taking on new engagements for <em style="font-style:italic; color:var(--accent);">Q3 2026</em>.
+    <p class="font-serif text-2xl text-ink leading-snug tracking-tight m-0 mb-5.5">
+      Taking on new engagements for <em class="italic text-accent">Q3 2026</em>.
       Let's talk about what you're building.
     </p>
-    <div class="author-bio__meta" style="font-family:var(--font-mono); font-size:11px; color:var(--mute); margin-bottom:24px;">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 font-mono text-11 text-mute mb-6">
       <div>
-        <div style="color:var(--faint); font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px;">based in</div>
-        <div style="color:var(--ink);">California</div>
+        <div class="text-faint text-10 tracking-loose uppercase mb-1">based in</div>
+        <div class="text-ink">California</div>
       </div>
       <div>
-        <div style="color:var(--faint); font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px;">working</div>
-        <div style="color:var(--ink);">remote</div>
+        <div class="text-faint text-10 tracking-loose uppercase mb-1">working</div>
+        <div class="text-ink">remote</div>
       </div>
       <div>
-        <div style="color:var(--faint); font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px;">contact</div>
-        <div style="color:var(--ink);">admin@bustamam.tech</div>
+        <div class="text-faint text-10 tracking-loose uppercase mb-1">contact</div>
+        <div class="text-ink">admin@bustamam.tech</div>
       </div>
       <div>
-        <div style="color:var(--faint); font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px;">elsewhere</div>
-        <div style="color:var(--ink);">github · rss</div>
+        <div class="text-faint text-10 tracking-loose uppercase mb-1">elsewhere</div>
+        <div class="text-ink">github · rss</div>
       </div>
     </div>
-    <a href="mailto:admin@bustamam.tech" style="display:inline-block; background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:2px; font-family:var(--font-mono); font-size:12px; letter-spacing:.02em; text-decoration:none;">
+    <a href="mailto:admin@bustamam.tech" class="inline-block bg-black text-white border border-black dark:bg-white dark:text-black dark:border-white py-2.5 px-4.5 rounded-sm font-mono text-xs tracking-snug no-underline">
       $ start a conversation →
     </a>
   </div>

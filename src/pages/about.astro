@@ -1,34 +1,89 @@
 ---
-import AboutHeroImage from '../assets/site/blog-placeholder-about.jpg';
-import Layout from '../layouts/BlogPost.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<Layout
-	title="About"
-	description="Rasheed Bustamam is an applications consultant specializing in web and mobile, learning distributed systems in public."
-	pubDate={new Date('August 08 2021')}
-	heroImage={AboutHeroImage}
+<BaseLayout
+  title="About"
+  description="Rasheed Bustamam is an applications consultant specializing in web and mobile, learning distributed systems in public."
+  chromePath="/about"
 >
-	<p>
-		I'm <strong>Rasheed Bustamam</strong>, an applications consultant specializing in web and mobile
-		development. I run <strong>Bustamam Technology</strong>, where I help teams design and build
-		web and mobile applications.
-	</p>
+  <div class="page-shell pt-12 pb-20 max-w-2xl">
+    <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/writing" class="text-mute no-underline">← /writing</a>
+      <span class="mx-2.5 text-faint">/</span>
+      <span>Aug 08 2021</span>
+    </div>
 
-	<p>
-		This blog is where I learn distributed systems in public. I'm particularly interested in how
-		the concepts behind distributed architecture—consistency models, service boundaries, failure
-		modes—apply to the kinds of applications I build every day.
-	</p>
+    <h1 class="font-serif text-[clamp(2.5rem,6vw,4rem)] font-medium tracking-[-0.028em] text-ink m-0 mb-10">
+      About.
+    </h1>
 
-	<p>
-		Posts are notes from that learning process: things I've worked through, patterns that clicked,
-		and trade-offs worth thinking about. If something is wrong or could be clearer, I'd genuinely
-		like to know.
-	</p>
+    <div class="flex flex-col">
+      <!-- Author strip -->
+      <div class="flex items-center gap-3.5 pb-7 border-b border-line-soft mb-8 col-[1/-1]">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-ink flex items-center justify-center text-bg font-mono font-semibold text-sm shrink-0">
+          RB
+        </div>
+        <div>
+          <div class="font-mono text-xs text-ink font-medium">Rasheed Bustamam</div>
+          <div class="font-mono text-11 text-faint mt-0.5">independent consultant · writing since 2019</div>
+        </div>
+      </div>
 
-	<p>
-		For web and mobile consulting, visit
-		<a href="https://bustamam.tech" target="_blank" rel="noreferrer">bustamam.tech</a>.
-	</p>
-</Layout>
+      <!-- Prose -->
+      <div class="about-prose font-serif text-lg leading-relaxed text-ink">
+        <p>
+          I'm <strong>Rasheed Bustamam</strong>, an applications consultant specializing in web and mobile
+          development. I run <strong>Bustamam Technology</strong>, where I help teams design and build
+          web and mobile applications.
+        </p>
+
+        <p>
+          This blog is where I learn distributed systems in public. I'm particularly interested in how
+          the concepts behind distributed architecture—consistency models, service boundaries, failure
+          modes—apply to the kinds of applications I build every day.
+        </p>
+
+        <p>
+          Posts are notes from that learning process: things I've worked through, patterns that clicked,
+          and trade-offs worth thinking about. If something is wrong or could be clearer, I'd genuinely
+          like to know.
+        </p>
+
+        <p>
+          For web and mobile consulting, visit
+          <a href="https://bustamam.tech" target="_blank" rel="noreferrer">bustamam.tech</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-prose {
+    color: var(--color-ink);
+  }
+
+  .about-prose p {
+    margin: 0 0 22px;
+  }
+
+  .about-prose p:first-of-type::first-letter {
+    float: left;
+    font-family: var(--font-serif);
+    font-size: 64px;
+    line-height: .85;
+    font-weight: 500;
+    padding: 6px 10px 0 0;
+    color: var(--color-accent);
+  }
+
+  .about-prose strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .about-prose a {
+    color: var(--color-accent);
+  }
+</style>
