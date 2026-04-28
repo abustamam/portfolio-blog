@@ -5,53 +5,76 @@
 @import "@fontsource-variable/jetbrains-mono/index.css";
 @import "@fontsource-variable/newsreader/index.css";
 
-/* ── Design tokens — light (default) ─────────────── */
-:root {
-  --bg:         #f5f4ef;
-  --surface:    #ffffff;
-  --ink:        #0c0f14;
-  --mute:       #565c66;
-  --faint:      #8a8f98;
-  --line:       #dcdad2;
-  --line-soft:  #e8e6dd;
-  --accent:     #1f6f43;
-  --accent-bg:  #dbeadf;
-  --accent-ink: #0f3f23;
-  --code:       #f1efe6;
-  --danger:     #b4432b;
-  --kbd:        #edebe3;
+/* ── Tailwind theme — design tokens ──────────────── */
+@theme {
+  /* Colors — generates bg-*, text-*, border-* utilities */
+  --color-bg:         #f5f4ef;
+  --color-surface:    #ffffff;
+  --color-ink:        #0c0f14;
+  --color-mute:       #565c66;
+  --color-faint:      #8a8f98;
+  --color-line:       #dcdad2;
+  --color-line-soft:  #e8e6dd;
+  --color-accent:     #1f6f43;
+  --color-accent-bg:  #dbeadf;
+  --color-accent-ink: #0f3f23;
+  --color-code:       #f1efe6;
+  --color-danger:     #b4432b;
+  --color-kbd:        #edebe3;
 
+  /* Fonts — generates font-sans, font-mono, font-serif */
   --font-sans:  'Geist Variable', -apple-system, system-ui, sans-serif;
   --font-mono:  'JetBrains Mono Variable', ui-monospace, Menlo, monospace;
   --font-serif: 'Newsreader Variable', 'Iowan Old Style', Georgia, serif;
 
-  --gutter: 56px;
+  /* Custom text sizes for common UI sizes not in Tailwind's default scale */
+  --text-10: 0.625rem;    /* 10px */
+  --text-11: 0.6875rem;   /* 11px */
+  --text-13: 0.8125rem;   /* 13px */
+
+  /* Custom letter-spacing for the mono UI patterns */
+  --tracking-caps:  0.12em;   /* uppercase mono labels */
+  --tracking-loose: 0.08em;   /* wider mono text */
+  --tracking-snug:  0.02em;   /* base mono tracking */
+
+  /* Gutter spacing — clamp-based, generates px-gutter, py-gutter */
+  --spacing-gutter: clamp(1rem, 4vw, 3.5rem);
 }
 
-/* ── Design tokens — dark ─────────────────────────── */
-[data-theme="dark"] {
-  --bg:         #0a0c10;
-  --surface:    #10141a;
-  --ink:        #eceae3;
-  --mute:       #8a8f98;
-  --faint:      #5a5f68;
-  --line:       #1c2129;
-  --line-soft:  #141820;
-  --accent:     #8cff5c;
-  --accent-bg:  #172010;
-  --accent-ink: #b8ff8a;
-  --code:       #0d1016;
-  --danger:     #ff6b4a;
-  --kbd:        #181c24;
+/* ── Dark mode token overrides (on .dark class on <html>) ── */
+.dark {
+  --color-bg:         #0a0c10;
+  --color-surface:    #10141a;
+  --color-ink:        #eceae3;
+  --color-mute:       #8a8f98;
+  --color-faint:      #5a5f68;
+  --color-line:       #1c2129;
+  --color-line-soft:  #141820;
+  --color-accent:     #8cff5c;
+  --color-accent-bg:  #172010;
+  --color-accent-ink: #b8ff8a;
+  --color-code:       #0d1016;
+  --color-danger:     #ff6b4a;
+  --color-kbd:        #181c24;
 }
 
-/* Responsive foundation — spec 2026-04-23 */
+/* ── Compat aliases — OLD token names pointing to NEW names.
+   Remove this block once every component uses Tailwind utilities. ─── */
 :root {
-  --gutter-x: clamp(16px, 4vw, 56px);
-  --bp-sm: 640px;
-  --bp-md: 768px;
-  --bp-lg: 1024px;
-  --bp-xl: 1280px;
+  --bg:        var(--color-bg);
+  --surface:   var(--color-surface);
+  --ink:       var(--color-ink);
+  --mute:      var(--color-mute);
+  --faint:     var(--color-faint);
+  --line:      var(--color-line);
+  --line-soft: var(--color-line-soft);
+  --accent:    var(--color-accent);
+  --accent-bg: var(--color-accent-bg);
+  --accent-ink:var(--color-accent-ink);
+  --code:      var(--color-code);
+  --danger:    var(--color-danger);
+  --kbd:       var(--color-kbd);
+  --gutter-x:  var(--spacing-gutter);
 }
 
 .page-shell {
@@ -148,7 +171,7 @@
   background: rgba(12, 15, 20, 0.45);
   cursor: pointer;
 }
-[data-theme='dark'] .site-nav-backdrop {
+.dark .site-nav-backdrop {
   background: rgba(0, 0, 0, 0.55);
 }
 .site-nav-backdrop[hidden] {
