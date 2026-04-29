@@ -285,6 +285,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	function closeMode() {
 		if (!isOpen) return;
 		if (pagerState) closePager();
+		historyIndex = -1;
+		historyDraft = '';
 		isOpen = false;
 		shell.classList.add('hidden');
 		shell.setAttribute('aria-hidden', 'true');
