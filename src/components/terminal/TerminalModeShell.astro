@@ -39,7 +39,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 <section
   id="terminal-mode-shell"
-  class="fixed inset-0 z-50 hidden flex flex-col bg-bg text-ink font-mono"
+  class="fixed inset-x-0 top-0 z-50 hidden flex flex-col bg-bg text-ink font-mono"
+  style="height: 100dvh"
   aria-hidden="true"
   aria-label="Simulated terminal"
   data-initial-path={initialPath}
@@ -282,6 +283,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		announce('Terminal mode on');
 		setExpandButtonState(true);
 		queueMicrotask(() => input.focus());
+		syncViewportHeight();
 	}
 
 	function closeMode() {
@@ -290,6 +292,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		historyIndex = -1;
 		historyDraft = '';
 		isOpen = false;
+		shell.style.height = '100dvh';
 		shell.classList.add('hidden');
 		shell.setAttribute('aria-hidden', 'true');
 		shell.removeAttribute('aria-modal');
@@ -417,11 +420,25 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	setExpandButtonState(false);
 	renderCwd();
+
+	function syncViewportHeight() {
+		if (!isOpen) return;
+		const h = window.visualViewport?.height ?? window.innerHeight;
+		shell.style.height = `${h}px`;
+	}
+
+	if (window.visualViewport) {
+		window.visualViewport.addEventListener('resize', syncViewportHeight);
+		window.visualViewport.addEventListener('scroll', syncViewportHeight);
+	}
   })();
 </script>
 
 <style is:global>
   html.terminal-mode {
     overflow: hidden;
+  }
+  #terminal-input {
+    font-size: 16px;
   }
 </style>
