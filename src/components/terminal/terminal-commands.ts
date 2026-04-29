@@ -95,6 +95,8 @@ function catPost(data: SiteTerminalData, slug: string): string[] {
 	return meta;
 }
 
+export const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'] as const;
+
 export function runCommandLine(
 	line: string,
 	state: TerminalState,
@@ -114,7 +116,7 @@ export function runCommandLine(
 
 	if (tokens[0] === '..') {
 		const next = resolveCd(state.cwd, '..');
-		return { next: { cwd: next! }, lines: [] };
+		return { next: { cwd: next ?? state.cwd }, lines: [] };
 	}
 
 	if (alias === 'exit') {
@@ -285,7 +287,6 @@ export function runCommandLine(
 	}
 
 	if (alias === 'theme') {
-		const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'];
 		const requested = (args[0] ?? '').toLowerCase();
 
 		if (!requested) {
