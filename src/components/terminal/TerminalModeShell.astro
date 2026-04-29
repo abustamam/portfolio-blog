@@ -129,8 +129,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
   function pagerPageSize(): number {
 	const h = typeof window !== 'undefined' ? window.innerHeight : 600;
-	const approx = Math.floor((h * 0.35) / 18);
-	return Math.max(12, Math.min(approx, 40));
+	const approx = Math.floor((h * 0.75) / 18);
+	return Math.max(12, Math.min(approx, 80));
   }
 
   (function () {
@@ -216,12 +216,12 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	}
 
 	function openPager(lines: string[]) {
-		pagerState = { lines, offset: 0, pageSize: pagerPageSize() };
 		output.classList.add('hidden');
 		pager.classList.remove('hidden');
 		pager.classList.remove('shrink-0');
 		pager.classList.add('flex-1', 'flex');
 		input.disabled = true;
+		pagerState = { lines, offset: 0, pageSize: pagerPageSize() };
 		renderPagerView();
 		announce('Pager open. Use arrows or hjkl. Press q to close.');
 	}
