@@ -234,6 +234,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		const hint = `${pagerState.offset + 1}–${end} of ${pagerState.lines.length} · arrows hjkl · q quit`;
 		if (pagerHint) pagerHint.textContent = hint;
 		pMeta.setAttribute('aria-label', hint);
+		if (pagerPrev) pagerPrev.disabled = pagerState.offset === 0;
+		if (pagerNext) pagerNext.disabled = end >= pagerState.lines.length;
 	}
 
 	function openPager(lines: string[]) {
@@ -253,6 +255,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		pager.classList.remove('flex-1', 'flex');
 		pBody.textContent = '';
 		if (pagerHint) pagerHint.textContent = '';
+		if (pagerPrev) pagerPrev.disabled = false;
+		if (pagerNext) pagerNext.disabled = false;
 		pMeta.removeAttribute('aria-label');
 		output.classList.remove('hidden');
 		input.disabled = false;
