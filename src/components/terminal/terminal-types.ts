@@ -38,4 +38,5 @@ export interface CommandResult {
 	lines: string[];
 	closeTerminal?: boolean;
 	navigateTo?: string;
+	setTheme?: string;
 }

@@ -276,6 +276,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		shell.style.height = `${h}px`;
 	}
 
+	function applyTheme(name: string) {
+		if (name === 'inherit') {
+			shell.removeAttribute('data-theme');
+		} else {
+			shell.setAttribute('data-theme', name);
+		}
+	}
+
 	function openMode() {
 		if (isOpen) return;
 		lastFocus = document.activeElement;
@@ -332,6 +340,9 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		const result = runCommandLine(line, state, siteData);
 		state = result.next;
 		renderCwd();
+		if (result.setTheme) {
+			applyTheme(result.setTheme);
+		}
 
 		if (result.navigateTo) {
 			window.location.href = result.navigateTo;
@@ -455,5 +466,44 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   }
   #terminal-input {
     font-size: 16px;
+  }
+
+  /* Green (CRT) theme */
+  #terminal-mode-shell[data-theme="green"] {
+    --color-bg: #0a0a0a;
+    --color-surface: #111111;
+    --color-code: #050505;
+    --color-ink: #33ff33;
+    --color-mute: #1a661a;
+    --color-faint: #0f3a0f;
+    --color-accent: #00ff88;
+    --color-line: #1a661a;
+    --color-line-soft: #0f2a0f;
+  }
+
+  /* Amber theme */
+  #terminal-mode-shell[data-theme="amber"] {
+    --color-bg: #0d0800;
+    --color-surface: #1a1000;
+    --color-code: #080400;
+    --color-ink: #ffb000;
+    --color-mute: #664a00;
+    --color-faint: #3d2c00;
+    --color-accent: #ffcc44;
+    --color-line: #664a00;
+    --color-line-soft: #3d2c00;
+  }
+
+  /* Ice theme */
+  #terminal-mode-shell[data-theme="ice"] {
+    --color-bg: #060d14;
+    --color-surface: #0d1a26;
+    --color-code: #030a10;
+    --color-ink: #7dd3fc;
+    --color-mute: #1e3a4f;
+    --color-faint: #102030;
+    --color-accent: #38bdf8;
+    --color-line: #1e3a4f;
+    --color-line-soft: #102030;
   }
 </style>

@@ -285,9 +285,34 @@ export function runCommandLine(
 	}
 
 	if (alias === 'theme') {
+		const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'];
+		const requested = (args[0] ?? '').toLowerCase();
+
+		if (!requested) {
+			return {
+				next: state,
+				lines: [
+					`available: ${VALID_THEMES.join(' · ')}`,
+					'usage: theme <name>',
+					'usage: theme inherit  (reset to default)',
+				],
+			};
+		}
+
+		if (!VALID_THEMES.includes(requested)) {
+			return {
+				next: state,
+				lines: [
+					`theme: unknown theme '${requested}'`,
+					`available: ${VALID_THEMES.join(' · ')}`,
+				],
+			};
+		}
+
 		return {
 			next: state,
-			lines: ['theme: not wired yet (coming soon)'],
+			lines: [`theme: ${requested}`],
+			setTheme: requested,
 		};
 	}
 
