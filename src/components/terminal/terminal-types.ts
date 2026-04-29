@@ -33,10 +33,13 @@ export interface SiteTerminalData {
 	work: WorkPayload[];
 }
 
+export const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'] as const;
+export type ThemeName = (typeof VALID_THEMES)[number];
+
 export interface CommandResult {
 	next: TerminalState;
 	lines: string[];
 	closeTerminal?: boolean;
 	navigateTo?: string;
-	setTheme?: string;
+	setTheme?: ThemeName;
 }

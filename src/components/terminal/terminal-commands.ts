@@ -1,4 +1,5 @@
-import type { CommandResult, SiteTerminalData, TerminalState } from './terminal-types';
+import type { CommandResult, SiteTerminalData, TerminalState, ThemeName } from './terminal-types';
+import { VALID_THEMES } from './terminal-types';
 import { isValidCwd, lsLines, resolveCd, routeForCwd } from './terminal-fs';
 
 const MAN_PAGES: Record<string, string[]> = {
@@ -94,8 +95,6 @@ function catPost(data: SiteTerminalData, slug: string): string[] {
 	];
 	return meta;
 }
-
-export const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'] as const;
 
 export function runCommandLine(
 	line: string,
@@ -300,7 +299,7 @@ export function runCommandLine(
 			};
 		}
 
-		if (!VALID_THEMES.includes(requested)) {
+		if (!(VALID_THEMES as readonly string[]).includes(requested)) {
 			return {
 				next: state,
 				lines: [
@@ -313,7 +312,7 @@ export function runCommandLine(
 		return {
 			next: state,
 			lines: [`theme: ${requested}`],
-			setTheme: requested,
+			setTheme: requested as ThemeName,
 		};
 	}
 
