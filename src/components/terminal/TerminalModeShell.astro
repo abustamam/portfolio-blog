@@ -196,6 +196,13 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	let isOpen = false;
 	let lastFocus: Element | null = null;
 
+	function lsGet(key: string): string | null {
+		try { return localStorage.getItem(key); } catch { return null; }
+	}
+	function lsSet(key: string, value: string): void {
+		try { localStorage.setItem(key, value); } catch { /* private browsing */ }
+	}
+
 	function announce(msg: string) {
 		live.textContent = '';
 		requestAnimationFrame(() => {
@@ -298,6 +305,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		setExpandButtonState(true);
 		queueMicrotask(() => input.focus());
 		syncViewportHeight();
+		lsSet('terminal:open', '1');
 	}
 
 	function closeMode() {
@@ -306,6 +314,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		historyIndex = -1;
 		historyDraft = '';
 		isOpen = false;
+		lsSet('terminal:open', '0');
 		shell.style.height = '100dvh';
 		shell.classList.add('hidden');
 		shell.setAttribute('aria-hidden', 'true');
@@ -337,11 +346,18 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		const line = raw.trim();
 		if (!line) return;
 		appendEcho(line);
+		const prevCwd = state.cwd;
 		const result = runCommandLine(line, state, siteData);
 		state = result.next;
 		renderCwd();
+
+		if (state.cwd !== prevCwd) {
+			lsSet('terminal:cwd', state.cwd);
+		}
+
 		if (result.setTheme) {
 			applyTheme(result.setTheme);
+			lsSet('terminal:theme', result.setTheme);
 		}
 
 		if (result.navigateTo) {
@@ -449,6 +465,13 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		input.value = '';
 		runLine(line);
 	});
+
+	const savedCwd = lsGet('terminal:cwd');
+	const savedTheme = lsGet('terminal:theme');
+	const savedOpen = lsGet('terminal:open');
+	if (savedCwd) state = { cwd: savedCwd };
+	if (savedTheme) applyTheme(savedTheme);
+	if (savedOpen === '1') openMode();
 
 	setExpandButtonState(false);
 	renderCwd();
