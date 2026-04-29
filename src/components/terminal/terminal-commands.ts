@@ -35,7 +35,7 @@ const MAN_PAGES: Record<string, string[]> = {
 		'DESCRIPTION',
 		'  Not everything is listed in help.',
 		'  If you found this page, you are already doing great.',
-		'  Try: whoami, hint, and explore with cd.',
+		'  Try: whoami, hint, trace, coffee, and explore with cd.',
 	],
 	rasheed: [
 		'NAME',
@@ -112,6 +112,14 @@ export function runCommandLine(
 				: cmd0;
 	const args = tokens.slice(1);
 
+	if (tokens[0] === '..') {
+		const next = resolveCd(state.cwd, '..');
+		if (!isValidCwd(next!, data)) {
+			return { next: state, lines: ['cd: no such file or directory: ..'] };
+		}
+		return { next: { cwd: next! }, lines: [] };
+	}
+
 	if (alias === 'exit') {
 		return { next: state, lines: ['bye'], closeTerminal: true };
 	}
@@ -134,7 +142,41 @@ export function runCommandLine(
 	if (alias === 'hint') {
 		return {
 			next: state,
-			lines: ['try: man easter-eggs', 'try: cd writing && ls'],
+			lines: [
+				'try: man easter-eggs',
+				'try: trace',
+				'try: coffee',
+				'try: cd writing && ls',
+			],
+		};
+	}
+
+	if (alias === 'trace') {
+		return {
+			next: state,
+			lines: [
+				'Segmentation fault (core dumped)',
+				'#0  0x00000000 in existence ()',
+				'#1  0x0000002a in consulting.c:404',
+				'#2  0x00c0ffee in main ()',
+				'    at life.c:1',
+				'note: try turning it off and on again',
+			],
+		};
+	}
+
+	if (alias === 'coffee') {
+		return {
+			next: state,
+			lines: [
+				'     ( (',
+				'      ) )',
+				'   .______.',
+				'   |      |]',
+				'   \\      /',
+				"    `----'",
+				'> brewing ideas since 2019',
+			],
 		};
 	}
 
