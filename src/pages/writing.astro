@@ -69,7 +69,7 @@ const tags = ['All', ...uniqueTags];
     <div id="post-list">
       {allPosts.map((post, i) => (
         <a
-          href={`/blog/${post.id}/`}
+          href={`/writing/${post.id}/`}
           class:list={['post-row', i === 0 && 'bg-surface']}
           data-title={post.data.title.toLowerCase()}
           data-tag={post.data.tag ?? ''}
@@ -141,8 +141,8 @@ const tags = ['All', ...uniqueTags];
   mqRows.addEventListener('change', filterPosts);
 
   try {
-    if (sessionStorage.getItem('journal:focus-search')) {
-      sessionStorage.removeItem('journal:focus-search');
+    if (sessionStorage.getItem('site:focus-search')) {
+      sessionStorage.removeItem('site:focus-search');
       queueMicrotask(() => searchInput?.focus());
     }
   } catch {

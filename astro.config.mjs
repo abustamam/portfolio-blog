@@ -10,6 +10,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://blog.bustamam.tech',
   integrations: [mdx(), sitemap()],
+  redirects: {
+    '/blog/:slug': '/writing/:slug',
+  },
   markdown: {
     shikiConfig: {
       themes: {

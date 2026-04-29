@@ -2,6 +2,7 @@
 import type { ImageMetadata } from 'astro';
 import BaseHead from '../components/BaseHead.astro';
 import TerminalChrome from '../components/TerminalChrome.astro';
+import TerminalModeShell from '../components/terminal/TerminalModeShell.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
@@ -23,8 +24,11 @@ const { title, description, chromePath = '/writing', image } = Astro.props;
   </head>
   <body>
     <TerminalChrome path={chromePath} />
-    <SiteHeader />
-    <slot />
-    <SiteFooter />
+    <div id="terminal-inert-siblings">
+      <SiteHeader />
+      <slot />
+      <SiteFooter />
+    </div>
+    <TerminalModeShell initialPath={chromePath} />
   </body>
 </html>

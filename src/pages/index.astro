@@ -20,7 +20,7 @@ const latestTitle = allPosts[0]?.data.title.toLowerCase() ?? 'no posts yet';
 const latestSlug = allPosts[0]?.id ?? '';
 ---
 
-<BaseLayout title="Rasheed Bustamam — Engineering Journal" description="Long-form writing on software craft, distributed systems, and independent consulting.">
+<BaseLayout title="Rasheed Bustamam — Engineering Journal" description="Long-form writing on software craft, distributed systems, and independent consulting." chromePath="/">
 
   <!-- Hero -->
   <section class="grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-8 md:gap-18 px-gutter pt-10 pb-8 md:pt-16 md:pb-13 border-b border-line items-end">
@@ -41,7 +41,7 @@ const latestSlug = allPosts[0]?.id ?? '';
         Writing on the craft and the decisions behind the code.
       </p>
       <div class="flex gap-3.5 mt-8">
-        <a href={latestSlug ? `/blog/${latestSlug}/` : '/'} class="bg-black text-white border border-black dark:bg-white dark:text-black dark:border-white py-2.25 px-4 rounded-sm cursor-pointer font-mono text-xs tracking-snug no-underline">
+        <a href={latestSlug ? `/writing/${latestSlug}/` : '/'} class="bg-black text-white border border-black dark:bg-white dark:text-black dark:border-white py-2.25 px-4 rounded-sm cursor-pointer font-mono text-xs tracking-snug no-underline">
           $ read latest <span class="ml-1">→</span>
         </a>
         <a href="mailto:admin@bustamam.tech" class="bg-transparent text-ink border border-line py-2.25 px-4 rounded-sm font-mono text-xs tracking-snug no-underline">
@@ -53,7 +53,14 @@ const latestSlug = allPosts[0]?.id ?? '';
     <!-- Right: terminal card -->
     <div class="bg-code border border-line rounded font-mono text-xs overflow-hidden">
       <div class="py-2 px-3.5 border-b border-line flex justify-between text-faint text-10 tracking-loose uppercase">
-        <span>whoami.sh</span><span>● online</span>
+        <span>whoami.sh</span>
+        <button
+          id="hero-terminal-open"
+          type="button"
+          class="text-accent bg-transparent border border-line rounded-sm px-2 py-0.5 uppercase tracking-snug hover:border-accent"
+        >
+          terminal
+        </button>
       </div>
       <div class="pt-4.5 pb-5 px-4">
         <div class="flex gap-2.5 mb-2.5 text-mute">
@@ -127,7 +134,7 @@ const latestSlug = allPosts[0]?.id ?? '';
   <div id="post-list">
     {allPosts.map((post, i) => (
       <a
-        href={`/blog/${post.id}/`}
+        href={`/writing/${post.id}/`}
         class:list={['post-row', i === 0 && 'bg-surface']}
         data-title={post.data.title.toLowerCase()}
         data-tag={post.data.tag ?? ''}
@@ -202,8 +209,8 @@ const latestSlug = allPosts[0]?.id ?? '';
   mqRows.addEventListener('change', filterPosts);
 
   try {
-    if (sessionStorage.getItem('journal:focus-search')) {
-      sessionStorage.removeItem('journal:focus-search');
+    if (sessionStorage.getItem('site:focus-search')) {
+      sessionStorage.removeItem('site:focus-search');
       queueMicrotask(() => searchInput?.focus());
     }
   } catch {
@@ -233,6 +240,7 @@ const latestSlug = allPosts[0]?.id ?? '';
   // '/' and ⌘K focus search
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     if (!searchInput) return;
+    if (document.documentElement.classList.contains('terminal-mode')) return;
     const focused = document.activeElement;
     if (e.key === '/' && focused !== searchInput) {
       e.preventDefault();
@@ -254,4 +262,9 @@ const latestSlug = allPosts[0]?.id ?? '';
   }
   updateTerminalTimestamps();
   setInterval(updateTerminalTimestamps, 1800);
+
+  // Hero terminal card opens fullscreen terminal mode
+  document.getElementById('hero-terminal-open')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('terminal:toggle'));
+  });
 </script>
