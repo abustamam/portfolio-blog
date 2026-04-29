@@ -147,7 +147,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   }
 
   function pagerPageSize(): number {
-	const h = typeof window !== 'undefined' ? window.innerHeight : 600;
+	const h = window.visualViewport?.height ?? window.innerHeight;
 	const approx = Math.floor((h * 0.75) / 18);
 	return Math.max(12, Math.min(approx, 80));
   }
