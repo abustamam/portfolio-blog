@@ -73,7 +73,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   >
     <pre
       id="terminal-pager-body"
-      class="max-h-[40vh] overflow-hidden p-4 font-mono text-xs leading-relaxed text-ink whitespace-pre-wrap"
+      class="flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed text-ink whitespace-pre-wrap"
     ></pre>
     <div
       id="terminal-pager-meta"
@@ -217,7 +217,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	function openPager(lines: string[]) {
 		pagerState = { lines, offset: 0, pageSize: pagerPageSize() };
+		output.classList.add('hidden');
 		pager.classList.remove('hidden');
+		pager.classList.remove('shrink-0');
+		pager.classList.add('flex-1', 'flex');
 		input.disabled = true;
 		renderPagerView();
 		announce('Pager open. Use arrows or hjkl. Press q to close.');
@@ -225,9 +228,11 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	function closePager() {
 		pagerState = null;
-		pager.classList.add('hidden');
+		pager.classList.add('hidden', 'shrink-0');
+		pager.classList.remove('flex-1', 'flex');
 		pBody.textContent = '';
 		pMeta.textContent = '';
+		output.classList.remove('hidden');
 		input.disabled = false;
 		queueMicrotask(() => input.focus());
 		announce('Pager closed');
