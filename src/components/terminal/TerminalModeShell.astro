@@ -77,8 +77,22 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     ></pre>
     <div
       id="terminal-pager-meta"
-      class="border-t border-line px-4 py-2 font-mono text-[10px] text-mute"
-    ></div>
+      class="border-t border-line px-4 font-mono text-[10px] text-mute flex items-center justify-between gap-2"
+    >
+      <button
+        id="terminal-pager-prev"
+        type="button"
+        class="min-h-[44px] px-4 text-mute hover:text-ink"
+        aria-label="Previous page"
+      >‹ prev</button>
+      <span id="terminal-pager-hint" class="text-center flex-1"></span>
+      <button
+        id="terminal-pager-next"
+        type="button"
+        class="min-h-[44px] px-4 text-mute hover:text-ink"
+        aria-label="Next page"
+      >next ›</button>
+    </div>
   </div>
   <form id="terminal-prompt-form" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
     <span id="terminal-cwd" class="shrink-0 text-accent"></span>
@@ -104,6 +118,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   import { runCommandLine } from './terminal-commands';
   import {
 	handlePagerKey,
+	pageUp,
+	pageDown,
 	shouldUsePager,
 	sliceVisible,
 	type PagerState,
@@ -147,6 +163,9 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	const pagerWrap = document.getElementById('terminal-pager');
 	const pagerBody = document.getElementById('terminal-pager-body');
 	const pagerMeta = document.getElementById('terminal-pager-meta');
+	const pagerPrev = document.getElementById('terminal-pager-prev') as HTMLButtonElement | null;
+	const pagerNext = document.getElementById('terminal-pager-next') as HTMLButtonElement | null;
+	const pagerHint = document.getElementById('terminal-pager-hint') as HTMLElement | null;
 
 	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
 
@@ -212,7 +231,9 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		const visible = sliceVisible(pagerState);
 		pBody.textContent = visible.join('\n');
 		const end = Math.min(pagerState.offset + visible.length, pagerState.lines.length);
-		pMeta.textContent = `lines ${pagerState.offset + 1}–${end} of ${pagerState.lines.length} · arrows or hjkl · space/l page down · q esc quit`;
+		const hint = `${pagerState.offset + 1}–${end} of ${pagerState.lines.length} · arrows hjkl · q quit`;
+		if (pagerHint) pagerHint.textContent = hint;
+		pMeta.setAttribute('aria-label', hint);
 	}
 
 	function openPager(lines: string[]) {
@@ -231,7 +252,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		pager.classList.add('hidden', 'shrink-0');
 		pager.classList.remove('flex-1', 'flex');
 		pBody.textContent = '';
-		pMeta.textContent = '';
+		if (pagerHint) pagerHint.textContent = '';
+		pMeta.removeAttribute('aria-label');
 		output.classList.remove('hidden');
 		input.disabled = false;
 		queueMicrotask(() => input.focus());
@@ -343,6 +365,16 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		window.dispatchEvent(new CustomEvent('terminal:toggle'));
 	});
 	minimizeBtn?.addEventListener('click', () => closeMode());
+	pagerPrev?.addEventListener('click', () => {
+		if (!pagerState) return;
+		pagerState = pageUp(pagerState);
+		renderPagerView();
+	});
+	pagerNext?.addEventListener('click', () => {
+		if (!pagerState) return;
+		pagerState = pageDown(pagerState);
+		renderPagerView();
+	});
 
 	form.addEventListener('submit', (e) => {
 		e.preventDefault();
