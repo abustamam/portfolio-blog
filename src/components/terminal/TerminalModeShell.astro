@@ -376,6 +376,20 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			}
 			return;
 		}
+		// Ctrl+L — clear output
+		if (e.ctrlKey && !e.shiftKey && e.key === 'l') {
+			e.preventDefault();
+			clearOutput();
+			return;
+		}
+		// Ctrl+C — cancel current input line
+		if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
+			e.preventDefault();
+			input.value = '';
+			historyIndex = -1;
+			historyDraft = '';
+			return;
+		}
 		// Command history traversal (only when terminal is open and pager is not active)
 		if (e.key === 'ArrowUp' && historyBuffer.length > 0) {
 			e.preventDefault();
