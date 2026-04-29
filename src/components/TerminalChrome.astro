@@ -27,6 +27,16 @@ const { path = '/writing' } = Astro.props;
       <span class="hidden sm:inline text-ink overflow-hidden text-ellipsis whitespace-nowrap max-w-28vw sm:max-w-none">available · Q3</span>
     </span>
     <span class="text-faint">·</span>
+    <button
+      type="button"
+      id="terminal-expand-btn"
+      class="shrink-0 rounded-sm border border-line bg-surface px-2 py-0.5 font-mono text-10 uppercase tracking-snug text-mute transition-colors hover:border-ink hover:text-ink"
+      aria-pressed="false"
+      aria-label="Enter terminal mode"
+    >
+      <span data-terminal-expand-label>expand</span>
+    </button>
+    <span class="text-faint">·</span>
     <ThemeToggle />
   </div>
 </div>

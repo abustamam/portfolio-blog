@@ -1,0 +1,126 @@
+---
+interface Props {
+  initialPath?: string;
+}
+const { initialPath = '/writing' } = Astro.props;
+---
+
+<section
+  id="terminal-mode-shell"
+  class="fixed inset-0 z-50 hidden flex flex-col bg-bg text-ink font-mono"
+  aria-hidden="true"
+  aria-label="Simulated terminal"
+  data-initial-path={initialPath}
+>
+  <div id="terminal-live" class="sr-only" aria-live="polite"></div>
+  <div
+    id="terminal-output"
+    class="min-h-0 flex-1 overflow-auto border-b border-line p-4 text-xs leading-relaxed whitespace-pre-wrap"
+  ></div>
+  <form id="terminal-prompt-form" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
+    <span id="terminal-cwd" class="shrink-0 text-accent"></span>
+    <input
+      id="terminal-input"
+      type="text"
+      class="min-w-0 flex-1 border-none bg-transparent text-xs text-ink outline-none"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Terminal command line"
+    />
+  </form>
+</section>
+
+<script>
+  (function () {
+    const shellEl = document.getElementById('terminal-mode-shell');
+    const liveEl = document.getElementById('terminal-live');
+    const cwdEl = document.getElementById('terminal-cwd');
+    const inputEl = document.getElementById('terminal-input');
+    const outputEl = document.getElementById('terminal-output');
+    const expandBtn = document.getElementById('terminal-expand-btn');
+
+    if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl) return;
+
+    const shell = shellEl as HTMLElement;
+    const live = liveEl as HTMLElement;
+    const cwd = cwdEl as HTMLElement;
+    const input = inputEl as HTMLInputElement;
+    const output = outputEl as HTMLElement;
+
+    const initialPath = shell.dataset.initialPath || '/writing';
+    let isOpen = false;
+    let lastFocus: Element | null = null;
+
+    function announce(msg: string) {
+      live.textContent = '';
+      requestAnimationFrame(() => {
+        live.textContent = msg;
+      });
+    }
+
+    function setExpandButtonState(open: boolean) {
+      if (!expandBtn) return;
+      expandBtn.setAttribute('aria-pressed', open ? 'true' : 'false');
+      expandBtn.setAttribute('aria-label', open ? 'Exit terminal mode' : 'Enter terminal mode');
+      const label = expandBtn.querySelector('[data-terminal-expand-label]');
+      if (label) label.textContent = open ? 'collapse' : 'expand';
+    }
+
+    function openMode() {
+      if (isOpen) return;
+      lastFocus = document.activeElement;
+      isOpen = true;
+      shell.classList.remove('hidden');
+      shell.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('terminal-mode');
+      cwd.textContent = `~${initialPath}`;
+      announce('Terminal mode on');
+      setExpandButtonState(true);
+      queueMicrotask(() => input.focus());
+    }
+
+    function closeMode() {
+      if (!isOpen) return;
+      isOpen = false;
+      shell.classList.add('hidden');
+      shell.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('terminal-mode');
+      announce('Terminal mode off');
+      setExpandButtonState(false);
+      const prev = lastFocus;
+      if (prev instanceof HTMLElement) {
+        queueMicrotask(() => prev.focus());
+      }
+      lastFocus = null;
+    }
+
+    function toggleMode() {
+      if (isOpen) closeMode();
+      else openMode();
+    }
+
+    window.addEventListener('terminal:toggle', () => {
+      toggleMode();
+    });
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        toggleMode();
+      }
+    });
+
+    expandBtn?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('terminal:toggle'));
+    });
+
+    setExpandButtonState(false);
+  })();
+</script>
+
+<style is:global>
+  html.terminal-mode {
+    overflow: hidden;
+  }
+</style>
