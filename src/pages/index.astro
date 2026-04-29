@@ -240,6 +240,7 @@ const latestSlug = allPosts[0]?.id ?? '';
   // '/' and ⌘K focus search
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     if (!searchInput) return;
+    if (document.documentElement.classList.contains('terminal-mode')) return;
     const focused = document.activeElement;
     if (e.key === '/' && focused !== searchInput) {
       e.preventDefault();
