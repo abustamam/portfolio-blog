@@ -380,6 +380,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		if (e.ctrlKey && !e.shiftKey && e.key === 'l') {
 			e.preventDefault();
 			clearOutput();
+			queueMicrotask(() => input.focus());
 			return;
 		}
 		// Ctrl+C — cancel current input line
