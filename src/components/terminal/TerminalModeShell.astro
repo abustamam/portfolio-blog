@@ -301,7 +301,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		const bodyLines = result.lines.filter((l) => l !== '__CLEAR__');
 
 		if (bodyLines.length > 0 && shouldUsePager(bodyLines)) {
-			appendLine(`[pager] ${bodyLines.length} lines — arrows or hjkl, q to close`, 'text-mute');
 			openPager(bodyLines);
 			return;
 		}
