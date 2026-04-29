@@ -114,9 +114,6 @@ export function runCommandLine(
 
 	if (tokens[0] === '..') {
 		const next = resolveCd(state.cwd, '..');
-		if (!isValidCwd(next!, data)) {
-			return { next: state, lines: ['cd: no such file or directory: ..'] };
-		}
 		return { next: { cwd: next! }, lines: [] };
 	}
 
