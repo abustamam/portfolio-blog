@@ -270,6 +270,12 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		announce('Pager closed');
 	}
 
+	function syncViewportHeight() {
+		if (!isOpen) return;
+		const h = window.visualViewport?.height ?? window.innerHeight;
+		shell.style.height = `${h}px`;
+	}
+
 	function openMode() {
 		if (isOpen) return;
 		lastFocus = document.activeElement;
@@ -420,12 +426,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	setExpandButtonState(false);
 	renderCwd();
-
-	function syncViewportHeight() {
-		if (!isOpen) return;
-		const h = window.visualViewport?.height ?? window.innerHeight;
-		shell.style.height = `${h}px`;
-	}
 
 	if (window.visualViewport) {
 		window.visualViewport.addEventListener('resize', syncViewportHeight);
