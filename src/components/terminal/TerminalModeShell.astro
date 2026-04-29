@@ -187,6 +187,9 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	let state: TerminalState = { cwd: chromePathToCwd(chromePath) };
 	let pagerState: PagerState | null = null;
+	let historyBuffer: string[] = [];
+	let historyIndex = -1;
+	let historyDraft = '';
 	let isOpen = false;
 	let lastFocus: Element | null = null;
 
@@ -358,6 +361,21 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 				pagerState = next;
 				renderPagerView();
 			}
+			return;
+		}
+		// Command history traversal (only when terminal is open and pager is not active)
+		if (e.key === 'ArrowUp' && historyBuffer.length > 0) {
+			e.preventDefault();
+			if (historyIndex === -1) historyDraft = input.value;
+			historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
+			input.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
+			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+		}
+		if (e.key === 'ArrowDown' && historyIndex >= 0) {
+			e.preventDefault();
+			historyIndex--;
+			input.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
+			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
 		}
 	});
 
@@ -384,6 +402,11 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		e.preventDefault();
 		if (pagerState) return;
 		const line = input.value;
+		if (line.trim()) {
+			historyBuffer.push(line.trim());
+			historyIndex = -1;
+			historyDraft = '';
+		}
 		input.value = '';
 		runLine(line);
 	});
