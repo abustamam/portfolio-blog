@@ -24,9 +24,11 @@ const { title, description, chromePath = '/writing', image } = Astro.props;
   </head>
   <body>
     <TerminalChrome path={chromePath} />
-    <SiteHeader />
-    <slot />
-    <SiteFooter />
+    <div id="terminal-inert-siblings">
+      <SiteHeader />
+      <slot />
+      <SiteFooter />
+    </div>
     <TerminalModeShell initialPath={chromePath} />
   </body>
 </html>

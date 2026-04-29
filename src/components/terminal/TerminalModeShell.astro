@@ -1,8 +1,40 @@
 ---
+import { getCollection } from 'astro:content';
+import { isPublished } from '../../utils/content';
+import type { SiteTerminalData } from './terminal-types';
+
 interface Props {
   initialPath?: string;
 }
 const { initialPath = '/writing' } = Astro.props;
+
+const blogRaw = await getCollection('blog', ({ data }) => isPublished(data));
+const blog: SiteTerminalData['blog'] = blogRaw.map((p) => ({
+	id: p.id,
+	title: p.data.title,
+	body: typeof p.body === 'string' ? p.body : '',
+	pubDate: p.data.pubDate.toISOString().slice(0, 10),
+	tag: p.data.tag,
+	readMin: p.data.readMin,
+	words: p.data.words,
+}));
+
+const seriesRaw = await getCollection('series', ({ data }) => isPublished(data));
+const series: SiteTerminalData['series'] = seriesRaw.map((s) => ({
+	id: s.id,
+	title: s.data.title,
+}));
+
+const workRaw = await getCollection('work', ({ data }) => isPublished(data));
+const work: SiteTerminalData['work'] = workRaw.map((w) => ({
+	id: w.id,
+	company: w.data.company,
+	role: w.data.role,
+	period: w.data.period,
+}));
+
+const terminalData: SiteTerminalData = { blog, series, work };
+const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 ---
 
 <section
@@ -17,6 +49,21 @@ const { initialPath = '/writing' } = Astro.props;
     id="terminal-output"
     class="min-h-0 flex-1 overflow-auto border-b border-line p-4 text-xs leading-relaxed whitespace-pre-wrap"
   ></div>
+  <div
+    id="terminal-pager"
+    class="hidden min-h-0 shrink-0 flex-col border-b border-line bg-bg"
+    role="document"
+    aria-label="Output pager"
+  >
+    <pre
+      id="terminal-pager-body"
+      class="max-h-[40vh] overflow-hidden p-4 font-mono text-xs leading-relaxed text-ink whitespace-pre-wrap"
+    ></pre>
+    <div
+      id="terminal-pager-meta"
+      class="border-t border-line px-4 py-2 font-mono text-[10px] text-mute"
+    ></div>
+  </div>
   <form id="terminal-prompt-form" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
     <span id="terminal-cwd" class="shrink-0 text-accent"></span>
     <input
@@ -30,92 +77,258 @@ const { initialPath = '/writing' } = Astro.props;
   </form>
 </section>
 
+<script
+  type="application/json"
+  id="terminal-site-data"
+  is:inline
+  set:html={terminalJson}
+></script>
+
 <script>
+  import { runCommandLine } from './terminal-commands';
+  import {
+	handlePagerKey,
+	shouldUsePager,
+	sliceVisible,
+	type PagerState,
+  } from './terminal-pager';
+  import type { SiteTerminalData, TerminalState } from './terminal-types';
+
+  function chromePathToCwd(path: string): string {
+	const p = (path || '/').replace(/\/+$/, '') || '/';
+	if (p === '/') return '~';
+	const segs = p.split('/').filter(Boolean);
+	return `~/${segs.join('/')}`;
+  }
+
+  function readSiteData(): SiteTerminalData | null {
+	const el = document.getElementById('terminal-site-data');
+	if (!el?.textContent) return null;
+	try {
+		return JSON.parse(el.textContent) as SiteTerminalData;
+	} catch {
+		return null;
+	}
+  }
+
+  function pagerPageSize(): number {
+	const h = typeof window !== 'undefined' ? window.innerHeight : 600;
+	const approx = Math.floor((h * 0.35) / 18);
+	return Math.max(12, Math.min(approx, 40));
+  }
+
   (function () {
-    const shellEl = document.getElementById('terminal-mode-shell');
-    const liveEl = document.getElementById('terminal-live');
-    const cwdEl = document.getElementById('terminal-cwd');
-    const inputEl = document.getElementById('terminal-input');
-    const outputEl = document.getElementById('terminal-output');
-    const expandBtn = document.getElementById('terminal-expand-btn');
+	const shellEl = document.getElementById('terminal-mode-shell');
+	const liveEl = document.getElementById('terminal-live');
+	const cwdEl = document.getElementById('terminal-cwd');
+	const inputEl = document.getElementById('terminal-input');
+	const outputEl = document.getElementById('terminal-output');
+	const formEl = document.getElementById('terminal-prompt-form');
+	const expandBtn = document.getElementById('terminal-expand-btn');
+	const inertSiblings = document.getElementById('terminal-inert-siblings');
+	const pagerWrap = document.getElementById('terminal-pager');
+	const pagerBody = document.getElementById('terminal-pager-body');
+	const pagerMeta = document.getElementById('terminal-pager-meta');
 
-    if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl) return;
+	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
 
-    const shell = shellEl as HTMLElement;
-    const live = liveEl as HTMLElement;
-    const cwd = cwdEl as HTMLElement;
-    const input = inputEl as HTMLInputElement;
-    const output = outputEl as HTMLElement;
+	const shell = shellEl as HTMLElement;
+	const live = liveEl as HTMLElement;
+	const cwd = cwdEl as HTMLElement;
+	const input = inputEl as HTMLInputElement;
+	const output = outputEl as HTMLElement;
+	const form = formEl as HTMLFormElement;
+	const pager = pagerWrap as HTMLElement;
+	const pBody = pagerBody as HTMLElement;
+	const pMeta = pagerMeta as HTMLElement;
 
-    const initialPath = shell.dataset.initialPath || '/writing';
-    let isOpen = false;
-    let lastFocus: Element | null = null;
+	const chromePath = shell.dataset.initialPath || '/writing';
+	const rawSite = readSiteData();
+	if (rawSite === null) return;
+	const siteData: SiteTerminalData = rawSite;
 
-    function announce(msg: string) {
-      live.textContent = '';
-      requestAnimationFrame(() => {
-        live.textContent = msg;
-      });
-    }
+	let state: TerminalState = { cwd: chromePathToCwd(chromePath) };
+	let pagerState: PagerState | null = null;
+	let isOpen = false;
+	let lastFocus: Element | null = null;
 
-    function setExpandButtonState(open: boolean) {
-      if (!expandBtn) return;
-      expandBtn.setAttribute('aria-pressed', open ? 'true' : 'false');
-      expandBtn.setAttribute('aria-label', open ? 'Exit terminal mode' : 'Enter terminal mode');
-      const label = expandBtn.querySelector('[data-terminal-expand-label]');
-      if (label) label.textContent = open ? 'collapse' : 'expand';
-    }
+	function announce(msg: string) {
+		live.textContent = '';
+		requestAnimationFrame(() => {
+			live.textContent = msg;
+		});
+	}
 
-    function openMode() {
-      if (isOpen) return;
-      lastFocus = document.activeElement;
-      isOpen = true;
-      shell.classList.remove('hidden');
-      shell.setAttribute('aria-hidden', 'false');
-      document.documentElement.classList.add('terminal-mode');
-      cwd.textContent = `~${initialPath}`;
-      announce('Terminal mode on');
-      setExpandButtonState(true);
-      queueMicrotask(() => input.focus());
-    }
+	function setExpandButtonState(open: boolean) {
+		if (!expandBtn) return;
+		expandBtn.setAttribute('aria-pressed', open ? 'true' : 'false');
+		expandBtn.setAttribute('aria-label', open ? 'Exit terminal mode' : 'Enter terminal mode');
+		const label = expandBtn.querySelector('[data-terminal-expand-label]');
+		if (label) label.textContent = open ? 'collapse' : 'expand';
+	}
 
-    function closeMode() {
-      if (!isOpen) return;
-      isOpen = false;
-      shell.classList.add('hidden');
-      shell.setAttribute('aria-hidden', 'true');
-      document.documentElement.classList.remove('terminal-mode');
-      announce('Terminal mode off');
-      setExpandButtonState(false);
-      const prev = lastFocus;
-      if (prev instanceof HTMLElement) {
-        queueMicrotask(() => prev.focus());
-      }
-      lastFocus = null;
-    }
+	function renderCwd() {
+		cwd.textContent = `${state.cwd} $`;
+	}
 
-    function toggleMode() {
-      if (isOpen) closeMode();
-      else openMode();
-    }
+	function appendLine(text: string, className = 'text-mute') {
+		const row = document.createElement('div');
+		row.className = `mb-0.5 font-mono text-xs ${className}`;
+		row.textContent = text;
+		output.appendChild(row);
+		output.scrollTop = output.scrollHeight;
+	}
 
-    window.addEventListener('terminal:toggle', () => {
-      toggleMode();
-    });
+	function appendEcho(line: string) {
+		appendLine(`${state.cwd} $ ${line}`, 'text-ink');
+	}
 
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
-      const mod = e.metaKey || e.ctrlKey;
-      if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
-        e.preventDefault();
-        toggleMode();
-      }
-    });
+	function clearOutput() {
+		output.textContent = '';
+	}
 
-    expandBtn?.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('terminal:toggle'));
-    });
+	function renderPagerView() {
+		if (!pagerState) return;
+		const visible = sliceVisible(pagerState);
+		pBody.textContent = visible.join('\n');
+		const end = Math.min(pagerState.offset + visible.length, pagerState.lines.length);
+		pMeta.textContent = `lines ${pagerState.offset + 1}–${end} of ${pagerState.lines.length} · arrows or hjkl · space/l page down · q esc quit`;
+	}
 
-    setExpandButtonState(false);
+	function openPager(lines: string[]) {
+		pagerState = { lines, offset: 0, pageSize: pagerPageSize() };
+		pager.classList.remove('hidden');
+		input.disabled = true;
+		renderPagerView();
+		announce('Pager open. Use arrows or hjkl. Press q to close.');
+	}
+
+	function closePager() {
+		pagerState = null;
+		pager.classList.add('hidden');
+		pBody.textContent = '';
+		pMeta.textContent = '';
+		input.disabled = false;
+		queueMicrotask(() => input.focus());
+		announce('Pager closed');
+	}
+
+	function openMode() {
+		if (isOpen) return;
+		lastFocus = document.activeElement;
+		isOpen = true;
+		shell.classList.remove('hidden');
+		shell.setAttribute('aria-hidden', 'false');
+		shell.setAttribute('aria-modal', 'true');
+		inertSiblings?.setAttribute('inert', '');
+		document.documentElement.classList.add('terminal-mode');
+		renderCwd();
+		announce('Terminal mode on');
+		setExpandButtonState(true);
+		queueMicrotask(() => input.focus());
+	}
+
+	function closeMode() {
+		if (!isOpen) return;
+		if (pagerState) closePager();
+		isOpen = false;
+		shell.classList.add('hidden');
+		shell.setAttribute('aria-hidden', 'true');
+		shell.removeAttribute('aria-modal');
+		inertSiblings?.removeAttribute('inert');
+		document.documentElement.classList.remove('terminal-mode');
+		announce('Terminal mode off');
+		setExpandButtonState(false);
+		const prev = lastFocus;
+		if (prev instanceof HTMLElement) {
+			queueMicrotask(() => prev.focus());
+		}
+		lastFocus = null;
+	}
+
+	function toggleMode() {
+		if (isOpen) closeMode();
+		else openMode();
+	}
+
+	function flushLines(lines: string[]) {
+		for (const ln of lines) {
+			if (ln === '__CLEAR__') clearOutput();
+			else appendLine(ln, 'text-ink');
+		}
+	}
+
+	function runLine(raw: string) {
+		const line = raw.trim();
+		if (!line) return;
+		appendEcho(line);
+		const result = runCommandLine(line, state, siteData);
+		state = result.next;
+		renderCwd();
+
+		if (result.navigateTo) {
+			window.location.href = result.navigateTo;
+			return;
+		}
+		if (result.closeTerminal) {
+			flushLines(result.lines.filter((l) => l !== '__CLEAR__'));
+			closeMode();
+			return;
+		}
+
+		const cleared = result.lines.includes('__CLEAR__');
+		if (cleared) clearOutput();
+		const bodyLines = result.lines.filter((l) => l !== '__CLEAR__');
+
+		if (bodyLines.length > 0 && shouldUsePager(bodyLines)) {
+			appendLine(`[pager] ${bodyLines.length} lines — arrows or hjkl, q to close`, 'text-mute');
+			openPager(bodyLines);
+			return;
+		}
+
+		flushLines(result.lines);
+		queueMicrotask(() => input.focus());
+	}
+
+	document.addEventListener('keydown', (e: KeyboardEvent) => {
+		if (!isOpen) return;
+		const mod = e.metaKey || e.ctrlKey;
+		if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
+			e.preventDefault();
+			if (pagerState) closePager();
+			toggleMode();
+			return;
+		}
+		if (pagerState) {
+			const next = handlePagerKey(e, pagerState);
+			if (next === null) {
+				closePager();
+				queueMicrotask(() => input.focus());
+			} else {
+				pagerState = next;
+				renderPagerView();
+			}
+		}
+	});
+
+	window.addEventListener('terminal:toggle', () => {
+		toggleMode();
+	});
+
+	expandBtn?.addEventListener('click', () => {
+		window.dispatchEvent(new CustomEvent('terminal:toggle'));
+	});
+
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		if (pagerState) return;
+		const line = input.value;
+		input.value = '';
+		runLine(line);
+	});
+
+	setExpandButtonState(false);
+	renderCwd();
   })();
 </script>
 

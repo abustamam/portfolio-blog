@@ -64,7 +64,7 @@ Add a playful, fully keyboard-navigable **Terminal Mode** to the blog that:
 - Add permanent redirects:
   - `/blog` -> `/writing`
   - `/blog/:slug` -> `/writing/:slug`
-- Preserve query params and hash on redirect.
+- Use strict 301 redirects without preserving query or hash (simple canonical URLs).
 - Keep redirects indefinitely for backlinks and SEO continuity.
 
 ### Terminal Filesystem Mapping
