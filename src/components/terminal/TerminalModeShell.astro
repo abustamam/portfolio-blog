@@ -50,9 +50,11 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       <button
         id="terminal-minimize-btn"
         type="button"
-        class="w-2 h-2 rounded-full bg-danger border border-line"
+        class="p-3 -m-3 flex items-center justify-center"
         aria-label="Minimize terminal mode"
-      ></button>
+      >
+        <span class="w-2 h-2 rounded-full bg-danger border border-line pointer-events-none"></span>
+      </button>
       <span class="w-2 h-2 rounded-full bg-faint border border-line"></span>
       <span class="w-2 h-2 rounded-full bg-accent border border-line"></span>
     </div>
