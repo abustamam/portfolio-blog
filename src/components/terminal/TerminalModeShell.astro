@@ -82,14 +82,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       <button
         id="terminal-pager-prev"
         type="button"
-        class="min-h-[44px] px-4 text-mute hover:text-ink"
+        class="min-h-[44px] px-4 text-mute hover:text-ink disabled:opacity-40 disabled:cursor-default"
         aria-label="Previous page"
       >‹ prev</button>
       <span id="terminal-pager-hint" class="text-center flex-1"></span>
       <button
         id="terminal-pager-next"
         type="button"
-        class="min-h-[44px] px-4 text-mute hover:text-ink"
+        class="min-h-[44px] px-4 text-mute hover:text-ink disabled:opacity-40 disabled:cursor-default"
         aria-label="Next page"
       >next ›</button>
     </div>
