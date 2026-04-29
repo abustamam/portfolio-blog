@@ -45,6 +45,22 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   data-initial-path={initialPath}
 >
   <div id="terminal-live" class="sr-only" aria-live="polite"></div>
+  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute">
+    <div class="flex items-center gap-1.5">
+      <button
+        id="terminal-minimize-btn"
+        type="button"
+        class="w-2 h-2 rounded-full bg-danger border border-line"
+        aria-label="Minimize terminal mode"
+      ></button>
+      <span class="w-2 h-2 rounded-full bg-faint border border-line"></span>
+      <span class="w-2 h-2 rounded-full bg-accent border border-line"></span>
+    </div>
+    <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
+      terminal <span class="text-faint">·</span> <span id="terminal-top-path">~</span>
+    </div>
+    <div class="font-mono text-10 uppercase tracking-snug text-faint">simulated</div>
+  </div>
   <div
     id="terminal-output"
     class="min-h-0 flex-1 overflow-auto border-b border-line p-4 text-xs leading-relaxed whitespace-pre-wrap"
@@ -123,6 +139,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	const cwdEl = document.getElementById('terminal-cwd');
 	const inputEl = document.getElementById('terminal-input');
 	const outputEl = document.getElementById('terminal-output');
+	const topPathEl = document.getElementById('terminal-top-path');
+	const minimizeBtn = document.getElementById('terminal-minimize-btn');
 	const formEl = document.getElementById('terminal-prompt-form');
 	const expandBtn = document.getElementById('terminal-expand-btn');
 	const inertSiblings = document.getElementById('terminal-inert-siblings');
@@ -130,13 +148,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	const pagerBody = document.getElementById('terminal-pager-body');
 	const pagerMeta = document.getElementById('terminal-pager-meta');
 
-	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
+	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
 
 	const shell = shellEl as HTMLElement;
 	const live = liveEl as HTMLElement;
 	const cwd = cwdEl as HTMLElement;
 	const input = inputEl as HTMLInputElement;
 	const output = outputEl as HTMLElement;
+	const topPath = topPathEl as HTMLElement;
 	const form = formEl as HTMLFormElement;
 	const pager = pagerWrap as HTMLElement;
 	const pBody = pagerBody as HTMLElement;
@@ -164,11 +183,12 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		expandBtn.setAttribute('aria-pressed', open ? 'true' : 'false');
 		expandBtn.setAttribute('aria-label', open ? 'Exit terminal mode' : 'Enter terminal mode');
 		const label = expandBtn.querySelector('[data-terminal-expand-label]');
-		if (label) label.textContent = open ? 'collapse' : 'expand';
+		if (label) label.textContent = 'Terminal';
 	}
 
 	function renderCwd() {
 		cwd.textContent = `${state.cwd} $`;
+		topPath.textContent = state.cwd;
 	}
 
 	function appendLine(text: string, className = 'text-mute') {
@@ -291,14 +311,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	}
 
 	document.addEventListener('keydown', (e: KeyboardEvent) => {
-		if (!isOpen) return;
 		const mod = e.metaKey || e.ctrlKey;
 		if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
 			e.preventDefault();
-			if (pagerState) closePager();
+			if (isOpen && pagerState) closePager();
 			toggleMode();
 			return;
 		}
+		if (!isOpen) return;
 		if (pagerState) {
 			const next = handlePagerKey(e, pagerState);
 			if (next === null) {
@@ -318,6 +338,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	expandBtn?.addEventListener('click', () => {
 		window.dispatchEvent(new CustomEvent('terminal:toggle'));
 	});
+	minimizeBtn?.addEventListener('click', () => closeMode());
 
 	form.addEventListener('submit', (e) => {
 		e.preventDefault();

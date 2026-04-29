@@ -5,6 +5,7 @@ interface Props {
   path?: string;
 }
 const { path = '/writing' } = Astro.props;
+const displayPath = path === '/' ? '~' : `~${path}`;
 ---
 
 <div class="flex items-center h-8.5 border-b border-line bg-surface font-mono text-11 text-mute min-w-0">
@@ -17,7 +18,7 @@ const { path = '/writing' } = Astro.props;
   <!-- Breadcrumb -->
   <div class="px-3.5 border-r border-line h-full flex items-center text-ink tracking-tight flex-1 min-w-0">
     <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
-      rasheed@bustamam <span class="text-faint"> · </span>~{path}
+      rasheed@bustamam <span class="text-faint"> · </span>{displayPath}
     </span>
   </div>
   <!-- Right: availability + theme toggle -->
@@ -34,7 +35,7 @@ const { path = '/writing' } = Astro.props;
       aria-pressed="false"
       aria-label="Enter terminal mode"
     >
-      <span data-terminal-expand-label>expand</span>
+      <span data-terminal-expand-label>Terminal</span>
     </button>
     <span class="text-faint">·</span>
     <ThemeToggle />
