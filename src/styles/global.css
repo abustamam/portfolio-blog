@@ -60,6 +60,40 @@
   --color-kbd:        #181c24;
 }
 
+/* ── Color theme overrides (accent only, both light and dark variants) ── */
+[data-color-theme="amber"] {
+  --color-accent:     #9a5f00;
+  --color-accent-bg:  #fef3dc;
+  --color-accent-ink: #5a3600;
+}
+.dark[data-color-theme="amber"] {
+  --color-accent:     #ffb000;
+  --color-accent-bg:  #2a1f00;
+  --color-accent-ink: #ffcc44;
+}
+
+[data-color-theme="ice"] {
+  --color-accent:     #0369a1;
+  --color-accent-bg:  #e0f2fe;
+  --color-accent-ink: #0c4a6e;
+}
+.dark[data-color-theme="ice"] {
+  --color-accent:     #38bdf8;
+  --color-accent-bg:  #0a1f2e;
+  --color-accent-ink: #7dd3fc;
+}
+
+[data-color-theme="green"] {
+  --color-accent:     #1f6f43;
+  --color-accent-bg:  #dbeadf;
+  --color-accent-ink: #0f3f23;
+}
+.dark[data-color-theme="green"] {
+  --color-accent:     #8cff5c;
+  --color-accent-bg:  #172010;
+  --color-accent-ink: #b8ff8a;
+}
+
 .page-shell {
   width: 100%;
   max-width: 1280px;

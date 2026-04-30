@@ -430,6 +430,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 </script>
 
 <style is:global>
+  /* Terminal widget — immersive palette (dark-mode values, work for all dark themes) */
   #terminal-widget[data-theme="green"] {
     --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
     --color-ink: #33ff33; --color-mute: #1a661a; --color-faint: #0f3a0f;
@@ -444,5 +445,21 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     --color-bg: #060d14; --color-surface: #0d1a26; --color-code: #030a10;
     --color-ink: #7dd3fc; --color-mute: #1e3a4f; --color-faint: #102030;
     --color-accent: #38bdf8; --color-line: #1e3a4f; --color-line-soft: #102030;
+  }
+  /* Light-mode overrides for terminal widget color themes */
+  html:not(.dark) #terminal-widget[data-theme="green"] {
+    --color-bg: #f0fdf4; --color-surface: #ffffff; --color-code: #e8fdf0;
+    --color-ink: #1f6f43; --color-mute: #3a8f5f; --color-faint: #86c9a2;
+    --color-accent: #1f6f43; --color-line: #bbdece; --color-line-soft: #d5eed9;
+  }
+  html:not(.dark) #terminal-widget[data-theme="amber"] {
+    --color-bg: #fffbf0; --color-surface: #ffffff; --color-code: #fff8e6;
+    --color-ink: #9a5f00; --color-mute: #b87800; --color-faint: #d4a847;
+    --color-accent: #9a5f00; --color-line: #e8d5a3; --color-line-soft: #f0e4c0;
+  }
+  html:not(.dark) #terminal-widget[data-theme="ice"] {
+    --color-bg: #f0f9ff; --color-surface: #ffffff; --color-code: #e8f5ff;
+    --color-ink: #0369a1; --color-mute: #0284c7; --color-faint: #7dd3fc;
+    --color-accent: #0369a1; --color-line: #b8dcf0; --color-line-soft: #d0eaf8;
   }
 </style>
