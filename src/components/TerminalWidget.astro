@@ -248,6 +248,23 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       historyBuffer,
       input,
     };
+
+    // Expand: serialize session and open full-screen shell
+    expandBtn?.addEventListener('click', () => {
+      try {
+        localStorage.setItem('terminal:session-lines', JSON.stringify(outputBuffer));
+        localStorage.setItem('terminal:history', JSON.stringify(historyBuffer));
+      } catch { /* private browsing */ }
+      output.style.opacity = '0';
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('terminal:open'));
+      }, 150);
+    });
+
+    // Fade back in when full-screen shell closes
+    window.addEventListener('terminal:closed', () => {
+      output.style.opacity = '1';
+    });
   })();
 </script>
 

@@ -324,6 +324,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		document.documentElement.classList.remove('terminal-mode');
 		announce('Terminal mode off');
 		setExpandButtonState(false);
+		window.dispatchEvent(new CustomEvent('terminal:closed'));
 		const prev = lastFocus;
 		if (prev instanceof HTMLElement) {
 			queueMicrotask(() => prev.focus());
@@ -450,6 +451,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	window.addEventListener('terminal:toggle', () => {
 		toggleMode();
+	});
+
+	window.addEventListener('terminal:open', () => {
+		if (!isOpen) openMode();
 	});
 
 	expandBtn?.addEventListener('click', () => {
