@@ -1,5 +1,5 @@
-import type { CommandResult, SiteTerminalData, TerminalState, ThemeName } from './terminal-types';
-import { VALID_THEMES } from './terminal-types';
+import type { CommandResult, SiteTerminalData, TerminalState, BrightnessTheme, ColorTheme } from './terminal-types';
+import { BRIGHTNESS_THEMES, COLOR_THEMES } from './terminal-types';
 import { isValidCwd, lsLines, resolveCd, routeForCwd } from './terminal-fs';
 
 const MAN_PAGES: Record<string, string[]> = {
@@ -292,27 +292,36 @@ export function runCommandLine(
 			return {
 				next: state,
 				lines: [
-					`available: ${VALID_THEMES.join(' · ')}`,
-					'usage: theme <name>',
-					'usage: theme inherit  (reset to default)',
+					'brightness: [light · dark]',
+					'color:      [inherit · green · amber · ice]',
+					'usage: theme <light|dark|inherit|green|amber|ice>',
 				],
 			};
 		}
 
-		if (!(VALID_THEMES as readonly string[]).includes(requested)) {
+		if ((BRIGHTNESS_THEMES as readonly string[]).includes(requested)) {
 			return {
 				next: state,
-				lines: [
-					`theme: unknown theme '${requested}'`,
-					`available: ${VALID_THEMES.join(' · ')}`,
-				],
+				lines: [`brightness: ${requested}`],
+				setBrightness: requested as BrightnessTheme,
+			};
+		}
+
+		if ((COLOR_THEMES as readonly string[]).includes(requested)) {
+			return {
+				next: state,
+				lines: [`color: ${requested}`],
+				setColor: requested as ColorTheme,
 			};
 		}
 
 		return {
 			next: state,
-			lines: [`theme: ${requested}`],
-			setTheme: requested as ThemeName,
+			lines: [
+				`theme: unknown theme '${requested}'`,
+				`brightness: light · dark`,
+				`color:      inherit · green · amber · ice`,
+			],
 		};
 	}
 
