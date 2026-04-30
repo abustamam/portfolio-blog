@@ -119,6 +119,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 <script>
   import { runCommandLine } from './terminal-commands';
+  import { getCompletion } from './terminal-completion';
   import {
 	handlePagerKey,
 	pageUp,
@@ -416,6 +417,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			input.value = '';
 			historyIndex = -1;
 			historyDraft = '';
+			return;
+		}
+		// Tab — command/path completion
+		if (e.key === 'Tab') {
+			e.preventDefault();
+			const result = getCompletion(input.value, state.cwd, siteData);
+			input.value = result.completed;
+			if (result.matches.length > 1) {
+				appendLine(result.matches.join('  '), 'text-mute');
+			}
+			queueMicrotask(() => {
+				input.selectionStart = input.selectionEnd = input.value.length;
+			});
 			return;
 		}
 		// Command history traversal (only when terminal is open and pager is not active)
