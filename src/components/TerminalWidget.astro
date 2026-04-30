@@ -36,14 +36,24 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   id="terminal-widget"
   class="bg-code border border-line rounded font-mono text-xs overflow-hidden flex flex-col"
 >
-  <!-- Chrome bar -->
-  <div class="py-2 px-3.5 border-b border-line flex justify-between items-center text-faint text-10 tracking-loose uppercase shrink-0">
-    <span>whoami.sh</span>
-    <button
-      id="widget-expand-btn"
-      type="button"
-      class="text-accent bg-transparent border border-line rounded-sm px-2 py-0.5 uppercase tracking-snug hover:border-accent"
-    >expand ↗</button>
+  <!-- Chrome bar (matches TerminalModeShell) -->
+  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute shrink-0">
+    <div class="flex items-center gap-1.5">
+      <button
+        id="widget-expand-btn"
+        type="button"
+        class="p-3 -m-3 flex items-center justify-center"
+        aria-label="Open terminal in full-screen mode"
+      >
+        <span class="w-2 h-2 rounded-full bg-danger border border-line pointer-events-none"></span>
+      </button>
+      <span class="w-2 h-2 rounded-full bg-faint border border-line"></span>
+      <span class="w-2 h-2 rounded-full bg-accent border border-line"></span>
+    </div>
+    <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
+      terminal <span class="text-faint">·</span> <span id="widget-top-path">~</span>
+    </div>
+    <div class="font-mono text-10 uppercase tracking-snug text-faint">simulated</div>
   </div>
 
   <!-- Scrollable output area -->
@@ -104,6 +114,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
     const cwdEl     = document.getElementById('widget-cwd') as HTMLElement | null;
     const expandBtn = document.getElementById('widget-expand-btn') as HTMLButtonElement | null;
+    const topPathEl = document.getElementById('widget-top-path') as HTMLElement | null;
 
     if (!widgetEl || !outputEl || !formEl || !inputEl || !cwdEl) return;
 
@@ -160,6 +171,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
     function renderCwd() {
       cwd.textContent = `${state.cwd} $`;
+      if (topPathEl) topPathEl.textContent = state.cwd;
     }
 
     // Cursor tracking — position the block cursor after the current text up to caret

@@ -99,14 +99,21 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   </div>
   <form id="terminal-prompt-form" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
     <span id="terminal-cwd" class="shrink-0 text-accent"></span>
-    <input
-      id="terminal-input"
-      type="text"
-      class="min-w-0 flex-1 border-none bg-transparent text-xs text-ink outline-none"
-      autocomplete="off"
-      spellcheck="false"
-      aria-label="Terminal command line"
-    />
+    <div class="flex items-center flex-1 min-w-0 relative">
+      <input
+        id="terminal-input"
+        type="text"
+        class="flex-1 border-none bg-transparent text-xs text-ink outline-none"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Terminal command line"
+      />
+      <span
+        id="terminal-cursor"
+        class="absolute left-0 top-1/2 -translate-y-1/2 w-1.75 h-3.25 bg-accent animate-[termBlink_1s_step-end_infinite]"
+        aria-hidden="true"
+      ></span>
+    </div>
   </form>
 </section>
 
@@ -169,9 +176,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	const pagerMeta = document.getElementById('terminal-pager-meta');
 	const pagerPrev = document.getElementById('terminal-pager-prev') as HTMLButtonElement | null;
 	const pagerNext = document.getElementById('terminal-pager-next') as HTMLButtonElement | null;
-	const pagerHint = document.getElementById('terminal-pager-hint') as HTMLElement | null;
+  const pagerHint = document.getElementById('terminal-pager-hint') as HTMLElement | null;
+  const cursorEl = document.getElementById('terminal-cursor') as HTMLElement | null;
 
-	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
+  if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
 
 	const shell = shellEl as HTMLElement;
 	const live = liveEl as HTMLElement;
@@ -222,6 +230,24 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	function renderCwd() {
 		cwd.textContent = `${state.cwd} $`;
 		topPath.textContent = state.cwd;
+	}
+
+	// Cursor tracking — position block cursor at caret
+	let _measureSpan: HTMLSpanElement | null = null;
+	function syncCursor(text: string, pos?: number) {
+		if (!cursorEl) return;
+		const slice = pos !== undefined ? text.slice(0, pos) : text;
+		if (!slice) { cursorEl.style.left = '0px'; return; }
+		if (!_measureSpan) {
+			_measureSpan = document.createElement('span');
+			_measureSpan.style.visibility = 'hidden';
+			_measureSpan.style.position = 'absolute';
+			_measureSpan.style.whiteSpace = 'pre';
+			_measureSpan.style.font = getComputedStyle(input).font;
+			form.appendChild(_measureSpan);
+		}
+		_measureSpan.textContent = slice;
+		cursorEl.style.left = `${_measureSpan.offsetWidth}px`;
 	}
 
 	function appendLine(text: string, className = 'text-mute') {
@@ -417,6 +443,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		queueMicrotask(() => input.focus());
 	}
 
+	// Track typing for cursor position
+	input.addEventListener('input', () => syncCursor(input.value, input.selectionStart ?? undefined));
+
+	// Arrow left/right for cursor tracking
+	input.addEventListener('keyup', (e: KeyboardEvent) => {
+		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+			syncCursor(input.value, input.selectionStart ?? undefined);
+		}
+	});
+	input.addEventListener('click', () => {
+		syncCursor(input.value, input.selectionStart ?? undefined);
+	});
+
 	document.addEventListener('keydown', (e: KeyboardEvent) => {
 		const mod = e.metaKey || e.ctrlKey;
 		if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
@@ -441,6 +480,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		if (e.ctrlKey && !e.shiftKey && e.key === 'l') {
 			e.preventDefault();
 			clearOutput();
+			syncCursor('');
 			queueMicrotask(() => input.focus());
 			return;
 		}
@@ -448,6 +488,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
 			e.preventDefault();
 			input.value = '';
+			syncCursor('');
 			historyIndex = -1;
 			historyDraft = '';
 			return;
@@ -462,6 +503,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			}
 			queueMicrotask(() => {
 				input.selectionStart = input.selectionEnd = input.value.length;
+				syncCursor(input.value);
 			});
 			return;
 		}
@@ -471,14 +513,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			if (historyIndex === -1) historyDraft = input.value;
 			historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
 			input.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
-			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
 		}
 		if (e.key === 'ArrowDown' && historyIndex >= 0) {
 			e.preventDefault();
 			historyIndex--;
 			input.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
-			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
 		}
+	});
+
+	// Reset cursor on submit
+	form.addEventListener('submit', () => {
+		syncCursor('');
 	});
 
 	window.addEventListener('terminal:toggle', () => {
