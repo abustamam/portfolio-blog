@@ -83,6 +83,7 @@
   --color-accent-ink: #7dd3fc;
 }
 
+/* green mirrors the @theme defaults — explicit for symmetry */
 [data-color-theme="green"] {
   --color-accent:     #1f6f43;
   --color-accent-bg:  #dbeadf;
