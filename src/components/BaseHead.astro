@@ -58,4 +58,16 @@ const imageUrl = typeof image === 'string' ? image : image.src;
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(imageUrl, Astro.url)} />
 
-<!-- Theme: prevent flash — ThemeToggle.astro handles this via .dark class on <html> -->
+<!-- Pre-paint: prevent brightness + color theme flash -->
+<script is:inline>
+  (function () {
+    var brightness = localStorage.getItem('theme') || 'light';
+    var color = localStorage.getItem('terminal:theme') || 'inherit';
+    document.documentElement.classList.toggle('dark', brightness === 'dark');
+    if (color !== 'inherit') {
+      document.documentElement.setAttribute('data-color-theme', color);
+    } else {
+      document.documentElement.removeAttribute('data-color-theme');
+    }
+  })();
+</script>
