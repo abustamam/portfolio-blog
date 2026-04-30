@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AuthorBio from '../components/AuthorBio.astro';
+import TerminalWidget from '../components/TerminalWidget.astro';
 
 const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -50,50 +51,8 @@ const latestSlug = allPosts[0]?.id ?? '';
       </div>
     </div>
 
-    <!-- Right: terminal card -->
-    <div class="bg-code border border-line rounded font-mono text-xs overflow-hidden">
-      <div class="py-2 px-3.5 border-b border-line flex justify-between text-faint text-10 tracking-loose uppercase">
-        <span>whoami.sh</span>
-        <button
-          id="hero-terminal-open"
-          type="button"
-          class="text-accent bg-transparent border border-line rounded-sm px-2 py-0.5 uppercase tracking-snug hover:border-accent"
-        >
-          terminal
-        </button>
-      </div>
-      <div class="pt-4.5 pb-5 px-4">
-        <div class="flex gap-2.5 mb-2.5 text-mute">
-          <span class="term-ts text-faint"></span>
-          <span class="text-ink">[WHO]</span>
-          <span>rasheed bustamam · independent consultant · california</span>
-        </div>
-        <div class="flex gap-2.5 mb-2.5 text-mute">
-          <span class="term-ts text-faint"></span>
-          <span class="text-ink">[IDX]</span>
-          <span>engineering journal · since 2019</span>
-        </div>
-        <div class="flex gap-2.5 mb-2.5 text-mute">
-          <span class="term-ts text-faint"></span>
-          <span class="text-accent font-semibold">[NEW]</span>
-          <span class="text-ink">{latestTitle}</span>
-        </div>
-        <div class="flex gap-2.5 mb-2.5 text-mute">
-          <span class="term-ts text-faint"></span>
-          <span class="text-accent font-semibold">[OPEN]</span>
-          <span class="text-ink">taking on new engagements for q3 2026</span>
-        </div>
-        <div class="flex gap-2.5 mt-3.5 text-ink items-center">
-          <span class="text-accent">$</span>
-          <span>cat journal/latest.md<span class="inline-block w-1.75 h-3.25 bg-accent ml-1 align-middle animate-[termBlink_1s_step-end_infinite]"></span></span>
-        </div>
-      </div>
-      <div class="py-3 px-3.5 border-t border-line flex items-center gap-2.5 text-10 text-faint tracking-loose uppercase">
-        <span class="text-ink font-mono tracking-normal text-13 font-medium">since 2019</span>
-        <span>·</span>
-        <span>an engineering journal</span>
-      </div>
-    </div>
+    <!-- Right: live terminal widget -->
+    <TerminalWidget />
   </section>
 
   <!-- Filter bar -->
@@ -252,19 +211,4 @@ const latestSlug = allPosts[0]?.id ?? '';
     }
   });
 
-  // ── Terminal timestamps (1.8s interval) ────────────
-  function updateTerminalTimestamps() {
-    const tsList = document.querySelectorAll<HTMLElement>('.term-ts');
-    tsList.forEach((el, i) => {
-      const ts = new Date(Date.now() - (tsList.length - i) * 2000);
-      el.textContent = ts.toISOString().slice(11, 19);
-    });
-  }
-  updateTerminalTimestamps();
-  setInterval(updateTerminalTimestamps, 1800);
-
-  // Hero terminal card opens fullscreen terminal mode
-  document.getElementById('hero-terminal-open')?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('terminal:toggle'));
-  });
 </script>
