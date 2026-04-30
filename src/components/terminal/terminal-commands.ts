@@ -239,12 +239,12 @@ export function runCommandLine(
 	if (alias === 'cat') {
 		const inner = state.cwd.startsWith('~/') ? state.cwd.slice(2) : '';
 		const parts = inner.split('/').filter(Boolean);
-		let slug: string | null = null;
-		if (parts[0] === 'writing' && parts.length === 2) slug = parts[1];
-		else if (parts[0] === 'writing' && parts.length === 1 && args[0]) slug = args[0].replace(/\/$/, '');
-		else if (parts[0] === 'writing' && parts.length === 0) {
+		if (parts[0] === 'writing' && parts.length === 0) {
 			return { next: state, lines: ['cat: not a file (cd into a post first)'] };
 		}
+		const slug = (parts[0] === 'writing' && parts.length === 1 && args[0])
+			? args[0].replace(/\/$/, '')
+			: null;
 
 		const file = args[0]?.toLowerCase();
 		if (parts[0] === 'writing' && parts.length === 2) {

@@ -1,0 +1,448 @@
+---
+import { getCollection } from 'astro:content';
+import { isPublished } from '../utils/content';
+import type { SiteTerminalData } from './terminal/terminal-types';
+
+const blogRaw = await getCollection('blog', ({ data }) => isPublished(data));
+const blog: SiteTerminalData['blog'] = blogRaw.map((p) => ({
+  id: p.id,
+  title: p.data.title,
+  body: typeof p.body === 'string' ? p.body : '',
+  pubDate: p.data.pubDate.toISOString().slice(0, 10),
+  tag: p.data.tag,
+  readMin: p.data.readMin,
+  words: p.data.words,
+}));
+
+const seriesRaw = await getCollection('series', ({ data }) => isPublished(data));
+const series: SiteTerminalData['series'] = seriesRaw.map((s) => ({
+  id: s.id,
+  title: s.data.title,
+}));
+
+const workRaw = await getCollection('work', ({ data }) => isPublished(data));
+const work: SiteTerminalData['work'] = workRaw.map((w) => ({
+  id: w.id,
+  company: w.data.company,
+  role: w.data.role,
+  period: w.data.period,
+}));
+
+const terminalData: SiteTerminalData = { blog, series, work };
+const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
+---
+
+<div
+  id="terminal-widget"
+  class="bg-code border border-line rounded font-mono text-xs overflow-hidden flex flex-col"
+>
+  <!-- Chrome bar (matches TerminalModeShell) -->
+  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute shrink-0">
+    <div class="flex items-center gap-1.5">
+      <button
+        id="widget-expand-btn"
+        type="button"
+        class="p-3 -m-3 flex items-center justify-center"
+        aria-label="Open terminal in full-screen mode"
+      >
+        <span id="widget-dot-1" class="w-2 h-2 rounded-full border border-line pointer-events-none bg-faint"></span>
+      </button>
+      <span id="widget-dot-2" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
+      <span id="widget-dot-3" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
+    </div>
+    <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
+      terminal <span class="text-faint">·</span> <span id="widget-top-path">~</span>
+    </div>
+    <div class="font-mono text-10 uppercase tracking-snug text-faint">simulated</div>
+  </div>
+
+  <!-- Scrollable output area -->
+  <div
+    id="widget-output"
+    class="h-48 overflow-y-auto p-4 leading-relaxed transition-opacity duration-150"
+    aria-live="polite"
+    aria-label="Terminal output"
+  ></div>
+
+  <!-- Prompt row -->
+  <form
+    id="widget-form"
+    aria-label="Terminal"
+    class="border-t border-line shrink-0 flex items-center gap-2 h-10 px-4"
+  >
+    <span id="widget-cwd" aria-hidden="true" class="shrink-0 text-accent text-xs">~ $</span>
+    <div class="flex items-center flex-1 min-w-0 relative">
+      <!-- Typewriter display span (visible during intro, hidden after) -->
+      <span id="widget-typewriter-display" class="text-ink text-xs"></span>
+      <!-- Real input (hidden during intro, shown after) -->
+      <input
+        id="widget-input"
+        type="text"
+        class="flex-1 border-none bg-transparent text-xs text-ink outline-none hidden"
+        style="caret-color: transparent"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Terminal command input"
+      />
+      <!-- Blocky blinking cursor -->
+      <span
+        id="widget-cursor"
+        class="absolute left-0 top-1/2 -translate-y-1/2 w-1.75 h-3.25 bg-accent animate-[termBlink_1s_step-end_infinite]"
+        aria-hidden="true"
+      ></span>
+    </div>
+  </form>
+</div>
+
+<!-- Embedded site data -->
+<script
+  type="application/json"
+  id="widget-site-data"
+  is:inline
+  set:html={terminalJson}
+></script>
+
+<script>
+  import { runCommandLine } from './terminal/terminal-commands';
+  import { getCompletion } from './terminal/terminal-completion';
+  import type { SiteTerminalData, TerminalState, TerminalWidgetBridge } from './terminal/terminal-types';
+
+  (function () {
+    const widgetEl  = document.getElementById('terminal-widget') as HTMLElement | null;
+    const outputEl  = document.getElementById('widget-output') as HTMLElement | null;
+    const formEl    = document.getElementById('widget-form') as HTMLFormElement | null;
+    const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
+    const cwdEl     = document.getElementById('widget-cwd') as HTMLElement | null;
+    const expandBtn = document.getElementById('widget-expand-btn') as HTMLButtonElement | null;
+    const topPathEl = document.getElementById('widget-top-path') as HTMLElement | null;
+
+    if (!widgetEl || !outputEl || !formEl || !inputEl || !cwdEl) return;
+
+    const widget = widgetEl;
+    const output = outputEl;
+    const form = formEl;
+    const input = inputEl;
+    const cwd = cwdEl;
+
+    // Read siteData from embedded JSON tag
+    const rawJson = document.getElementById('widget-site-data')?.textContent ?? '';
+    let siteData: SiteTerminalData;
+    try { siteData = JSON.parse(rawJson) as SiteTerminalData; }
+    catch { return; }
+
+    // State
+    let state: TerminalState = { cwd: '~' };
+    let historyBuffer: string[] = [];
+    let historyIndex = -1;
+    let historyDraft = '';
+    // Output buffer for serialization on expand (Task 4)
+    const outputBuffer: { text: string; cls: string }[] = [];
+
+    // localStorage helpers
+    function lsGet(key: string): string | null {
+      try { return localStorage.getItem(key); } catch { return null; }
+    }
+    function lsSet(key: string, value: string): void {
+      try { localStorage.setItem(key, value); } catch { /* private browsing */ }
+    }
+
+    // Theme
+    function applyTheme(name: string) {
+      if (name === 'inherit') {
+        widget.removeAttribute('data-theme');
+      } else {
+        widget.setAttribute('data-theme', name);
+      }
+    }
+
+    // Output
+    function appendLine(text: string, cls = 'text-mute') {
+      const row = document.createElement('div');
+      row.className = `mb-0.5 font-mono text-xs ${cls}`;
+      row.textContent = text;
+      output.appendChild(row);
+      output.scrollTop = output.scrollHeight;
+      outputBuffer.push({ text, cls });
+    }
+
+    function appendEcho(line: string) {
+      appendLine(`${state.cwd} $ ${line}`, 'text-ink');
+    }
+
+    function renderCwd() {
+      cwd.textContent = `${state.cwd} $`;
+      if (topPathEl) topPathEl.textContent = state.cwd;
+    }
+
+    // Cursor tracking — position the block cursor after the current text up to caret
+    const cursorEl = document.getElementById('widget-cursor') as HTMLElement | null;
+    const twDisplayEl = document.getElementById('widget-typewriter-display') as HTMLElement | null;
+    let _measureSpan: HTMLSpanElement | null = null;
+    function syncCursor(text: string, pos?: number) {
+      if (!cursorEl) return;
+      const slice = pos !== undefined ? text.slice(0, pos) : text;
+      if (!slice) { cursorEl.style.left = '0px'; return; }
+      if (!_measureSpan) {
+        _measureSpan = document.createElement('span');
+        _measureSpan.style.visibility = 'hidden';
+        _measureSpan.style.position = 'absolute';
+        _measureSpan.style.whiteSpace = 'pre';
+        _measureSpan.style.font = getComputedStyle(input!).font;
+        form.appendChild(_measureSpan);
+      }
+      _measureSpan.textContent = slice;
+      cursorEl.style.left = `${_measureSpan.offsetWidth}px`;
+    }
+
+    // Run a command — no pager (stream all lines into scrollable output)
+    function runLine(raw: string) {
+      const line = raw.trim();
+      if (!line) return;
+      appendEcho(line);
+      const prevCwd = state.cwd;
+      const result = runCommandLine(line, state, siteData);
+      state = result.next;
+      renderCwd();
+
+      if (state.cwd !== prevCwd) lsSet('terminal:cwd', state.cwd);
+      if (result.setTheme) {
+        applyTheme(result.setTheme);
+        lsSet('terminal:theme', result.setTheme);
+      }
+      if (result.navigateTo) { window.location.href = result.navigateTo; return; }
+      // In the widget, ignore closeTerminal — just print the lines
+      const cleared = result.lines.includes('__CLEAR__');
+      if (cleared) {
+        output.textContent = '';
+        outputBuffer.length = 0;
+      }
+      for (const ln of result.lines) {
+        if (ln !== '__CLEAR__') appendLine(ln, 'text-ink');
+      }
+      queueMicrotask(() => input.focus());
+    }
+
+    // Track typing in real-time for cursor position
+    input.addEventListener('input', () => syncCursor(input.value, input.selectionStart ?? undefined));
+
+    // Form submit
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const line = input.value;
+      if (line.trim()) {
+        historyBuffer.push(line.trim());
+        historyIndex = -1;
+        historyDraft = '';
+      }
+      input.value = '';
+      syncCursor('');
+      runLine(line);
+    });
+
+    // Keydown: Tab, ArrowUp/Down, Ctrl+C, ArrowLeft/Right
+    input.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const result = getCompletion(input.value, state.cwd, siteData);
+        input.value = result.completed;
+        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
+        if (result.matches.length > 1) appendLine(result.matches.join('  '), 'text-mute');
+        return;
+      }
+      if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
+        e.preventDefault();
+        input.value = '';
+        syncCursor('');
+        historyIndex = -1;
+        historyDraft = '';
+        return;
+      }
+      if (e.key === 'ArrowUp' && historyBuffer.length > 0) {
+        e.preventDefault();
+        if (historyIndex === -1) historyDraft = input.value;
+        historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
+        input.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
+        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
+      }
+      if (e.key === 'ArrowDown' && historyIndex >= 0) {
+        e.preventDefault();
+        historyIndex--;
+        input.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
+        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
+      }
+    });
+
+    // Cursor tracking: arrow keys, Home/End, Ctrl+A/E
+    input.addEventListener('keyup', (e: KeyboardEvent) => {
+      const movers = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+      if (movers.includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'e'))) {
+        syncCursor(input.value, input.selectionStart ?? undefined);
+      }
+    });
+    input.addEventListener('click', () => {
+      syncCursor(input.value, input.selectionStart ?? undefined);
+    });
+
+    // Click output area → focus input
+    output.addEventListener('click', () => {
+      input.focus();
+    });
+
+    // Focus indicator: border + traffic lights
+    const dot1 = document.getElementById('widget-dot-1') as HTMLElement | null;
+    const dot2 = document.getElementById('widget-dot-2') as HTMLElement | null;
+    const dot3 = document.getElementById('widget-dot-3') as HTMLElement | null;
+    function setFocused(on: boolean) {
+      widget.style.transition = 'border-color 0.2s ease';
+      widget.style.borderColor = on ? 'var(--color-accent)' : '';
+      if (dot1) dot1.className = on
+        ? 'w-2 h-2 rounded-full border border-line pointer-events-none bg-danger'
+        : 'w-2 h-2 rounded-full border border-line pointer-events-none bg-faint';
+      if (dot2) dot2.className = on
+        ? 'w-2 h-2 rounded-full border border-line bg-mute'
+        : 'w-2 h-2 rounded-full border border-line bg-faint';
+      if (dot3) dot3.className = on
+        ? 'w-2 h-2 rounded-full border border-line bg-accent'
+        : 'w-2 h-2 rounded-full border border-line bg-faint';
+    }
+
+    // Focus/blur: toggle cursor visibility
+    input.addEventListener('focus', () => {
+      if (cursorEl) cursorEl.style.display = '';
+      setFocused(true);
+      syncCursor(input.value, input.selectionStart ?? undefined);
+    });
+    input.addEventListener('blur', () => {
+      if (cursorEl) cursorEl.style.display = 'none';
+      setFocused(false);
+    });
+
+    // Start hidden — shown on first focus (typewriter will show it temporarily)
+    if (cursorEl) cursorEl.style.display = 'none';
+    // Show cursor during typewriter intro
+    function showCursorDuringIntro() {
+      if (cursorEl) cursorEl.style.display = '';
+    }
+    function hideCursorDuringIntro() {
+      if (cursorEl) cursorEl.style.display = 'none';
+    }
+
+    // Restore persisted state on load
+    const savedCwd = lsGet('terminal:cwd');
+    const savedTheme = lsGet('terminal:theme');
+    if (savedCwd) state = { cwd: savedCwd };
+    if (savedTheme) applyTheme(savedTheme);
+    renderCwd();
+
+    // Expose internals on the DOM element for the typewriter script and TerminalModeShell
+    (widget as HTMLElement & { __terminal: TerminalWidgetBridge }).__terminal = {
+      runLine,
+      syncCursor,
+      showCursor: showCursorDuringIntro,
+      hideCursor: hideCursorDuringIntro,
+      setFocused,
+      get state() { return state; },
+      outputBuffer,
+      historyBuffer,
+      input,
+    };
+
+    // Expand: open full-screen shell (session transferred via __terminal bridge, not localStorage)
+    expandBtn?.addEventListener('click', () => {
+      output.style.opacity = '0';
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('terminal:open'));
+      }, 150);
+    });
+
+    // Fade back in when full-screen shell closes; restore cwd/theme
+    window.addEventListener('terminal:closed', () => {
+      output.style.opacity = '1';
+      const savedCwd = lsGet('terminal:cwd');
+      const savedTheme = lsGet('terminal:theme');
+      if (savedCwd) state = { cwd: savedCwd };
+      if (savedTheme) applyTheme(savedTheme);
+      renderCwd();
+    });
+  })();
+</script>
+
+<script>
+  import type { TerminalWidgetBridge } from './terminal/terminal-types';
+
+  (function () {
+    const widgetEl  = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
+    const twDisplay = document.getElementById('widget-typewriter-display') as HTMLElement | null;
+    const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
+    if (!widgetEl || !twDisplay || !inputEl) return;
+
+    let introRun = false;
+
+    function runIntro() {
+      if (introRun) return;
+      introRun = true;
+
+      const term = widgetEl.__terminal;
+      if (!term) return;
+
+      term.setFocused(true);
+      term.showCursor();
+
+      const cmd = 'whoami';
+      let i = 0;
+
+      function typeNext() {
+        const text = cmd.slice(0, i);
+        twDisplay.textContent = text;
+        term.syncCursor(text);
+        i++;
+        if (i <= cmd.length) {
+          setTimeout(typeNext, 60);
+        } else {
+          // Typing complete — pause then run the command
+          setTimeout(() => {
+            twDisplay.textContent = '';
+            term.runLine(cmd);
+            // Hide typewriter cursor, show real input (focus handler will show cursor)
+            term.hideCursor();
+            twDisplay.classList.add('hidden');
+            inputEl!.classList.remove('hidden');
+            queueMicrotask(() => inputEl!.focus());
+          }, 300);
+        }
+      }
+
+      typeNext();
+    }
+
+    // IntersectionObserver: defer on mobile until widget enters viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect();
+          runIntro();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(widgetEl);
+  })();
+</script>
+
+<style is:global>
+  #terminal-widget[data-theme="green"] {
+    --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
+    --color-ink: #33ff33; --color-mute: #1a661a; --color-faint: #0f3a0f;
+    --color-accent: #00ff88; --color-line: #1a661a; --color-line-soft: #0f2a0f;
+  }
+  #terminal-widget[data-theme="amber"] {
+    --color-bg: #0d0800; --color-surface: #1a1000; --color-code: #080400;
+    --color-ink: #ffb000; --color-mute: #664a00; --color-faint: #3d2c00;
+    --color-accent: #ffcc44; --color-line: #664a00; --color-line-soft: #3d2c00;
+  }
+  #terminal-widget[data-theme="ice"] {
+    --color-bg: #060d14; --color-surface: #0d1a26; --color-code: #030a10;
+    --color-ink: #7dd3fc; --color-mute: #1e3a4f; --color-faint: #102030;
+    --color-accent: #38bdf8; --color-line: #1e3a4f; --color-line-soft: #102030;
+  }
+</style>

@@ -54,10 +54,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         class="p-3 -m-3 flex items-center justify-center"
         aria-label="Minimize terminal mode"
       >
-        <span class="w-2 h-2 rounded-full bg-danger border border-line pointer-events-none"></span>
+        <span id="terminal-dot-1" class="w-2 h-2 rounded-full border border-line pointer-events-none bg-faint"></span>
       </button>
-      <span class="w-2 h-2 rounded-full bg-faint border border-line"></span>
-      <span class="w-2 h-2 rounded-full bg-accent border border-line"></span>
+      <span id="terminal-dot-2" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
+      <span id="terminal-dot-3" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
     </div>
     <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
       terminal <span class="text-faint">·</span> <span id="terminal-top-path">~</span>
@@ -99,14 +99,22 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   </div>
   <form id="terminal-prompt-form" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
     <span id="terminal-cwd" class="shrink-0 text-accent"></span>
-    <input
-      id="terminal-input"
-      type="text"
-      class="min-w-0 flex-1 border-none bg-transparent text-xs text-ink outline-none"
-      autocomplete="off"
-      spellcheck="false"
-      aria-label="Terminal command line"
-    />
+    <div class="flex items-center flex-1 min-w-0 relative">
+      <input
+        id="terminal-input"
+        type="text"
+        class="flex-1 border-none bg-transparent text-xs text-ink outline-none"
+        style="caret-color: transparent"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Terminal command line"
+      />
+      <span
+        id="terminal-cursor"
+        class="absolute left-0 top-1/2 -translate-y-1/2 w-1.75 h-3.25 bg-accent animate-[termBlink_1s_step-end_infinite]"
+        aria-hidden="true"
+      ></span>
+    </div>
   </form>
 </section>
 
@@ -128,7 +136,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	sliceVisible,
 	type PagerState,
   } from './terminal-pager';
-  import type { SiteTerminalData, TerminalState } from './terminal-types';
+  import type { SiteTerminalData, TerminalState, TerminalWidgetBridge } from './terminal-types';
 
   function chromePathToCwd(path: string): string {
 	const p = (path || '/').replace(/\/+$/, '') || '/';
@@ -170,6 +178,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	const pagerPrev = document.getElementById('terminal-pager-prev') as HTMLButtonElement | null;
 	const pagerNext = document.getElementById('terminal-pager-next') as HTMLButtonElement | null;
 	const pagerHint = document.getElementById('terminal-pager-hint') as HTMLElement | null;
+	const cursorEl = document.getElementById('terminal-cursor') as HTMLElement | null;
 
 	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
 
@@ -195,6 +204,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	let historyIndex = -1;
 	let historyDraft = '';
 	let isOpen = false;
+	let isClosing = false;
 	let lastFocus: Element | null = null;
 
 	function lsGet(key: string): string | null {
@@ -222,6 +232,24 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	function renderCwd() {
 		cwd.textContent = `${state.cwd} $`;
 		topPath.textContent = state.cwd;
+	}
+
+	// Cursor tracking — position block cursor at caret
+	let _measureSpan: HTMLSpanElement | null = null;
+	function syncCursor(text: string, pos?: number) {
+		if (!cursorEl) return;
+		const slice = pos !== undefined ? text.slice(0, pos) : text;
+		if (!slice) { cursorEl.style.left = '0px'; return; }
+		if (!_measureSpan) {
+			_measureSpan = document.createElement('span');
+			_measureSpan.style.visibility = 'hidden';
+			_measureSpan.style.position = 'absolute';
+			_measureSpan.style.whiteSpace = 'pre';
+			_measureSpan.style.font = getComputedStyle(input).font;
+			form.appendChild(_measureSpan);
+		}
+		_measureSpan.textContent = slice;
+		cursorEl.style.left = `${_measureSpan.offsetWidth}px`;
 	}
 
 	function appendLine(text: string, className = 'text-mute') {
@@ -293,43 +321,120 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	}
 
 	function openMode() {
-		if (isOpen) return;
-		lastFocus = document.activeElement;
-		isOpen = true;
-		shell.classList.remove('hidden');
-		shell.setAttribute('aria-hidden', 'false');
-		shell.setAttribute('aria-modal', 'true');
-		inertSiblings?.setAttribute('inert', '');
-		document.documentElement.classList.add('terminal-mode');
-		renderCwd();
-		announce('Terminal mode on');
-		setExpandButtonState(true);
-		queueMicrotask(() => input.focus());
-		syncViewportHeight();
-		lsSet('terminal:open', '1');
-	}
+    if (isOpen || isClosing) return;
+    lastFocus = document.activeElement;
+    isOpen = true;
+    // Start off-screen + transparent for slide-up animation
+    shell.style.transform = 'translateY(20px)';
+    shell.style.opacity = '0';
+    shell.classList.remove('hidden');
+    // Force reflow so the transition triggers
+    shell.offsetHeight;
+    shell.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+    shell.style.transform = 'translateY(0)';
+    shell.style.opacity = '1';
+    shell.setAttribute('aria-hidden', 'false');
+    shell.setAttribute('aria-modal', 'true');
+    inertSiblings?.setAttribute('inert', '');
+    document.documentElement.classList.add('terminal-mode');
+    // Consume widget session lines (one-shot handoff from TerminalWidget)
+    // Try direct widget element first (for hotkey/programmatic opens), then fallback to localStorage
+    let sessionLines: { text: string; cls: string }[] | null = null;
+    const widgetEl = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
+    if (widgetEl?.__terminal?.outputBuffer) {
+      sessionLines = widgetEl.__terminal.outputBuffer;
+      // Do NOT clear — widget may still be used after closing full-screen
+    }
+    if (!sessionLines) {
+      const lsLines = lsGet('terminal:session-lines');
+      if (lsLines) {
+        try {
+          sessionLines = JSON.parse(lsLines) as { text: string; cls: string }[];
+        } catch { /* malformed — skip */ }
+        try { localStorage.removeItem('terminal:session-lines'); } catch { /* private browsing */ }
+      }
+    }
+    if (sessionLines) {
+      for (const { text, cls } of sessionLines) appendLine(text, cls);
+    }
+    // Pre-populate history from widget session (persists — not deleted)
+    if (widgetEl?.__terminal?.historyBuffer?.length) {
+      historyBuffer = [...widgetEl.__terminal.historyBuffer];
+    }
+    if (historyBuffer.length === 0) {
+      const sessionHistoryRaw = lsGet('terminal:history');
+      if (sessionHistoryRaw) {
+        try {
+          const hist = JSON.parse(sessionHistoryRaw) as string[];
+          if (hist.length > 0) historyBuffer = hist;
+        } catch { /* malformed JSON — skip */ }
+      }
+    }
+    // Restore cwd/theme from widget state if present
+    if (widgetEl?.__terminal?.state) {
+      const ws = widgetEl.__terminal.state;
+      if (ws.cwd !== state.cwd) {
+        state.cwd = ws.cwd;
+      }
+      if (widgetEl?.getAttribute('data-theme')) {
+        applyTheme(widgetEl.getAttribute('data-theme')!);
+      }
+    }
+    renderCwd();
+    announce('Terminal mode on');
+    setExpandButtonState(true);
+    setFocused(true);
+    queueMicrotask(() => input.focus());
+    syncViewportHeight();
+    lsSet('terminal:open', '1');
+  }
 
-	function closeMode() {
-		if (!isOpen) return;
-		if (pagerState) closePager();
-		historyIndex = -1;
-		historyDraft = '';
-		isOpen = false;
-		lsSet('terminal:open', '0');
-		shell.style.height = '100dvh';
-		shell.classList.add('hidden');
-		shell.setAttribute('aria-hidden', 'true');
-		shell.removeAttribute('aria-modal');
-		inertSiblings?.removeAttribute('inert');
-		document.documentElement.classList.remove('terminal-mode');
-		announce('Terminal mode off');
-		setExpandButtonState(false);
-		const prev = lastFocus;
-		if (prev instanceof HTMLElement) {
-			queueMicrotask(() => prev.focus());
-		}
-		lastFocus = null;
-	}
+  function closeMode() {
+    if (!isOpen) return;
+    if (pagerState) closePager();
+    historyIndex = -1;
+    historyDraft = '';
+    isOpen = false;
+    isClosing = true;
+    lsSet('terminal:open', '0');
+    // Fade out before hiding
+    shell.style.transition = 'transform 0.15s ease-in, opacity 0.15s ease-in';
+    shell.style.transform = 'translateY(10px)';
+    shell.style.opacity = '0';
+    setTimeout(() => {
+      // Sync state back to widget before it fades back in
+      const widgetEl = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
+      if (widgetEl?.__terminal) {
+        widgetEl.__terminal.historyBuffer = [...historyBuffer];
+        lsSet('terminal:cwd', state.cwd);
+        const currentTheme = shell.getAttribute('data-theme');
+        if (currentTheme) {
+          widgetEl.setAttribute('data-theme', currentTheme);
+          lsSet('terminal:theme', currentTheme);
+        } else {
+          widgetEl.removeAttribute('data-theme');
+          lsSet('terminal:theme', 'inherit');
+        }
+      }
+      shell.style.height = '100dvh';
+      shell.classList.add('hidden');
+      shell.style.boxShadow = '';
+      shell.setAttribute('aria-hidden', 'true');
+      shell.removeAttribute('aria-modal');
+      shell.removeAttribute('style');
+      inertSiblings?.removeAttribute('inert');
+      document.documentElement.classList.remove('terminal-mode');
+      announce('Terminal mode off');
+      setExpandButtonState(false);
+      isClosing = false;
+      window.dispatchEvent(new CustomEvent('terminal:closed'));
+      const prev = lastFocus;
+      if (prev instanceof HTMLElement) {
+        queueMicrotask(() => prev.focus());
+      }
+      lastFocus = null;
+    }, 160);
+  }
 
 	function toggleMode() {
 		if (isOpen) closeMode();
@@ -384,6 +489,57 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		queueMicrotask(() => input.focus());
 	}
 
+	// Track typing for cursor position
+	input.addEventListener('input', () => syncCursor(input.value, input.selectionStart ?? undefined));
+
+	// Cursor tracking: arrow keys, Home/End, Ctrl+A/E
+	input.addEventListener('keyup', (e: KeyboardEvent) => {
+		const movers = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+		if (movers.includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'e'))) {
+			syncCursor(input.value, input.selectionStart ?? undefined);
+		}
+	});
+	input.addEventListener('click', () => {
+		syncCursor(input.value, input.selectionStart ?? undefined);
+	});
+
+	// Click output area → focus input
+	output.addEventListener('click', () => {
+		input.focus();
+	});
+
+	// Focus indicator: border + traffic lights
+	const dot1 = document.getElementById('terminal-dot-1') as HTMLElement | null;
+	const dot2 = document.getElementById('terminal-dot-2') as HTMLElement | null;
+	const dot3 = document.getElementById('terminal-dot-3') as HTMLElement | null;
+	function setFocused(on: boolean) {
+		shell.style.transition = 'box-shadow 0.2s ease';
+		shell.style.boxShadow = on ? 'inset 0 0 0 2px var(--color-accent)' : '';
+		if (dot1) dot1.className = on
+			? 'w-2 h-2 rounded-full border border-line pointer-events-none bg-danger'
+			: 'w-2 h-2 rounded-full border border-line pointer-events-none bg-faint';
+		if (dot2) dot2.className = on
+			? 'w-2 h-2 rounded-full border border-line bg-mute'
+			: 'w-2 h-2 rounded-full border border-line bg-faint';
+		if (dot3) dot3.className = on
+			? 'w-2 h-2 rounded-full border border-line bg-accent'
+			: 'w-2 h-2 rounded-full border border-line bg-faint';
+	}
+
+	// Focus/blur: toggle cursor visibility
+	input.addEventListener('focus', () => {
+		if (cursorEl) cursorEl.style.display = '';
+		setFocused(true);
+		syncCursor(input.value, input.selectionStart ?? undefined);
+	});
+	input.addEventListener('blur', () => {
+		if (cursorEl) cursorEl.style.display = 'none';
+		setFocused(false);
+	});
+
+	// Start hidden — shown on first focus
+	if (cursorEl) cursorEl.style.display = 'none';
+
 	document.addEventListener('keydown', (e: KeyboardEvent) => {
 		const mod = e.metaKey || e.ctrlKey;
 		if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
@@ -408,6 +564,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		if (e.ctrlKey && !e.shiftKey && e.key === 'l') {
 			e.preventDefault();
 			clearOutput();
+			syncCursor('');
 			queueMicrotask(() => input.focus());
 			return;
 		}
@@ -415,6 +572,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
 			e.preventDefault();
 			input.value = '';
+			syncCursor('');
 			historyIndex = -1;
 			historyDraft = '';
 			return;
@@ -429,6 +587,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			}
 			queueMicrotask(() => {
 				input.selectionStart = input.selectionEnd = input.value.length;
+				syncCursor(input.value);
 			});
 			return;
 		}
@@ -438,18 +597,22 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			if (historyIndex === -1) historyDraft = input.value;
 			historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
 			input.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
-			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
 		}
 		if (e.key === 'ArrowDown' && historyIndex >= 0) {
 			e.preventDefault();
 			historyIndex--;
 			input.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
-			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+			queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
 		}
 	});
 
 	window.addEventListener('terminal:toggle', () => {
 		toggleMode();
+	});
+
+	window.addEventListener('terminal:open', () => {
+		if (!isOpen) openMode();
 	});
 
 	expandBtn?.addEventListener('click', () => {
@@ -477,6 +640,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			historyDraft = '';
 		}
 		input.value = '';
+		syncCursor('');
 		runLine(line);
 	});
 
