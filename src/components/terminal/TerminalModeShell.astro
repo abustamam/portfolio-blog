@@ -292,15 +292,23 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		}
 	}
 
-	function openMode() {
-		if (isOpen) return;
-		lastFocus = document.activeElement;
-		isOpen = true;
-		shell.classList.remove('hidden');
-		shell.setAttribute('aria-hidden', 'false');
-		shell.setAttribute('aria-modal', 'true');
-		inertSiblings?.setAttribute('inert', '');
-		document.documentElement.classList.add('terminal-mode');
+  function openMode() {
+    if (isOpen) return;
+    lastFocus = document.activeElement;
+    isOpen = true;
+    // Start off-screen + transparent for slide-up animation
+    shell.style.transform = 'translateY(20px)';
+    shell.style.opacity = '0';
+    shell.classList.remove('hidden');
+    // Force reflow so the transition triggers
+    shell.offsetHeight;
+    shell.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+    shell.style.transform = 'translateY(0)';
+    shell.style.opacity = '1';
+    shell.setAttribute('aria-hidden', 'false');
+    shell.setAttribute('aria-modal', 'true');
+    inertSiblings?.setAttribute('inert', '');
+    document.documentElement.classList.add('terminal-mode');
 		// Consume widget session lines (one-shot handoff from TerminalWidget)
 		const sessionLinesRaw = lsGet('terminal:session-lines');
 		if (sessionLinesRaw) {
@@ -326,28 +334,35 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		lsSet('terminal:open', '1');
 	}
 
-	function closeMode() {
-		if (!isOpen) return;
-		if (pagerState) closePager();
-		historyIndex = -1;
-		historyDraft = '';
-		isOpen = false;
-		lsSet('terminal:open', '0');
-		shell.style.height = '100dvh';
-		shell.classList.add('hidden');
-		shell.setAttribute('aria-hidden', 'true');
-		shell.removeAttribute('aria-modal');
-		inertSiblings?.removeAttribute('inert');
-		document.documentElement.classList.remove('terminal-mode');
-		announce('Terminal mode off');
-		setExpandButtonState(false);
-		window.dispatchEvent(new CustomEvent('terminal:closed'));
-		const prev = lastFocus;
-		if (prev instanceof HTMLElement) {
-			queueMicrotask(() => prev.focus());
-		}
-		lastFocus = null;
-	}
+  function closeMode() {
+    if (!isOpen) return;
+    if (pagerState) closePager();
+    historyIndex = -1;
+    historyDraft = '';
+    isOpen = false;
+    lsSet('terminal:open', '0');
+    // Fade out before hiding
+    shell.style.transition = 'transform 0.15s ease-in, opacity 0.15s ease-in';
+    shell.style.transform = 'translateY(10px)';
+    shell.style.opacity = '0';
+    setTimeout(() => {
+      shell.style.height = '100dvh';
+      shell.classList.add('hidden');
+      shell.setAttribute('aria-hidden', 'true');
+      shell.removeAttribute('aria-modal');
+      shell.removeAttribute('style');
+      inertSiblings?.removeAttribute('inert');
+      document.documentElement.classList.remove('terminal-mode');
+      announce('Terminal mode off');
+      setExpandButtonState(false);
+      window.dispatchEvent(new CustomEvent('terminal:closed'));
+      const prev = lastFocus;
+      if (prev instanceof HTMLElement) {
+        queueMicrotask(() => prev.focus());
+      }
+      lastFocus = null;
+    }, 160);
+  }
 
 	function toggleMode() {
 		if (isOpen) closeMode();
