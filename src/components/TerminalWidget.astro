@@ -89,3 +89,165 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   is:inline
   set:html={terminalJson}
 ></script>
+
+<script>
+  import { runCommandLine } from './terminal/terminal-commands';
+  import { getCompletion } from './terminal/terminal-completion';
+  import type { SiteTerminalData, TerminalState } from './terminal/terminal-types';
+
+  (function () {
+    const widgetEl  = document.getElementById('terminal-widget') as HTMLElement | null;
+    const outputEl  = document.getElementById('widget-output') as HTMLElement | null;
+    const formEl    = document.getElementById('widget-form') as HTMLFormElement | null;
+    const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
+    const cwdEl     = document.getElementById('widget-cwd') as HTMLElement | null;
+    const expandBtn = document.getElementById('widget-expand-btn') as HTMLButtonElement | null;
+
+    if (!widgetEl || !outputEl || !formEl || !inputEl || !cwdEl) return;
+
+    // Read siteData from embedded JSON tag
+    const rawJson = document.getElementById('widget-site-data')?.textContent ?? '';
+    let siteData: SiteTerminalData;
+    try { siteData = JSON.parse(rawJson) as SiteTerminalData; }
+    catch { return; }
+
+    // State
+    let state: TerminalState = { cwd: '~' };
+    let historyBuffer: string[] = [];
+    let historyIndex = -1;
+    let historyDraft = '';
+    // Output buffer for serialization on expand (Task 4)
+    const outputBuffer: { text: string; cls: string }[] = [];
+
+    // localStorage helpers
+    function lsGet(key: string): string | null {
+      try { return localStorage.getItem(key); } catch { return null; }
+    }
+    function lsSet(key: string, value: string): void {
+      try { localStorage.setItem(key, value); } catch { /* private browsing */ }
+    }
+
+    // Theme
+    function applyTheme(name: string) {
+      if (name === 'inherit') {
+        widgetEl.removeAttribute('data-theme');
+      } else {
+        widgetEl.setAttribute('data-theme', name);
+      }
+    }
+
+    // Output
+    function appendLine(text: string, cls = 'text-mute') {
+      const row = document.createElement('div');
+      row.className = `mb-0.5 font-mono text-xs ${cls}`;
+      row.textContent = text;
+      outputEl!.appendChild(row);
+      outputEl!.scrollTop = outputEl!.scrollHeight;
+      outputBuffer.push({ text, cls });
+    }
+
+    function appendEcho(line: string) {
+      appendLine(`${state.cwd} $ ${line}`, 'text-ink');
+    }
+
+    function renderCwd() {
+      cwdEl!.textContent = `${state.cwd} $`;
+    }
+
+    // Run a command — no pager (stream all lines into scrollable output)
+    function runLine(raw: string) {
+      const line = raw.trim();
+      if (!line) return;
+      appendEcho(line);
+      const prevCwd = state.cwd;
+      const result = runCommandLine(line, state, siteData);
+      state = result.next;
+      renderCwd();
+
+      if (state.cwd !== prevCwd) lsSet('terminal:cwd', state.cwd);
+      if (result.setTheme) {
+        applyTheme(result.setTheme);
+        lsSet('terminal:theme', result.setTheme);
+      }
+      if (result.navigateTo) { window.location.href = result.navigateTo; return; }
+      // In the widget, ignore closeTerminal — just print the lines
+      for (const ln of result.lines) {
+        if (ln !== '__CLEAR__') appendLine(ln, 'text-ink');
+      }
+      queueMicrotask(() => inputEl!.focus());
+    }
+
+    // Form submit
+    formEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const line = inputEl.value;
+      if (line.trim()) {
+        historyBuffer.push(line.trim());
+        historyIndex = -1;
+        historyDraft = '';
+      }
+      inputEl.value = '';
+      runLine(line);
+    });
+
+    // Keydown: Tab, ArrowUp/Down, Ctrl+C
+    inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const result = getCompletion(inputEl.value, state.cwd, siteData);
+        inputEl.value = result.completed;
+        if (result.matches.length > 1) appendLine(result.matches.join('  '), 'text-mute');
+        queueMicrotask(() => { inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length; });
+        return;
+      }
+      if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
+        e.preventDefault();
+        inputEl.value = '';
+        historyIndex = -1;
+        historyDraft = '';
+        return;
+      }
+      if (e.key === 'ArrowUp' && historyBuffer.length > 0) {
+        e.preventDefault();
+        if (historyIndex === -1) historyDraft = inputEl.value;
+        historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
+        inputEl.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
+        queueMicrotask(() => { inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length; });
+      }
+      if (e.key === 'ArrowDown' && historyIndex >= 0) {
+        e.preventDefault();
+        historyIndex--;
+        inputEl.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
+        queueMicrotask(() => { inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length; });
+      }
+    });
+
+    // Restore persisted state on load
+    const savedCwd = lsGet('terminal:cwd');
+    const savedTheme = lsGet('terminal:theme');
+    if (savedCwd) state = { cwd: savedCwd };
+    if (savedTheme) applyTheme(savedTheme);
+    renderCwd();
+
+    // Expose internals on the DOM element for the typewriter script (Task 3)
+    (widgetEl as any).__terminal = { runLine, state, outputBuffer, historyBuffer, inputEl };
+  })();
+</script>
+
+<style is:global>
+  #terminal-widget[data-theme="green"] {
+    --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
+    --color-ink: #33ff33; --color-mute: #1a661a; --color-faint: #0f3a0f;
+    --color-accent: #00ff88; --color-line: #1a661a; --color-line-soft: #0f2a0f;
+  }
+  #terminal-widget[data-theme="amber"] {
+    --color-bg: #0d0800; --color-surface: #1a1000; --color-code: #080400;
+    --color-ink: #ffb000; --color-mute: #664a00; --color-faint: #3d2c00;
+    --color-accent: #ffcc44; --color-line: #664a00; --color-line-soft: #3d2c00;
+  }
+  #terminal-widget[data-theme="ice"] {
+    --color-bg: #060d14; --color-surface: #0d1a26; --color-code: #030a10;
+    --color-ink: #7dd3fc; --color-mute: #1e3a4f; --color-faint: #102030;
+    --color-accent: #38bdf8; --color-line: #1e3a4f; --color-line-soft: #102030;
+  }
+</style>
