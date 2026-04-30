@@ -251,6 +251,62 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   })();
 </script>
 
+<script>
+  (function () {
+    const widgetEl  = document.getElementById('terminal-widget') as HTMLElement | null;
+    const twDisplay = document.getElementById('widget-typewriter-display') as HTMLElement | null;
+    const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
+    if (!widgetEl || !twDisplay || !inputEl) return;
+
+    let introRun = false;
+
+    function runIntro() {
+      if (introRun) return;
+      introRun = true;
+
+      const term = (widgetEl as any).__terminal as {
+        runLine: (raw: string) => void;
+      } | undefined;
+      if (!term) return;
+
+      const cmd = 'whoami';
+      let i = 0;
+
+      function typeNext() {
+        twDisplay.textContent = cmd.slice(0, i);
+        i++;
+        if (i <= cmd.length) {
+          setTimeout(typeNext, 60);
+        } else {
+          // Typing complete — pause then run the command
+          setTimeout(() => {
+            twDisplay.textContent = '';
+            term.runLine(cmd);
+            // Show real input, hide typewriter display
+            twDisplay.classList.add('hidden');
+            inputEl!.classList.remove('hidden');
+            queueMicrotask(() => inputEl!.focus());
+          }, 300);
+        }
+      }
+
+      typeNext();
+    }
+
+    // IntersectionObserver: defer on mobile until widget enters viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect();
+          runIntro();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(widgetEl);
+  })();
+</script>
+
 <style is:global>
   #terminal-widget[data-theme="green"] {
     --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
