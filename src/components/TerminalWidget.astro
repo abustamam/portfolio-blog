@@ -61,24 +61,26 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     class="border-t border-line shrink-0 flex items-center gap-2 h-10 px-4"
   >
     <span id="widget-cwd" aria-hidden="true" class="shrink-0 text-accent text-xs">~ $</span>
-    <!-- Typewriter display span (visible during intro, hidden after) -->
-    <span id="widget-typewriter-display" class="text-ink text-xs"></span>
-    <!-- Real input (hidden during intro, shown after) -->
-    <input
-      id="widget-input"
-      type="text"
-      class="border-none bg-transparent text-xs text-ink outline-none hidden"
-      style="caret-color: transparent"
-      autocomplete="off"
-      spellcheck="false"
-      aria-label="Terminal command input"
-    />
-    <!-- Blocky blinking cursor -->
-    <span
-      id="widget-cursor"
-      class="inline-block w-1.75 h-3.25 bg-accent shrink-0 animate-[termBlink_1s_step-end_infinite]"
-      aria-hidden="true"
-    ></span>
+    <div class="flex items-center flex-1 min-w-0 relative">
+      <!-- Typewriter display span (visible during intro, hidden after) -->
+      <span id="widget-typewriter-display" class="text-ink text-xs"></span>
+      <!-- Real input (hidden during intro, shown after) -->
+      <input
+        id="widget-input"
+        type="text"
+        class="flex-1 border-none bg-transparent text-xs text-ink outline-none hidden"
+        style="caret-color: transparent"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Terminal command input"
+      />
+      <!-- Blocky blinking cursor -->
+      <span
+        id="widget-cursor"
+        class="absolute left-0 top-1/2 -translate-y-1/2 w-1.75 h-3.25 bg-accent animate-[termBlink_1s_step-end_infinite]"
+        aria-hidden="true"
+      ></span>
+    </div>
   </form>
 </div>
 
@@ -160,6 +162,25 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       cwd.textContent = `${state.cwd} $`;
     }
 
+    // Cursor tracking — position the block cursor after the current text
+    const cursorEl = document.getElementById('widget-cursor') as HTMLElement | null;
+    const twDisplayEl = document.getElementById('widget-typewriter-display') as HTMLElement | null;
+    let _measureSpan: HTMLSpanElement | null = null;
+    function syncCursor(text: string) {
+      if (!cursorEl) return;
+      if (!text) { cursorEl.style.left = '0px'; return; }
+      if (!_measureSpan) {
+        _measureSpan = document.createElement('span');
+        _measureSpan.style.visibility = 'hidden';
+        _measureSpan.style.position = 'absolute';
+        _measureSpan.style.whiteSpace = 'pre';
+        _measureSpan.style.font = getComputedStyle(input!).font;
+        form.appendChild(_measureSpan);
+      }
+      _measureSpan.textContent = text;
+      cursorEl.style.left = `${_measureSpan.offsetWidth}px`;
+    }
+
     // Run a command — no pager (stream all lines into scrollable output)
     function runLine(raw: string) {
       const line = raw.trim();
@@ -188,6 +209,9 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       queueMicrotask(() => input.focus());
     }
 
+    // Track typing in real-time for cursor position
+    input.addEventListener('input', () => syncCursor(input.value));
+
     // Form submit
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -198,6 +222,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         historyDraft = '';
       }
       input.value = '';
+      syncCursor('');
       runLine(line);
     });
 
@@ -207,6 +232,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         e.preventDefault();
         const result = getCompletion(input.value, state.cwd, siteData);
         input.value = result.completed;
+        syncCursor(input.value);
         if (result.matches.length > 1) appendLine(result.matches.join('  '), 'text-mute');
         queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
         return;
@@ -214,6 +240,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
         e.preventDefault();
         input.value = '';
+        syncCursor('');
         historyIndex = -1;
         historyDraft = '';
         return;
@@ -223,12 +250,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         if (historyIndex === -1) historyDraft = input.value;
         historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
         input.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
+        syncCursor(input.value);
         queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
       }
       if (e.key === 'ArrowDown' && historyIndex >= 0) {
         e.preventDefault();
         historyIndex--;
         input.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
+        syncCursor(input.value);
         queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
       }
     });
@@ -243,6 +272,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     // Expose internals on the DOM element for the typewriter script (Task 3)
     (widget as any).__terminal = {
       runLine,
+      syncCursor,
       get state() { return state; },
       outputBuffer,
       historyBuffer,
@@ -283,6 +313,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
       const term = (widgetEl as any).__terminal as {
         runLine: (raw: string) => void;
+        syncCursor: (text: string) => void;
       } | undefined;
       if (!term) return;
 
@@ -290,7 +321,9 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       let i = 0;
 
       function typeNext() {
-        twDisplay.textContent = cmd.slice(0, i);
+        const text = cmd.slice(0, i);
+        twDisplay.textContent = text;
+        term.syncCursor(text);
         i++;
         if (i <= cmd.length) {
           setTimeout(typeNext, 60);
@@ -302,6 +335,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
             // Show real input, hide typewriter display
             twDisplay.classList.add('hidden');
             inputEl!.classList.remove('hidden');
+            term.syncCursor('');
             queueMicrotask(() => inputEl!.focus());
           }, 300);
         }
