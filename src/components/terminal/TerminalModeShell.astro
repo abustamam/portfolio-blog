@@ -104,6 +104,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         id="terminal-input"
         type="text"
         class="flex-1 border-none bg-transparent text-xs text-ink outline-none"
+        style="caret-color: transparent"
         autocomplete="off"
         spellcheck="false"
         aria-label="Terminal command line"
@@ -495,6 +496,23 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	input.addEventListener('click', () => {
 		syncCursor(input.value, input.selectionStart ?? undefined);
 	});
+
+	// Click output area → focus input
+	output.addEventListener('click', () => {
+		input.focus();
+	});
+
+	// Focus/blur: toggle cursor visibility
+	input.addEventListener('focus', () => {
+		if (cursorEl) cursorEl.style.display = '';
+		syncCursor(input.value, input.selectionStart ?? undefined);
+	});
+	input.addEventListener('blur', () => {
+		if (cursorEl) cursorEl.style.display = 'none';
+	});
+
+	// Start hidden — shown on first focus
+	if (cursorEl) cursorEl.style.display = 'none';
 
 	document.addEventListener('keydown', (e: KeyboardEvent) => {
 		const mod = e.metaKey || e.ctrlKey;

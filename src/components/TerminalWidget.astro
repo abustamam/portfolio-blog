@@ -282,6 +282,30 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       syncCursor(input.value, input.selectionStart ?? undefined);
     });
 
+    // Click output area → focus input
+    output.addEventListener('click', () => {
+      input.focus();
+    });
+
+    // Focus/blur: toggle cursor visibility
+    input.addEventListener('focus', () => {
+      if (cursorEl) cursorEl.style.display = '';
+      syncCursor(input.value, input.selectionStart ?? undefined);
+    });
+    input.addEventListener('blur', () => {
+      if (cursorEl) cursorEl.style.display = 'none';
+    });
+
+    // Start hidden — shown on first focus (typewriter will show it temporarily)
+    if (cursorEl) cursorEl.style.display = 'none';
+    // Show cursor during typewriter intro
+    function showCursorDuringIntro() {
+      if (cursorEl) cursorEl.style.display = '';
+    }
+    function hideCursorDuringIntro() {
+      if (cursorEl) cursorEl.style.display = 'none';
+    }
+
     // Restore persisted state on load
     const savedCwd = lsGet('terminal:cwd');
     const savedTheme = lsGet('terminal:theme');
@@ -293,6 +317,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     (widget as any).__terminal = {
       runLine,
       syncCursor,
+      showCursor: showCursorDuringIntro,
+      hideCursor: hideCursorDuringIntro,
       get state() { return state; },
       outputBuffer,
       historyBuffer,
@@ -339,8 +365,12 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       const term = (widgetEl as any).__terminal as {
         runLine: (raw: string) => void;
         syncCursor: (text: string, pos?: number) => void;
+        showCursor: () => void;
+        hideCursor: () => void;
       } | undefined;
       if (!term) return;
+
+      term.showCursor();
 
       const cmd = 'whoami';
       let i = 0;
@@ -357,10 +387,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
           setTimeout(() => {
             twDisplay.textContent = '';
             term.runLine(cmd);
-            // Show real input, hide typewriter display
+            // Hide typewriter cursor, show real input (focus handler will show cursor)
+            term.hideCursor();
             twDisplay.classList.add('hidden');
             inputEl!.classList.remove('hidden');
-            term.syncCursor('');
             queueMicrotask(() => inputEl!.focus());
           }, 300);
         }
