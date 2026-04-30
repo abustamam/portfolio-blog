@@ -119,6 +119,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 <script>
   import { runCommandLine } from './terminal-commands';
+  import { getCompletion } from './terminal-completion';
   import {
 	handlePagerKey,
 	pageUp,
@@ -195,6 +196,13 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	let historyDraft = '';
 	let isOpen = false;
 	let lastFocus: Element | null = null;
+
+	function lsGet(key: string): string | null {
+		try { return localStorage.getItem(key); } catch { return null; }
+	}
+	function lsSet(key: string, value: string): void {
+		try { localStorage.setItem(key, value); } catch { /* private browsing */ }
+	}
 
 	function announce(msg: string) {
 		live.textContent = '';
@@ -276,6 +284,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		shell.style.height = `${h}px`;
 	}
 
+	function applyTheme(name: string) {
+		if (name === 'inherit') {
+			shell.removeAttribute('data-theme');
+		} else {
+			shell.setAttribute('data-theme', name);
+		}
+	}
+
 	function openMode() {
 		if (isOpen) return;
 		lastFocus = document.activeElement;
@@ -290,6 +306,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		setExpandButtonState(true);
 		queueMicrotask(() => input.focus());
 		syncViewportHeight();
+		lsSet('terminal:open', '1');
 	}
 
 	function closeMode() {
@@ -298,6 +315,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		historyIndex = -1;
 		historyDraft = '';
 		isOpen = false;
+		lsSet('terminal:open', '0');
 		shell.style.height = '100dvh';
 		shell.classList.add('hidden');
 		shell.setAttribute('aria-hidden', 'true');
@@ -329,9 +347,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		const line = raw.trim();
 		if (!line) return;
 		appendEcho(line);
+		const prevCwd = state.cwd;
 		const result = runCommandLine(line, state, siteData);
 		state = result.next;
 		renderCwd();
+
+		if (state.cwd !== prevCwd) {
+			lsSet('terminal:cwd', state.cwd);
+		}
+
+		if (result.setTheme) {
+			applyTheme(result.setTheme);
+			lsSet('terminal:theme', result.setTheme);
+		}
 
 		if (result.navigateTo) {
 			window.location.href = result.navigateTo;
@@ -374,6 +402,34 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 				pagerState = next;
 				renderPagerView();
 			}
+			return;
+		}
+		// Ctrl+L — clear output
+		if (e.ctrlKey && !e.shiftKey && e.key === 'l') {
+			e.preventDefault();
+			clearOutput();
+			queueMicrotask(() => input.focus());
+			return;
+		}
+		// Ctrl+C — cancel current input line
+		if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
+			e.preventDefault();
+			input.value = '';
+			historyIndex = -1;
+			historyDraft = '';
+			return;
+		}
+		// Tab — command/path completion
+		if (e.key === 'Tab') {
+			e.preventDefault();
+			const result = getCompletion(input.value, state.cwd, siteData);
+			input.value = result.completed;
+			if (result.matches.length > 1) {
+				appendLine(result.matches.join('  '), 'text-mute');
+			}
+			queueMicrotask(() => {
+				input.selectionStart = input.selectionEnd = input.value.length;
+			});
 			return;
 		}
 		// Command history traversal (only when terminal is open and pager is not active)
@@ -424,6 +480,13 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		runLine(line);
 	});
 
+	const savedCwd = lsGet('terminal:cwd');
+	const savedTheme = lsGet('terminal:theme');
+	const savedOpen = lsGet('terminal:open');
+	if (savedCwd) state = { cwd: savedCwd };
+	if (savedTheme) applyTheme(savedTheme);
+	if (savedOpen === '1') openMode();
+
 	setExpandButtonState(false);
 	renderCwd();
 
@@ -440,5 +503,44 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   }
   #terminal-input {
     font-size: 16px;
+  }
+
+  /* Green (CRT) theme */
+  #terminal-mode-shell[data-theme="green"] {
+    --color-bg: #0a0a0a;
+    --color-surface: #111111;
+    --color-code: #050505;
+    --color-ink: #33ff33;
+    --color-mute: #1a661a;
+    --color-faint: #0f3a0f;
+    --color-accent: #00ff88;
+    --color-line: #1a661a;
+    --color-line-soft: #0f2a0f;
+  }
+
+  /* Amber theme */
+  #terminal-mode-shell[data-theme="amber"] {
+    --color-bg: #0d0800;
+    --color-surface: #1a1000;
+    --color-code: #080400;
+    --color-ink: #ffb000;
+    --color-mute: #664a00;
+    --color-faint: #3d2c00;
+    --color-accent: #ffcc44;
+    --color-line: #664a00;
+    --color-line-soft: #3d2c00;
+  }
+
+  /* Ice theme */
+  #terminal-mode-shell[data-theme="ice"] {
+    --color-bg: #060d14;
+    --color-surface: #0d1a26;
+    --color-code: #030a10;
+    --color-ink: #7dd3fc;
+    --color-mute: #1e3a4f;
+    --color-faint: #102030;
+    --color-accent: #38bdf8;
+    --color-line: #1e3a4f;
+    --color-line-soft: #102030;
   }
 </style>

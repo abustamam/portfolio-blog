@@ -1,4 +1,5 @@
-import type { CommandResult, SiteTerminalData, TerminalState } from './terminal-types';
+import type { CommandResult, SiteTerminalData, TerminalState, ThemeName } from './terminal-types';
+import { VALID_THEMES } from './terminal-types';
 import { isValidCwd, lsLines, resolveCd, routeForCwd } from './terminal-fs';
 
 const MAN_PAGES: Record<string, string[]> = {
@@ -35,7 +36,7 @@ const MAN_PAGES: Record<string, string[]> = {
 		'DESCRIPTION',
 		'  Not everything is listed in help.',
 		'  If you found this page, you are already doing great.',
-		'  Try: whoami, hint, and explore with cd.',
+		'  Try: whoami, hint, trace, coffee, and explore with cd.',
 	],
 	rasheed: [
 		'NAME',
@@ -112,6 +113,11 @@ export function runCommandLine(
 				: cmd0;
 	const args = tokens.slice(1);
 
+	if (tokens[0] === '..') {
+		const next = resolveCd(state.cwd, '..');
+		return { next: { cwd: next ?? state.cwd }, lines: [] };
+	}
+
 	if (alias === 'exit') {
 		return { next: state, lines: ['bye'], closeTerminal: true };
 	}
@@ -134,7 +140,41 @@ export function runCommandLine(
 	if (alias === 'hint') {
 		return {
 			next: state,
-			lines: ['try: man easter-eggs', 'try: cd writing && ls'],
+			lines: [
+				'try: man easter-eggs',
+				'try: trace',
+				'try: coffee',
+				'try: cd writing && ls',
+			],
+		};
+	}
+
+	if (alias === 'trace') {
+		return {
+			next: state,
+			lines: [
+				'Segmentation fault (core dumped)',
+				'#0  0x00000000 in existence ()',
+				'#1  0x0000002a in consulting.c:404',
+				'#2  0x00c0ffee in main ()',
+				'    at life.c:1',
+				'note: try turning it off and on again',
+			],
+		};
+	}
+
+	if (alias === 'coffee') {
+		return {
+			next: state,
+			lines: [
+				'     ( (',
+				'      ) )',
+				'   .______.',
+				'   |      |]',
+				'   \\      /',
+				"    `----'",
+				'> brewing ideas since 2019',
+			],
 		};
 	}
 
@@ -246,9 +286,33 @@ export function runCommandLine(
 	}
 
 	if (alias === 'theme') {
+		const requested = (args[0] ?? '').toLowerCase();
+
+		if (!requested) {
+			return {
+				next: state,
+				lines: [
+					`available: ${VALID_THEMES.join(' · ')}`,
+					'usage: theme <name>',
+					'usage: theme inherit  (reset to default)',
+				],
+			};
+		}
+
+		if (!(VALID_THEMES as readonly string[]).includes(requested)) {
+			return {
+				next: state,
+				lines: [
+					`theme: unknown theme '${requested}'`,
+					`available: ${VALID_THEMES.join(' · ')}`,
+				],
+			};
+		}
+
 		return {
 			next: state,
-			lines: ['theme: not wired yet (coming soon)'],
+			lines: [`theme: ${requested}`],
+			setTheme: requested as ThemeName,
 		};
 	}
 
