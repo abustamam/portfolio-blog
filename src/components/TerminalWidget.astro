@@ -162,13 +162,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       cwd.textContent = `${state.cwd} $`;
     }
 
-    // Cursor tracking — position the block cursor after the current text
+    // Cursor tracking — position the block cursor after the current text up to caret
     const cursorEl = document.getElementById('widget-cursor') as HTMLElement | null;
     const twDisplayEl = document.getElementById('widget-typewriter-display') as HTMLElement | null;
     let _measureSpan: HTMLSpanElement | null = null;
-    function syncCursor(text: string) {
+    function syncCursor(text: string, pos?: number) {
       if (!cursorEl) return;
-      if (!text) { cursorEl.style.left = '0px'; return; }
+      const slice = pos !== undefined ? text.slice(0, pos) : text;
+      if (!slice) { cursorEl.style.left = '0px'; return; }
       if (!_measureSpan) {
         _measureSpan = document.createElement('span');
         _measureSpan.style.visibility = 'hidden';
@@ -177,7 +178,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         _measureSpan.style.font = getComputedStyle(input!).font;
         form.appendChild(_measureSpan);
       }
-      _measureSpan.textContent = text;
+      _measureSpan.textContent = slice;
       cursorEl.style.left = `${_measureSpan.offsetWidth}px`;
     }
 
@@ -210,7 +211,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     }
 
     // Track typing in real-time for cursor position
-    input.addEventListener('input', () => syncCursor(input.value));
+    input.addEventListener('input', () => syncCursor(input.value, input.selectionStart ?? undefined));
 
     // Form submit
     form.addEventListener('submit', (e) => {
@@ -226,15 +227,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       runLine(line);
     });
 
-    // Keydown: Tab, ArrowUp/Down, Ctrl+C
+    // Keydown: Tab, ArrowUp/Down, Ctrl+C, ArrowLeft/Right
     input.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Tab') {
         e.preventDefault();
         const result = getCompletion(input.value, state.cwd, siteData);
         input.value = result.completed;
-        syncCursor(input.value);
+        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
         if (result.matches.length > 1) appendLine(result.matches.join('  '), 'text-mute');
-        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
         return;
       }
       if (e.ctrlKey && !e.shiftKey && e.key === 'c') {
@@ -250,16 +250,24 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         if (historyIndex === -1) historyDraft = input.value;
         historyIndex = Math.min(historyIndex + 1, historyBuffer.length - 1);
         input.value = historyBuffer[historyBuffer.length - 1 - historyIndex];
-        syncCursor(input.value);
-        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
       }
       if (e.key === 'ArrowDown' && historyIndex >= 0) {
         e.preventDefault();
         historyIndex--;
         input.value = historyIndex === -1 ? historyDraft : historyBuffer[historyBuffer.length - 1 - historyIndex];
-        syncCursor(input.value);
-        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; });
+        queueMicrotask(() => { input.selectionStart = input.selectionEnd = input.value.length; syncCursor(input.value); });
       }
+    });
+
+    // Arrow left/right for cursor tracking
+    input.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        syncCursor(input.value, input.selectionStart ?? undefined);
+      }
+    });
+    input.addEventListener('click', () => {
+      syncCursor(input.value, input.selectionStart ?? undefined);
     });
 
     // Restore persisted state on load
@@ -313,7 +321,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
       const term = (widgetEl as any).__terminal as {
         runLine: (raw: string) => void;
-        syncCursor: (text: string) => void;
+        syncCursor: (text: string, pos?: number) => void;
       } | undefined;
       if (!term) return;
 
