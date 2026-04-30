@@ -136,7 +136,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	sliceVisible,
 	type PagerState,
   } from './terminal-pager';
-  import type { SiteTerminalData, TerminalState } from './terminal-types';
+  import type { SiteTerminalData, TerminalState, TerminalWidgetBridge } from './terminal-types';
 
   function chromePathToCwd(path: string): string {
 	const p = (path || '/').replace(/\/+$/, '') || '/';
@@ -177,10 +177,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	const pagerMeta = document.getElementById('terminal-pager-meta');
 	const pagerPrev = document.getElementById('terminal-pager-prev') as HTMLButtonElement | null;
 	const pagerNext = document.getElementById('terminal-pager-next') as HTMLButtonElement | null;
-  const pagerHint = document.getElementById('terminal-pager-hint') as HTMLElement | null;
-  const cursorEl = document.getElementById('terminal-cursor') as HTMLElement | null;
+	const pagerHint = document.getElementById('terminal-pager-hint') as HTMLElement | null;
+	const cursorEl = document.getElementById('terminal-cursor') as HTMLElement | null;
 
-  if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
+	if (!shellEl || !liveEl || !cwdEl || !inputEl || !outputEl || !topPathEl || !formEl || !pagerWrap || !pagerBody || !pagerMeta) return;
 
 	const shell = shellEl as HTMLElement;
 	const live = liveEl as HTMLElement;
@@ -204,6 +204,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	let historyIndex = -1;
 	let historyDraft = '';
 	let isOpen = false;
+	let isClosing = false;
 	let lastFocus: Element | null = null;
 
 	function lsGet(key: string): string | null {
@@ -320,7 +321,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	}
 
 	function openMode() {
-    if (isOpen) return;
+    if (isOpen || isClosing) return;
     lastFocus = document.activeElement;
     isOpen = true;
     // Start off-screen + transparent for slide-up animation
@@ -339,7 +340,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     // Consume widget session lines (one-shot handoff from TerminalWidget)
     // Try direct widget element first (for hotkey/programmatic opens), then fallback to localStorage
     let sessionLines: { text: string; cls: string }[] | null = null;
-    const widgetEl = document.getElementById('terminal-widget') as any;
+    const widgetEl = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
     if (widgetEl?.__terminal?.outputBuffer) {
       sessionLines = widgetEl.__terminal.outputBuffer;
       // Do NOT clear — widget may still be used after closing full-screen
@@ -382,6 +383,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     renderCwd();
     announce('Terminal mode on');
     setExpandButtonState(true);
+    setFocused(true);
     queueMicrotask(() => input.focus());
     syncViewportHeight();
     lsSet('terminal:open', '1');
@@ -393,6 +395,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     historyIndex = -1;
     historyDraft = '';
     isOpen = false;
+    isClosing = true;
     lsSet('terminal:open', '0');
     // Fade out before hiding
     shell.style.transition = 'transform 0.15s ease-in, opacity 0.15s ease-in';
@@ -400,7 +403,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     shell.style.opacity = '0';
     setTimeout(() => {
       // Sync state back to widget before it fades back in
-      const widgetEl = document.getElementById('terminal-widget') as any;
+      const widgetEl = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
       if (widgetEl?.__terminal) {
         widgetEl.__terminal.historyBuffer = [...historyBuffer];
         lsSet('terminal:cwd', state.cwd);
@@ -423,6 +426,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       document.documentElement.classList.remove('terminal-mode');
       announce('Terminal mode off');
       setExpandButtonState(false);
+      isClosing = false;
       window.dispatchEvent(new CustomEvent('terminal:closed'));
       const prev = lastFocus;
       if (prev instanceof HTMLElement) {
@@ -488,9 +492,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	// Track typing for cursor position
 	input.addEventListener('input', () => syncCursor(input.value, input.selectionStart ?? undefined));
 
-	// Arrow left/right for cursor tracking
+	// Cursor tracking: arrow keys, Home/End, Ctrl+A/E
 	input.addEventListener('keyup', (e: KeyboardEvent) => {
-		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+		const movers = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+		if (movers.includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'e'))) {
 			syncCursor(input.value, input.selectionStart ?? undefined);
 		}
 	});
@@ -534,8 +539,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
 	// Start hidden — shown on first focus
 	if (cursorEl) cursorEl.style.display = 'none';
-	// Show focused state immediately on open
-	setFocused(true);
 
 	document.addEventListener('keydown', (e: KeyboardEvent) => {
 		const mod = e.metaKey || e.ctrlKey;
@@ -604,11 +607,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		}
 	});
 
-	// Reset cursor on submit
-	form.addEventListener('submit', () => {
-		syncCursor('');
-	});
-
 	window.addEventListener('terminal:toggle', () => {
 		toggleMode();
 	});
@@ -642,6 +640,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			historyDraft = '';
 		}
 		input.value = '';
+		syncCursor('');
 		runLine(line);
 	});
 

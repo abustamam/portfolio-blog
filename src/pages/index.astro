@@ -17,7 +17,6 @@ const rawTags = allPosts.map(p => p.data.tag).filter((t): t is string => Boolean
 const uniqueTags = Array.from(new Set(rawTags));
 const tags = ['All', ...uniqueTags];
 
-const latestTitle = allPosts[0]?.data.title.toLowerCase() ?? 'no posts yet';
 const latestSlug = allPosts[0]?.id ?? '';
 ---
 

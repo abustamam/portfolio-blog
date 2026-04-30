@@ -36,6 +36,18 @@ export interface SiteTerminalData {
 export const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'] as const;
 export type ThemeName = (typeof VALID_THEMES)[number];
 
+export interface TerminalWidgetBridge {
+	runLine: (raw: string) => void;
+	syncCursor: (value: string, pos?: number) => void;
+	showCursor: () => void;
+	hideCursor: () => void;
+	setFocused: (on: boolean) => void;
+	readonly state: TerminalState;
+	outputBuffer: { text: string; cls: string }[];
+	historyBuffer: string[];
+	input: HTMLInputElement;
+}
+
 export interface CommandResult {
 	next: TerminalState;
 	lines: string[];

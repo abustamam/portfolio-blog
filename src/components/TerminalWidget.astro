@@ -105,7 +105,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 <script>
   import { runCommandLine } from './terminal/terminal-commands';
   import { getCompletion } from './terminal/terminal-completion';
-  import type { SiteTerminalData, TerminalState } from './terminal/terminal-types';
+  import type { SiteTerminalData, TerminalState, TerminalWidgetBridge } from './terminal/terminal-types';
 
   (function () {
     const widgetEl  = document.getElementById('terminal-widget') as HTMLElement | null;
@@ -272,9 +272,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       }
     });
 
-    // Arrow left/right for cursor tracking
+    // Cursor tracking: arrow keys, Home/End, Ctrl+A/E
     input.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      const movers = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+      if (movers.includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'e'))) {
         syncCursor(input.value, input.selectionStart ?? undefined);
       }
     });
@@ -333,8 +334,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     if (savedTheme) applyTheme(savedTheme);
     renderCwd();
 
-    // Expose internals on the DOM element for the typewriter script (Task 3)
-    (widget as any).__terminal = {
+    // Expose internals on the DOM element for the typewriter script and TerminalModeShell
+    (widget as HTMLElement & { __terminal: TerminalWidgetBridge }).__terminal = {
       runLine,
       syncCursor,
       showCursor: showCursorDuringIntro,
@@ -346,12 +347,8 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       input,
     };
 
-    // Expand: serialize session and open full-screen shell
+    // Expand: open full-screen shell (session transferred via __terminal bridge, not localStorage)
     expandBtn?.addEventListener('click', () => {
-      try {
-        localStorage.setItem('terminal:session-lines', JSON.stringify(outputBuffer));
-        localStorage.setItem('terminal:history', JSON.stringify(historyBuffer));
-      } catch { /* private browsing */ }
       output.style.opacity = '0';
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('terminal:open'));
@@ -371,8 +368,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 </script>
 
 <script>
+  import type { TerminalWidgetBridge } from './terminal/terminal-types';
+
   (function () {
-    const widgetEl  = document.getElementById('terminal-widget') as HTMLElement | null;
+    const widgetEl  = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
     const twDisplay = document.getElementById('widget-typewriter-display') as HTMLElement | null;
     const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
     if (!widgetEl || !twDisplay || !inputEl) return;
@@ -383,13 +382,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       if (introRun) return;
       introRun = true;
 
-      const term = (widgetEl as any).__terminal as {
-        runLine: (raw: string) => void;
-        syncCursor: (text: string, pos?: number) => void;
-        showCursor: () => void;
-        hideCursor: () => void;
-        setFocused: (on: boolean) => void;
-      } | undefined;
+      const term = widgetEl.__terminal;
       if (!term) return;
 
       term.setFocused(true);
