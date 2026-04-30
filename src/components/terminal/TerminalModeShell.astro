@@ -54,10 +54,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         class="p-3 -m-3 flex items-center justify-center"
         aria-label="Minimize terminal mode"
       >
-        <span class="w-2 h-2 rounded-full bg-danger border border-line pointer-events-none"></span>
+        <span id="terminal-dot-1" class="w-2 h-2 rounded-full border border-line pointer-events-none bg-faint"></span>
       </button>
-      <span class="w-2 h-2 rounded-full bg-faint border border-line"></span>
-      <span class="w-2 h-2 rounded-full bg-accent border border-line"></span>
+      <span id="terminal-dot-2" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
+      <span id="terminal-dot-3" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
     </div>
     <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
       terminal <span class="text-faint">·</span> <span id="terminal-top-path">~</span>
@@ -415,6 +415,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       }
       shell.style.height = '100dvh';
       shell.classList.add('hidden');
+      shell.style.boxShadow = '';
       shell.setAttribute('aria-hidden', 'true');
       shell.removeAttribute('aria-modal');
       shell.removeAttribute('style');
@@ -502,17 +503,39 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		input.focus();
 	});
 
+	// Focus indicator: border + traffic lights
+	const dot1 = document.getElementById('terminal-dot-1') as HTMLElement | null;
+	const dot2 = document.getElementById('terminal-dot-2') as HTMLElement | null;
+	const dot3 = document.getElementById('terminal-dot-3') as HTMLElement | null;
+	function setFocused(on: boolean) {
+		shell.style.transition = 'box-shadow 0.2s ease';
+		shell.style.boxShadow = on ? 'inset 0 0 0 2px var(--color-accent)' : '';
+		if (dot1) dot1.className = on
+			? 'w-2 h-2 rounded-full border border-line pointer-events-none bg-danger'
+			: 'w-2 h-2 rounded-full border border-line pointer-events-none bg-faint';
+		if (dot2) dot2.className = on
+			? 'w-2 h-2 rounded-full border border-line bg-mute'
+			: 'w-2 h-2 rounded-full border border-line bg-faint';
+		if (dot3) dot3.className = on
+			? 'w-2 h-2 rounded-full border border-line bg-accent'
+			: 'w-2 h-2 rounded-full border border-line bg-faint';
+	}
+
 	// Focus/blur: toggle cursor visibility
 	input.addEventListener('focus', () => {
 		if (cursorEl) cursorEl.style.display = '';
+		setFocused(true);
 		syncCursor(input.value, input.selectionStart ?? undefined);
 	});
 	input.addEventListener('blur', () => {
 		if (cursorEl) cursorEl.style.display = 'none';
+		setFocused(false);
 	});
 
 	// Start hidden — shown on first focus
 	if (cursorEl) cursorEl.style.display = 'none';
+	// Show focused state immediately on open
+	setFocused(true);
 
 	document.addEventListener('keydown', (e: KeyboardEvent) => {
 		const mod = e.metaKey || e.ctrlKey;
