@@ -33,7 +33,11 @@ export interface SiteTerminalData {
 	work: WorkPayload[];
 }
 
-export const VALID_THEMES = ['inherit', 'green', 'amber', 'ice'] as const;
+export const BRIGHTNESS_THEMES = ['light', 'dark'] as const;
+export const COLOR_THEMES = ['inherit', 'green', 'amber', 'ice'] as const;
+export const VALID_THEMES = [...BRIGHTNESS_THEMES, ...COLOR_THEMES] as const;
+export type BrightnessTheme = (typeof BRIGHTNESS_THEMES)[number];
+export type ColorTheme = (typeof COLOR_THEMES)[number];
 export type ThemeName = (typeof VALID_THEMES)[number];
 
 export interface TerminalWidgetBridge {
@@ -53,5 +57,6 @@ export interface CommandResult {
 	lines: string[];
 	closeTerminal?: boolean;
 	navigateTo?: string;
-	setTheme?: ThemeName;
+	setBrightness?: BrightnessTheme;
+	setColor?: ColorTheme;
 }
