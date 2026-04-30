@@ -318,7 +318,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		}
 	}
 
-  function openMode() {
+	function openMode() {
     if (isOpen) return;
     lastFocus = document.activeElement;
     isOpen = true;
@@ -335,30 +335,56 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     shell.setAttribute('aria-modal', 'true');
     inertSiblings?.setAttribute('inert', '');
     document.documentElement.classList.add('terminal-mode');
-		// Consume widget session lines (one-shot handoff from TerminalWidget)
-		const sessionLinesRaw = lsGet('terminal:session-lines');
-		if (sessionLinesRaw) {
-		  try {
-		    const lines = JSON.parse(sessionLinesRaw) as { text: string; cls: string }[];
-		    for (const { text, cls } of lines) appendLine(text, cls);
-		  } catch { /* malformed JSON — skip */ }
-		  try { localStorage.removeItem('terminal:session-lines'); } catch { /* private browsing */ }
-		}
-		// Pre-populate history from widget session (persists — not deleted)
-		const sessionHistoryRaw = lsGet('terminal:history');
-		if (sessionHistoryRaw) {
-		  try {
-		    const hist = JSON.parse(sessionHistoryRaw) as string[];
-		    if (hist.length > 0) historyBuffer = hist;
-		  } catch { /* malformed JSON — skip */ }
-		}
-		renderCwd();
-		announce('Terminal mode on');
-		setExpandButtonState(true);
-		queueMicrotask(() => input.focus());
-		syncViewportHeight();
-		lsSet('terminal:open', '1');
-	}
+    // Consume widget session lines (one-shot handoff from TerminalWidget)
+    // Try direct widget element first (for hotkey/programmatic opens), then fallback to localStorage
+    let sessionLines: { text: string; cls: string }[] | null = null;
+    const widgetEl = document.getElementById('terminal-widget') as any;
+    if (widgetEl?.__terminal?.outputBuffer) {
+      sessionLines = widgetEl.__terminal.outputBuffer;
+      // Do NOT clear — widget may still be used after closing full-screen
+    }
+    if (!sessionLines) {
+      const lsLines = lsGet('terminal:session-lines');
+      if (lsLines) {
+        try {
+          sessionLines = JSON.parse(lsLines) as { text: string; cls: string }[];
+        } catch { /* malformed — skip */ }
+        try { localStorage.removeItem('terminal:session-lines'); } catch { /* private browsing */ }
+      }
+    }
+    if (sessionLines) {
+      for (const { text, cls } of sessionLines) appendLine(text, cls);
+    }
+    // Pre-populate history from widget session (persists — not deleted)
+    if (widgetEl?.__terminal?.historyBuffer?.length) {
+      historyBuffer = [...widgetEl.__terminal.historyBuffer];
+    }
+    if (historyBuffer.length === 0) {
+      const sessionHistoryRaw = lsGet('terminal:history');
+      if (sessionHistoryRaw) {
+        try {
+          const hist = JSON.parse(sessionHistoryRaw) as string[];
+          if (hist.length > 0) historyBuffer = hist;
+        } catch { /* malformed JSON — skip */ }
+      }
+    }
+    // Restore cwd/theme from widget state if present
+    if (widgetEl?.__terminal?.state) {
+      const ws = widgetEl.__terminal.state;
+      if (ws.cwd !== state.cwd) {
+        state.cwd = ws.cwd;
+      }
+      if (widgetEl?.getAttribute('data-theme')) {
+        applyTheme(widgetEl.getAttribute('data-theme')!);
+      }
+    }
+    renderCwd();
+    announce('Terminal mode on');
+    setExpandButtonState(true);
+    queueMicrotask(() => input.focus());
+    syncViewportHeight();
+    lsSet('terminal:open', '1');
+  }
 
   function closeMode() {
     if (!isOpen) return;
@@ -372,6 +398,20 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     shell.style.transform = 'translateY(10px)';
     shell.style.opacity = '0';
     setTimeout(() => {
+      // Sync state back to widget before it fades back in
+      const widgetEl = document.getElementById('terminal-widget') as any;
+      if (widgetEl?.__terminal) {
+        widgetEl.__terminal.historyBuffer = [...historyBuffer];
+        lsSet('terminal:cwd', state.cwd);
+        const currentTheme = shell.getAttribute('data-theme');
+        if (currentTheme) {
+          widgetEl.setAttribute('data-theme', currentTheme);
+          lsSet('terminal:theme', currentTheme);
+        } else {
+          widgetEl.removeAttribute('data-theme');
+          lsSet('terminal:theme', 'inherit');
+        }
+      }
       shell.style.height = '100dvh';
       shell.classList.add('hidden');
       shell.setAttribute('aria-hidden', 'true');

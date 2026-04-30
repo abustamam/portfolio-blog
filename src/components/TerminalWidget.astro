@@ -311,9 +311,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       }, 150);
     });
 
-    // Fade back in when full-screen shell closes
+    // Fade back in when full-screen shell closes; restore cwd/theme
     window.addEventListener('terminal:closed', () => {
       output.style.opacity = '1';
+      const savedCwd = lsGet('terminal:cwd');
+      const savedTheme = lsGet('terminal:theme');
+      if (savedCwd) state = { cwd: savedCwd };
+      if (savedTheme) applyTheme(savedTheme);
+      renderCwd();
     });
   })();
 </script>
