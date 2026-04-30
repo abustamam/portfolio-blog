@@ -57,9 +57,10 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   <!-- Prompt row -->
   <form
     id="widget-form"
+    aria-label="Terminal"
     class="border-t border-line shrink-0 flex items-center gap-2 h-10 px-4"
   >
-    <span id="widget-cwd" class="shrink-0 text-accent text-xs">~ $</span>
+    <span id="widget-cwd" aria-hidden="true" class="shrink-0 text-accent text-xs">~ $</span>
     <!-- Typewriter display span (visible during intro, hidden after) -->
     <span id="widget-typewriter-display" class="text-ink text-xs"></span>
     <!-- Real input (hidden during intro, shown after) -->
