@@ -146,15 +146,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       try { localStorage.setItem(key, value); } catch { /* private browsing */ }
     }
 
-    // Theme
-    function applyTheme(name: string) {
-      if (name === 'inherit') {
-        widget.removeAttribute('data-theme');
-      } else {
-        widget.setAttribute('data-theme', name);
-      }
-    }
-
     // Output
     function appendLine(text: string, cls = 'text-mute') {
       const row = document.createElement('div');
@@ -205,9 +196,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       renderCwd();
 
       if (state.cwd !== prevCwd) lsSet('terminal:cwd', state.cwd);
-      if (result.setTheme) {
-        applyTheme(result.setTheme);
-        lsSet('terminal:theme', result.setTheme);
+      if (result.setBrightness) {
+        const applyBrightness = (window as any).__applyBrightness;
+        if (applyBrightness) applyBrightness(result.setBrightness);
+      }
+      if (result.setColor) {
+        const applyColor = (window as any).__applyColorTheme;
+        if (applyColor) applyColor(result.setColor);
+        if (result.setColor === 'inherit') {
+          widget.removeAttribute('data-theme');
+        } else {
+          widget.setAttribute('data-theme', result.setColor);
+        }
+        lsSet('terminal:theme', result.setColor);
       }
       if (result.navigateTo) { window.location.href = result.navigateTo; return; }
       // In the widget, ignore closeTerminal — just print the lines
@@ -329,9 +330,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
     // Restore persisted state on load
     const savedCwd = lsGet('terminal:cwd');
-    const savedTheme = lsGet('terminal:theme');
+    const savedColor = lsGet('terminal:theme');
     if (savedCwd) state = { cwd: savedCwd };
-    if (savedTheme) applyTheme(savedTheme);
+    // Restore color theme on widget element
+    if (savedColor && savedColor !== 'inherit') {
+      widget.setAttribute('data-theme', savedColor);
+    } else {
+      widget.removeAttribute('data-theme');
+    }
     renderCwd();
 
     // Expose internals on the DOM element for the typewriter script and TerminalModeShell
@@ -359,9 +365,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     window.addEventListener('terminal:closed', () => {
       output.style.opacity = '1';
       const savedCwd = lsGet('terminal:cwd');
-      const savedTheme = lsGet('terminal:theme');
+      const savedColor = lsGet('terminal:theme');
       if (savedCwd) state = { cwd: savedCwd };
-      if (savedTheme) applyTheme(savedTheme);
+      // Restore color theme on widget element
+      if (savedColor && savedColor !== 'inherit') {
+        widget.setAttribute('data-theme', savedColor);
+      } else {
+        widget.removeAttribute('data-theme');
+      }
       renderCwd();
     });
   })();
