@@ -1,0 +1,90 @@
+---
+import { getCollection } from 'astro:content';
+import { isPublished } from '../utils/content';
+import type { SiteTerminalData } from './terminal/terminal-types';
+
+const blogRaw = await getCollection('blog', ({ data }) => isPublished(data));
+const blog: SiteTerminalData['blog'] = blogRaw.map((p) => ({
+  id: p.id,
+  title: p.data.title,
+  body: typeof p.body === 'string' ? p.body : '',
+  pubDate: p.data.pubDate.toISOString().slice(0, 10),
+  tag: p.data.tag,
+  readMin: p.data.readMin,
+  words: p.data.words,
+}));
+
+const seriesRaw = await getCollection('series', ({ data }) => isPublished(data));
+const series: SiteTerminalData['series'] = seriesRaw.map((s) => ({
+  id: s.id,
+  title: s.data.title,
+}));
+
+const workRaw = await getCollection('work', ({ data }) => isPublished(data));
+const work: SiteTerminalData['work'] = workRaw.map((w) => ({
+  id: w.id,
+  company: w.data.company,
+  role: w.data.role,
+  period: w.data.period,
+}));
+
+const terminalData: SiteTerminalData = { blog, series, work };
+const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
+---
+
+<div
+  id="terminal-widget"
+  class="bg-code border border-line rounded font-mono text-xs overflow-hidden flex flex-col"
+>
+  <!-- Chrome bar -->
+  <div class="py-2 px-3.5 border-b border-line flex justify-between items-center text-faint text-10 tracking-loose uppercase shrink-0">
+    <span>whoami.sh</span>
+    <button
+      id="widget-expand-btn"
+      type="button"
+      class="text-accent bg-transparent border border-line rounded-sm px-2 py-0.5 uppercase tracking-snug hover:border-accent"
+    >expand ↗</button>
+  </div>
+
+  <!-- Scrollable output area -->
+  <div
+    id="widget-output"
+    class="h-48 overflow-y-auto p-4 leading-relaxed transition-opacity duration-150"
+    aria-live="polite"
+    aria-label="Terminal output"
+  ></div>
+
+  <!-- Prompt row -->
+  <form
+    id="widget-form"
+    class="border-t border-line shrink-0 flex items-center gap-2 h-10 px-4"
+  >
+    <span id="widget-cwd" class="shrink-0 text-accent text-xs">~ $</span>
+    <!-- Typewriter display span (visible during intro, hidden after) -->
+    <span id="widget-typewriter-display" class="text-ink text-xs"></span>
+    <!-- Real input (hidden during intro, shown after) -->
+    <input
+      id="widget-input"
+      type="text"
+      class="min-w-0 flex-1 border-none bg-transparent text-xs text-ink outline-none hidden"
+      style="caret-color: transparent"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Terminal command input"
+    />
+    <!-- Blocky blinking cursor -->
+    <span
+      id="widget-cursor"
+      class="inline-block w-1.75 h-3.25 bg-accent shrink-0 animate-[termBlink_1s_step-end_infinite]"
+      aria-hidden="true"
+    ></span>
+  </form>
+</div>
+
+<!-- Embedded site data -->
+<script
+  type="application/json"
+  id="widget-site-data"
+  is:inline
+  set:html={terminalJson}
+></script>
