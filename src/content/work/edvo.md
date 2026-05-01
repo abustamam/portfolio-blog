@@ -9,7 +9,7 @@ companyMission: "Edvo's mission is to provide people with tools that help them t
 skills: [Firestore, React, TypeScript, Electron, Browser Extensions, Graph Data Models]
 logo: ../../assets/work/logos/edvo-logo.jpeg
 badges: [zeroToOne]
-featured: false
+featured: true
 order: 4
 ---
 

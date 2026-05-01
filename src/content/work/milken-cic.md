@@ -9,7 +9,7 @@ period: "2024–2025"
 skills: [React, Prisma, ExpressJS]
 logo: ../../assets/work/logos/cic-logo.svg
 badges: []
-featured: false
+featured: true
 order: 3
 ---
 
