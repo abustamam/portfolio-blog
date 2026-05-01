@@ -1,213 +1,95 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import AuthorBio from '../components/AuthorBio.astro';
-import TerminalWidget from '../components/TerminalWidget.astro';
+import WorkCard from '../components/WorkCard.astro';
+import AvailabilityCard from '../components/AvailabilityCard.astro';
 
-const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-function fmtDate(date: Date): string {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const d = new Date(date);
-  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')} ${d.getFullYear()}`;
-}
-
-const rawTags = allPosts.map(p => p.data.tag).filter((t): t is string => Boolean(t));
-const uniqueTags = Array.from(new Set(rawTags));
-const tags = ['All', ...uniqueTags];
-
-const latestSlug = allPosts[0]?.id ?? '';
+const featuredWork = (await getCollection('work', ({ data }) => data.featured && !data.draft))
+  .sort((a, b) => {
+    if (a.data.order !== undefined && b.data.order !== undefined) {
+      return a.data.order - b.data.order;
+    }
+    return b.data.startDate.getTime() - a.data.startDate.getTime();
+  });
 ---
 
-<BaseLayout title="Rasheed Bustamam — Engineering Journal" description="Long-form writing on software craft, distributed systems, and independent consulting." chromePath="/">
+<BaseLayout
+  title="Rasheed Bustamam — Software Consultant"
+  description="Independent software consultant based in California. I build web and mobile applications for teams that need a senior engineer without the full-time hire."
+  chromePath="/"
+>
 
   <!-- Hero -->
-  <section class="grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-8 md:gap-18 px-gutter pt-10 pb-8 md:pt-16 md:pb-13 border-b border-line items-end">
-    <!-- Left -->
-    <div>
-      <div class="inline-flex items-center gap-2.5 py-1.25 px-3 bg-accent-bg text-accent-ink rounded-sm font-mono text-11 tracking-loose uppercase mb-8">
-        <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
-        distributed systems in public
-      </div>
-      <h1 class="display-hero font-serif font-medium m-0 text-ink tracking-tight">
-        I build software<br/>
-        that doesn't <em class="italic text-accent font-medium">page you</em><br/>
-        on a Sunday.
-      </h1>
-      <p class="mt-6.5 max-w-[500px] font-serif text-lg leading-[1.55] text-mute">
-        I'm <span class="text-ink">Rasheed Bustamam</span> — an independent software
-        consultant based in California. This is my notebook.
-        Writing on the craft and the decisions behind the code.
-      </p>
-      <div class="flex gap-3.5 mt-8">
-        <a href={latestSlug ? `/writing/${latestSlug}/` : '/'} class="bg-black text-white border border-black dark:bg-white dark:text-black dark:border-white py-2.25 px-4 rounded-sm cursor-pointer font-mono text-xs tracking-snug no-underline">
-          $ read latest <span class="ml-1">→</span>
-        </a>
-        <a href="mailto:admin@bustamam.tech" class="bg-transparent text-ink border border-line py-2.25 px-4 rounded-sm font-mono text-xs tracking-snug no-underline">
-          $ hire me
-        </a>
-      </div>
+  <section class="px-gutter pt-10 pb-10 md:pt-16 md:pb-14 border-b border-line">
+    <div class="inline-flex items-center gap-2.5 py-1.25 px-3 bg-accent-bg text-accent-ink rounded-sm font-mono text-11 tracking-loose uppercase mb-8">
+      <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+      available for Q3 2026
     </div>
-
-    <!-- Right: live terminal widget -->
-    <TerminalWidget />
+    <h1 class="display-hero font-serif font-medium m-0 text-ink tracking-tight max-w-2xl">
+      You need to ship.<br/>
+      Your team is <em class="italic text-accent font-medium">maxed out.</em>
+    </h1>
+    <p class="mt-6.5 max-w-[540px] font-serif text-lg leading-[1.55] text-mute">
+      I'm <span class="text-ink">Rasheed Bustamam</span> — an independent software consultant based in California.
+      I build web and mobile applications for teams that need a senior engineer without the full-time hire.
+    </p>
+    <div class="flex gap-3.5 mt-8">
+      <a
+        href="mailto:admin@bustamam.tech"
+        class="bg-black text-white border border-black dark:bg-white dark:text-black dark:border-white py-2.25 px-4 rounded-sm font-mono text-xs tracking-snug no-underline"
+      >
+        $ start a conversation →
+      </a>
+      <a
+        href="/work"
+        class="bg-transparent text-ink border border-line py-2.25 px-4 rounded-sm font-mono text-xs tracking-snug no-underline"
+      >
+        $ see my work →
+      </a>
+    </div>
   </section>
 
-  <!-- Filter bar -->
-  <div class="px-gutter py-5.5 border-b border-line bg-bg flex items-center gap-5 flex-wrap">
-    <div class="flex items-center gap-2 py-1.5 px-2.5 border border-line rounded-sm bg-surface min-w-[280px] flex-1 max-w-[360px]">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="text-mute shrink-0" aria-hidden="true">
-        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <input id="search-input" placeholder="grep titles, tags, years..." class="border-none outline-none bg-transparent flex-1 font-mono text-xs text-ink w-full" />
-      <span class="font-mono text-10 py-0.5 px-1.5 bg-kbd text-mute rounded-sm shrink-0">/</span>
+  <!-- What I Build -->
+  <section class="px-gutter py-12 border-b border-line">
+    <div class="font-mono text-10 text-faint tracking-caps uppercase mb-8">§ what i build</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="font-serif text-lg font-medium text-ink mb-2">Web Applications</div>
+        <p class="font-serif text-base text-mute leading-relaxed m-0">
+          Full-stack web apps from greenfield to production — API design, database modeling, frontend, deployment.
+        </p>
+      </div>
+      <div>
+        <div class="font-serif text-lg font-medium text-ink mb-2">Mobile Applications</div>
+        <p class="font-serif text-base text-mute leading-relaxed m-0">
+          Native and cross-platform mobile apps. iOS, Android, or React Native depending on what your project actually needs.
+        </p>
+      </div>
+      <div>
+        <div class="font-serif text-lg font-medium text-ink mb-2">Systems &amp; Infrastructure</div>
+        <p class="font-serif text-base text-mute leading-relaxed m-0">
+          Caching, scaling, observability, third-party integrations. The plumbing that keeps things running when traffic spikes.
+        </p>
+      </div>
     </div>
-    <div class="h-4.5 w-px bg-line"></div>
-    <div id="tag-filters" class="flex gap-1.5 flex-wrap">
-      {tags.map((tag, i) => (
-        <button
-          data-tag={tag}
-          class:list={['tag-pill font-mono text-11 tracking-snug py-1.25 px-2.5 rounded-sm cursor-pointer border transition-colors',
-            i === 0
-              ? 'border-ink bg-ink text-bg'
-              : 'border-line bg-transparent text-mute']}
-        >
-          {tag.toLowerCase()}
-        </button>
-      ))}
-    </div>
-    <div class="w-full ml-0 lg:w-auto lg:ml-auto font-mono text-11 text-faint">
-      sort: <span class="text-ink">recent ↓</span>
-    </div>
-  </div>
+  </section>
 
-  <!-- Column headers -->
-  <div class="post-list-header">
-    <div>№</div><div>date</div><div>title · dek</div><div>tag</div><div class="text-right">length</div><div></div>
-  </div>
+  <!-- Selected Work -->
+  {featuredWork.length > 0 && (
+    <section class="px-gutter py-12 border-b border-line">
+      <div class="flex items-center justify-between mb-6">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase">§ selected work</div>
+        <a href="/work" class="font-mono text-11 text-mute no-underline">view all work →</a>
+      </div>
+      <div class="grid grid-cols-1 gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+        {featuredWork.map((entry, i) => (
+          <WorkCard entry={entry} index={i} />
+        ))}
+      </div>
+    </section>
+  )}
 
-  <!-- Post list -->
-  <div id="post-list">
-    {allPosts.map((post, i) => (
-      <a
-        href={`/writing/${post.id}/`}
-        class:list={['post-row', i === 0 && 'bg-surface']}
-        data-title={post.data.title.toLowerCase()}
-        data-tag={post.data.tag ?? ''}
-        data-kind={post.data.kind ?? ''}
-      >
-        <div class="post-row__idx font-mono text-11 text-faint tracking-snug tabular-nums">
-          {String(i + 1).padStart(3, '0')}
-        </div>
-        <div class="post-row__date font-mono text-11 text-mute tabular-nums">
-          {fmtDate(post.data.pubDate)}
-        </div>
-        <div class="post-row__main">
-          <div class="post-row__title m-0 font-serif text-2xl leading-tight font-medium text-ink tracking-tight">
-            {post.data.title}
-          </div>
-          <div class="post-row__dek">
-            {post.data.dek ?? post.data.description}
-          </div>
-          <div class="post-row__compact-meta">
-            {fmtDate(post.data.pubDate)}
-            {post.data.tag && ` · ${post.data.tag}`}
-            {post.data.readMin != null && ` · ${post.data.readMin} min`}
-            {post.data.words != null && (
-              <span class="post-row__words"> · {post.data.words.toLocaleString()} w</span>
-            )}
-          </div>
-        </div>
-        <div class="post-row__tag font-mono text-11 text-mute">
-          {post.data.tag && (
-            <span class="py-0.5 px-1.75 border border-line text-ink rounded-sm tracking-wider text-10 uppercase">
-              {post.data.tag}
-            </span>
-          )}
-        </div>
-        <div class="post-row__len font-mono text-11 flex flex-col items-end gap-0.5 text-right tabular-nums">
-          {post.data.readMin && <span class="text-ink">{post.data.readMin} min</span>}
-          {post.data.words && <span class="text-faint">{post.data.words.toLocaleString()} w</span>}
-        </div>
-        <div class="post-row__arrow post-arrow text-faint font-mono text-sm self-center text-right">→</div>
-      </a>
-    ))}
-  </div>
-
-  <AuthorBio />
+  <!-- Availability CTA -->
+  <AvailabilityCard />
 
 </BaseLayout>
-
-<script>
-  // ── Search + Tag filter ─────────────────────────────
-  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
-  const tagPills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
-  const rows = document.querySelectorAll<HTMLAnchorElement>('.post-row');
-  const mqRows = window.matchMedia('(min-width: 1024px)');
-
-  let activeTag = 'All';
-
-  function rowLayoutDisplay() {
-    return mqRows.matches ? 'grid' : 'flex';
-  }
-
-  function filterPosts() {
-    const q = searchInput ? searchInput.value.toLowerCase() : '';
-    rows.forEach(row => {
-      const titleMatch = !q || (row.dataset.title ?? '').includes(q);
-      const tagMatch = activeTag === 'All'
-        || row.dataset.tag === activeTag
-        || row.dataset.kind === activeTag;
-      (row as HTMLElement).style.display = (titleMatch && tagMatch) ? rowLayoutDisplay() : 'none';
-    });
-  }
-
-  mqRows.addEventListener('change', filterPosts);
-
-  try {
-    if (sessionStorage.getItem('site:focus-search')) {
-      sessionStorage.removeItem('site:focus-search');
-      queueMicrotask(() => searchInput?.focus());
-    }
-  } catch {
-    /* private mode */
-  }
-
-  tagPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      activeTag = pill.dataset.tag ?? 'All';
-      tagPills.forEach(p => {
-        const on = p.dataset.tag === activeTag;
-        p.classList.toggle('border-ink', on);
-        p.classList.toggle('bg-ink', on);
-        p.classList.toggle('text-bg', on);
-        p.classList.toggle('border-line', !on);
-        p.classList.toggle('bg-transparent', !on);
-        p.classList.toggle('text-mute', !on);
-      });
-      filterPosts();
-    });
-  });
-
-  if (searchInput) {
-    searchInput.addEventListener('input', filterPosts);
-  }
-
-  // '/' and ⌘K focus search
-  document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (!searchInput) return;
-    if (document.documentElement.classList.contains('terminal-mode')) return;
-    const focused = document.activeElement;
-    if (e.key === '/' && focused !== searchInput) {
-      e.preventDefault();
-      searchInput.focus();
-    }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      searchInput.focus();
-    }
-  });
-
-</script>
