@@ -38,17 +38,33 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 >
   <!-- Chrome bar (matches TerminalModeShell) -->
   <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute shrink-0">
-    <div class="flex items-center gap-1.5">
+    <div class="group flex items-center gap-1.5">
+      <button
+        id="widget-dot-1-btn"
+        type="button"
+        disabled
+        aria-label="Close (unavailable)"
+        class="w-2 h-2 rounded-full border border-line bg-faint flex items-center justify-center opacity-60 cursor-not-allowed"
+      >
+        <span class="traffic-light-glyph font-mono leading-none select-none pointer-events-none" style="font-size:6px; opacity:0">×</span>
+      </button>
+      <button
+        id="widget-dot-2-btn"
+        type="button"
+        disabled
+        aria-label="Minimize (unavailable)"
+        class="w-2 h-2 rounded-full border border-line bg-faint flex items-center justify-center opacity-60 cursor-not-allowed"
+      >
+        <span class="traffic-light-glyph font-mono leading-none select-none pointer-events-none" style="font-size:6px; opacity:0">─</span>
+      </button>
       <button
         id="widget-expand-btn"
         type="button"
-        class="p-3 -m-3 flex items-center justify-center"
         aria-label="Open terminal in full-screen mode"
+        class="w-2 h-2 rounded-full border border-line bg-faint flex items-center justify-center"
       >
-        <span id="widget-dot-1" class="w-2 h-2 rounded-full border border-line pointer-events-none bg-faint"></span>
+        <span class="traffic-light-glyph font-mono leading-none select-none pointer-events-none" style="font-size:6px; opacity:0">+</span>
       </button>
-      <span id="widget-dot-2" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
-      <span id="widget-dot-3" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
     </div>
     <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
       terminal <span class="text-faint">·</span> <span id="widget-top-path">~</span>
@@ -290,21 +306,18 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     });
 
     // Focus indicator: border + traffic lights
-    const dot1 = document.getElementById('widget-dot-1') as HTMLElement | null;
-    const dot2 = document.getElementById('widget-dot-2') as HTMLElement | null;
-    const dot3 = document.getElementById('widget-dot-3') as HTMLElement | null;
+    const dot1 = document.getElementById('widget-dot-1-btn') as HTMLElement | null;
+    const dot2 = document.getElementById('widget-dot-2-btn') as HTMLElement | null;
+    const dot3 = document.getElementById('widget-expand-btn') as HTMLElement | null;
     function setFocused(on: boolean) {
       widget.style.transition = 'border-color 0.2s ease';
       widget.style.borderColor = on ? 'var(--color-accent)' : '';
-      if (dot1) dot1.className = on
-        ? 'w-2 h-2 rounded-full border border-line pointer-events-none bg-danger'
-        : 'w-2 h-2 rounded-full border border-line pointer-events-none bg-faint';
-      if (dot2) dot2.className = on
-        ? 'w-2 h-2 rounded-full border border-line bg-mute'
-        : 'w-2 h-2 rounded-full border border-line bg-faint';
-      if (dot3) dot3.className = on
-        ? 'w-2 h-2 rounded-full border border-line bg-accent'
-        : 'w-2 h-2 rounded-full border border-line bg-faint';
+      const colors = on
+        ? ['var(--color-danger)', 'var(--color-mute)', 'var(--color-accent)']
+        : ['', '', ''];
+      [dot1, dot2, dot3].forEach((d, i) => {
+        if (d) d.style.backgroundColor = colors[i];
+      });
     }
 
     // Focus/blur: toggle cursor visibility
@@ -441,6 +454,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 </script>
 
 <style is:global>
+  #terminal-widget .group:hover .traffic-light-glyph { opacity: 1 !important; }
   /* Terminal widget — immersive palette (dark-mode values, work for all dark themes) */
   #terminal-widget[data-theme="green"] {
     --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
