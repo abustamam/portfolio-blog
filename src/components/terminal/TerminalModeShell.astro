@@ -335,14 +335,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		}
 	}
 
-	function applyTheme(name: string) {
-		if (name === 'inherit') {
-			shell.removeAttribute('data-theme');
-		} else {
-			shell.setAttribute('data-theme', name);
-		}
-	}
-
 	function openMode() {
     if (isOpen || isClosing) return;
     lastFocus = document.activeElement;
@@ -401,23 +393,17 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       }
       if (widgetEl?.getAttribute('data-theme')) {
         const theme = widgetEl.getAttribute('data-theme')!;
+        applyTheme(theme);
         const applyColor = (window as any).__applyColorTheme;
-        if (applyColor) {
-          applyColor(theme);
-        } else {
-          applyTheme(theme);
-        }
+        if (applyColor) applyColor(theme);
       }
     }
     // Also restore color theme from localStorage as fallback
     const savedColor = lsGet('terminal:theme');
     if (savedColor && savedColor !== 'inherit') {
+      if (!widgetEl?.getAttribute('data-theme')) applyTheme(savedColor);
       const applyColor = (window as any).__applyColorTheme;
-      if (applyColor) {
-        applyColor(savedColor);
-      } else if (!widgetEl?.getAttribute('data-theme')) {
-        applyTheme(savedColor);
-      }
+      if (applyColor) applyColor(savedColor);
     }
     // Restore brightness from localStorage
     const savedBrightness = lsGet('theme');
