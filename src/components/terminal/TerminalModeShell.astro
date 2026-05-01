@@ -47,17 +47,32 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 >
   <div id="terminal-live" class="sr-only" aria-live="polite"></div>
   <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute">
-    <div class="flex items-center gap-1.5">
+    <div class="group flex items-center gap-1.5">
       <button
         id="terminal-minimize-btn"
         type="button"
-        class="p-3 -m-3 flex items-center justify-center"
-        aria-label="Minimize terminal mode"
+        aria-label="Close terminal"
+        class="w-2 h-2 rounded-full border border-line bg-faint flex items-center justify-center"
       >
-        <span id="terminal-dot-1" class="w-2 h-2 rounded-full border border-line pointer-events-none bg-faint"></span>
+        <span class="traffic-light-glyph font-mono leading-none select-none pointer-events-none" style="font-size:6px; opacity:0">×</span>
       </button>
-      <span id="terminal-dot-2" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
-      <span id="terminal-dot-3" class="w-2 h-2 rounded-full border border-line bg-faint"></span>
+      <button
+        id="terminal-to-widget-btn"
+        type="button"
+        aria-label="Minimize to widget"
+        class="w-2 h-2 rounded-full border border-line bg-faint flex items-center justify-center"
+      >
+        <span class="traffic-light-glyph font-mono leading-none select-none pointer-events-none" style="font-size:6px; opacity:0">─</span>
+      </button>
+      <button
+        id="terminal-dot-3"
+        type="button"
+        disabled
+        aria-label="Fullscreen (already maximized)"
+        class="w-2 h-2 rounded-full border border-line bg-faint flex items-center justify-center opacity-60 cursor-not-allowed"
+      >
+        <span class="traffic-light-glyph font-mono leading-none select-none pointer-events-none" style="font-size:6px; opacity:0">+</span>
+      </button>
     </div>
     <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
       terminal <span class="text-faint">·</span> <span id="terminal-top-path">~</span>
@@ -559,21 +574,18 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	});
 
 	// Focus indicator: border + traffic lights
-	const dot1 = document.getElementById('terminal-dot-1') as HTMLElement | null;
-	const dot2 = document.getElementById('terminal-dot-2') as HTMLElement | null;
+	const dot1 = document.getElementById('terminal-minimize-btn') as HTMLElement | null;
+	const dot2 = document.getElementById('terminal-to-widget-btn') as HTMLElement | null;
 	const dot3 = document.getElementById('terminal-dot-3') as HTMLElement | null;
 	function setFocused(on: boolean) {
 		shell.style.transition = 'box-shadow 0.2s ease';
 		shell.style.boxShadow = on ? 'inset 0 0 0 2px var(--color-accent)' : '';
-		if (dot1) dot1.className = on
-			? 'w-2 h-2 rounded-full border border-line pointer-events-none bg-danger'
-			: 'w-2 h-2 rounded-full border border-line pointer-events-none bg-faint';
-		if (dot2) dot2.className = on
-			? 'w-2 h-2 rounded-full border border-line bg-mute'
-			: 'w-2 h-2 rounded-full border border-line bg-faint';
-		if (dot3) dot3.className = on
-			? 'w-2 h-2 rounded-full border border-line bg-accent'
-			: 'w-2 h-2 rounded-full border border-line bg-faint';
+		const colors = on
+			? ['var(--color-danger)', 'var(--color-mute)', 'var(--color-accent)']
+			: ['', '', ''];
+		[dot1, dot2, dot3].forEach((d, i) => {
+			if (d) d.style.backgroundColor = colors[i];
+		});
 	}
 
 	// Focus/blur: toggle cursor visibility
@@ -669,6 +681,13 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		window.dispatchEvent(new CustomEvent('terminal:toggle'));
 	});
 	minimizeBtn?.addEventListener('click', () => closeMode());
+	const toWidgetBtn = document.getElementById('terminal-to-widget-btn');
+	toWidgetBtn?.addEventListener('click', () => {
+		closeMode();
+		setTimeout(() => {
+			document.getElementById('terminal-widget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}, 100);
+	});
 	pagerPrev?.addEventListener('click', () => {
 		if (!pagerState) return;
 		pagerState = pageUp(pagerState);
@@ -724,6 +743,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 </script>
 
 <style is:global>
+  #terminal-mode-shell .group:hover .traffic-light-glyph { opacity: 1 !important; }
   html.terminal-mode {
     overflow: hidden;
   }

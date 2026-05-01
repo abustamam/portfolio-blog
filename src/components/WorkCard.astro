@@ -4,13 +4,11 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   entry: CollectionEntry<'work'>;
-  animated?: boolean;
   index?: number;
 }
 
-const { entry, animated = false, index = 0 } = Astro.props;
+const { entry, index = 0 } = Astro.props;
 const { company, projectName, role, period, skills, badges, logo, darkLogo, location } = entry.data;
-const delay = 300 + index * 80;
 
 const badgeLabels: Record<string, string> = {
   acquired: 'acquired',
@@ -20,11 +18,7 @@ const badgeLabels: Record<string, string> = {
 
 <a
   href={`/work/${entry.id}/`}
-  class:list={[
-    'block no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-colors duration-150 hover:border-accent hover:shadow-sm',
-    animated && 'animate-fade-up',
-  ]}
-  style={animated ? `--delay:${delay}` : undefined}
+  class="block no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-colors duration-150 hover:border-accent hover:shadow-sm"
 >
   <div class="flex items-center gap-3.5 mb-2.5">
     <div class="w-10 h-10 shrink-0 flex items-center justify-center">

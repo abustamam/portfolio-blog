@@ -33,7 +33,7 @@ const badgeLabels: Record<string, string> = {
   chromePath="/work"
   image={logo}
 >
-  <main class="max-w-4xl mx-auto px-8 pt-10 pb-16 max-[700px]:px-5 max-[700px]:pt-6 max-[700px]:pb-12">
+  <main class="page-shell pt-10 pb-16">
     <!-- Back link -->
     <nav>
       <a href="/work/" class="font-mono text-11 text-mute no-underline tracking-snug inline-block mb-8 hover:text-ink">← Work</a>
@@ -42,7 +42,7 @@ const badgeLabels: Record<string, string> = {
     <div class="grid grid-cols-[1fr_220px] gap-12 items-start max-[700px]:grid-cols-1 max-[700px]:gap-8">
       <!-- Main content -->
       <article>
-        <header class="flex items-center gap-4 mb-6 animate-fade-up" style="--delay:0">
+        <header class="flex items-center gap-4 mb-6">
           {logo && (
             <div class="shrink-0">
               <Image
@@ -64,17 +64,17 @@ const badgeLabels: Record<string, string> = {
         </header>
 
         {companyMission && (
-          <blockquote class="font-serif text-base italic text-mute border-l-3 border-accent m-0 mb-6 py-2 pl-4 leading-relaxed animate-fade-up" style="--delay:80">
+          <blockquote class="font-serif text-base italic text-mute border-l-3 border-accent m-0 mb-6 py-2 pl-4 leading-relaxed">
             {companyMission}
           </blockquote>
         )}
 
-        <div class="font-serif text-base leading-[1.7] text-ink animate-fade-up [&_p]:m-0 [&_p]:mb-4" style="--delay:160">
+        <div class="font-serif text-base leading-[1.7] text-ink [&_p]:m-0 [&_p]:mb-4">
           <Content />
         </div>
 
         {additionalRoles && additionalRoles.length > 0 && (
-          <section class="mt-8 border-t border-line pt-6 animate-fade-up" style="--delay:240">
+          <section class="mt-8 border-t border-line pt-6">
             <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-4">Additional Roles</h2>
             {additionalRoles.map((r) => (
               <div class="mb-5">
@@ -90,7 +90,7 @@ const badgeLabels: Record<string, string> = {
       </article>
 
       <!-- Sidebar -->
-      <aside class="sticky top-8 animate-fade-up max-[700px]:static max-[700px]:order-[-1]" style="--delay:80">
+        <aside class="sticky top-8 max-[700px]:static max-[700px]:order-[-1]">
         <dl class="border border-line rounded-[3px] py-4 px-[18px] bg-surface">
           <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
             <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Period</dt>
