@@ -7,7 +7,7 @@ period: "2025"
 skills: [Hasura, React, Metabase, tRPC]
 logo: ../../assets/work/logos/breezy-logo.png
 badges: []
-featured: false
+featured: true
 order: 2
 ---
 

@@ -9,7 +9,7 @@ skills: [Expo, Prisma, tRPC, AWS, Serverless, React Native]
 logo: ../../assets/work/logos/nuema-logo.svg
 darkLogo: true
 badges: []
-featured: false
+featured: true
 order: 1
 ---
 
