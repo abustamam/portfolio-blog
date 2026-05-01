@@ -19,6 +19,9 @@ const seriesWithCounts = await Promise.all(
 
 <BaseLayout title="Series" description="Multi-part deep dives into distributed systems topics." chromePath="/series">
 	<main>
+    <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/" class="text-mute no-underline">← home</a>
+    </div>
 		<h1>Series</h1>
 		<ul class="m-0 flex list-none flex-col gap-8 p-0">
 			{seriesWithCounts.map(({ series, postCount }) => (
