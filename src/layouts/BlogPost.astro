@@ -14,7 +14,7 @@ interface PrevNextPost {
   title: string;
 }
 
-type Props = Omit<CollectionEntry<'blog'>['data'], 'series'> & {
+type Props = Omit<CollectionEntry<'writing'>['data'], 'series'> & {
   slug: string;
   series?: SeriesInfo;
   prevPost?: PrevNextPost | null;
@@ -30,7 +30,7 @@ const {
 } = Astro.props;
 
 // Related posts: 3 most recent, excluding current
-const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .filter(p => p.id !== slug)
   .slice(0, 3);

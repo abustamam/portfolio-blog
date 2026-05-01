@@ -8,10 +8,10 @@ export interface PrevNext {
 }
 
 export async function getSeriesPosts(seriesId: string): Promise<{
-	posts: CollectionEntry<'blog'>[];
+	posts: CollectionEntry<'writing'>[];
 	getPrevNext: (currentSlug: string) => PrevNext;
 }> {
-	const allPosts = await getCollection('blog', ({ data }) => isPublished(data));
+	const allPosts = await getCollection('writing', ({ data }) => isPublished(data));
 	const posts = allPosts
 		.filter((p) => p.data.series === seriesId)
 		.sort((a, b) => {

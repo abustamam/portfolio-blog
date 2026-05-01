@@ -4,7 +4,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { isPublished } from '../utils/content';
 
 export async function GET(context) {
-	const posts = await getCollection('blog', ({ data }) => isPublished(data));
+	const posts = await getCollection('writing', ({ data }) => isPublished(data));
 	return rss({
 		title: SITE_TITLE,
 		description: SITE_DESCRIPTION,

@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { isPublished } from '../utils/content';
 import type { SiteTerminalData } from './terminal/terminal-types';
 
-const blogRaw = await getCollection('blog', ({ data }) => isPublished(data));
+const blogRaw = await getCollection('writing', ({ data }) => isPublished(data));
 const blog: SiteTerminalData['blog'] = blogRaw.map((p) => ({
   id: p.id,
   title: p.data.title,

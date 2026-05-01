@@ -10,6 +10,7 @@ tag: "Infrastructure"
 kind: "Case Study"
 readMin: 9
 words: 1682
+draft: true
 ---
 
 > *Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*

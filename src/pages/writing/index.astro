@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 function fmtDate(date: Date): string {
@@ -22,6 +22,9 @@ const tags = ['All', ...uniqueTags];
   chromePath="/writing"
 >
   <div class="page-shell pt-12 pb-20">
+    <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/" class="text-mute no-underline">← home</a>
+    </div>
     <div class="mb-10">
       <h1 class="display-hero font-serif font-medium tracking-tight text-ink m-0 mb-2.5">
         Writing.
