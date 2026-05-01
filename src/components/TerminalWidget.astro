@@ -146,15 +146,6 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       try { localStorage.setItem(key, value); } catch { /* private browsing */ }
     }
 
-    // Theme
-    function applyTheme(name: string) {
-      if (name === 'inherit') {
-        widget.removeAttribute('data-theme');
-      } else {
-        widget.setAttribute('data-theme', name);
-      }
-    }
-
     // Output
     function appendLine(text: string, cls = 'text-mute') {
       const row = document.createElement('div');
@@ -205,9 +196,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       renderCwd();
 
       if (state.cwd !== prevCwd) lsSet('terminal:cwd', state.cwd);
-      if (result.setTheme) {
-        applyTheme(result.setTheme);
-        lsSet('terminal:theme', result.setTheme);
+      if (result.setBrightness) {
+        const applyBrightness = (window as any).__applyBrightness;
+        if (applyBrightness) applyBrightness(result.setBrightness);
+      }
+      if (result.setColor) {
+        const applyColor = (window as any).__applyColorTheme;
+        if (applyColor) applyColor(result.setColor);
+        if (result.setColor === 'inherit') {
+          widget.removeAttribute('data-theme');
+        } else {
+          widget.setAttribute('data-theme', result.setColor);
+        }
+        lsSet('terminal:theme', result.setColor);
       }
       if (result.navigateTo) { window.location.href = result.navigateTo; return; }
       // In the widget, ignore closeTerminal — just print the lines
@@ -329,9 +330,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 
     // Restore persisted state on load
     const savedCwd = lsGet('terminal:cwd');
-    const savedTheme = lsGet('terminal:theme');
+    const savedColor = lsGet('terminal:theme');
     if (savedCwd) state = { cwd: savedCwd };
-    if (savedTheme) applyTheme(savedTheme);
+    // Restore color theme on widget element
+    if (savedColor && savedColor !== 'inherit') {
+      widget.setAttribute('data-theme', savedColor);
+    } else {
+      widget.removeAttribute('data-theme');
+    }
     renderCwd();
 
     // Expose internals on the DOM element for the typewriter script and TerminalModeShell
@@ -359,9 +365,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     window.addEventListener('terminal:closed', () => {
       output.style.opacity = '1';
       const savedCwd = lsGet('terminal:cwd');
-      const savedTheme = lsGet('terminal:theme');
+      const savedColor = lsGet('terminal:theme');
       if (savedCwd) state = { cwd: savedCwd };
-      if (savedTheme) applyTheme(savedTheme);
+      // Restore color theme on widget element
+      if (savedColor && savedColor !== 'inherit') {
+        widget.setAttribute('data-theme', savedColor);
+      } else {
+        widget.removeAttribute('data-theme');
+      }
       renderCwd();
     });
   })();
@@ -430,6 +441,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 </script>
 
 <style is:global>
+  /* Terminal widget — immersive palette (dark-mode values, work for all dark themes) */
   #terminal-widget[data-theme="green"] {
     --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
     --color-ink: #33ff33; --color-mute: #1a661a; --color-faint: #0f3a0f;
@@ -444,5 +456,21 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     --color-bg: #060d14; --color-surface: #0d1a26; --color-code: #030a10;
     --color-ink: #7dd3fc; --color-mute: #1e3a4f; --color-faint: #102030;
     --color-accent: #38bdf8; --color-line: #1e3a4f; --color-line-soft: #102030;
+  }
+  /* Light-mode overrides for terminal widget color themes */
+  html:not(.dark) #terminal-widget[data-theme="green"] {
+    --color-bg: #f0fdf4; --color-surface: #ffffff; --color-code: #e8fdf0;
+    --color-ink: #1f6f43; --color-mute: #3a8f5f; --color-faint: #86c9a2;
+    --color-accent: #1f6f43; --color-line: #bbdece; --color-line-soft: #d5eed9;
+  }
+  html:not(.dark) #terminal-widget[data-theme="amber"] {
+    --color-bg: #fffbf0; --color-surface: #ffffff; --color-code: #fff8e6;
+    --color-ink: #9a5f00; --color-mute: #b87800; --color-faint: #d4a847;
+    --color-accent: #9a5f00; --color-line: #e8d5a3; --color-line-soft: #f0e4c0;
+  }
+  html:not(.dark) #terminal-widget[data-theme="ice"] {
+    --color-bg: #f0f9ff; --color-surface: #ffffff; --color-code: #e8f5ff;
+    --color-ink: #0369a1; --color-mute: #0284c7; --color-faint: #7dd3fc;
+    --color-accent: #0369a1; --color-line: #b8dcf0; --color-line-soft: #d0eaf8;
   }
 </style>

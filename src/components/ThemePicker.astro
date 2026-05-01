@@ -1,0 +1,147 @@
+---
+// ThemePicker.astro — replaces ThemeToggle in TerminalChrome
+---
+
+<div class="relative" id="theme-picker-root">
+  <button
+    id="theme-picker-btn"
+    type="button"
+    aria-haspopup="true"
+    aria-expanded="false"
+    class="bg-transparent border border-line text-ink cursor-pointer font-mono text-10 py-0.75 px-2 rounded-sm tracking-wider uppercase"
+  >
+    <span id="theme-picker-label">☾ dark</span>
+  </button>
+
+  <div
+    id="theme-picker-popover"
+    role="menu"
+    hidden
+    class="absolute right-0 top-full mt-1 z-50 bg-surface border border-line rounded shadow-lg min-w-[160px] py-1 text-left"
+  >
+    <!-- Group 1: Brightness -->
+    <div class="px-2.5 pt-1.5 pb-1 font-mono text-10 text-faint tracking-caps uppercase">brightness</div>
+    <button type="button" role="menuitemradio" data-brightness="light"
+      class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
+      <span class="theme-picker-check opacity-0">✓</span> ☀ light
+    </button>
+    <button type="button" role="menuitemradio" data-brightness="dark"
+      class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
+      <span class="theme-picker-check opacity-0">✓</span> ☾ dark
+    </button>
+
+    <div class="my-1 border-t border-line"></div>
+
+    <!-- Group 2: Color -->
+    <div class="px-2.5 pt-1.5 pb-1 font-mono text-10 text-faint tracking-caps uppercase">color</div>
+    <button type="button" role="menuitemradio" data-color="inherit"
+      class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
+      <span class="theme-picker-check opacity-0">✓</span>
+      <span class="w-2 h-2 rounded-full bg-accent shrink-0"></span> inherit
+    </button>
+    <button type="button" role="menuitemradio" data-color="green"
+      class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
+      <span class="theme-picker-check opacity-0">✓</span>
+      <span class="w-2 h-2 rounded-full shrink-0" style="background:#1f6f43"></span> green
+    </button>
+    <button type="button" role="menuitemradio" data-color="amber"
+      class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
+      <span class="theme-picker-check opacity-0">✓</span>
+      <span class="w-2 h-2 rounded-full shrink-0" style="background:#9a5f00"></span> amber
+    </button>
+    <button type="button" role="menuitemradio" data-color="ice"
+      class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
+      <span class="theme-picker-check opacity-0">✓</span>
+      <span class="w-2 h-2 rounded-full shrink-0" style="background:#0369a1"></span> ice
+    </button>
+  </div>
+</div>
+
+<script>
+  function initThemePicker() {
+    const root    = document.getElementById('theme-picker-root');
+    const btn     = document.getElementById('theme-picker-btn');
+    const popover = document.getElementById('theme-picker-popover');
+    const label   = document.getElementById('theme-picker-label');
+    if (!root || !btn || !popover || !label) return;
+
+    function applyBrightness(b: string) {
+      document.documentElement.classList.toggle('dark', b === 'dark');
+      try { localStorage.setItem('theme', b); } catch { /* private */ }
+      window.dispatchEvent(new CustomEvent('theme:brightness-changed', { detail: b }));
+    }
+
+    function applyColorTheme(c: string) {
+      if (c === 'inherit') {
+        document.documentElement.removeAttribute('data-color-theme');
+      } else {
+        document.documentElement.setAttribute('data-color-theme', c);
+      }
+      try { localStorage.setItem('terminal:theme', c); } catch { /* private */ }
+      window.dispatchEvent(new CustomEvent('theme:color-changed', { detail: c }));
+    }
+
+    // Expose helpers globally so terminal components can call them
+    (window as any).__applyBrightness = applyBrightness;
+    (window as any).__applyColorTheme = applyColorTheme;
+
+    function syncUI() {
+      const brightness = localStorage.getItem('theme') || 'light';
+      const color      = localStorage.getItem('terminal:theme') || 'inherit';
+      const icon = brightness === 'dark' ? '☾' : '☀';
+      label.textContent = `${icon} ${brightness} · ${color}`;
+
+      root.querySelectorAll<HTMLElement>('[data-brightness]').forEach(opt => {
+        const check = opt.querySelector<HTMLElement>('.theme-picker-check');
+        if (check) check.style.opacity = opt.dataset.brightness === brightness ? '1' : '0';
+      });
+      root.querySelectorAll<HTMLElement>('[data-color]').forEach(opt => {
+        const check = opt.querySelector<HTMLElement>('.theme-picker-check');
+        if (check) check.style.opacity = opt.dataset.color === color ? '1' : '0';
+      });
+    }
+
+    function open() {
+      popover.removeAttribute('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      syncUI();
+    }
+    function close() {
+      popover.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', () => {
+      popover.hasAttribute('hidden') ? open() : close();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target as Node)) close();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+
+    root.querySelectorAll<HTMLElement>('[data-brightness]').forEach(opt => {
+      opt.addEventListener('click', () => {
+        applyBrightness(opt.dataset.brightness!);
+        syncUI();
+        close();
+      });
+    });
+
+    root.querySelectorAll<HTMLElement>('[data-color]').forEach(opt => {
+      opt.addEventListener('click', () => {
+        applyColorTheme(opt.dataset.color!);
+        syncUI();
+        close();
+      });
+    });
+
+    syncUI();
+  }
+
+  initThemePicker();
+  document.addEventListener('astro:after-swap', initThemePicker);
+</script>

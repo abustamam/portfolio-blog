@@ -320,6 +320,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 		}
 	}
 
+	function applyTheme(name: string) {
+		if (name === 'inherit') {
+			shell.removeAttribute('data-theme');
+		} else {
+			shell.setAttribute('data-theme', name);
+		}
+	}
+
 	function openMode() {
     if (isOpen || isClosing) return;
     lastFocus = document.activeElement;
@@ -377,8 +385,30 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
         state.cwd = ws.cwd;
       }
       if (widgetEl?.getAttribute('data-theme')) {
-        applyTheme(widgetEl.getAttribute('data-theme')!);
+        const theme = widgetEl.getAttribute('data-theme')!;
+        const applyColor = (window as any).__applyColorTheme;
+        if (applyColor) {
+          applyColor(theme);
+        } else {
+          applyTheme(theme);
+        }
       }
+    }
+    // Also restore color theme from localStorage as fallback
+    const savedColor = lsGet('terminal:theme');
+    if (savedColor && savedColor !== 'inherit') {
+      const applyColor = (window as any).__applyColorTheme;
+      if (applyColor) {
+        applyColor(savedColor);
+      } else if (!widgetEl?.getAttribute('data-theme')) {
+        applyTheme(savedColor);
+      }
+    }
+    // Restore brightness from localStorage
+    const savedBrightness = lsGet('theme');
+    if (savedBrightness) {
+      const applyBrightness = (window as any).__applyBrightness;
+      if (applyBrightness) applyBrightness(savedBrightness);
     }
     renderCwd();
     announce('Terminal mode on');
@@ -402,20 +432,29 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     shell.style.transform = 'translateY(10px)';
     shell.style.opacity = '0';
     setTimeout(() => {
-      // Sync state back to widget before it fades back in
-      const widgetEl = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
-      if (widgetEl?.__terminal) {
-        widgetEl.__terminal.historyBuffer = [...historyBuffer];
-        lsSet('terminal:cwd', state.cwd);
-        const currentTheme = shell.getAttribute('data-theme');
-        if (currentTheme) {
-          widgetEl.setAttribute('data-theme', currentTheme);
-          lsSet('terminal:theme', currentTheme);
-        } else {
-          widgetEl.removeAttribute('data-theme');
-          lsSet('terminal:theme', 'inherit');
-        }
-      }
+       // Sync state back to widget before it fades back in
+       const widgetEl = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
+       if (widgetEl?.__terminal) {
+         widgetEl.__terminal.historyBuffer = [...historyBuffer];
+         lsSet('terminal:cwd', state.cwd);
+         const currentColor = shell.getAttribute('data-theme');
+         if (currentColor) {
+           widgetEl.setAttribute('data-theme', currentColor);
+           lsSet('terminal:theme', currentColor);
+           const applyColor = (window as any).__applyColorTheme;
+           if (applyColor) applyColor(currentColor);
+         } else {
+           widgetEl.removeAttribute('data-theme');
+           lsSet('terminal:theme', 'inherit');
+           const applyColor = (window as any).__applyColorTheme;
+           if (applyColor) applyColor('inherit');
+         }
+         // Sync brightness
+         const currentBrightness = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+         lsSet('theme', currentBrightness);
+         const applyBrightness = (window as any).__applyBrightness;
+         if (applyBrightness) applyBrightness(currentBrightness);
+       }
       shell.style.height = '100dvh';
       shell.classList.add('hidden');
       shell.style.boxShadow = '';
@@ -461,9 +500,20 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 			lsSet('terminal:cwd', state.cwd);
 		}
 
-		if (result.setTheme) {
-			applyTheme(result.setTheme);
-			lsSet('terminal:theme', result.setTheme);
+		if (result.setBrightness) {
+			const applyBrightness = (window as any).__applyBrightness;
+			if (applyBrightness) applyBrightness(result.setBrightness);
+		}
+		if (result.setColor) {
+			const applyColor = (window as any).__applyColorTheme;
+			if (applyColor) applyColor(result.setColor);
+			// Full immersive palette on terminal element
+			if (result.setColor === 'inherit') {
+				shell.removeAttribute('data-theme');
+			} else {
+				shell.setAttribute('data-theme', result.setColor);
+			}
+			lsSet('terminal:theme', result.setColor);
 		}
 
 		if (result.navigateTo) {
@@ -645,10 +695,22 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
 	});
 
 	const savedCwd = lsGet('terminal:cwd');
-	const savedTheme = lsGet('terminal:theme');
+	const savedColor = lsGet('terminal:theme');
+	const savedBrightness = lsGet('theme');
 	const savedOpen = lsGet('terminal:open');
 	if (savedCwd) state = { cwd: savedCwd };
-	if (savedTheme) applyTheme(savedTheme);
+	if (savedColor && savedColor !== 'inherit') {
+		const applyColor = (window as any).__applyColorTheme;
+		if (applyColor) {
+			applyColor(savedColor);
+		} else {
+			applyTheme(savedColor);
+		}
+	}
+	if (savedBrightness) {
+		const applyBrightness = (window as any).__applyBrightness;
+		if (applyBrightness) applyBrightness(savedBrightness);
+	}
 	if (savedOpen === '1') openMode();
 
 	setExpandButtonState(false);

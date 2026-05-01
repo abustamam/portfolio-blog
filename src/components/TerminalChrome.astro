@@ -1,5 +1,5 @@
 ---
-import ThemeToggle from './ThemeToggle.astro';
+import ThemePicker from './ThemePicker.astro';
 
 interface Props {
   path?: string;
@@ -38,6 +38,6 @@ const displayPath = path === '/' ? '~' : `~${path}`;
       <span data-terminal-expand-label>Terminal</span>
     </button>
     <span class="text-faint">·</span>
-    <ThemeToggle />
+    <ThemePicker />
   </div>
 </div>
