@@ -1,0 +1,1 @@
+/media/rasheed-bustamam/Extra/coding/blog/.claude/skills/gstack/careful/SKILL.md
