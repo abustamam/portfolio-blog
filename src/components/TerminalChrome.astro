@@ -10,10 +10,31 @@ const displayPath = path === '/' ? '~' : `~${path}`;
 
 <div class="flex items-center h-8.5 border-b border-line bg-surface font-mono text-11 text-mute min-w-0">
   <!-- Traffic lights -->
-  <div class="flex items-center gap-1.5 px-3.5 border-r border-line h-full shrink-0">
-    <span class="w-1.75 h-1.75 rounded-full bg-danger"></span>
-    <span class="w-1.75 h-1.75 rounded-full bg-faint"></span>
-    <span class="w-1.75 h-1.75 rounded-full bg-accent"></span>
+  <div class="group flex items-center gap-1.5 px-3.5 border-r border-line h-full shrink-0">
+    <button
+      type="button"
+      disabled
+      aria-label="Close (unavailable)"
+      class="traffic-light w-2 h-2 rounded-full bg-faint border border-black/10 flex items-center justify-center opacity-60 cursor-not-allowed"
+    >
+      <span class="traffic-light-glyph font-mono leading-none select-none" style="font-size:6px; opacity:0">×</span>
+    </button>
+    <button
+      type="button"
+      disabled
+      aria-label="Minimize (unavailable)"
+      class="traffic-light w-2 h-2 rounded-full bg-faint border border-black/10 flex items-center justify-center opacity-60 cursor-not-allowed"
+    >
+      <span class="traffic-light-glyph font-mono leading-none select-none" style="font-size:6px; opacity:0">─</span>
+    </button>
+    <button
+      id="chrome-traffic-green"
+      type="button"
+      aria-label="Open terminal"
+      class="traffic-light w-2 h-2 rounded-full bg-accent border border-black/10 flex items-center justify-center cursor-pointer"
+    >
+      <span class="traffic-light-glyph font-mono leading-none select-none" style="font-size:6px; opacity:0">+</span>
+    </button>
   </div>
   <!-- Breadcrumb -->
   <div class="px-3.5 border-r border-line h-full flex items-center text-ink tracking-tight flex-1 min-w-0">
@@ -41,3 +62,14 @@ const displayPath = path === '/' ? '~' : `~${path}`;
     <ThemePicker />
   </div>
 </div>
+
+<style>
+  .group:hover .traffic-light-glyph { opacity: 1 !important; }
+</style>
+
+<script>
+  const greenBtn = document.getElementById('chrome-traffic-green');
+  greenBtn?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('terminal:open'));
+  });
+</script>
