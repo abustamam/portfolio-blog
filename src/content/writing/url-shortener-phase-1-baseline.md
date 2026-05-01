@@ -82,13 +82,7 @@ There are three common ways to generate slugs, each with different tradeoffs:
 
 I went with nanoid (random). Sequential is a privacy concern -- if someone gives you a short URL ending in 00100, you can probably enumerate 00001-00099. Not ideal. Hash vs random was a toss-up, but random had fewer downsides. The right choice depends on whether leaking the URL structure is fine or not.
 
-```ts
-import { customAlphabet } from 'nanoid';
-
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 7);
-```
-
-A 7-character slug from a 36-character alphabet gives you ~78 billion possible combinations. At a million slugs created per day, you'd expect your first collision after roughly 200 years. This is why observability is important -- if a collision does happen, you need to know when and how frequently, and at that point you can reassess whether you want to keep with random or go with hashing, or use a long random slug.
+A 7-character slug from a 36-character alphabet (a-z and 0-9) gives you ~78 billion possible combinations. At a million slugs created per day, you'd expect your first collision after roughly 200 years. This is why observability is important -- if a collision does happen, you need to know when and how frequently, and at that point you can reassess whether you want to keep with random or go with hashing, or use a long random slug. An 8-character slug gives us 2.8 trillion combos. We'll use nanoid 8 in this post, but nanoid 7 would suffice as well.
 
 ## OpenAPI as documentation-as-code
 
@@ -108,13 +102,13 @@ const shortenRoute = createRoute({
     },
   },
   responses: {
-    200: {
+    201: {
       content: {
         'application/json': {
-          schema: z.object({ slug: z.string(), short_url: z.string() }),
+          schema: z.object({ slug: z.string() }),
         },
       },
-      description: 'Shortened URL',
+      description: 'URL shortened successfully',
     },
   },
 });
@@ -130,7 +124,7 @@ Here's the full implementation of the URL shortener. The only non-obvious decisi
 
 The `/redirect` endpoint:
 
-```redirect.ts
+```ts
 import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { eq, sql } from 'drizzle-orm'
@@ -190,7 +184,7 @@ redirectRouter.openapi(redirectRoute, async (c) => {
 
 The `/shorten` endpoint is a lot simpler. No fire-and-forget, just insert the record and return the slug.
 
-```shorten.ts
+```ts
 import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { nanoid } from 'nanoid'
@@ -252,7 +246,7 @@ I'm using a 4vCPU and 8GB RAM Ubuntu box in a Helsinki datacenter ($5.99/mo) bec
 
 We'll be using docker compose to manage services. My docker-compose.yml looks like this:
 
-```docker-compose.yml
+```yml
 services:
   postgres:
     image: postgres:16
@@ -336,7 +330,7 @@ I'm going to use k6 because it natively outputs p50/p95/p99 in its summary, and 
 
 I wrote this script:
 
-```k6-baseline.js
+```js
 /**
  * k6 load test for the URL shortener.
  *
@@ -376,6 +370,8 @@ export default function () {
 `vus` represents "virtual users." This script will simulate 50 parallel "users" continuously looping through the default function exported here for the full 30 seconds. Each VU will make one request, and make another as soon as it receives a response.
 
 Install k6 on your machine using the appropriate instructions from [here](https://grafana.com/docs/k6/latest/set-up/install-k6/?pg=get&plcmt=selfmanaged-box10-cta1).
+
+Create a test slug via the /shorten endpoint.
 
 Then run:
 ```bash
