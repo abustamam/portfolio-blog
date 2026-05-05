@@ -8,8 +8,6 @@ heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
 dek: "Two endpoints, one table, and a load test — everything that follows is measured against this baseline."
 tag: "Infrastructure"
 kind: "Case Study"
-readMin: 13
-words: 2556
 ---
 
 *TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. This post establishes the baseline latency you'll use as a reference point throughout the series.
@@ -371,11 +369,11 @@ export default function () {
 
 Install k6 on your machine using the appropriate instructions from [here](https://grafana.com/docs/k6/latest/set-up/install-k6/?pg=get&plcmt=selfmanaged-box10-cta1).
 
-Create a test slug via the /shorten endpoint.
+Create a test slug via the /shorten endpoint, make note of the slug.
 
 Then run:
 ```bash
-k6 run scripts/k6-baseline.js
+k6 run --env BASE_URL="https://shrtn.your.domain" --env SLUG="your_slug" scripts/k6-baseline.js
 ```
 
 You'll see a lot of stuff here. But you'll want to pay attention to `http_req_duration` because it represents the time from sending the request to receiving the response. `iteration_duration` includes any overhead around the request like setting up k6 on each iteration. 

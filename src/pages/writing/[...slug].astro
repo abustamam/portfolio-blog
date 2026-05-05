@@ -16,6 +16,13 @@ type Props = CollectionEntry<'writing'>;
 const post = Astro.props;
 const { Content, headings } = await render(post);
 
+// Compute word count and reading time from markdown body
+// Simple approach: strip frontmatter, count everything else (code is still content)
+const bodyText = post.body ?? '';
+const contentWithoutFrontmatter = bodyText.replace(/^---[\s\S]*?---/, '').trim();
+const computedWords = contentWithoutFrontmatter.split(/\s+/).length;
+const computedReadMin = Math.max(1, Math.ceil(computedWords / 200));
+
 // This route intentionally has no page-scoped styles; BlogPost handles presentation.
 let series: { id: string; title: string } | undefined;
 let prevPost: { id: string; title: string } | null = null;
@@ -35,6 +42,8 @@ if (post.data.series) {
 
 <BlogPost
 	{...post.data}
+	readMin={computedReadMin}
+	words={computedWords}
 	slug={post.id}
 	headings={headings}
 	{series}
