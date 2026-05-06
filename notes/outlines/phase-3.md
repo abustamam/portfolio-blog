@@ -99,10 +99,11 @@ sequenceDiagram
   participant R as Redis
 
   C->>M: POST /shorten
-  M->>R: ZADD ip:timestamps now now
-  M->>R: ZREMRANGEBYSCORE ip:timestamps 0 (now - window_ms)
-  M->>R: ZCARD ip:timestamps
-  M->>R: EXPIRE ip:timestamps (window_ms / 1000)
+  M->>R: ZADD rate_limit:<ip>:post_shorten now member
+  M->>R: ZREMRANGEBYSCORE rate_limit:<ip>:post_shorten 0 (now - window_ms)
+  M->>R: ZCARD rate_limit:<ip>:post_shorten
+  M->>R: ZRANGE rate_limit:<ip>:post_shorten 0 0 WITHSCORES
+  M->>R: EXPIRE rate_limit:<ip>:post_shorten (window_ms / 1000)
   alt count ≤ limit
     M-->>C: pass through to handler
   else count > limit
@@ -116,62 +117,111 @@ sequenceDiagram
 
 ```typescript
 // src/middleware/rateLimit.ts
-import type { Context, Next } from 'hono'
+import { createMiddleware } from 'hono/factory'
+import { HTTPException } from 'hono/http-exception'
 import { redis } from '../lib/redis'
 
-const LIMIT = Number(process.env.RATE_LIMIT_MAX ?? 10)
-const WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? 60_000)
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? 10)
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? 60_000)
 
-export async function rateLimit(c: Context, next: Next) {
-  // Get the client IP — trust the header your reverse proxy sets
-  const ip =
-    c.req.header('cf-connecting-ip') ??
-    c.req.header('x-forwarded-for')?.split(',')[0].trim() ??
-    'unknown'
-
-  const key = `ratelimit:${ip}`
+export const rateLimit = createMiddleware(async (c, next) => {
+  // Caddy forwards the original client IP via X-Forwarded-For
+  const forwarded = c.req.header('x-forwarded-for')
+  const ip = forwarded?.split(',')[0]?.trim() ?? 'unknown'
+  const key = `rate_limit:${ip}:post_shorten`
   const now = Date.now()
-  const windowStart = now - WINDOW_MS
+  const windowStart = now - RATE_LIMIT_WINDOW_MS
 
-  const pipeline = redis.pipeline()
-  pipeline.zadd(key, now, now.toString())
-  pipeline.zremrangebyscore(key, 0, windowStart)
-  pipeline.zcard(key)
-  pipeline.expire(key, Math.ceil(WINDOW_MS / 1000))
+  try {
+    const pipeline = redis.pipeline()
 
-  const results = await pipeline.exec()
-  // zcard result is at index 2 (0-indexed after zadd, zremrangebyscore, zcard)
-  const count = results?.[2]?.[1] as number ?? 0
+    // 1. Add current request timestamp (with random suffix to guarantee uniqueness)
+    pipeline.zadd(key, now, `${now}-${Math.random().toString(36).slice(2)}`)
 
-  if (count > LIMIT) {
-    // Calculate seconds until the oldest entry in the window expires
-    const oldestEntry = await redis.zrange(key, 0, 0, 'WITHSCORES')
-    const oldestTimestamp = oldestEntry[1] ? Number(oldestEntry[1]) : now
-    const retryAfter = Math.ceil((oldestTimestamp + WINDOW_MS - now) / 1000)
+    // 2. Remove entries outside the sliding window
+    pipeline.zremrangebyscore(key, 0, windowStart)
 
-    return c.json(
-      { error: 'Too many requests', retryAfter },
-      429,
-      { 'Retry-After': retryAfter.toString() }
-    )
+    // 3. Count remaining entries in the window
+    pipeline.zcard(key)
+
+    // 4. Get the oldest remaining entry to compute Retry-After
+    pipeline.zrange(key, 0, 0, 'WITHSCORES')
+
+    // 5. Set expiry on the key so Redis cleans it up eventually
+    pipeline.expire(key, Math.ceil(RATE_LIMIT_WINDOW_MS / 1000))
+
+    const results = await pipeline.exec()
+    if (!results) {
+      console.error({ msg: 'Rate limit pipeline returned no results', ip })
+      return next()
+    }
+
+    const countResult = results[2] // zcard
+    if (!countResult || countResult[0]) {
+      console.error({ msg: 'Rate limit zcard failed', err: countResult?.[0], ip })
+      return next()
+    }
+
+    const count = countResult[1] as number
+
+    if (count > RATE_LIMIT_MAX) {
+      const oldestResult = results[3] // zrange withscores
+      let retryAfter = Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)
+
+      if (oldestResult && !oldestResult[0]) {
+        const oldestEntry = oldestResult[1] as string[]
+        if (oldestEntry.length >= 2) {
+          const oldestTimestamp = Number(oldestEntry[1])
+          retryAfter = Math.max(
+            1,
+            Math.ceil((oldestTimestamp + RATE_LIMIT_WINDOW_MS - now) / 1000)
+          )
+        }
+      }
+
+      throw new HTTPException(429, {
+        message: 'Too Many Requests',
+        res: new Response(
+          JSON.stringify({ error: 'Too Many Requests' }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'Retry-After': String(retryAfter),
+            },
+          }
+        ),
+      })
+    }
+
+    return next()
+  } catch (err) {
+    if (err instanceof HTTPException) {
+      throw err
+    }
+
+    // Redis is likely down — fail open so the app stays usable
+    console.error({ msg: 'Rate limiter error, failing open', err, ip })
+    return next()
   }
-
-  await next()
-}
+})
 ```
 
 A few things worth naming:
 
-**Pipeline:** The four Redis operations run as a pipeline — sent in one round trip and executed atomically from the server's perspective. This avoids race conditions between the `ZADD` and `ZCARD` steps.
+**Reusing the Phase 2 Redis client:** We import `redis` from `../lib/redis` — the same singleton client that handles caching. No second connection, no duplicate error handlers.
 
-**Timestamps as both score and member:** The sorted set uses the Unix timestamp (milliseconds) as the score *and* the string representation of that timestamp as the member. The score enables range-based eviction (`ZREMRANGEBYSCORE`). The string-value member is just the bookkeeping payload — we only care about the count.
+**Pipeline of five commands:** All five Redis operations run in one round trip. The `ZRANGE` is the key addition — it lets us compute `Retry-After` from the pipeline result without a second Redis round-trip on rejection.
+
+**Member uniqueness with a random suffix:** Two requests in the same millisecond would collide if the member were just the timestamp. Appending a random base36 suffix guarantees every request gets its own sorted-set entry.
+
+**Fail-open behavior:** If Redis is unreachable, the middleware logs the error and calls `next()` — the request proceeds. The alternative (fail closed) would break the app for everyone during a Redis outage. We chose availability over strict enforcement.
 
 **`EXPIRE` on every request:** Without this, sorted sets for IPs that never exceed the limit would persist in Redis forever. Setting the TTL to the window duration ensures they expire cleanly.
 
-**IP extraction:** We trust `CF-Connecting-IP` (Cloudflare) first, fall back to `X-Forwarded-For`. If neither is set, we fall back to `'unknown'` — which effectively rate-limits all unknown-origin traffic together. In production, make sure you know which header your reverse proxy sets and trust that one.
+**IP extraction:** We read `X-Forwarded-For` because Caddy is the reverse proxy. If that header is missing, we fall back to `'unknown'` — which effectively rate-limits all unknown-origin traffic together. In production, know which header your reverse proxy sets and trust that one.
 
-<!-- YOUR WORDS: What's your reverse proxy (Caddy)? What header does it set?
-     Did you test that IP extraction was working correctly before deploying?
+<!-- YOUR WORDS: Did you test that IP extraction was working correctly before deploying?
      Note: if X-Forwarded-For contains multiple IPs (proxies chained), we take the first one — the client IP. -->
 
 ### Applying the middleware
@@ -180,7 +230,9 @@ A few things worth naming:
 // src/routes/shorten.ts
 import { rateLimit } from '../middleware/rateLimit'
 
-shortenRouter.use('/shorten', rateLimit)
+export const shortenRouter = new OpenAPIHono()
+
+shortenRouter.use(rateLimit)
 
 shortenRouter.openapi(shortenRoute, async (c) => {
   // ... existing handler unchanged
@@ -199,12 +251,11 @@ Retry-After: 47
 Content-Type: application/json
 
 {
-  "error": "Too many requests",
-  "retryAfter": 47
+  "error": "Too Many Requests"
 }
 ```
 
-`Retry-After` is the number of seconds until the oldest request in the current window drops out of the count — the earliest moment the client could make another request without being rejected.
+`Retry-After` is the number of seconds until the oldest request in the current window drops out of the count — the earliest moment the client could make another request without being rejected. We compute it from the `ZRANGE` result in the same pipeline, so there's no extra Redis round-trip on rejection.
 
 Well-behaved clients (and Swagger UI) can use this to back off automatically. The header is standardized in [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after).
 
@@ -242,7 +293,7 @@ To verify the window resets: wait the number of seconds shown in `Retry-After`, 
 To observe the sorted set directly in Redis:
 
 ```bash
-redis-cli ZRANGE ratelimit:<your-ip> 0 -1 WITHSCORES
+docker compose exec redis redis-cli ZRANGE rate_limit:<your-ip>:post_shorten 0 -1 WITHSCORES
 ```
 
 <!-- YOUR WORDS: What happened when you ran this? Was the transition from 201 to 429 exactly at request 11?
@@ -254,6 +305,8 @@ redis-cli ZRANGE ratelimit:<your-ip> 0 -1 WITHSCORES
 ## Trade-offs
 
 **In-memory rate limiters** (a `Map<ip, timestamps[]>` in the process) are simpler to implement and have zero network overhead. But they don't survive restarts, don't work across multiple app instances, and can't be inspected externally. We'll see in Phase 4 why Redis was the right call: when we add a second app node, the rate limit state is already shared.
+
+**One Redis client, not two:** My first implementation created a second `new Redis(...)` connection in the rate limiter. That meant two TCP connections and two error event handlers for the same Redis server. I caught it during PR review and switched to importing the singleton from `src/lib/redis.ts` — the same client that handles caching. If you're adding Redis-based features incrementally, watch for this.
 
 **Sliding window memory cost:** Each IP's sorted set holds one entry per request within the window. With a 60-second window and a limit of 10 requests, each IP uses at most 10 entries. At realistic scale (thousands of unique IPs), this is kilobytes of Redis memory — entirely acceptable.
 
