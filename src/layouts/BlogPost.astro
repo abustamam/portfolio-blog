@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import CopyButton from '../components/CopyButton.astro';
+import profilePic from '../assets/profile-pic.jpeg';
 
 interface SeriesInfo {
   id: string;
@@ -83,15 +84,13 @@ const readMinNum = readMin ?? 0;
 
         <!-- Author strip -->
         <div class="post-title__author mt-10 flex items-center gap-3.5 pt-6 border-t border-line-soft flex-wrap max-xs:flex-col max-xs:items-start">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-ink flex items-center justify-center text-bg font-mono font-semibold text-sm shrink-0">
-            RB
-          </div>
+          <img src={profilePic.src} alt="Rasheed Bustamam" class="w-10 h-10 rounded-full object-cover shrink-0" />
           <div class="flex-1 min-w-0">
             <div class="font-mono text-xs text-ink font-medium">Rasheed Bustamam</div>
             <div class="font-mono text-11 text-faint mt-0.5">independent consultant · writing since 2019</div>
           </div>
           <div class="flex gap-2.5 font-mono text-11 shrink-0">
-            <button type="button" onclick={`navigator.share?.({title:'${title}',url:location.href})`} class="bg-transparent border border-line text-ink py-1.5 px-3 rounded-sm cursor-pointer font-mono text-11">↗ share</button>
+            <button type="button" id="share-btn" data-title={title} class="bg-transparent border border-line text-ink py-1.5 px-3 rounded-sm cursor-pointer font-mono text-11">↗ share</button>
           </div>
         </div>
       </div>
@@ -376,5 +375,35 @@ const readMinNum = readMin ?? 0;
         link.classList.toggle('active', i === activeIdx);
       });
     }, { passive: true });
+  }
+
+  // Share button: native share API with clipboard fallback
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const shareData = {
+        title: shareBtn.dataset.title || document.title,
+        url: location.href,
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (err) {
+          // User cancelled or share failed — fall through to clipboard
+        }
+      }
+      // Fallback: copy URL to clipboard
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        const originalText = shareBtn.textContent;
+        shareBtn.textContent = 'copied!';
+        setTimeout(() => {
+          shareBtn.textContent = originalText;
+        }, 2000);
+      } catch {
+        // Clipboard API also unavailable — do nothing
+      }
+    });
   }
 </script>

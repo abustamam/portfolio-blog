@@ -1,5 +1,5 @@
 ---
-// AuthorBio.astro — no props
+import profilePic from '../assets/profile-pic.jpeg';
 ---
 
 <section class="grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-8 md:gap-14 px-gutter py-14 md:py-14 items-start border-t border-line bg-surface">
@@ -9,9 +9,7 @@
       § about the author
     </div>
     <div class="flex items-center gap-4 mb-4">
-      <div class="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-ink flex items-center justify-center text-bg font-mono font-semibold text-lg tracking-tight shrink-0">
-        RB
-      </div>
+      <img src={profilePic.src} alt="Rasheed Bustamam" class="w-14 h-14 rounded-full object-cover shrink-0" />
       <div>
         <div class="font-serif text-2xl text-ink font-medium tracking-tight">Rasheed Bustamam</div>
         <div class="font-mono text-11 text-faint mt-1 tracking-snug">
