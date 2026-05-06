@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import profilePic from '../assets/profile-pic.jpeg';
 ---
 
 <BaseLayout
@@ -19,9 +20,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="flex flex-col">
       <!-- Author strip -->
       <div class="flex items-center gap-3.5 pb-7 border-b border-line-soft mb-8 col-[1/-1]">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-ink flex items-center justify-center text-bg font-mono font-semibold text-sm shrink-0">
-          RB
-        </div>
+        <img src={profilePic.src} alt="Rasheed Bustamam" class="w-10 h-10 rounded-full object-cover shrink-0" />
         <div>
           <div class="font-mono text-xs text-ink font-medium">Rasheed Bustamam</div>
           <div class="font-mono text-11 text-faint mt-0.5">independent consultant · writing since 2019</div>

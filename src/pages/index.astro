@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import AvailabilityCard from '../components/AvailabilityCard.astro';
+import profilePic from '../assets/profile-pic.jpeg';
 
 const featuredWork = (await getCollection('work', ({ data }) => data.featured && !data.draft))
   .sort((a, b) => {
@@ -30,7 +31,7 @@ const featuredWork = (await getCollection('work', ({ data }) => data.featured &&
       Your team is <em class="italic text-accent font-medium">maxed out.</em>
     </h1>
     <p class="mt-6.5 max-w-[540px] font-serif text-lg leading-[1.55] text-mute">
-      I'm <span class="text-ink">Rasheed Bustamam</span> — an independent software consultant based in California.
+      I'm <img src={profilePic.src} alt="Rasheed Bustamam" class="w-8 h-8 rounded-full object-cover inline-block align-middle -mt-0.5 mr-0.5" /> <span class="text-ink">Rasheed Bustamam</span> — an independent software consultant based in California.
       I build web and mobile applications for teams that need a senior engineer without the full-time hire.
     </p>
     <div class="flex gap-3.5 mt-8">
