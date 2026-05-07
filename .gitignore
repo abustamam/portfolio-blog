@@ -40,3 +40,5 @@ pnpm-debug.log*
 !.claude/hooks.json
 CLAUDE.local.md
 .release-worktree/
+test-results/
+package-lock.json
