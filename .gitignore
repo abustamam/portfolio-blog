@@ -41,4 +41,3 @@ pnpm-debug.log*
 CLAUDE.local.md
 .release-worktree/
 test-results/
-package-lock.json
