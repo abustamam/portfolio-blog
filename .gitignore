@@ -36,7 +36,7 @@ pnpm-debug.log*
 !.codeledger/bin/**
 !.codeledger/team-ledger/
 !.codeledger/team-ledger/**
-.claude/
+.claude/*
 !.claude/hooks.json
 CLAUDE.local.md
 .release-worktree/
