@@ -1,28 +1,30 @@
 ---
 title: "A URL Shortener Is Not Just Two Endpoints"
-description: "Phase 1 of Systems Design in Practice: a Hono + Postgres URL shortener with two endpoints, Swagger UI, and a baseline latency measurement you'll reference for every phase that follows."
+description: "Phase 1 of Systems Design in Practice: a Hono + Postgres URL shortener with two endpoints, Swagger UI, and a baseline latency measurement that serves as reference for every phase that follows."
 pubDate: '2026-03-04'
 series: url-shortener-systems-design
 seriesOrder: 1
 heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
-dek: "Two endpoints, one table, and a load test — everything that follows is measured against this baseline."
+dek: "Two endpoints, one table, and a load test — all subsequent phases measure against this baseline."
 tag: "Infrastructure"
 kind: "Case Study"
 ---
 
-*TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. This post establishes the baseline latency you'll use as a reference point throughout the series.
+> *Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
 
-Have you ever been in an interview and they asked you, "Design a URL shortener."
+---
 
-That's it. That's the question. What was your answer? Was it anything like mine, which was just "two endpoints -- one to shorten, one to redirect, and that's it! Can I have a job now?"
+*TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. This post establishes the baseline latency that serves as the reference point for the entire series.
 
-There's a reason this is a classic interview question. It's not a trick question, but it is a weeder question. Many developers may fall into the trap of not understanding how complex a URL shortener actually could be. It's easy to think that it's just two endpoints and a single database table and that's all we need. What happens when there's a million requests per day against your API? Will your 1 vCPU VPS be able to handle it, or will you just keep adding more RAM and vCPU?
+Interview question: "Design a URL shortener."
 
-The goal of this series is to learn infrastructure concepts hands-on — not by following a curriculum, but by building something real and breaking it. A URL shortener is the perfect vehicle: it's trivial enough to understand in five minutes, and interesting enough to keep adding layers to.
+That is the entire prompt. The common answer — "two endpoints, one to shorten, one to redirect" — misses the point. This is a weeder question, not a trick question. The trap is underestimating the complexity. Two endpoints and a single database table are not enough for production. A million requests per day against a 1 vCPU VPS does not end well without deliberate design decisions.
 
-This first post covers the foundation. No Redis, no load balancers, nothing clever. Just the app itself, and a baseline p95 you'll reference as we add Redis, load balancers, and more.
+This series teaches infrastructure concepts hands-on — by building something real, measuring it, and breaking it. A URL shortener is the perfect vehicle: trivial enough to understand in five minutes, interesting enough to layer complexity onto.
 
-If you want to follow along, the repo can be found [here](https://github.com/abustamam/url-shortener).
+This first post covers the foundation. No Redis, no load balancers, nothing clever. Just the app itself, and a baseline p95 that every subsequent phase compares against.
+
+The repo is available [here](https://github.com/abustamam/url-shortener).
 
 ## The app in two endpoints
 
@@ -31,18 +33,18 @@ POST /shorten   — takes a URL, returns a slug
 GET  /:slug     — looks up the slug, redirects to the original URL
 ```
 
-That's it. Everything in this series is about making these two endpoints faster, more resilient, and more observable. Keeping the app trivial is a feature — it means every new concept gets your full attention.
+That is the entire surface area. This series makes these two endpoints faster, more resilient, and more observable. Keeping the app trivial is intentional — it isolates each concept so the infrastructure change is the only variable.
 
 ![simple request/response diagram — POST /shorten returns {"slug": "abc123"}, GET /abc123 returns 301 to original URL](../../assets/series/url-shortener/url-shortener-phase-1-endpoints.png)
 
 ## Why Hono
 
-I didn't want to think too much about the stack because the app isn't the point. So, I went with the simplest serverside framework that gives me OpenAPI specs: Hono. Hono is a small, fast web framework that runs on any JS runtime — Node, Bun, Cloudflare Workers, Deno. For this project, it has two things I care about:
+The stack choice is deliberate: the app is not the point. Hono is the simplest serverside framework that provides OpenAPI specs. It runs on any JS runtime — Node, Bun, Cloudflare Workers, Deno. For this project, two features matter:
 
 1. **First-class TypeScript** — no ceremony, no workarounds
 2. **`@hono/zod-openapi`** — schema validation and OpenAPI spec generation from the same source
 
-That second point matters a lot, which I'll get to in a moment.
+That second point matters — more on that shortly.
 
 ## Schema design
 
@@ -62,7 +64,7 @@ export const urls = pgTable('urls', {
 ])
 ```
 
-I think the columns are pretty self-explanatory, but let's talk about `hitCount` for a second. `hitCount` just represents how often people are hitting this link. We'll talk a bit more about this column in the implementation section.
+The `hitCount` column tracks how often a link is accessed. More on its role in the implementation section.
 
 One other decision worth noting: slug has a UNIQUE constraint, so the database enforces no collisions. The application layer doesn't need to worry about it.
 
@@ -78,9 +80,9 @@ There are three common ways to generate slugs, each with different tradeoffs:
 | **Hash of URL** | `sha256(url)[:7]` | Deterministic — same URL, same slug | Hash collisions require handling; leaks URL structure |
 | **Sequential** | `0001`, `0002` | Short, predictable length | Requires coordination; enumerable (privacy concern) |
 
-I went with nanoid (random). Sequential is a privacy concern -- if someone gives you a short URL ending in 00100, you can probably enumerate 00001-00099. Not ideal. Hash vs random was a toss-up, but random had fewer downsides. The right choice depends on whether leaking the URL structure is fine or not.
+The choice: nanoid (random). Sequential slugs are a privacy concern — a short URL ending in 00100 invites enumeration of 00001-00099. Hash vs random was close, but random had fewer downsides. The correct choice depends on whether leaking the URL structure is acceptable.
 
-A 7-character slug from a 36-character alphabet (a-z and 0-9) gives you ~78 billion possible combinations. At a million slugs created per day, you'd expect your first collision after roughly 200 years. This is why observability is important -- if a collision does happen, you need to know when and how frequently, and at that point you can reassess whether you want to keep with random or go with hashing, or use a long random slug. An 8-character slug gives us 2.8 trillion combos. We'll use nanoid 8 in this post, but nanoid 7 would suffice as well.
+A 7-character slug from a 36-character alphabet (a-z and 0-9) gives you ~78 billion possible combinations. At a million slugs created per day, you'd expect your first collision after roughly 200 years. This is why observability matters — if a collision happens, the data shows when and how frequently, enabling a reassessment of random vs hash vs longer random slugs. An 8-character slug provides 2.8 trillion combos. This post uses nanoid 8, though nanoid 7 would suffice.
 
 ## OpenAPI as documentation-as-code
 
@@ -111,7 +113,7 @@ const shortenRoute = createRoute({
   },
 });
 ```
-I've always appreciated when API providers provide some sort of interactive playground. I can see the schema of inputs and outputs and run tests without touching my code. The result is a clean way to see all of your app's endpoints, and you can add whatever additional information necessary for your users, like when to use it, whether it's deprecated (and what to use instead), or any auth requirements, giving us a clean, self-documenting view of every endpoint.
+API providers that ship interactive playgrounds make integration easier — schema visibility and test execution without touching code. The result is a clean, self-documenting view of every endpoint, including usage guidance, deprecation status, and auth requirements.
 
 ![screenshot of the Swagger UI at /docs showing the two endpoints](../../assets/series/url-shortener/url-shortener-phase-1-swagger.png)
 ![screenshot of the Swagger UI at /docs showing the /shorten endpoint](../../assets/series/url-shortener/url-shortener-phase-1-swagger-shorten.png)
@@ -234,15 +236,15 @@ shortenRouter.openapi(shortenRoute, async (c) => {
 })
 ```
 
-That's it. This app is intentionally simple because the complexity isn't in the code, it's what happens when it runs at scale, and that is what the rest of this series is going to take you through.
+This app is intentionally simple. The complexity emerges at scale — the focus of the rest of this series.
 
 ## Deployment: single VPS behind Caddy
 
 The deployment is intentionally simple: one Hetzner VPS, Caddy as a reverse proxy. Caddy handles TLS automatically. The app runs in a Docker container.
 
-I'm using a 4vCPU and 8GB RAM Ubuntu box in a Helsinki datacenter ($5.99/mo) because that's just what I use for all my labs, but you probably don't even need that much; try it with the smallest you can get. If it doesn't work then you can always rescale. 
+The deployment uses a 4vCPU / 8GB RAM Ubuntu box in a Helsinki datacenter ($5.99/mo) — the standard lab setup. Smaller instances may work; scale up if needed.
 
-We'll be using docker compose to manage services. My docker-compose.yml looks like this:
+Docker Compose manages the services. The `docker-compose.yml`:
 
 ```yml
 services:
@@ -304,9 +306,9 @@ networks:
     name: srv-network
 ```
 
-Use a .env to populate POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB if you want to change from the defaults.
+Use a `.env` to override `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` from the defaults.
 
-My Caddyfile looks like this:
+The `Caddyfile`:
 
 ```Caddyfile
 shrtn.bustamam.tech {
@@ -320,11 +322,11 @@ A single-node setup is exactly right for Phase 1. It makes the baseline latency 
 
 ## Measuring the baseline
 
-Before doing anything else, let's measure redirect latency. These will be referenced in every subsequent phase, and every optimization will be compared against these values.
+First: measure redirect latency. These values are referenced in every subsequent phase, and every optimization compares against them.
 
-We'll get our baseline values by load-testing our app in order to get a bunch of latency values, then do some math to determine statistical latencies. These are commonly called p50, p90, p95, p99. In p*n*, we are just talking about the *n*th percentile. This may sound like jargon, but it's just statistics, and fortunately, the math is simple. To get these numbers, we sort, then grab the value at the specified rank. So if we say p50, we look at the number that is at the 50% mark. Half of all entries will be lower, half will be higher. If we say p99, we are looking at the highest 1% of latencies, and this is where we typically want to spend our time optimizing as we scale. 1% of 100 is only 1, but 1% of 100,000 is 1,000. Those are real users who may be having real problems with your app.  
+Baseline values come from load-testing, then computing statistical latencies — commonly called p50, p90, p95, p99. In p*n*, *n* is the percentile. The math is simple: sort the values, then grab the entry at the specified rank. p50 is the 50% mark — half lower, half higher. p99 is the highest 1% of latencies, and that is where optimization time is best spent. 1% of 100 is 1, but 1% of 100,000 is 1,000. Those are real users experiencing real latency.
 
-I'm going to use k6 because it natively outputs p50/p95/p99 in its summary, and it's scriptable in JS. There are plenty of other tools you could use, feel free to experiment.
+k6 was chosen because it natively outputs p50/p95/p99 in its summary, and it is scriptable in JS.
 
 I wrote this script:
 
@@ -365,18 +367,18 @@ export default function () {
 }
 ```
 
-`vus` represents "virtual users." This script will simulate 50 parallel "users" continuously looping through the default function exported here for the full 30 seconds. Each VU will make one request, and make another as soon as it receives a response.
+`vus` represents "virtual users." This script simulates 50 parallel users continuously looping for 30 seconds. Each VU makes one request, then immediately makes another upon receiving a response.
 
-Install k6 on your machine using the appropriate instructions from [here](https://grafana.com/docs/k6/latest/set-up/install-k6/?pg=get&plcmt=selfmanaged-box10-cta1).
+Install k6 from [the official docs](https://grafana.com/docs/k6/latest/set-up/install-k6/?pg=get&plcmt=selfmanaged-box10-cta1).
 
-Create a test slug via the /shorten endpoint, make note of the slug.
+Create a test slug via `/shorten` and note the slug.
 
 Then run:
 ```bash
 k6 run --env BASE_URL="https://shrtn.your.domain" --env SLUG="your_slug" scripts/k6-baseline.js
 ```
 
-You'll see a lot of stuff here. But you'll want to pay attention to `http_req_duration` because it represents the time from sending the request to receiving the response. `iteration_duration` includes any overhead around the request like setting up k6 on each iteration. 
+Focus on `http_req_duration` — the time from sending the request to receiving the response. `iteration_duration` includes k6 overhead per iteration. 
 
 ![k6 run on local machine against deployed URL shortener service](../../assets/series/url-shortener/url-shortener-phase-1-run.png)
 
@@ -388,7 +390,7 @@ You'll see a lot of stuff here. But you'll want to pay attention to `http_req_du
 
 The distribution is pretty tight! 19ms between p50 and p99. The 170ms is almost certainly dominated by network round-trip to Helsinki, not app time.
 
-If we want to disregard network latency and just test our Postgresql query, we can run this exact thing on our Hetzner box.
+To isolate network latency from app latency, run the same test directly on the Hetzner box.
 
 ![k6 run on hetzner box](../../assets/series/url-shortener/url-shortener-phase-1-run-2.png)
 
@@ -398,7 +400,7 @@ If we want to disregard network latency and just test our Postgresql query, we c
 | p95 | 57.86ms |
 | p99 | 77.75ms |
 
-Great! We saved about 120ms just from the round trip. Let's profile our Postgres query to make extra sure.
+The on-box test saves ~120ms of round-trip latency. Next: profile the Postgres query directly.
 
 ```bash
 docker compose exec postgres   psql -U "${POSTGRES_USER:-postgres}" urlshortener   -c "EXPLAIN ANALYZE SELECT original_url FROM urls WHERE slug = 'WY3Ly9Yd';"
@@ -414,17 +416,17 @@ docker compose exec postgres   psql -U "${POSTGRES_USER:-postgres}" urlshortener
 (7 rows)
 ```
 
-The planning time is the time postgres took to optimize the query. The execution time is the time to actually execute the query.
+Planning time is what Postgres spends optimizing the query. Execution time is what it spends running it.
 
-The important thing isn't the absolute numbers, it's having them. Every subsequent phase will change something about the system and we'll compare against this baseline.
+Absolute numbers matter less than having a baseline. Every subsequent phase changes something about the system, and the comparison against this baseline reveals whether the change helped or hurt.
 
-The Postgres query takes 0.091ms to execute, so we can probably infer that Postgres is not the problem. The ~40ms on the VPS is the full request pipeline, which includes Caddy, Docker networking, Hono, connection pool to Postgres, etc.
+The Postgres query executes in 0.091ms — Postgres is not the bottleneck. The ~40ms on the VPS is the full request pipeline: Caddy, Docker networking, Hono, connection pool to Postgres, etc.
 
 ## What's next
 
-Phase 2 adds Redis. Every redirect currently hits Postgres, but a redirect is a pure read, and the slug-to-URL mapping almost never changes. It's the ideal cache candidate. To reiterate, we are not trying to optimize speed of query -- we already established that it is already sub-millisecond above. The purpose is to eliminate _unnecessary_ queries.
+Phase 2 adds Redis. Every redirect currently hits Postgres, but a redirect is a pure read, and the slug-to-URL mapping almost never changes. It is the ideal cache candidate. To reiterate: the goal is not query speed optimization — the query is already sub-millisecond. The purpose is to eliminate *unnecessary* queries.
 
-But again, before we do any optimizations: measure, measure, measure. The baseline we establish here is the only honest way to know whether the next change actually helped.
+Before any optimization: measure. The baseline established here is the only honest way to know whether the next change actually helped.
 
 > You can't manage what you don't measure.
 
