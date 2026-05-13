@@ -4,7 +4,7 @@
 
 ---
 
-**Title:** *I instrumented my URL shortener with the full Grafana LGTM stack — here's what I found*
+**Title:** *Instrumenting a URL shortener with the Grafana LGTM stack — what the metrics reveal*
 
 **TL;DR:**
 <!-- YOUR WORDS: 2-3 sentences. Something like: "Logs tell you what happened. Metrics tell you how often.
@@ -352,8 +352,8 @@ Once Tempo is receiving data, open Grafana's Explore panel, select Tempo as the 
 
 The useful flow: see a high-latency request in the Prometheus latency panel → correlate to a trace in Tempo (Grafana's "exemplars" feature links these directly when configured) → identify which span is slow.
 
-<!-- YOUR WORDS: Describe what you actually saw in Tempo for a cache-miss request vs. a cache-hit request.
-     Were the span durations what you expected? Were there any surprising spans?
+<!-- YOUR WORDS: Describe what was observed in Tempo for a cache-miss request vs. a cache-hit request.
+     Note whether span durations matched expectations and whether any spans were unexpected.
      Did the auto-instrumentation capture the Redis operations correctly? -->
 
 ---
@@ -398,13 +398,13 @@ Question: *Is something broken?*
 
 > **HANDS-ON — fill in from your actual observations**
 
-This section must be written from what you actually saw on your running system. The following is a template for the kinds of things worth documenting:
+This section must be written from what was observed on your running system. The following is a template for the kinds of things worth documenting:
 
-- **Cache hit rate:** Was it what you expected? If it was lower than ~80%, investigate why — the most common cause is slugs created but never accessed again (test traffic, bots, etc.)
+- **Cache hit rate:** Note whether it matched expectations. If lower than ~80%, investigate why — the most common cause is slugs created but never accessed again (test traffic, bots, etc.)
 - **Latency distribution:** What was the gap between p50 and p99? A wide gap suggests something non-deterministic (Postgres autovacuum, GC pauses, Redis connection pool contention).
 - **Any latency spike you observed:** When did it happen, what did the trace show was the cause?
 
-<!-- YOUR WORDS: Write what you actually found. This section is the core of the post.
+<!-- YOUR WORDS: Write what was found. This section is the core of the post.
      The reader is here for your real observations, not the scaffold.
      Be specific: "cache hit rate was 62%" beats "cache hit rate was lower than expected."
      Include the actual trace screenshot if you found something interesting. -->
@@ -422,7 +422,7 @@ This section must be written from what you actually saw on your running system. 
 **Loki vs. Elasticsearch:** Loki stores logs more cheaply by design (labels, not full-text indexing). The tradeoff is less powerful full-text search. For this use case — structured JSON logs with known field names — Loki is the right choice.
 
 <!-- YOUR WORDS: Did the observability stack add any measurable overhead to request latency?
-     Note what you observed, not what you'd expect. -->
+     Note what was observed, not what is expected. -->
 
 ---
 

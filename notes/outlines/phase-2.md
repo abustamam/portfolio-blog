@@ -4,14 +4,14 @@
 
 ---
 
-**Title:** *I added Redis to my URL shortener — and had to think hard about cache invalidation*
+**Title:** *Adding Redis broke the p99 — cache invalidation is harder than it looks*
 
 **TL;DR:**
 <!-- YOUR WORDS: 2-3 sentences. Something like: "Redirects are pure reads — a slug maps to a URL, and that mapping almost never changes. Adding Redis cache-aside dropped warm-path latency from Xms to Yms. The interesting work wasn't the cache — it was deciding what TTL to use and what to do when a URL gets deleted." -->
 
 ---
 
-**Who this is for:** This post assumes you've read [Post 1](./phase-1.md) or are already running a working Hono + Postgres URL shortener. No prior Redis experience required — we'll cover what you need.
+**Who this is for:** This post assumes familiarity with [Post 1](./phase-1.md) or are already running a working Hono + Postgres URL shortener. No prior Redis experience required — this post covers the essentials.
 
 *New in this phase: ioredis 5.3.2*
 
@@ -38,7 +38,7 @@ Contrast this with `POST /shorten`: every shorten is a new record. There's no "c
 
 ## The Cache-Aside Pattern
 
-There are several ways to integrate a cache with a database. We're using **cache-aside** (also called lazy loading):
+There are several ways to integrate a cache with a database. This uses **cache-aside** (also called lazy loading):
 
 1. Check Redis for the slug key
 2. On a **hit**: return the cached URL immediately — no database query
@@ -65,7 +65,7 @@ sequenceDiagram
   end
 ```
 
-The alternative is **write-through**: populate the cache on every write, so the cache is always warm. We're not using it here because writes are rare — there's no benefit to pre-populating an entry that might never be read again.
+The alternative is **write-through**: populate the cache on every write, so the cache is always warm. It is not used here because writes are rare — there is no benefit to pre-populating an entry that might never be read again.
 
 ### The Redis client
 
@@ -135,7 +135,7 @@ A few things worth naming:
 
 **On a cache hit, we still increment `hit_count`.** The counter lives in Postgres and is incremented regardless of whether Redis served the response. The two systems are tracking different things: Redis tracks the URL, Postgres tracks the usage.
 
-**`CACHE_TTL_SECONDS` is an env var.** The right TTL depends on your use case. We'll discuss how to choose it in the next section.
+**`CACHE_TTL_SECONDS` is an env var.** The right TTL depends on your use case. The next section covers how to choose it.
 
 **The cold path is now two round trips** (Redis + Postgres) instead of one. In practice Redis responds in <1ms, so this adds negligible overhead. But it's worth knowing — a "cache miss" with Redis is technically slower than no cache at all on that first request.
 
@@ -149,7 +149,7 @@ TTL is the first real design decision in this phase. There's no universally corr
 
 **Long TTL (hours/days):** Few cache misses, minimal Postgres load, but stale data lingers. Fine if URLs are immutable after creation.
 
-For a URL shortener where slugs are created once and never modified, a long TTL is defensible. We're using 24 hours (`86400` seconds) as a starting point.
+For a URL shortener where slugs are created once and never modified, a long TTL is defensible. This uses 24 hours (`86400` seconds) as a starting point.
 
 <!-- YOUR WORDS: What TTL did you settle on and why? Did you consider anything shorter?
      What does "stale data" actually mean here — when would a cached URL become wrong? -->
@@ -212,7 +212,7 @@ To observe the cache directly while requests land:
 redis-cli MONITOR   # on your VPS — shows every Redis command in real-time
 ```
 
-You'll see the `GET slug` on the first request return `nil`, followed by a `SET`, followed by subsequent `GET slug` commands returning the URL.
+The output shows `GET slug` returning `nil` on the first request, then a `SET`, then subsequent `GET slug` commands returning the URL.
 
 To verify the TTL was set correctly:
 

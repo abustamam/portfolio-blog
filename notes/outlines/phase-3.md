@@ -13,7 +13,7 @@
 
 ---
 
-**Who this is for:** This post assumes you've followed the series or are running a Hono app with Redis available. No prior knowledge of rate limiting algorithms required — that's exactly what we're covering.
+**Who this is for:** This post assumes you've followed the series or are running a Hono app with Redis available. No prior knowledge of rate limiting algorithms required — that is what this post covers.
 
 *No new dependencies in this phase. Redis is already running from Phase 2.*
 
@@ -219,7 +219,7 @@ A few things worth naming:
 
 **`EXPIRE` on every request:** Without this, sorted sets for IPs that never exceed the limit would persist in Redis forever. Setting the TTL to the window duration ensures they expire cleanly.
 
-**IP extraction:** We read `X-Forwarded-For` because Caddy is the reverse proxy. If that header is missing, we fall back to `'unknown'` — which effectively rate-limits all unknown-origin traffic together. In production, know which header your reverse proxy sets and trust that one.
+**IP extraction:** The middleware reads `X-Forwarded-For` because Caddy is the reverse proxy. If that header is missing, it falls back to `'unknown'` — which effectively rate-limits all unknown-origin traffic together. In production, know which header the reverse proxy sets.
 
 <!-- YOUR WORDS: Did you test that IP extraction was working correctly before deploying?
      Note: if X-Forwarded-For contains multiple IPs (proxies chained), we take the first one — the client IP. -->
@@ -304,7 +304,7 @@ docker compose exec redis redis-cli ZRANGE rate_limit:<your-ip>:post_shorten 0 -
 
 ## Trade-offs
 
-**In-memory rate limiters** (a `Map<ip, timestamps[]>` in the process) are simpler to implement and have zero network overhead. But they don't survive restarts, don't work across multiple app instances, and can't be inspected externally. We'll see in Phase 4 why Redis was the right call: when we add a second app node, the rate limit state is already shared.
+**In-memory rate limiters** (a `Map<ip, timestamps[]>` in the process) are simpler to implement and have zero network overhead. But they don't survive restarts, don't work across multiple app instances, and can't be inspected externally. Phase 4 shows why Redis was the right call: when a second app node is added, the rate limit state is already shared.
 
 **One Redis client, not two:** My first implementation created a second `new Redis(...)` connection in the rate limiter. That meant two TCP connections and two error event handlers for the same Redis server. I caught it during PR review and switched to importing the singleton from `src/lib/redis.ts` — the same client that handles caching. If you're adding Redis-based features incrementally, watch for this.
 

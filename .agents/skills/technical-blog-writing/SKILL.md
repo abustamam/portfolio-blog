@@ -11,11 +11,11 @@ Write developer-focused technical blog posts.
 
 ### 1. Tutorial / How-To
 
-Step-by-step instruction. The reader should be able to follow along and build something.
+Step-by-step instruction. The reader should be able to reproduce the build.
 
 ```
 Structure:
-1. What we're building (with screenshot/demo)
+1. What this builds (with screenshot/demo)
 2. Prerequisites
 3. Step 1: Setup
 4. Step 2: Core implementation
@@ -39,7 +39,7 @@ Explains a concept, technology, or architecture decision in depth.
 
 ```
 Structure:
-1. What is [concept] and why should you care?
+1. What [concept] is and why it matters
 2. How it works (simplified mental model)
 3. How it works (detailed mechanics)
 4. Real-world example
@@ -67,7 +67,7 @@ Data-driven comparison of tools, approaches, or architectures.
 
 ```
 Structure:
-1. What we compared and why
+1. What was compared and why
 2. Methodology (so results are reproducible)
 3. Results with charts/tables
 4. Analysis (what the numbers mean)
@@ -81,11 +81,11 @@ Explains how a system is built and why decisions were made.
 
 ```
 Structure:
-1. Problem we needed to solve
+1. Problem to solve
 2. Constraints and requirements
 3. Options considered
 4. Architecture chosen (with diagram)
-5. Trade-offs we accepted
+5. Trade-offs accepted
 6. Results and lessons
 ```
 
@@ -97,7 +97,8 @@ Structure:
 |----|-------|
 | Be direct: "Use connection pooling" | "You might want to consider using..." |
 | Admit trade-offs: "This adds complexity" | Pretend your solution is perfect |
-| Use "we" for team decisions | "I single-handedly architected..." |
+| Use "we" for team decisions only | "I single-handedly architected..." |
+| Use declarative statements | "You might want to consider..." |
 | Specific numbers: "reduced p99 from 800ms to 90ms" | "significantly improved performance" |
 | Cite sources and benchmarks | Make unsourced claims |
 | Acknowledge alternatives | Pretend yours is the only way |
@@ -106,7 +107,10 @@ Structure:
 
 ```
 ❌ "In today's fast-paced world of technology..." (filler)
-❌ "As we all know..." (if we all know, why are you writing it?)
+❌ "As we all know..." (if everyone knows it, omit it)
+❌ "Let's build this together" (this is instruction, not collaboration)
+❌ "Here's what I found" (state findings directly)
+❌ "I added X and here's what happened" (state what happens and why)
 ❌ "Simply do X" (nothing is simple if you're reading a tutorial)
 ❌ "It's easy to..." (dismissive of reader's experience)
 ❌ "Obviously..." (if it's obvious, don't write it)
@@ -170,9 +174,9 @@ If you're new to containers, start with [our intro post]."
 **TL;DR:** [2-3 sentence summary with key takeaway]
 
 ## The Problem / Why This Matters
-[Set up why the reader should care — specific, not generic]
+[Why the reader should care — specific, not generic]
 
-## The Solution / How We Did It
+## The Solution / How It Works
 [Core content — code, architecture, explanation]
 
 ### Step 1: [First thing]
