@@ -4,7 +4,7 @@
 
 ---
 
-**Title:** *I added Postgres replication to my URL shortener — then killed the primary*
+**Title:** *Postgres replication and intentional chaos — what failover actually looks like*
 
 **TL;DR:**
 <!-- YOUR WORDS: 2-3 sentences. Something like: "Postgres streaming replication sends the write-ahead log
@@ -289,7 +289,7 @@ done
 <!-- YOUR WORDS: On your idle system, did the slug appear on the first attempt (essentially synchronous)?
      Under write load, how many attempts before the slug appeared?
      What's the maximum replication lag you observed during this test?
-     This is "eventual consistency" made concrete — document what you actually saw. -->
+     This is "eventual consistency" made concrete — document what was observed. -->
 
 ---
 

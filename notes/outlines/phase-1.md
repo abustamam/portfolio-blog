@@ -15,7 +15,7 @@ Code in this project is AI-scaffolded. The posts are written by hand.
 
 **AI-assisted:** boilerplate, schema definitions, middleware implementations, Docker Compose wiring, OTel SDK setup — anything read, understood, and explainable before publishing.
 
-**Always hands-on:** all latency measurements (real VPS, real traffic), chaos experiments and failure observations (exact error messages, recovery steps, actual behavior), configuration decisions and the reasoning behind them, and anything described as "what I found" in a post.
+**Always hands-on:** all latency measurements (real VPS, real traffic), chaos experiments and failure observations (exact error messages, recovery steps, actual behavior), configuration decisions and the reasoning behind them, and anything described as "observed findings" in a post.
 
 Each post includes a disclosure: *"I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS."*
 
@@ -25,7 +25,7 @@ Each post includes a disclosure: *"I used AI to scaffold the implementation. All
 
 **Goal:** Ship the simplest possible working URL shortener. No caching, no scaling, nothing clever.
 
-**What you build:**
+**What this builds:**
 - Hono app with two routes: `POST /shorten` and `GET /:slug`
 - Schema validation with Zod via `@hono/zod-openapi`
 - Swagger UI served at `/docs` — your interactive "frontend"
@@ -33,9 +33,9 @@ Each post includes a disclosure: *"I used AI to scaffold the implementation. All
 - Slug generation (nanoid)
 - Deployed on a single Hetzner VPS behind Caddy
 
-**The one concept:** Data modeling and baseline performance. Measure redirect latency now — you'll compare it at every subsequent phase.
+**The one concept:** Data modeling and baseline performance. Measure redirect latency now — comparison happens at every subsequent phase.
 
-**Blog post angle:** *"I built a URL shortener in a weekend — here's the boring foundation that makes everything else possible"*
+**Blog post angle:** *"A URL shortener is not just two endpoints — here's the foundation everything else builds on"*
 Covers: why Hono over a heavier framework, schema design, slug generation tradeoffs (random vs. hash vs. sequential), OpenAPI as documentation-as-code, why you measure before you optimize
 
 ---
@@ -44,14 +44,14 @@ Covers: why Hono over a heavier framework, schema design, slug generation tradeo
 
 **Goal:** Stop hitting Postgres on every redirect. A redirect is a pure read — it's the ideal cache candidate.
 
-**What you build:**
+**What this builds:**
 - Redis on the same Hetzner box
 - Cache-aside on `GET /:slug` — check Redis first, fall back to Postgres, populate cache on miss
 - TTL strategy: what's the right expiry for a shortened URL?
 
 **The one concept:** Cache-aside pattern, TTL decisions, cache invalidation (what happens if someone deletes a URL?)
 
-**Blog post angle:** *"I added Redis to my URL shortener — and had to think hard about cache invalidation"*
+**Blog post angle:** *"Adding Redis broke the p99 — cache invalidation is harder than it looks"*
 Covers: why redirects are perfect cache candidates, the TTL decision, the deletion edge case, before/after latency numbers
 
 ---
@@ -60,7 +60,7 @@ Covers: why redirects are perfect cache candidates, the TTL decision, the deleti
 
 **Goal:** Prevent abuse of `POST /shorten` without a database lookup on every request.
 
-**What you build:**
+**What this builds:**
 - Redis-backed rate limiter on the shorten endpoint (sliding window or token bucket)
 - Per-IP limiting
 - Appropriate error responses (429)
@@ -76,14 +76,14 @@ Covers: the three main algorithms with diagrams, why fixed window has a boundary
 
 **Goal:** Add a second Hetzner node. Watch what breaks. Fix it.
 
-**What you build:**
+**What this builds:**
 - Second VPS added to Caddy upstream
 - Identify what breaks (hint: anything node-local — in-memory state, local file storage if any)
 - Verify Redis is doing the right job as shared state
 
 **The one concept:** Stateless application design — why your app needs to treat every node as disposable
 
-**Blog post angle:** *"I added a second server to my URL shortener — here's what broke"*
+**Blog post angle:** *"What breaks when you add a second server — stateless design in practice"*
 Covers: what stateless actually means in practice, the difference between application state and data state, why Redis as shared layer makes horizontal scaling almost trivial for this app
 
 ---
@@ -101,14 +101,14 @@ Covers: what stateless actually means in practice, the difference between applic
 | **Grafana** | Unified dashboard for all three |
 | **OpenTelemetry** | Instrumentation SDK — feeds Tempo and Loki |
 
-**What you build:**
+**What this builds:**
 - OTel SDK instrumented in Hono middleware
 - Structured logging with Pino + Loki transport
 - A Grafana dashboard answering: redirect latency p50/p95/p99, cache hit rate, top slugs by traffic, error rate
 
 **The one concept:** The three pillars of observability — logs, metrics, traces — and why you need all three
 
-**Blog post angle:** *"I instrumented my URL shortener with the full Grafana LGTM stack — here's what I found"*
+**Blog post angle:** *"Instrumenting a URL shortener with the Grafana LGTM stack — what the metrics reveal"*
 Covers: why logs alone aren't enough, what a distributed trace actually shows you, the cache hit rate metric that made everything click, the RED method (Rate, Errors, Duration)
 
 ---
@@ -117,14 +117,14 @@ Covers: why logs alone aren't enough, what a distributed trace actually shows yo
 
 **Goal:** Add a Postgres read replica. Route redirect reads to the replica, writes to primary.
 
-**What you build:**
+**What this builds:**
 - Primary + replica Postgres on separate Hetzner VPSes
 - Read/write splitting via two Drizzle client instances
 - Intentional chaos: kill the primary, document the failure mode
 
 **The one concept:** Replication, replication lag, and eventual consistency — what they mean when you actually experience them
 
-**Blog post angle:** *"I added Postgres replication to my URL shortener — then killed the primary"*
+**Blog post angle:** *"Postgres replication and intentional chaos — what failover actually looks like"*
 Covers: why replication exists, what replication lag looks like in practice, the failover behavior, what "eventual consistency" actually feels like vs. how it's usually described
 
 ---
