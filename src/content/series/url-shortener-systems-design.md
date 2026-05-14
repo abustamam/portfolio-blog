@@ -5,32 +5,27 @@ heroImage: "../../assets/series/url-shortener/url-shortener.png"
 ---
 
 ## Systems Design for Full-Stack Developers
-Have you ever read an article about systems design and felt totally lost when they were talking about L7 load balancing, LRU caches, failover, p99? You're not alone.
 
-Hi, I'm Rasheed. I've been a software engineer for over ten years, and I've learned a lot about how to build maintainable web applications for companies of all sizes. But as I discovered on a Google interview once, I don't know how to design scalable software. The question I was asked was -- "How would you design the Google search bar?" Apparently the answer was NOT "use an input form and call GET google.com/search!"
+Most infrastructure content teaches concepts in isolation. Reading about caching is not the same as watching a cache miss fall back to the database and measuring the latency difference. This series closes that gap.
 
-That interview has stuck with me even more than five years later, but I never got around to actually studying systems design and scalable software. Now, in the spirit of building, learning, and teaching, I'm building a classic interview question: a URL shortener. I'm sharing my journey with you.
+The vehicle is a URL shortener — a classic interview question that most developers underestimate. Two endpoints, one database table, and a load test. From that minimal foundation, each phase layers on one infrastructure concept, builds it on a real VPS, and measures the result.
 
-Most infrastructure content teaches concepts in isolation. You may have read about caching, but you've never actually watched a cache miss fall back to the database and seen the latency difference. This series is about closing that gap.
+The baseline from Phase 1 carries through every subsequent post. By the end, the same two-endpoint app has Redis caching, rate limiting, horizontal scaling across multiple nodes, and full observability with the Grafana LGTM stack.
 
-We have two endpoints:
+The app has two endpoints:
 
 ```
 POST /shorten   — takes a URL, returns a slug
 GET  /:slug     — redirects to the original URL
 ```
 
-That's the whole thing. It's intentionally trivial — because the point isn't the app, it's what we layer on top of it.
+That is the entire surface area. The app is intentionally trivial — because the point is not the app, it is what gets layered on top of it.
 
-Each phase introduces one infrastructure concept, builds it on a real VPS, and measures the result. The baseline from Phase 1 carries through every subsequent post. By the end, the same two-endpoint app will have Redis caching, rate limiting, horizontal scaling across multiple nodes, and full observability with the Grafana LGTM stack.
+No prior infrastructure knowledge is required. Infrastructure is largely separate from backend code, so the concepts apply whether the backend is Java, Python, Rails, or anything else. The base application uses Node.js, but application code changes are minimal.
 
-This series does not require any prior infrastructure knowledge. The fun part about infrastructure is that it's largely separate from your backend code, so the concepts apply whether your backend is Java, Python, Rails, or anything else.
+By the end of the series, the result is a fully scalable URL shortener with concrete performance measurements on real production infrastructure — and a clear understanding of what problem each concept solves.
 
-That being said, the base application will be built using Node.js, but we won't really be updating application code too much so if you aren't familiar with Node.js, don't fret.
-
-At the end of the series, if you've followed along, you'll have built a fully scalable URL shortener and understand what problem each concept solves. More importantly, you'll have measured the performance gains concretely on real production infrastructure.
-
-## What we're building
+## What This Series Builds
 
 ![End-state architecture: Browser → Caddy LB → Hono Nodes → Redis, Postgres Primary/Replica, Grafana LGTM Stack](../../assets/series/url-shortener/url-shortener-map.png)
 
@@ -45,12 +40,10 @@ At the end of the series, if you've followed along, you'll have built a fully sc
 
 ## A note on the code
 
-Code in this series is AI-scaffolded — boilerplate, schema definitions, middleware, Docker Compose wiring. Everything I publish is something I've read, understood, and can explain. All latency measurements, configuration decisions, and failure observations come from running this on a real Hetzner VPS.
+Code in this series is AI-scaffolded — boilerplate, schema definitions, middleware, Docker Compose wiring. Everything published has been read, understood, and can be explained in detail. All latency measurements, configuration decisions, and failure observations come from running this on a real Hetzner VPS.
 
 Each post includes a disclosure to that effect.
 
-I will be using Alex Xu's [System Design Interview book](https://www.amazon.com/System-Design-Interview-insiders-Second-ebook/dp/B08B3FWYBX?_encoding=UTF8&qid=&sr=) as a reference in this series.
+Alex Xu's [System Design Interview book](https://www.amazon.com/System-Design-Interview-insiders-Second-ebook/dp/B08B3FWYBX?_encoding=UTF8&qid=&sr=) is used as a reference throughout the series.
 
-If you want to follow along, [here](https://github.com/abustamam/url-shortener) is the repo.
-
-Let's learn together!
+The repo is available [here](https://github.com/abustamam/url-shortener).

@@ -1,11 +1,11 @@
 ---
-title: "I Added Redis and Broke My p99"
-description: "Phase 2 of Systems Design in Practice"
+title: "Adding Redis Broke the p99"
+description: "Phase 2 of Systems Design in Practice: adding Redis caching to a Hono + Postgres URL shortener, and the hidden cost of fire-and-forget writes."
 pubDate: '2026-03-18'
 series: url-shortener-systems-design
 seriesOrder: 2
 heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
-dek: "Adding Redis is the easy part — the real work is deciding what to do when your cached data becomes stale."
+dek: "Adding Redis is straightforward. The real work is cache invalidation — and the hidden cost of fire-and-forget writes."
 tag: "Infrastructure"
 kind: "Case Study"
 ---
@@ -17,19 +17,19 @@ kind: "Case Study"
 ## TL;DR
 Redirects are pure reads: a slug maps to a URL and that mapping almost never changes. We already measured our Postgres query to be sub-millisecond. Caching won't make this faster, but it will prevent an unnecessary DB hit. The interesting work here isn't necessarily the cache, it's deciding what TTL to use and what to do if a URL gets deleted.
 
-**Who this is for:** This post assumes you've read [Post 1](/writing/url-shortener-phase-1-baseline/) or are already running a working Hono + Postgres URL shortener. No prior Redis experience required — we'll cover what you need.
+**Who this is for:** This post assumes familiarity with [Post 1](/writing/url-shortener-phase-1-baseline/) or an existing Hono + Postgres URL shortener. No prior Redis experience required — this post covers the essentials.
 
 *New in this phase: ioredis 5.3.2*
 
 ## Intro
 
-Adding a cache is the easy part. The hard part is deciding what to do when the underlying data changes. As we previously saw, a URL shortener is simple, and even here cache invalidation requires real decisions.
+Adding a cache is the easy part. The hard part is deciding what to do when the underlying data changes. As established in Phase 1, a URL shortener is simple — yet even here, cache invalidation requires real decisions.
 
 ---
 
 ## Why Redirects Are Perfect Cache Candidates
 
-Before reaching for Redis, it's worth being explicit about why this particular endpoint benefits from a cache.
+Before adding Redis, understand why this endpoint benefits from caching.
 
 `GET /:slug` is a pure read. Given the same slug, it returns the same URL — always. The underlying data almost never changes after creation. And the read-to-write ratio is heavily skewed: for every `POST /shorten`, there are potentially thousands of `GET /:slug` hits.
 
@@ -43,7 +43,7 @@ Contrast this with `POST /shorten`: every shorten is a new record. There's no "c
 
 ## The Cache-Aside Pattern
 
-There are several ways to integrate a cache with a database. We're using **cache-aside** (also called lazy loading):
+Several patterns integrate a cache with a database. This implementation uses **cache-aside** (also called lazy loading):
 
 1. Check Redis for the slug key
 2. On a **hit**: return the cached URL immediately — no database query
@@ -70,7 +70,7 @@ sequenceDiagram
   end
 ```
 
-The alternative is **write-through**: populate the cache on every write, so the cache is always warm. We're not using it here because writes are rare — there's no benefit to pre-populating an entry that might never be read again.
+The alternative is **write-through**: populate the cache on every write, so the cache is always warm. It is not used here because writes are rare — pre-populating an entry that might never be read again provides no benefit.
 
 ### The Redis client
 
@@ -147,15 +147,15 @@ redirectRouter.openapi(redirectRoute, async (c) => {
 
 A few notes on the handler:
 
-**On a cache hit, we still increment `hit_count`.** The counter lives in Postgres and is incremented regardless of whether Redis served the response. The two systems are tracking different things: Redis tracks the URL, Postgres tracks the usage.
+**On a cache hit, `hit_count` still increments.** The counter lives in Postgres and increments regardless of whether Redis served the response. The two systems track different things: Redis tracks the URL, Postgres tracks the usage.
 
-**`CACHE_TTL_SECONDS` is an env var.** The right TTL depends on your use case. We'll discuss how to choose it in the next section.
+**`CACHE_TTL_SECONDS` is an env var.** The right TTL depends on the use case. The next section covers how to choose it.
 
 **The cold path is now two round trips** (Redis + Postgres) instead of one. In practice Redis responds in <1ms, so this adds negligible overhead. But it's worth knowing — a "cache miss" with Redis is technically slower than no cache at all on that first request.
 
 ### Docker Compose changes
 
-Before these code changes actually work in production, you need to run Redis somewhere. Add it to `docker-compose.yml`:
+For these changes to work in production, Redis must run somewhere. Add it to `docker-compose.yml`:
 
 ```yaml
 services:
@@ -177,34 +177,34 @@ services:
 
 Docker Compose's internal DNS resolves `redis` to the container IP. The `REDIS_URL` env var overrides the `127.0.0.1` default in the code.
 
-**A gotcha that cost me an hour:** I added the Redis code, rebuilt the image, pushed it, and eagerly ran k6. The numbers were *worse* than Phase 1. I checked Redis directly: every `GET "slug:..."` returned `(nil)`. The cache was never being written. The problem? I had updated the code but never added the `redis` service to `docker-compose.yml` on the VPS. The old image was still running, the app was trying to connect to `127.0.0.1:6379` inside its container, failing silently, and falling back to Postgres — plus paying the connection-timeout tax.
+**A gotcha that cost an hour:** Redis code was added, the image was rebuilt and pushed, and k6 was run immediately. The numbers were *worse* than Phase 1. Checking Redis directly: every `GET "slug:..."` returned `(nil)`. The cache was never being written. The problem? The code was updated but the `redis` service was never added to `docker-compose.yml` on the VPS. The old image was still running, the app was trying to connect to `127.0.0.1:6379` inside its container, failing silently, and falling back to Postgres — plus paying the connection-timeout tax.
 
-**Adding code isn't deploying it.** Verify with:
+**Adding code is not deploying it.** Verify with:
 
 ```bash
 docker compose exec redis redis-cli GET "slug:your-slug"
 ```
 
-If it returns `(nil)` after a request, your app isn't talking to Redis.
+If it returns `(nil)` after a request, the app isn't talking to Redis.
 
 ---
 
 ## The TTL Decision
 
-TTL is the first real design decision in this phase. There's no universally correct answer — it depends on what you're optimizing for.
+TTL is the first real design decision. No universally correct answer exists — it depends on optimization goals.
 
 **Short TTL (minutes):** Frequent cache misses, more Postgres load, but stale data clears quickly. Good if URLs change often.
 
 **Long TTL (hours/days):** Few cache misses, minimal Postgres load, but stale data lingers. Fine if URLs are immutable after creation.
 
-For a URL shortener where slugs are created once and never modified, a long TTL is defensible. We're using 24 hours (`86400` seconds) as a starting point.
+For immutable slugs, a long TTL is defensible. This implementation uses 24 hours (`86400` seconds) as a starting point.
 
 ### What "stale" actually means
 
 A cached slug becomes stale when the underlying record changes — either the `original_url` is updated, or the record is deleted entirely. For a URL shortener:
 
 - **Updates are rare.** Most implementations don't allow updating a slug's destination. If yours does, you need to invalidate on update.
-- **Deletions happen.** If you delete a URL from Postgres but don't invalidate Redis, the cache will serve a redirect for up to `CACHE_TTL_SECONDS` to a URL that no longer exists in your system.
+- **Deletions happen.** If a URL is deleted from Postgres but Redis is not invalidated, the cache serves a redirect for up to `CACHE_TTL_SECONDS` to a URL that no longer exists in the system.
 
 The fix is to `DEL` from Redis whenever you delete from Postgres:
 
@@ -216,7 +216,7 @@ async function deleteSlug(slug: string) {
 }
 ```
 
-I haven't built a delete endpoint yet — for now, a deleted slug would keep redirecting until the TTL expires. That's a known deferral. In practice, if you don't offer deletion, this edge case never fires. But it's worth knowing that "we don't have deletes" is a decision, not an absence of a feature.
+A delete endpoint does not exist yet — a deleted slug would keep redirecting until the TTL expires. That is a known deferral. In practice, without deletion, this edge case never fires. Recognize that "no deletes" is a decision, not an absence of a feature.
 
 This is why cache invalidation has a reputation. It's not the TTL math that's hard — it's identifying all the places where the underlying data can change.
 
@@ -230,7 +230,7 @@ But a hidden cost emerged. When measuring from outside the VPS, tail latency got
 
 ### Methodology
 
-Use the same k6 script from Phase 1, but pre-warm the cache first so you're testing cache hits:
+Use the same k6 script from Phase 1, but pre-warm the cache first so the test measures cache hits:
 
 ```bash
 # 1. Warm the cache (must return 301)
@@ -243,7 +243,7 @@ docker compose exec redis redis-cli GET "slug:WY3Ly9Yd"
 k6 run --env BASE_URL="https://shrtn.bustamam.tech" --env SLUG="WY3Ly9Yd" scripts/k6-baseline.js
 ```
 
-Run k6 twice: once from your local machine (includes network RTT) and once from inside the VPS (app latency only).
+Run k6 twice: once from the local machine (includes network RTT) and once from inside the VPS (app latency only).
 
 ### Results
 
@@ -254,11 +254,11 @@ Run k6 twice: once from your local machine (includes network RTT) and once from 
 | p99 | 190.77ms | 286.36ms | **25.39ms** |
 | throughput | 234 req/s | 269 req/s | **4,253 req/s** |
 
-The on-VPS numbers are the real story: **Redis cut server-side latency by ~70% and increased throughput 18x.** The 11ms p50 is Hono + Redis + Docker networking overhead — no Postgres involved.
+The on-VPS numbers tell the real story: **Redis cut server-side latency by ~70% and increased throughput 18x.** The 11ms p50 is Hono + Redis + Docker networking overhead — no Postgres involved.
 
 ### The p99 anomaly
 
-The p99 from outside the VPS got worse (190ms → 286ms). At first glance this is surprising — the cache hit should be faster. But looking at the code, on every cache hit we still fire a `hitCount` UPDATE to Postgres:
+The p99 from outside the VPS got worse (190ms → 286ms). At first glance this is surprising — the cache hit should be faster. But looking at the code, on every cache hit the handler still fires a `hitCount` UPDATE to Postgres:
 
 ```typescript
 if (cached) {
@@ -277,7 +277,7 @@ The `.catch(() => {})` makes this fire-and-forget from the app's perspective —
 
 This is why p50 stays flat (most requests win the lock race quickly) but p99 spikes (the unlucky ones wait). That's the signature of row-lock contention: most requests are fine, but the unlucky ones queue up behind a locked row.
 
-For a production system, the real fix is either removing hit counts on cache hits (accept under-counting) or moving them to a Redis counter flushed periodically. For this series, the lesson to take home: **fire-and-forget doesn't mean free**. The database still does the work, and concurrent writes to the same row still contend.
+For a production system, the real fix is either removing hit counts on cache hits (accept under-counting) or moving them to a Redis counter flushed periodically. The lesson: **fire-and-forget does not mean free**. The database still does the work, and concurrent writes to the same row still contend.
 
 ### Cache hit rate
 
@@ -301,9 +301,9 @@ redis-cli TTL "slug:WY3Ly9Yd"    # returns remaining seconds; -1 means no TTL; -
 
 ## Trade-offs
 
-Redis is now a dependency. If Redis goes down, the cache is unavailable — but the app should still function by falling back to Postgres on every request. The error handler on the Redis client above prevents a connection error from crashing the process, but the redirect handler itself will throw if `redis.get()` rejects.
+Redis is now a dependency. If Redis goes down, the cache is unavailable — but the app still functions by falling back to Postgres on every request. The error handler on the Redis client prevents connection errors from crashing the process, but the redirect handler itself will throw if `redis.get()` rejects.
 
-A production-grade implementation would wrap Redis calls in a try/catch and fall back to Postgres on Redis failure. I implemented this — the redirect handler uses `getCached()` which catches Redis errors and returns `null`, triggering the Postgres fallback. The app treats Redis as a **soft dependency**: nice to have, not required. If Redis is down, every request becomes a cache miss and hits Postgres directly. The app still works; it's just slower.
+A production-grade implementation wraps Redis calls in a try/catch and falls back to Postgres on Redis failure. The redirect handler uses `getCached()` which catches Redis errors and returns `null`, triggering the Postgres fallback. Redis is treated as a **soft dependency**: nice to have, not required. If Redis is down, every request becomes a cache miss and hits Postgres directly. The app still works; it is just slower.
 
 ```typescript
 // Cache-resilient lookup — degrades gracefully if Redis is unavailable
@@ -319,7 +319,7 @@ try {
 
 ## Closer
 
-That's Phase 2. The cache works, the numbers are real, and I now know what "cache invalidation is hard" actually means. Next phase: someone's about to start hammering `POST /shorten`. Time to add rate limits — and the algorithm choice matters more than you'd expect.
+Phase 2 is complete. The cache works, the numbers are real, and "cache invalidation is hard" now has concrete meaning. Next phase: protecting `POST /shorten` from abuse. Rate limits are next — and the algorithm choice matters more than expected.
 
 ---
 

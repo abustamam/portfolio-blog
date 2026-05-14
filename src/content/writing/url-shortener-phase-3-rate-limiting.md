@@ -1,11 +1,11 @@
 ---
-title: "Sliding Window Rate Limiting"
-description: "Phase 3 of Systems Design in Practice: picking a rate limiting algorithm, implementing sliding window with Redis, and why the choice actually matters."
+title: "Why Sliding Window Rate Limiting Beats Fixed Window"
+description: "Phase 3 of Systems Design in Practice: evaluating rate limiting algorithms, implementing sliding window with Redis, and why algorithm choice matters."
 pubDate: '2026-05-06'
 series: url-shortener-systems-design
 seriesOrder: 3
 heroImage: '../../assets/series/url-shortener/url-shortener-cover.png'
-dek: "Fixed window is simple but has a well-known exploit. Sliding window eliminates it at modest cost."
+dek: "Fixed window has a well-known boundary exploit. Sliding window eliminates it at modest cost."
 tag: "Infrastructure"
 kind: "Case Study"
 ---
@@ -16,21 +16,21 @@ kind: "Case Study"
 
 ## TL;DR
 
-Rate limiting prevents someone from hitting your API 100 times in a second and racking up costs or crashing your server. In this post we'll add sliding window rate limiting to the `/shorten` endpoint using Redis — the same Redis instance already running from Phase 2.
+Rate limiting prevents someone from hitting an API 100 times in a second and racking up costs or crashing the server. This post adds sliding window rate limiting to the `/shorten` endpoint using Redis — the same Redis instance already running from Phase 2.
 
-**Who this is for:** You've followed the series or have a Hono app with Redis running. Read [post 2](/writing/url-shortener-phase-2-caching/) if you need to catch up. No prior rate limiting knowledge needed. Code is [here](https://github.com/abustamam/url-shortener/tree/v3-rate-limiting).
+**Who this is for:** Familiarity with the series or a Hono app with Redis is assumed. See [post 2](/writing/url-shortener-phase-2-caching/) for prerequisites. No prior rate limiting knowledge is required. Code is [here](https://github.com/abustamam/url-shortener/tree/v3-rate-limiting).
 
 *No new dependencies — Redis is already running from Phase 2.*
 
 ## Intro
 
-"Add rate limiting" sounds like a one-liner. It isn't. I spent more time deciding which algorithm to use than writing the actual Redis code.
+"Add rate limiting" sounds like a one-liner. It is not. More time was spent deciding which algorithm to use than writing the actual Redis code.
 
 ---
 
 ## The Three Algorithms
 
-I looked at three approaches. Two of them were wrong for this project.
+Three approaches were evaluated. Two were wrong for this project.
 
 ### Fixed Window
 
@@ -50,7 +50,7 @@ Redis implementation is two operations: `INCR key` and `EXPIRE key window_second
 01:00 → 10 requests   (new minute, counter resets)
 ```
 
-That's 20 requests in 2 seconds — double the stated limit. You can hit this just by timing requests around the boundary. I didn't want to ship something that obvious.
+That is 20 requests in 2 seconds — double the stated limit. Hitting this requires only timing requests around the boundary. Shipping an exploitable rate limiter is not acceptable.
 
 ### Sliding Window
 
@@ -81,13 +81,13 @@ Token bucket allows bursts — if you haven't made requests in 5 seconds, you ca
 
 ## Why Sliding Window for This App
 
-`POST /shorten` is a spam target. I wanted strict limits, not graceful burst tolerance. Sliding window fits because the boundary isn't exploitable, the behavior is easy to reason about ("you made N requests in the last 60 seconds"), and Redis sorted sets make it straightforward to implement.
+`POST /shorten` is a spam target. The requirement: strict limits, not graceful burst tolerance. Sliding window fits because the boundary is not exploitable, the behavior is easy to reason about ("N requests in the last 60 seconds"), and Redis sorted sets make it straightforward to implement.
 
-Here's what actually hits Redis when a request comes through. I ran `MONITOR` and called `/shorten`:
+This is what hits Redis on each request, captured via `MONITOR`:
 
 ![Redis MONITOR output showing the five pipeline commands executing in sequence for key rate_limit:70.9.92.38:post_shorten](../../assets/series/url-shortener/url-shortener-phase-3-monitor.png)
 
-You can see the five commands in order: `ZADD` the timestamp, `ZREMRANGEBYSCORE` to evict old entries, `ZCARD` to count what's left, `ZRANGE` to find the oldest entry for `Retry-After`, and `EXPIRE` to set the TTL. All in one pipeline round trip.
+The five commands execute in order: `ZADD` the timestamp, `ZREMRANGEBYSCORE` to evict old entries, `ZCARD` to count what remains, `ZRANGE` to find the oldest entry for `Retry-After`, and `EXPIRE` to set the TTL. All in one pipeline round trip.
 
 ---
 
@@ -185,17 +185,17 @@ export const rateLimit = createMiddleware(async (c, next) => {
 })
 ```
 
-I imported `redis` from `../lib/redis` — the same singleton client from Phase 2. My first draft actually created a second `new Redis(...)` connection, which meant two TCP connections and two error handlers for the same server. I caught that in review and ripped it out. If you're adding Redis features incrementally, watch for that.
+The implementation imports `redis` from `../lib/redis` — the same singleton client from Phase 2. A first draft created a second `new Redis(...)` connection, which meant two TCP connections and two error handlers for the same server. Review caught this; it was removed. When adding Redis features incrementally, watch for duplicate connections.
 
 All five Redis operations run in one pipeline round trip. The `ZRANGE` is the key addition — it lets me compute `Retry-After` without a second Redis call on rejection.
 
-For member uniqueness, two requests in the same millisecond would collide if the member were just the timestamp. Appending a random base36 suffix (`${now}-${Math.random().toString(36).slice(2)}`) guarantees every request gets its own sorted-set entry.
+For member uniqueness: two requests in the same millisecond would collide with timestamp-only members. Appending a random base36 suffix (`${now}-${Math.random().toString(36).slice(2)}`) guarantees every request gets its own sorted-set entry.
 
-If Redis is unreachable, the middleware logs the error and calls `next()` — the request proceeds. I went back and forth on fail-open vs fail-closed. Fail-closed would break the app for everyone during a Redis outage. I chose availability.
+If Redis is unreachable, the middleware logs the error and calls `next()` — the request proceeds. Fail-open vs fail-closed was debated. Fail-closed would break the app for everyone during a Redis outage. The choice: availability.
 
 Setting `EXPIRE` on every request matters because without it, sorted sets for IPs that never hit the limit would live in Redis forever. The TTL is set to the window duration so they clean themselves up.
 
-For IP extraction, I read `X-Forwarded-For` because Caddy is the reverse proxy. If that header is missing, the middleware falls back to `'unknown'` — which lumps all unknown-origin traffic together. In production, know which header your proxy sets.
+For IP extraction, the middleware reads `X-Forwarded-For` because Caddy is the reverse proxy. If that header is missing, it falls back to `'unknown'` — which lumps all unknown-origin traffic together. In production, know which header the proxy sets.
 
 ### Applying the middleware
 
@@ -212,7 +212,7 @@ shortenRouter.openapi(shortenRoute, async (c) => {
 })
 ```
 
-I only applied this to `/shorten`. Redirects (`GET /:slug`) aren't rate limited — they're the whole point of the product. Throttling redirects would punish people clicking links, which isn't the goal.
+This applies only to `/shorten`. Redirects (`GET /:slug`) are not rate limited — they are the whole point of the product. Throttling redirects would punish people clicking links, which is not the goal.
 
 ---
 
@@ -236,7 +236,7 @@ Swagger UI picks this up automatically and shows a countdown. The header is stan
 
 ## Testing It
 
-I tested this by hammering the endpoint with a loop:
+Testing used a simple loop:
 
 ```bash
 for i in {1..15}; do
@@ -260,7 +260,7 @@ curl -s -i -X POST https://yourdomain.com/shorten \
   2>&1 | grep -E "HTTP|retry-after"
 ```
 
-Wait out the `retry-after` seconds, then try again — you should get a `201`.
+After the `retry-after` duration, requests return `201`.
 
 ![Terminal output showing HTTP/2 429 response with retry-after: 32 header from the rate limiter](../../assets/series/url-shortener/url-shortener-phase-3-retry-after.png)
 
@@ -274,7 +274,7 @@ docker compose exec redis redis-cli KEYS 'rate_limit:*:post_shorten'
 docker compose exec redis redis-cli ZRANGE rate_limit:<your-ip>:post_shorten 0 -1 WITHSCORES
 ```
 
-If you inspect the sorted set after running the 15-request loop, you'll notice something unexpected: there are **15 entries**, not 10. That's because the middleware adds the timestamp **before** checking the count. Every request — even the 5 rejected ones — gets recorded in Redis. The rejection happens after `ZCARD` returns the count, but by then the timestamp is already in the set.
+Inspecting the sorted set after the 15-request loop reveals something unexpected: there are **15 entries**, not 10. The middleware adds the timestamp **before** checking the count. Every request — even the 5 rejected ones — gets recorded in Redis. The rejection happens after `ZCARD` returns the count, but by then the timestamp is already in the set.
 
 ![redis-cli ZRANGE output showing 15 timestamped entries in the rate limit sorted set for IP 70.9.92.38](../../assets/series/url-shortener/url-shortener-phase-3-cache.png)
 
@@ -282,15 +282,15 @@ The odd lines are the member strings (`timestamp-randomsuffix`), the even lines 
 
 This is harmless at our scale, but worth knowing: the sorted set grows with total requests, not just allowed ones. A blocked client spamming 1,000 requests would create 1,000 entries. The TTL cleans them up, but within the window, memory scales with volume.
 
-**Why add the timestamp before checking the count?** I considered "check first, then add" — run `ZCARD`, see the count is at 9, then `ZADD` the 10th. But you can't branch conditionally inside a Redis pipeline. You'd need two round trips (race condition) or a Lua script (more complexity than this project needs). Adding first and checking after keeps everything in one pipeline. The downside is rejected requests waste a few bytes of Redis memory for a minute. I'll take that trade.
+**Why add the timestamp before checking the count?** A "check first, then add" approach was considered — run `ZCARD`, see the count is at 9, then `ZADD` the 10th. But branching conditionally inside a Redis pipeline is impossible. That would require two round trips (race condition) or a Lua script (more complexity than this project needs). Adding first and checking after keeps everything in one pipeline. The downside is rejected requests waste a few bytes of Redis memory for a minute. That trade is acceptable.
 
 ---
 
 ## Trade-offs
 
-An in-memory `Map<ip, timestamps[]>` would have been simpler and had zero network overhead. But it wouldn't survive restarts, wouldn't work across multiple app instances, and you couldn't inspect it externally. I went with Redis because Phase 4 adds a second app node — the rate limit state will already be shared.
+An in-memory `Map<ip, timestamps[]>` would have been simpler with zero network overhead. But it would not survive restarts, would not work across multiple app instances, and could not be inspected externally. Redis was chosen because Phase 4 adds a second app node — the rate limit state will already be shared.
 
-I also almost created a second `new Redis(...)` connection in the rate limiter. That would have meant two TCP connections and two error handlers for the same Redis server. I caught it during PR review and switched to importing the singleton from `src/lib/redis.ts` instead. If you're adding Redis features incrementally, watch for this.
+A second `new Redis(...)` connection was almost created in the rate limiter. That would have meant two TCP connections and two error handlers for the same Redis server. PR review caught this; the singleton import from `src/lib/redis.ts` replaced it. When adding Redis features incrementally, watch for duplicate connections.
 
 Memory cost is negligible here. Each IP stores at most 10 entries (one per request in the 60-second window). Even with thousands of IPs, that's kilobytes of Redis memory.
 
@@ -300,9 +300,9 @@ Per-IP limiting won't stop someone with a botnet — each IP stays under the lim
 
 ## Closer
 
-Rate limiting is a shared-state problem — it only works because Redis is available to all app processes. That shared-state dependency becomes central in the next post, when I add a second server and audit every piece of state the app holds. Choosing Redis over an in-memory `Map` here will make that scaling almost trivial.
+Rate limiting is a shared-state problem — it only works because Redis is available to all app processes. That shared-state dependency becomes central in the next post, when a second server is added and every piece of state the app holds is audited. Choosing Redis over an in-memory `Map` here makes that scaling almost trivial.
 
-The trickiest part of this phase wasn't the Redis code — it was deciding between fixed and sliding window. Once I settled on sliding window, the implementation was straightforward.
+The trickiest part of this phase was not the Redis code — it was deciding between fixed and sliding window. Once sliding window was chosen, the implementation was straightforward.
 
 ---
 
