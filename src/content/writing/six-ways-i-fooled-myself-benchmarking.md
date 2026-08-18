@@ -21,7 +21,7 @@ So I measured it instead. Twelve releases later, here's the method, the numbers,
 
 The nice thing about a context selector is that you already have thousands of labelled examples sitting in your git history. Every bug fix is a task description paired with the exact set of files that turned out to matter.
 
-So for each historical fix in my app — a TypeScript/Postgres codebase with about 35 tables — I did this:
+So for each historical fix in [GavelUp](https://gavelup.app), my meeting-runner app for Toastmasters clubs — a TypeScript/Postgres codebase with about 35 tables — I did this:
 
 - Take the GitHub issue's title and body as the task. That's the artifact that existed **before** anyone wrote the fix, so nothing leaks backwards.
 - Check out a worktree at the fix's **parent** commit.
