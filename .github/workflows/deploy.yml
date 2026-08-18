@@ -26,6 +26,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Required. Without the docker-container driver that setup-buildx provides,
+      # build-push-action falls back to the plain docker driver, which cannot emit
+      # provenance attestations — so the push lands as a single-arch v2 manifest
+      # instead of an OCI index. WUD (which deploys this box) can only resolve a
+      # digest baseline from an OCI index; against a v2 manifest it records
+      # digest.value=null, reports "no update" with NO error, and silently stops
+      # deploying. That left the blog serving a 3-week-old image while every build
+      # succeeded and landed in ghcr.
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -42,5 +53,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          cache-to: type=inline
+          # Registry cache, not inline: inline cache conflicts with the provenance
+          # attestations that make the push an OCI index (see the Buildx note above).
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
