@@ -5,6 +5,11 @@
 @import "@fontsource-variable/jetbrains-mono/index.css";
 @import "@fontsource-variable/newsreader/index.css";
 
+/* `dark:` utilities follow the site toggle (.dark on <html>), not the OS.
+ * Without this, dark: fired on OS preference while tokens followed .dark, so
+ * a light-themed page on a dark-OS machine got dark-mode utilities. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Tailwind theme — design tokens ──────────────── */
 @theme {
   /* Colors — generates bg-*, text-*, border-* utilities */
