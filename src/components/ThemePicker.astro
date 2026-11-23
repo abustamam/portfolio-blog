@@ -145,3 +145,23 @@
   initThemePicker();
   document.addEventListener('astro:after-swap', initThemePicker);
 </script>
+
+<style>
+  /* The chrome bar is too short for a 44px button, so the visible pill stays
+     compact and an invisible ::after extends the hit area to ~45px tall. */
+  #theme-picker-btn {
+    position: relative;
+    z-index: 1; /* keep the hit area above the header below the bar */
+  }
+  #theme-picker-btn::after {
+    content: "";
+    position: absolute;
+    inset: -11px -6px;
+  }
+  /* Menu rows are full 44px targets on touch screens. */
+  @media (pointer: coarse) {
+    .theme-picker-opt {
+      min-height: 44px;
+    }
+  }
+</style>
