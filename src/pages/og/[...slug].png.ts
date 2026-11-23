@@ -15,9 +15,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
     {
       slug: 'default',
       card: {
-        title: 'Software consulting for web and mobile products',
+        title: 'Fractional founding engineer and technical advisor',
         eyebrow: 'Rasheed Bustamam',
-        subtitle: 'Senior engineer, without the full-time hire',
+        subtitle: 'For funded startups · zero-to-one builds · measured AI-assisted delivery',
       },
     },
     ...writing.map((p) => ({

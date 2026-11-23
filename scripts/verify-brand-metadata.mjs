@@ -39,17 +39,11 @@ const APEX = 'https://bustamam.tech/';
 const pages = walk(dist).filter((f) => f.endsWith('.html'));
 const imageCache = new Map();
 let checked = 0;
-let redirects = 0;
 
 for (const file of pages) {
   const rel = file.slice(dist.length + 1);
   const page = readFileSync(file, 'utf8');
 
-  // Astro redirect stubs (e.g. /blog/:slug) carry no metadata by design
-  if (/http-equiv="refresh"/i.test(page)) {
-    redirects++;
-    continue;
-  }
   checked++;
 
   const canonical = page.match(/<link[^>]*rel="canonical"[^>]*href="([^"]*)"/)?.[1];
@@ -110,6 +104,6 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `Brand metadata verification passed: ${checked} pages checked (${redirects} redirect stubs skipped), ` +
+  `Brand metadata verification passed: ${checked} pages checked, ` +
     `${imageCache.size} distinct og:image files all PNG/JPEG 1200x630, no blog.bustamam.tech in canonical/og:url.`,
 );

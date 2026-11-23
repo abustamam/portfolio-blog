@@ -9,10 +9,14 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://bustamam.tech',
-  integrations: [mdx(), sitemap()],
-  redirects: {
-    '/blog/:slug': '/writing/:slug',
-  },
+  integrations: [
+    mdx(),
+    sitemap({
+      // Redirect-only pages (harmless if they do not exist)
+      filter: (page) =>
+        !/\/work\/(cdk-global|embedded-insurance)\/?$/.test(page),
+    }),
+  ],
   markdown: {
     shikiConfig: {
       themes: {
