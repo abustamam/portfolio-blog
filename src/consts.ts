@@ -3,4 +3,4 @@
 
 export const SITE_TITLE = 'Rasheed Bustamam — Fractional Founding Engineer & Technical Advisor';
 export const SITE_DESCRIPTION =
-	'Fractional founding engineer and technical advisor for founders and CTOs of funded startups: architecture, hiring, roadmap, scoped zero-to-one builds, and AI-assisted delivery that is actually measured.';
+	'Rasheed Bustamam is a part-time founding engineer and technical advisor for funded startups. Four years as a founding engineer, and two teams that were acquired.';

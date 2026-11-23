@@ -17,7 +17,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       card: {
         title: 'Fractional founding engineer and technical advisor',
         eyebrow: 'Rasheed Bustamam',
-        subtitle: 'For funded startups · zero-to-one builds · measured AI-assisted delivery',
+        subtitle: 'Four years as a founding engineer · two acquisitions',
       },
     },
     ...writing.map((p) => ({

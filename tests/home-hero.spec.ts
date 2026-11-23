@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-const HEADLINE = /Founding-engineer judgment,\s*a few hours a week\./;
+const HEADLINE = /I've been the first engineer\.\s*Now I do it part-time\./;
 
 test.describe('homepage hero copy', () => {
   test('sells the fractional offer and drops the old copy', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1')).toHaveText(HEADLINE);
-    await expect(page.getByText('fractional founding engineer and technical advisor', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('founding engineer', { exact: false }).first()).toBeVisible();
     const body = await page.locator('body').innerText();
     expect(body).not.toContain('maxed out');
     expect(body).not.toContain('Q3 2026');
@@ -21,7 +21,7 @@ test.describe('homepage hero copy', () => {
       'Fractional founding engineer',
       'Technical advisory',
       'Scoped zero-to-one builds',
-      'AI-assisted delivery, measured',
+      'AI coding tools that earn their keep',
     ]);
     const proof = page.getByRole('region', { name: 'Track record' });
     await expect(proof).toContainText('Edvo');
@@ -45,8 +45,8 @@ test.describe('hero terminal', () => {
     await expect(widget).not.toHaveAttribute('data-intro', /.*/);
 
     const output = page.locator('#widget-output');
-    await expect(output).toContainText('fractional founding engineer + advisor');
-    await expect(output).toContainText('a few engagements at a time');
+    await expect(output).toContainText('part-time founding engineer + advisor');
+    await expect(output).toContainText('a few clients at a time');
     await expect(page.locator('#widget-input')).toBeVisible();
 
     const focusedId = await page.evaluate(() => document.activeElement?.id ?? '');
@@ -83,7 +83,7 @@ test.describe('hero terminal', () => {
 
     await input.fill('capacity');
     await input.press('Enter');
-    await expect(output.getByText('a few engagements at a time')).toHaveCount(2);
+    await expect(output.getByText('a few clients at a time')).toHaveCount(2);
   });
 
   test('clicking mid-intro skips to the end and focuses the prompt', async ({ page }) => {
@@ -132,7 +132,7 @@ test.describe('hero without JavaScript', () => {
     await expect(page.getByRole('link', { name: '$ see my work →' })).toBeVisible();
     const output = page.locator('#widget-output');
     await expect(output.getByText('~ $ whoami')).toBeVisible();
-    await expect(output.getByText('04  ai-assisted delivery, measured')).toBeVisible();
+    await expect(output.getByText('04  ai coding tools, checked')).toBeVisible();
     await expect(output.getByRole('link', { name: /\/work/ })).toHaveAttribute('href', '/work/');
   });
 });
