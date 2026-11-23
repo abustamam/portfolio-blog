@@ -7,7 +7,7 @@ answers, re-scores them, and inserts one row into the `ai_quiz` database on the
 box's Postgres.
 
 ```
-browser ─POST /api/ai-quiz─▶ Cloudflare ─▶ Caddy (blog.bustamam.tech)
+browser ─POST /api/ai-quiz─▶ Cloudflare ─▶ Caddy (bustamam.tech)
                                              ├─ /api/ai-quiz* ─▶ ai-quiz-intake:3000 ─▶ postgres/ai_quiz.responses
                                              └─ everything else ─▶ portfolio-blog:80
 ```
@@ -81,7 +81,7 @@ The image is built and pushed by `.github/workflows/deploy.yml` on every push to
 ### 3. Caddy route
 
 ```caddy
-blog.bustamam.tech {
+bustamam.tech {
     handle /api/ai-quiz* {
         request_body {
             max_size 32KB
@@ -95,6 +95,11 @@ blog.bustamam.tech {
     }
 }
 ```
+
+The site moved from `blog.bustamam.tech` to the apex on 2026-11-23. The old
+host now only 301-redirects to `https://bustamam.tech{uri}`, `/api/ai-quiz`
+included, so don't point anything at it: a 301 turns a POST into a GET, and the
+submission is lost.
 
 `/srv/Caddyfile` is bind-mounted as a single file. Edit it **in place**
 (`cat new > Caddyfile`). Don't let an editor or `sed -i` replace it with a new
