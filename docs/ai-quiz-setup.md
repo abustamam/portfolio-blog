@@ -57,7 +57,8 @@ docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
 
 ```yaml
   ai-quiz-intake:
-    image: ghcr.io/abustamam/ai-quiz-intake:latest
+    image: ai-quiz-intake:deployed
+    pull_policy: never
     container_name: ai-quiz-intake
     mem_limit: 128m
     environment:
@@ -67,7 +68,7 @@ docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
         condition: service_healthy
     restart: unless-stopped
     labels:
-      - wud.watch=true
+      - wud.watch=false
     logging:
       driver: "json-file"
       options:
@@ -76,7 +77,9 @@ docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
 ```
 
 The image is built and pushed by `.github/workflows/deploy.yml` on every push to
-`main`. WUD redeploys it like the blog.
+`main`, and that workflow's `deploy` job deploys it with the blog, by commit SHA,
+through the box's `deploy-blog` script (abustamam/hetzner-deploy
+`docs/ci-deploy-blog.md`). WUD does not watch it.
 
 ### 3. Caddy route
 

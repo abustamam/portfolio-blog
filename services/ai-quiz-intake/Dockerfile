@@ -3,6 +3,9 @@ FROM oven/bun:1-alpine
 WORKDIR /app
 COPY src/utils/aiQuiz.ts src/utils/aiQuiz.ts
 COPY services/ai-quiz-intake/src services/ai-quiz-intake/src
+# The commit this image was built from; the server's deploy-blog script checks it.
+ARG GIT_SHA=unknown
+RUN printf '{"commit":"%s"}\n' "$GIT_SHA" > /app/build-info.json
 USER bun
 ENV PORT=3000
 EXPOSE 3000
