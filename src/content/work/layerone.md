@@ -10,7 +10,7 @@ logo: ../../assets/work/logos/xyo-logo.svg
 badges: [acquired]
 flagship: true
 problem: "LayerOne sold virtual land through smart contracts. There were four of us, and I built the front end."
-outcome: "XYO acquired LayerOne in July 2018."
+outcome: "XYO acquired LayerOne in July 2018, when there were four of us."
 metrics:
   - label: "People on the team"
     value: "4"

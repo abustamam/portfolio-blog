@@ -11,8 +11,8 @@ skills: [TypeScript, React, Puppeteer, Stripe, PCI Compliance, Team Leadership]
 logo: ../../assets/work/logos/salty-logo.jpeg
 badges: [acquired]
 flagship: true
-problem: "CDK Global bought Salty right after I joined. From then on the job was building an insurance quoting platform inside a much bigger company."
-outcome: "I stayed, was promoted to Staff Engineer, and led three automation engineers. The team later re-formed as Salty.ai, and I work there now."
+problem: "I joined a startup, and soon after it was part of a much bigger company. From then on the job was building an insurance quoting platform inside CDK Global."
+outcome: "CDK Global bought Salty for about $150M right after I joined. I stayed, was promoted to Staff Engineer, and led three automation engineers."
 metrics:
   - label: "CDK Global's acquisition of Salty"
     value: "~$150M"
