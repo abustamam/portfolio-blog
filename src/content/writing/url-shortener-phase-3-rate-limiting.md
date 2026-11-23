@@ -10,21 +10,13 @@ tag: "Infrastructure"
 kind: "Case Study"
 ---
 
-> *Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
-
----
-
 ## TL;DR
 
-Rate limiting prevents someone from hitting an API 100 times in a second and racking up costs or crashing the server. This post adds sliding window rate limiting to the `/shorten` endpoint using Redis — the same Redis instance already running from Phase 2.
+Fixed window rate limiting can be exploited at the window boundary: a client can send 20 requests in 2 seconds against a limit of 10. Sliding window closes that gap by counting requests relative to now, at modest cost. This post adds a Redis sorted-set sliding window limiter to `POST /shorten`, reusing the Redis instance from Phase 2. In testing, the first 10 requests returned `201` and the remaining 5 returned `429`.
 
-**Who this is for:** Familiarity with the series or a Hono app with Redis is assumed. See [post 2](/writing/url-shortener-phase-2-caching/) for prerequisites. No prior rate limiting knowledge is required. Code is [here](https://github.com/abustamam/url-shortener/tree/v3-rate-limiting).
+Choosing the algorithm took more time than writing the Redis code. Prerequisite: a Hono app with Redis, as built in [post 2](/writing/url-shortener-phase-2-redis/). No prior rate limiting knowledge is required. Code is [here](https://github.com/abustamam/url-shortener/tree/v3-rate-limiting).
 
 *No new dependencies — Redis is already running from Phase 2.*
-
-## Intro
-
-"Add rate limiting" sounds like a one-liner. It is not. More time was spent deciding which algorithm to use than writing the actual Redis code.
 
 ---
 
@@ -312,3 +304,7 @@ The trickiest part of this phase was not the Redis code — it was deciding betw
 - [Redis sorted set commands](https://redis.io/docs/data-types/sorted-sets/)
 - [RFC 9110 — Retry-After header](https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after)
 - Cloudflare blog: [How Cloudflare implements rate limiting at scale](https://blog.cloudflare.com/counting-things-a-lot-of-different-things/)
+
+---
+
+*Note on AI assistance: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*

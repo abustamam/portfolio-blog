@@ -4,6 +4,7 @@ description: "You don't need to master AI. You need to know how to use it — an
 pubDate: '2026-05-06'
 dek: "The pressure to keep up with every model release is a distraction. AI is infrastructure, not a skill tree."
 tag: "AI"
+audience: "general"
 kind: "Essay"
 ---
 

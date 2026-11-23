@@ -10,20 +10,14 @@ tag: "Infrastructure"
 kind: "Case Study"
 ---
 
-> *Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
-
----
-
 ## TL;DR
-Redirects are pure reads: a slug maps to a URL and that mapping almost never changes. We already measured our Postgres query to be sub-millisecond. Caching won't make this faster, but it will prevent an unnecessary DB hit. The interesting work here isn't necessarily the cache, it's deciding what TTL to use and what to do if a URL gets deleted.
+Adding Redis cut on-server redirect latency by about 70% (p99 77.75ms to 25.39ms) and raised throughput 18x. Measured from outside the VPS, p99 got worse: 191ms to 286ms. The cause is the `hit_count` write that still hits Postgres on every cache hit, and the row-lock contention it creates. The remaining work is the TTL decision and what to do when a URL is deleted.
 
-**Who this is for:** This post assumes familiarity with [Post 1](/writing/url-shortener-phase-1-baseline/) or an existing Hono + Postgres URL shortener. No prior Redis experience required — this post covers the essentials.
+Redirects are pure reads: a slug maps to a URL and that mapping almost never changes. The Postgres query was already sub-millisecond, so the cache does not speed up the query; it removes an unnecessary database hit.
+
+Prerequisite: [Post 1](/writing/url-shortener-phase-1-baseline/) or an existing Hono + Postgres URL shortener. No prior Redis experience is required.
 
 *New in this phase: ioredis 5.3.2*
-
-## Intro
-
-Adding a cache is the easy part. The hard part is deciding what to do when the underlying data changes. As established in Phase 1, a URL shortener is simple — yet even here, cache invalidation requires real decisions.
 
 ---
 
@@ -329,3 +323,7 @@ Phase 2 is complete. The cache works, the numbers are real, and "cache invalidat
 - [ioredis documentation](https://github.com/redis/ioredis)
 - Alex Xu — *System Design Interview*, Ch. 6 (Design a Key-Value Store)
 - *Designing Data-Intensive Applications*, Ch. 1 — on caching and the cost of consistency
+
+---
+
+*Note on AI assistance: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
