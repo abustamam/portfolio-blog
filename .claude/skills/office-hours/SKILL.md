@@ -1,1 +1,0 @@
-/media/rasheed-bustamam/Extra/coding/blog/.claude/skills/gstack/office-hours/SKILL.md

@@ -1,1 +1,0 @@
-/media/rasheed-bustamam/Extra/coding/blog/.claude/skills/gstack/plan-ceo-review/SKILL.md
