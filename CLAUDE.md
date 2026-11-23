@@ -4,7 +4,7 @@ Use the /browse skill from gstack for all web browsing. NEVER use mcp__claude-in
 
 Available gstack skills: /plan-ceo-review, /plan-eng-review, /review, /ship, /browse, /qa, /setup-browser-cookies, /retro
 
-If gstack skills aren't working, run `cd .claude/skills/gstack && ./setup` to build the binary and register skills.
+gstack is installed globally at `~/.claude/skills/gstack`; this repo does not vendor a copy. If gstack skills aren't working, run `cd ~/.claude/skills/gstack && ./setup` to build the binary and register skills.
 
 ## Git Workflow
 
