@@ -358,36 +358,41 @@ html.nav-open body {
   }
 }
 
-/* ── Base reset ───────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+/* ── Base reset ───────────────────────────────────
+ * Must live in @layer base: unlayered rules beat every Tailwind utility,
+ * so an unlayered `a { color }` silently overrode text-ink/text-white/etc.
+ * on every link (e.g. the primary CTA rendered accent-on-white). */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
 
-html {
-  font-family: var(--font-sans);
-  background: var(--color-bg);
-  color: var(--color-ink);
-}
+  html {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-ink);
+  }
 
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--color-bg);
-  color: var(--color-ink);
-  min-height: 100vh;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    min-height: 100vh;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-a { color: var(--color-accent); }
-img { max-width: 100%; height: auto; }
+  a { color: var(--color-accent); }
+  img { max-width: 100%; height: auto; }
 
-.sr-only {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
-  border: 0;
+  .sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 /* Cursor blink used in terminal hero */
