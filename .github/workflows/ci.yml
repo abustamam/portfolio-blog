@@ -23,6 +23,10 @@ jobs:
 
       - name: Build
         run: bun run build
+        # Build west of UTC so tests/post-dates.spec.ts catches dates that are
+        # formatted in local time (they render a day early here, not on UTC).
+        env:
+          TZ: America/Los_Angeles
 
       - name: Check internal links in dist
         run: node scripts/check-links.mjs dist

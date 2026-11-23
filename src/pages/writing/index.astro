@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fmtDate } from '../../utils/date';
 
 // Engineering posts lead; general-audience posts follow. Each group is newest first.
 const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
@@ -10,11 +11,6 @@ const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
   });
 const firstGeneralIdx = allPosts.findIndex(p => p.data.audience === 'general');
 
-function fmtDate(date: Date): string {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const d = new Date(date);
-  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')} ${d.getFullYear()}`;
-}
 
 const rawTags = allPosts.map(p => p.data.tag).filter((t): t is string => Boolean(t));
 const uniqueTags = Array.from(new Set(rawTags));
