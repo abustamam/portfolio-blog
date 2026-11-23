@@ -8,13 +8,14 @@ gstack is installed globally at `~/.claude/skills/gstack`; this repo does not ve
 
 ## Git Workflow
 
-Never push directly to `main`. Always:
+Never push directly to `main`. Every change gets its own git worktree; never switch branches in the main checkout, because another session may be working in it. Always:
 
-1. `git checkout -b feat/<descriptive-name>`
-2. Make changes, commit
+1. `git fetch origin`, then `git worktree add .claude/worktrees/<name> -b feat/<descriptive-name> origin/main`
+2. Work inside that directory (run `bun install` there first), make changes, commit
 3. `git push -u origin feat/<descriptive-name>`
 4. `gh pr create` (or open PR via GitHub UI)
 5. Wait for PR review/merge
+6. After the merge: `git worktree remove .claude/worktrees/<name>` and delete the branch
 
 This applies to all code changes, blog posts, and config updates.
 
