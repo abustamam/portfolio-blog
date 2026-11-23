@@ -9,7 +9,9 @@ skills: [Expo, Prisma, tRPC, AWS, Serverless, React Native]
 logo: ../../assets/work/logos/nuema-logo.svg
 darkLogo: true
 badges: []
-featured: true
+featured: false
+recent: true
+summary: "Built several MVPs for a digital village where parents find connections and trusted wellness resources."
 order: 1
 ---
 

@@ -7,18 +7,22 @@ interface Props {
   index?: number;
 }
 
-const { entry, index = 0 } = Astro.props;
-const { company, projectName, role, period, skills, badges, logo, darkLogo, location } = entry.data;
+const { entry } = Astro.props;
+const { company, projectName, role, period, skills, badges, logo, darkLogo, location, outcome, summary } = entry.data;
 
 const badgeLabels: Record<string, string> = {
   acquired: 'acquired',
   zeroToOne: '0→1',
 };
+
+// Lead with the result when the entry has one; fall back to skills otherwise.
+const blurb = outcome ?? summary;
 ---
 
 <a
   href={`/work/${entry.id}/`}
-  class="block no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-colors duration-150 hover:border-accent hover:shadow-sm"
+  class="flex flex-col no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-colors duration-150 hover:border-accent hover:shadow-sm"
+  data-work-card={entry.id}
 >
   <div class="flex items-center gap-3.5 mb-2.5">
     <div class="w-10 h-10 shrink-0 flex items-center justify-center">
@@ -58,7 +62,9 @@ const badgeLabels: Record<string, string> = {
     </div>
   )}
 
-  {skills.length > 0 && (
+  {blurb ? (
+    <p class="font-serif text-[0.95rem] leading-relaxed text-ink m-0">{blurb}</p>
+  ) : skills.length > 0 && (
     <div class="flex flex-wrap gap-1.5">
       {skills.map((s) => (
         <span class="font-mono text-10 text-mute bg-bg border border-line rounded-sm py-0.5 px-1.75 tracking-snug">

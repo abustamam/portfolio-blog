@@ -1,0 +1,27 @@
+---
+// Static redirect page for a retired /work/ slug. The site is static and served
+// by nginx, so this is an HTML meta refresh with a canonical link and a
+// visible fallback link.
+interface Props {
+  to: string;
+  label: string;
+}
+
+const { to, label } = Astro.props;
+const target = new URL(to, Astro.site ?? Astro.url).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Moved: {label}</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={target} />
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+  </head>
+  <body>
+    <p>This page moved to <a href={to}>{label}</a>.</p>
+  </body>
+</html>

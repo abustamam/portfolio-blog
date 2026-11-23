@@ -76,6 +76,40 @@ const work = defineCollection({
 				}))
 				.optional(),
 
+			// Index placement. `flagship` entries get the case-study layout and lead
+			// /work/; `recent` entries form the "recent engagements" row; everything
+			// else goes in the compact timeline.
+			flagship: z.boolean().default(false),
+			recent:   z.boolean().default(false),
+
+			// One-line summary for compact listings (recent engagements row).
+			summary: z.string().optional(),
+
+			// Case-study fields (flagship entries). The Markdown body is "What I did".
+			problem: z.string().optional(),
+			outcome: z.string().optional(),
+
+			// Client quote. Leave unset until the quote is approved for publishing;
+			// nothing renders when it is absent.
+			quote: z
+				.object({
+					text:  z.string().min(1),
+					name:  z.string().min(1),
+					title: z.string().min(1),
+				})
+				.optional(),
+
+			// Outcome figures. Any figure that comes from a third party must carry
+			// `source` (a URL) so the page can link it next to the number.
+			metrics: z
+				.array(z.object({
+					label:       z.string(),
+					value:       z.string(),
+					source:      z.string().url().optional(),
+					sourceLabel: z.string().optional(),
+				}))
+				.optional(),
+
 			// Display controls
 			order:    z.number().optional(),
 			featured: z.boolean().default(false),

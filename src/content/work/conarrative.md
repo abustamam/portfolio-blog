@@ -8,7 +8,7 @@ period: "2015 – Jul 2018 · 3 yrs"
 location: "Granite Bay, CA · On-site"
 skills: [React, SVG, GSAP, Leaflet, CSS, Scala, Data Visualization]
 logo: ../../assets/work/logos/conarrative-logo.png
-badges: [acquired]
+badges: []
 featured: false
 order: 6
 ---
