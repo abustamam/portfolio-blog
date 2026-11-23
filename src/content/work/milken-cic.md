@@ -9,7 +9,9 @@ period: "2024–2025"
 skills: [React, Prisma, ExpressJS]
 logo: ../../assets/work/logos/cic-logo.svg
 badges: []
-featured: true
+featured: false
+recent: true
+summary: "Architected a redesign and added file and budget management to the Community Infrastructure Center platform."
 order: 3
 ---
 

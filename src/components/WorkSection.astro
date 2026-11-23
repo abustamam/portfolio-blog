@@ -1,26 +1,73 @@
 ---
+// Compact timeline of work entries: one row each, newest first.
+import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import WorkCard from './WorkCard.astro';
 
 interface Props {
   title: string;
   entries: CollectionEntry<'work'>[];
-  indexOffset?: number;
 }
 
-const { title, entries, indexOffset = 0 } = Astro.props;
+const { title, entries } = Astro.props;
+
+const badgeLabels: Record<string, string> = {
+  acquired: 'acquired',
+  zeroToOne: '0→1',
+};
+
+const yearRange = (start: Date, end?: Date) => {
+  const s = start.getUTCFullYear();
+  if (!end) return `${s}–now`;
+  const e = end.getUTCFullYear();
+  return s === e ? `${s}` : `${s}–${String(e).slice(-2)}`;
+};
 ---
 
-<section class="mb-12">
-  <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-5 pb-2 border-b border-line">
+<section class="mb-12" data-work-timeline>
+  <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-2 pb-2 border-b border-line">
     {title}
   </h2>
-  <div class="grid grid-cols-1 gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
-    {entries.map((entry, i) => (
-      <WorkCard
-        entry={entry}
-        index={indexOffset + i}
-      />
-    ))}
-  </div>
+  <ol class="list-none m-0 p-0">
+    {entries.map((entry) => {
+      const { company, projectName, role, startDate, endDate, logo, darkLogo, badges, type } = entry.data;
+      return (
+        <li class="border-b border-line-soft">
+          <a
+            href={`/work/${entry.id}/`}
+            class="group grid grid-cols-[4.5rem_2rem_1fr] sm:grid-cols-[5.5rem_2rem_1fr_auto] items-center gap-x-3 sm:gap-x-4 py-3 no-underline text-inherit"
+            data-timeline-row={entry.id}
+          >
+            <span class="font-mono text-11 text-faint tracking-snug tabular-nums">{yearRange(startDate, endDate)}</span>
+            <span class="w-8 h-8 flex items-center justify-center">
+              {logo ? (
+                <Image
+                  src={logo}
+                  alt={`${company} logo`}
+                  width={32}
+                  height={32}
+                  class:list={['work-logo w-8 h-8 object-contain rounded-sm', darkLogo && 'is-dark']}
+                />
+              ) : (
+                <span class="w-8 h-8 rounded-sm bg-accent-bg text-accent-ink font-mono text-10 font-semibold flex items-center justify-center">
+                  {company.slice(0, 2).toUpperCase()}
+                </span>
+              )}
+            </span>
+            <span class="min-w-0">
+              <span class="block font-sans text-sm font-semibold text-ink group-hover:text-accent-ink truncate">
+                {company}{projectName && <span class="font-normal text-mute"> · {projectName}</span>}
+              </span>
+              <span class="block font-mono text-11 text-mute tracking-snug truncate">{role}</span>
+            </span>
+            <span class="hidden sm:flex items-center gap-1.5">
+              {badges.map((b) => (
+                <span class="font-mono text-10 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">{badgeLabels[b] ?? b}</span>
+              ))}
+              <span class="font-mono text-10 text-faint tracking-loose uppercase">{type}</span>
+            </span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
 </section>

@@ -7,7 +7,9 @@ period: "2025"
 skills: [Hasura, React, Metabase, tRPC]
 logo: ../../assets/work/logos/breezy-logo.png
 badges: []
-featured: true
+featured: false
+recent: true
+summary: "Added drip notifications for maintenance plans and configurable client dashboards to an HVAC management SaaS."
 order: 2
 ---
 

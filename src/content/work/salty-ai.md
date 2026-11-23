@@ -1,5 +1,5 @@
 ---
-company: Embedded Insurance, Inc.
+company: Salty.ai
 role: Senior Software Engineer
 type: employment
 startDate: 2023-08-01
@@ -8,7 +8,7 @@ location: Remote
 skills: [Software Design, Retool, Remix, React.js, Temporal.io]
 logo: ../../assets/work/logos/ei-logo.svg
 badges: []
-featured: true
+featured: false
 order: 1
 ---
 

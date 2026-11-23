@@ -2,46 +2,66 @@
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Metrics from './_Metrics.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('work', ({ data }) => !data.draft);
-  return entries.map((entry) => ({
-    params: { slug: entry.id },
-    props: entry,
-  }));
+  const flagships = entries
+    .filter((e) => e.data.flagship)
+    .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+  return entries.map((entry) => {
+    const i = flagships.findIndex((f) => f.id === entry.id);
+    const next = i === -1 ? undefined : flagships[(i + 1) % flagships.length];
+    return {
+      params: { slug: entry.id },
+      props: {
+        entry,
+        caseNumber: i === -1 ? undefined : i + 1,
+        next: next && next.id !== entry.id ? { id: next.id, company: next.data.company } : undefined,
+      },
+    };
+  });
 }
 
-type Props = CollectionEntry<'work'>;
+interface Props {
+  entry: CollectionEntry<'work'>;
+  caseNumber?: number;
+  next?: { id: string; company: string };
+}
 
-const entry = Astro.props;
+const { entry, caseNumber, next } = Astro.props;
 const { Content } = await render(entry);
 
 const {
   company, projectName, role, type, period, location,
   companyMission, skills, logo, darkLogo, badges, additionalRoles,
+  flagship, problem, outcome, quote, metrics,
 } = entry.data;
 
 const badgeLabels: Record<string, string> = {
   acquired: 'acquired',
   zeroToOne: '0→1',
 };
+
+const sourced = (metrics ?? []).filter((m) => m.source);
+const pad = (n: number) => String(n).padStart(2, '0');
+const sectionHeading = 'font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-4 pb-2 border-b border-line';
+const prose = 'font-serif text-[1.075rem] leading-[1.7] text-ink [&_p]:m-0 [&_p]:mb-4 [&_ul]:m-0 [&_ul]:mb-4 [&_ul]:pl-5 [&_li]:mb-2 [&_a]:text-accent-ink [&_strong]:font-semibold';
+const title = `${company}${projectName ? ` · ${projectName}` : ''} — ${flagship ? 'Case study' : 'Work'}`;
+const description = flagship && outcome ? outcome : `${role} at ${company}. ${period}.`;
 ---
 
-<BaseLayout
-  title={`${company}${projectName ? ` · ${projectName}` : ''} — Work`}
-  description={`${role} at ${company}. ${period}.`}
-  chromePath="/work"
-  image={logo}
->
+<BaseLayout title={title} description={description} chromePath="/work" image={logo}>
   <main class="page-shell pt-10 pb-16">
-    <!-- Back link -->
     <nav>
-      <a href="/" class="font-mono text-11 text-mute no-underline tracking-snug inline-block mb-8 hover:text-ink">← home</a>
+      <a href="/work/" class="font-mono text-11 text-mute no-underline tracking-snug inline-block mb-8 hover:text-ink">← work</a>
     </nav>
 
     <div class="grid grid-cols-[1fr_220px] gap-12 items-start max-[700px]:grid-cols-1 max-[700px]:gap-8">
-      <!-- Main content -->
-      <article>
+      <article data-case-study={flagship ? entry.id : undefined}>
+        {flagship && caseNumber && (
+          <div class="font-mono text-11 text-faint tracking-caps uppercase mb-4">Case study {pad(caseNumber)}</div>
+        )}
         <header class="flex items-center gap-4 mb-6">
           {logo && (
             <div class="shrink-0">
@@ -50,14 +70,17 @@ const badgeLabels: Record<string, string> = {
                 alt={`${company} logo`}
                 width={56}
                 height={56}
-                class:list={['w-14 h-14 object-contain rounded-md', darkLogo && 'dark:invert dark:brightness-200']}
+                class:list={['work-logo w-14 h-14 object-contain rounded-md', darkLogo && 'is-dark']}
               />
             </div>
           )}
           <div>
-            <h1 class="font-serif text-[clamp(1.5rem,4vw,2rem)] font-medium tracking-tight text-ink m-0 mb-1">
+            <h1 class:list={[
+              'font-serif font-medium tracking-tight text-ink m-0 mb-1',
+              flagship ? 'text-[clamp(1.9rem,5vw,2.75rem)] leading-tight' : 'text-[clamp(1.5rem,4vw,2rem)]',
+            ]}>
               {company}
-              {projectName && <span class="font-normal text-mute"> · {projectName}</span>}
+              {projectName && <span class="font-normal text-mute">{flagship ? ' / ' : ' · '}{projectName}</span>}
             </h1>
             <div class="font-mono text-xs text-mute tracking-snug">{role}</div>
           </div>
@@ -69,16 +92,70 @@ const badgeLabels: Record<string, string> = {
           </blockquote>
         )}
 
-        <div class="font-serif text-base leading-[1.7] text-ink [&_p]:m-0 [&_p]:mb-4">
-          <Content />
-        </div>
+        {flagship ? (
+          <>
+            {metrics && metrics.length > 0 && (
+              <div class="mb-10"><Metrics metrics={metrics} size="lg" /></div>
+            )}
+
+            {problem && (
+              <section class="mb-10" data-section="problem">
+                <h2 class={sectionHeading}>§ The problem</h2>
+                <p class="font-serif text-[1.075rem] leading-[1.7] text-ink m-0">{problem}</p>
+              </section>
+            )}
+
+            <section class="mb-10" data-section="what-i-did">
+              <h2 class={sectionHeading}>§ What I did</h2>
+              <div class={prose}><Content /></div>
+            </section>
+
+            {outcome && (
+              <section class="mb-10" data-section="outcome">
+                <h2 class={sectionHeading}>§ Outcome</h2>
+                <p class="font-serif text-[1.3rem] leading-[1.5] text-ink m-0">{outcome}</p>
+              </section>
+            )}
+
+            {quote && (
+              <figure class="m-0 mb-10 border-l-3 border-accent pl-5" data-section="quote">
+                <blockquote class="m-0 font-serif text-[1.3rem] italic leading-[1.5] text-ink">
+                  “{quote.text}”
+                </blockquote>
+                <figcaption class="mt-3 font-mono text-11 text-mute tracking-snug">
+                  {quote.name}, {quote.title}
+                </figcaption>
+              </figure>
+            )}
+
+            {sourced.length > 0 && (
+              <section class="mb-10" data-section="sources">
+                <h2 class={sectionHeading}>§ Sources</h2>
+                <ul class="list-none m-0 p-0">
+                  {sourced.map((m) => (
+                    <li class="font-mono text-xs text-mute tracking-snug leading-relaxed mb-2">
+                      <span class="text-ink">{m.value}</span> · {m.label} ·{' '}
+                      <a href={m.source} target="_blank" rel="noopener noreferrer" class="text-accent-ink underline decoration-accent underline-offset-2">
+                        {m.sourceLabel ?? m.source} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </>
+        ) : (
+          <div class="font-serif text-base leading-[1.7] text-ink [&_p]:m-0 [&_p]:mb-4">
+            <Content />
+          </div>
+        )}
 
         {additionalRoles && additionalRoles.length > 0 && (
           <section class="mt-8 border-t border-line pt-6">
-            <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-4">Additional Roles</h2>
+            <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-4">{flagship ? 'Roles' : 'Additional Roles'}</h2>
             {additionalRoles.map((r) => (
               <div class="mb-5">
-                <div class="flex items-baseline gap-3 mb-1">
+                <div class="flex flex-wrap items-baseline gap-x-3 mb-1">
                   <span class="font-sans text-sm font-semibold text-ink">{r.role}</span>
                   <span class="font-mono text-11 text-faint">{r.period}</span>
                 </div>
@@ -87,11 +164,21 @@ const badgeLabels: Record<string, string> = {
             ))}
           </section>
         )}
+
+        {next && (
+          <nav class="mt-12 pt-6 border-t border-line font-mono text-xs tracking-snug">
+            <a href={`/work/${next.id}/`} class="text-accent-ink no-underline hover:underline">next case study: {next.company} →</a>
+          </nav>
+        )}
       </article>
 
-      <!-- Sidebar -->
-        <aside class="sticky top-8 max-[700px]:static max-[700px]:order-[-1]">
-        <dl class="border border-line rounded-[3px] py-4 px-[18px] bg-surface">
+      <!-- On narrow screens a case study keeps the story first, so the metadata box
+           drops below the article; other entries keep it on top. -->
+      <aside
+        class:list={['sticky top-8 max-[700px]:static', !flagship && 'max-[700px]:order-[-1]']}
+        data-work-meta
+      >
+        <dl class="border border-line rounded-[3px] py-4 px-[18px] bg-surface m-0">
           <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
             <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Period</dt>
             <dd class="font-mono text-xs text-ink m-0">{period}</dd>

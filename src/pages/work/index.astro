@@ -1,48 +1,140 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorkSection from '../../components/WorkSection.astro';
+import Metrics from './_Metrics.astro';
 
 const allWork = await getCollection('work', ({ data }) => !data.draft);
 
-// Sort by startDate descending, with order as tiebreaker
-allWork.sort((a, b) => {
+const byOrder = (a: (typeof allWork)[number], b: (typeof allWork)[number]) => {
   if (a.data.order !== undefined && b.data.order !== undefined) {
     return a.data.order - b.data.order;
   }
   return b.data.startDate.getTime() - a.data.startDate.getTime();
-});
+};
+const byNewest = (a: (typeof allWork)[number], b: (typeof allWork)[number]) =>
+  b.data.startDate.getTime() - a.data.startDate.getTime() ||
+  (b.data.endDate?.getTime() ?? Infinity) - (a.data.endDate?.getTime() ?? Infinity);
 
-const employment = allWork.filter((e) => e.data.type === 'employment');
-const consulting = allWork.filter((e) => e.data.type === 'consulting');
+const flagships = allWork.filter((e) => e.data.flagship).sort(byOrder);
+const recent = allWork.filter((e) => !e.data.flagship && e.data.recent).sort(byOrder);
+const timeline = allWork.filter((e) => !e.data.flagship && !e.data.recent).sort(byNewest);
+
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title="Work" description="A record of consulting engagements and employment — what I built, where, and with whom." chromePath="/work">
+<BaseLayout
+  title="Work"
+  description="Three case studies from startups I helped build and carry through acquisition, then recent engagements and the full record."
+  chromePath="/work"
+>
   <main class="page-shell pt-12 pb-20">
     <div class="mb-7 font-mono text-11 text-mute tracking-[.04em]">
       <a href="/" class="text-mute no-underline">← home</a>
     </div>
-    <header class="mb-12">
+    <header class="mb-14">
       <h1 class="font-serif text-[clamp(2rem,5vw,3rem)] font-medium tracking-tight text-ink m-0 mb-3">Work</h1>
-      <p class="font-serif text-lg text-mute leading-relaxed m-0 max-w-md">
-        A record of consulting engagements and employment — what I built, where, and with whom.
+      <p class="font-serif text-lg text-mute leading-relaxed m-0 max-w-xl">
+        I work with funded startups as a fractional founding engineer and technical advisor.
+        These three stories show what that looks like: building from zero, and staying through an acquisition.
       </p>
     </header>
 
-    {employment.length > 0 && (
-      <WorkSection
-        title="§ Employment"
-        entries={employment}
-        indexOffset={0}
-      />
+    <!-- Flagship case studies -->
+    <section class="mb-16" aria-labelledby="case-studies-heading" data-flagships>
+      <h2 id="case-studies-heading" class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-2 pb-2 border-b border-line">
+        § Case studies
+      </h2>
+      {flagships.map((entry, i) => {
+        const { company, projectName, role, period, logo, darkLogo, outcome, metrics } = entry.data;
+        return (
+          <article class="py-10 border-b border-line" data-flagship={entry.id}>
+            <div class="grid grid-cols-[3rem_1fr] gap-x-5 max-[640px]:grid-cols-1 max-[640px]:gap-y-3">
+              <div class="font-mono text-11 text-faint tracking-caps pt-2">{pad(i + 1)}</div>
+              <div>
+                <header class="flex items-center gap-4 mb-4">
+                  {logo && (
+                    <Image
+                      src={logo}
+                      alt={`${company} logo`}
+                      width={48}
+                      height={48}
+                      class:list={['work-logo w-12 h-12 object-contain rounded-md shrink-0', darkLogo && 'is-dark']}
+                    />
+                  )}
+                  <div class="min-w-0">
+                    <h3 class="font-serif text-[clamp(1.6rem,4vw,2.25rem)] font-medium tracking-tight text-ink m-0 leading-tight">
+                      <a href={`/work/${entry.id}/`} class="text-ink no-underline hover:text-accent-ink">
+                        {company}{projectName && <span class="font-normal text-mute"> / {projectName}</span>}
+                      </a>
+                    </h3>
+                    <div class="font-mono text-11 text-mute tracking-snug mt-1">{role} · {period}</div>
+                  </div>
+                </header>
+
+                {outcome && (
+                  <p class="font-serif text-[1.2rem] leading-[1.55] text-ink m-0 mb-6 max-w-2xl">{outcome}</p>
+                )}
+
+                {metrics && metrics.length > 0 && (
+                  <div class="mb-6"><Metrics metrics={metrics} size="md" /></div>
+                )}
+
+                <a
+                  href={`/work/${entry.id}/`}
+                  class="font-mono text-xs text-accent-ink tracking-snug no-underline hover:underline"
+                >
+                  read the case study →
+                </a>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </section>
+
+    <!-- Recent engagements -->
+    {recent.length > 0 && (
+      <section class="mb-16" aria-labelledby="recent-heading" data-recent>
+        <h2 id="recent-heading" class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-5 pb-2 border-b border-line">
+          § Recent engagements
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {recent.map((entry) => {
+            const { company, projectName, role, period, logo, darkLogo, summary } = entry.data;
+            return (
+              <a
+                href={`/work/${entry.id}/`}
+                class="flex flex-col no-underline text-inherit border border-line rounded p-5 bg-surface transition-colors duration-150 hover:border-accent"
+                data-recent-card={entry.id}
+              >
+                <div class="flex items-center gap-3 mb-3">
+                  {logo && (
+                    <Image
+                      src={logo}
+                      alt={`${company} logo`}
+                      width={36}
+                      height={36}
+                      class:list={['work-logo w-9 h-9 object-contain rounded shrink-0', darkLogo && 'is-dark']}
+                    />
+                  )}
+                  <div class="min-w-0">
+                    <div class="font-sans text-sm font-semibold text-ink">{company}</div>
+                    <div class="font-mono text-11 text-faint tracking-snug">{period}</div>
+                  </div>
+                </div>
+                {projectName && <div class="font-mono text-11 text-mute tracking-snug mb-1">{projectName}</div>}
+                {summary && <p class="font-serif text-[0.95rem] leading-relaxed text-ink m-0 mb-3">{summary}</p>}
+                <div class="mt-auto font-mono text-11 text-mute tracking-snug">{role}</div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
     )}
 
-    {consulting.length > 0 && (
-      <WorkSection
-        title="§ Consulting"
-        entries={consulting}
-        indexOffset={employment.length}
-      />
-    )}
+    <!-- Everything else -->
+    {timeline.length > 0 && <WorkSection title="§ Timeline" entries={timeline} />}
   </main>
 </BaseLayout>
