@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
+import { fmtDate } from '../utils/date';
 import CopyButton from '../components/CopyButton.astro';
 import AvailabilityCard from '../components/AvailabilityCard.astro';
 import profilePic from '../assets/profile-pic.jpeg';
@@ -37,11 +38,6 @@ const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
   .filter(p => p.id !== slug)
   .slice(0, 3);
 
-function fmtDate(date: Date): string {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const d = new Date(date);
-  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')} ${d.getFullYear()}`;
-}
 
 // TOC: depth-2 headings only (h2)
 const toc = headings.filter(h => h.depth === 2);
