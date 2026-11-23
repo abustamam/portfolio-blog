@@ -4,6 +4,7 @@ description: "Bring one real workflow, leave with it automated. A small local AI
 pubDate: '2026-11-22'
 dek: "Not a course about AI. A few sessions where you point AI at your actual work and leave with something that runs."
 tag: "AI"
+audience: "general"
 kind: "Announcement"
 ---
 

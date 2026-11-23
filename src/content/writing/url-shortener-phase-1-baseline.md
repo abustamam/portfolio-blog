@@ -10,19 +10,11 @@ tag: "Infrastructure"
 kind: "Case Study"
 ---
 
-> *Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
+*TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. Measured from outside the VPS, redirects take 172ms at p50 and 191ms at p99; on the box, 41ms at p50. The Postgres query itself executes in 0.091ms. Every later phase in this series is compared against these numbers.
 
----
+"Design a URL shortener" is a common interview prompt, and the common answer, two endpoints and one table, is not a production design. A million requests per day against a 1 vCPU VPS does not end well without deliberate decisions. The app is trivial enough to understand in five minutes, which makes it a clean vehicle for layering on one infrastructure change at a time and measuring each.
 
-*TL;DR*: A minimal Hono + Postgres URL shortener with two endpoints and Swagger UI. This post establishes the baseline latency that serves as the reference point for the entire series.
-
-Interview question: "Design a URL shortener."
-
-That is the entire prompt. The common answer — "two endpoints, one to shorten, one to redirect" — misses the point. This is a weeder question, not a trick question. The trap is underestimating the complexity. Two endpoints and a single database table are not enough for production. A million requests per day against a 1 vCPU VPS does not end well without deliberate design decisions.
-
-This series teaches infrastructure concepts hands-on — by building something real, measuring it, and breaking it. A URL shortener is the perfect vehicle: trivial enough to understand in five minutes, interesting enough to layer complexity onto.
-
-This first post covers the foundation. No Redis, no load balancers, nothing clever. Just the app itself, and a baseline p95 that every subsequent phase compares against.
+This first post covers the foundation: no Redis, no load balancers, nothing clever.
 
 The repo is available [here](https://github.com/abustamam/url-shortener).
 
@@ -432,4 +424,4 @@ Before any optimization: measure. The baseline established here is the only hone
 
 ---
 
-*Disclaimer: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*
+*Note on AI assistance: I used AI to scaffold the implementation. All measurements, configuration decisions, and failure observations are from running this on a real VPS.*

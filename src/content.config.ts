@@ -13,6 +13,7 @@ const writing = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			audience: z.enum(['engineering', 'general']).default('engineering'), // /writing/ lists engineering first
 			series: z.string().optional(),
 			seriesOrder: z.number().optional(),
 			draft: z.boolean().optional(),
