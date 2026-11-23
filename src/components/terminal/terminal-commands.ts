@@ -43,10 +43,38 @@ const MAN_PAGES: Record<string, string[]> = {
 		'  rasheed — short bio',
 		'',
 		'DESCRIPTION',
-		'  Independent software consultant, California.',
+		'  Fractional founding engineer and technical advisor, California.',
 		'  This site is an engineering journal.',
 	],
 };
+
+// Lines for the practice-intro commands. The homepage hero renders these at
+// build time (static session) and replays them, so keep each line short
+// enough to fit a 375px-wide phone without wrapping (~40 chars).
+export const WHOAMI_LINES = [
+	'rasheed bustamam',
+	'fractional founding engineer + advisor',
+];
+
+export const OFFERS_LINES = [
+	'01  fractional founding engineer',
+	'02  technical advisory',
+	'    architecture · hiring · roadmap',
+	'03  scoped zero-to-one builds',
+	'04  ai-assisted delivery, measured',
+];
+
+export const CAPACITY_LINES = [
+	'a few engagements at a time',
+	'fractional hours, beside a full-time role',
+];
+
+export const START_HERE_LINES = [
+	'work      /work',
+	'writing   /writing',
+	'contact   admin@bustamam.tech',
+	'your turn: type help',
+];
 
 function tokenize(line: string): string[] {
 	const trimmed = line.trim();
@@ -131,10 +159,19 @@ export function runCommandLine(
 	}
 
 	if (alias === 'whoami') {
-		return {
-			next: state,
-			lines: ['rasheed bustamam · independent consultant · california'],
-		};
+		return { next: state, lines: WHOAMI_LINES };
+	}
+
+	if (alias === 'offers') {
+		return { next: state, lines: OFFERS_LINES };
+	}
+
+	if (alias === 'capacity') {
+		return { next: state, lines: CAPACITY_LINES };
+	}
+
+	if (alias === 'start-here') {
+		return { next: state, lines: START_HERE_LINES };
 	}
 
 	if (alias === 'hint') {
@@ -183,7 +220,8 @@ export function runCommandLine(
 			next: state,
 			lines: [
 				'commands:',
-				'  help, ?, ls, ll, cd, pwd, cat, open, man, clear, exit, whoami, hint',
+				'  whoami, offers, capacity, start-here',
+				'  help, ?, ls, ll, cd, pwd, cat, open, man, clear, exit, hint',
 				'  hotkey: Ctrl/Cmd + Shift + T toggles terminal mode',
 			],
 		};

@@ -2,6 +2,21 @@
 import { getCollection } from 'astro:content';
 import { isPublished } from '../utils/content';
 import type { SiteTerminalData } from './terminal/terminal-types';
+import { runCommandLine } from './terminal/terminal-commands';
+
+interface Props {
+  /**
+   * Commands replayed as a scripted session. Rendered at build time so the
+   * session shows with JavaScript off and under prefers-reduced-motion; with
+   * motion allowed, the client types it out over the same reserved box.
+   */
+  script?: string[];
+  /** Height class for the output area. The box is fixed so nothing shifts. */
+  outputClass?: string;
+  /** Accessible name for the whole widget. */
+  label?: string;
+}
+const { script = [], outputClass = 'h-48', label = 'Interactive terminal' } = Astro.props;
 
 const blogRaw = await getCollection('writing', ({ data }) => isPublished(data));
 const blog: SiteTerminalData['blog'] = blogRaw.map((p) => ({
@@ -30,10 +45,36 @@ const work: SiteTerminalData['work'] = workRaw.map((w) => ({
 
 const terminalData: SiteTerminalData = { blog, series, work };
 const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
+
+// Turn a scripted line into a link when it names a site path or the email.
+function hrefFor(text: string): string | undefined {
+  const email = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+  if (email) return `mailto:${email[0]}`;
+  const path = text.match(/(?:^|\s)(\/[a-z0-9/-]+)$/);
+  if (path) return path[1].endsWith('/') ? path[1] : `${path[1]}/`;
+  return undefined;
+}
+
+type Row = { kind: 'echo'; cwd: string; cmd: string } | { kind: 'out'; text: string; href?: string };
+const rows: Row[] = [];
+let scriptState = { cwd: '~' };
+for (const cmd of script) {
+  rows.push({ kind: 'echo', cwd: scriptState.cwd, cmd });
+  const result = runCommandLine(cmd, scriptState, terminalData);
+  scriptState = result.next;
+  for (const text of result.lines) {
+    if (text === '__CLEAR__') continue;
+    rows.push({ kind: 'out', text, href: hrefFor(text) });
+  }
+}
+const hasScript = rows.length > 0;
 ---
 
 <div
   id="terminal-widget"
+  role="group"
+  aria-label={label}
+  data-scripted={hasScript ? '' : undefined}
   class="bg-code border border-line rounded font-mono text-xs overflow-hidden flex flex-col"
 >
   <!-- Chrome bar (matches TerminalModeShell) -->
@@ -72,13 +113,19 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     <div class="font-mono text-10 uppercase tracking-snug text-faint">simulated</div>
   </div>
 
-  <!-- Scrollable output area -->
+  <!-- Scrollable output area. A scripted session is server-rendered here. -->
   <div
     id="widget-output"
-    class="h-48 overflow-y-auto p-4 leading-relaxed transition-opacity duration-150"
+    class:list={[outputClass, 'overflow-y-auto p-3.5 sm:p-4 leading-normal transition-opacity duration-150']}
     aria-live="polite"
     aria-label="Terminal output"
-  ></div>
+  >{rows.map((row) => row.kind === 'echo' ? (
+    <div class="mb-0.5 font-mono text-xs text-ink whitespace-pre-wrap" data-script-row="echo"><span class="text-accent">{row.cwd} $ </span><span data-cmd={row.cmd}>{row.cmd}</span></div>
+  ) : (
+    <div class="mb-0.5 font-mono text-xs text-mute whitespace-pre-wrap" data-script-row="out">{row.href
+      ? <a href={row.href} class="text-mute underline decoration-line underline-offset-2 hover:text-ink">{row.text}</a>
+      : row.text}</div>
+  ))}</div>
 
   <!-- Prompt row -->
   <form
@@ -94,10 +141,14 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       <input
         id="widget-input"
         type="text"
-        class="flex-1 border-none bg-transparent text-xs text-ink outline-none hidden"
+        class="flex-1 min-w-0 border-none bg-transparent text-base sm:text-xs text-ink outline-none placeholder:text-faint focus:placeholder:text-transparent hidden"
         style="caret-color: transparent"
         autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        enterkeyhint="go"
         spellcheck="false"
+        placeholder={hasScript ? 'type help' : undefined}
         aria-label="Terminal command input"
       />
       <!-- Blocky blinking cursor -->
@@ -165,7 +216,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     // Output
     function appendLine(text: string, cls = 'text-mute') {
       const row = document.createElement('div');
-      row.className = `mb-0.5 font-mono text-xs ${cls}`;
+      row.className = `mb-0.5 font-mono text-xs whitespace-pre-wrap ${cls}`;
       row.textContent = text;
       output.appendChild(row);
       output.scrollTop = output.scrollHeight;
@@ -300,8 +351,11 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       syncCursor(input.value, input.selectionStart ?? undefined);
     });
 
-    // Click output area → focus input
-    output.addEventListener('click', () => {
+    // Click output area → focus input (links keep their own behavior; the
+    // intro script handles clicks while the session is still typing)
+    output.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) return;
+      if (widget.hasAttribute('data-intro')) return;
       input.focus();
     });
 
@@ -344,7 +398,20 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     // Restore persisted state on load
     const savedCwd = lsGet('terminal:cwd');
     const savedColor = lsGet('terminal:theme');
-    if (savedCwd) state = { cwd: savedCwd };
+    // A scripted session always starts at ~ so the replay reads true.
+    const scripted = widget.hasAttribute('data-scripted');
+    if (savedCwd && !scripted) state = { cwd: savedCwd };
+
+    // Seed the buffers from the server-rendered session so the full-screen
+    // shell (and ArrowUp) pick it up.
+    if (scripted) {
+      output.querySelectorAll<HTMLElement>('[data-script-row]').forEach((row) => {
+        const isEcho = row.dataset.scriptRow === 'echo';
+        outputBuffer.push({ text: row.textContent ?? '', cls: isEcho ? 'text-ink' : 'text-mute' });
+        const cmd = row.querySelector<HTMLElement>('[data-cmd]')?.dataset.cmd;
+        if (isEcho && cmd) historyBuffer.push(cmd);
+      });
+    }
     // Restore color theme on widget element
     if (savedColor && savedColor !== 'inherit') {
       widget.setAttribute('data-theme', savedColor);
@@ -391,69 +458,125 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   })();
 </script>
 
-<script>
-  import type { TerminalWidgetBridge } from './terminal/terminal-types';
-
+<script is:inline>
+  // Runs during parse, before first paint: hide the static session only when
+  // it is about to be typed out. No JS or reduced motion → it stays visible.
   (function () {
-    const widgetEl  = document.getElementById('terminal-widget') as (HTMLElement & { __terminal?: TerminalWidgetBridge }) | null;
+    var w = document.getElementById('terminal-widget');
+    if (!w || !w.hasAttribute('data-scripted')) return;
+    try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { return; }
+    w.setAttribute('data-intro', 'pending');
+    // Typing would otherwise be announced one character at a time.
+    var o = document.getElementById('widget-output');
+    if (o) o.setAttribute('aria-live', 'off');
+  })();
+</script>
+
+<script>
+  (function () {
+    const widget = document.getElementById('terminal-widget') as HTMLElement | null;
+    const output = document.getElementById('widget-output') as HTMLElement | null;
+    const input = document.getElementById('widget-input') as HTMLInputElement | null;
     const twDisplay = document.getElementById('widget-typewriter-display') as HTMLElement | null;
-    const inputEl   = document.getElementById('widget-input') as HTMLInputElement | null;
-    if (!widgetEl || !twDisplay || !inputEl) return;
-
-    let introRun = false;
-
-    function runIntro() {
-      if (introRun) return;
-      introRun = true;
-
-      const term = widgetEl.__terminal;
-      if (!term) return;
-
-      term.setFocused(true);
-      term.showCursor();
-
-      const cmd = 'whoami';
-      let i = 0;
-
-      function typeNext() {
-        const text = cmd.slice(0, i);
-        twDisplay.textContent = text;
-        term.syncCursor(text);
-        i++;
-        if (i <= cmd.length) {
-          setTimeout(typeNext, 60);
-        } else {
-          // Typing complete — pause then run the command
-          setTimeout(() => {
-            twDisplay.textContent = '';
-            term.runLine(cmd);
-            // Hide typewriter cursor, show real input (focus handler will show cursor)
-            term.hideCursor();
-            twDisplay.classList.add('hidden');
-            inputEl!.classList.remove('hidden');
-            queueMicrotask(() => inputEl!.focus());
-          }, 300);
-        }
-      }
-
-      typeNext();
+    if (!widget || !output || !input) return;
+    if (!widget.hasAttribute('data-scripted')) {
+      // Unscripted widget: no replay, hand over the prompt straight away.
+      twDisplay?.classList.add('hidden');
+      input.classList.remove('hidden');
+      return;
     }
 
-    // IntersectionObserver: defer on mobile until widget enters viewport
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect();
-          runIntro();
-        }
-      },
-      { threshold: 0.3 },
-    );
-    observer.observe(widgetEl);
+    const rows = Array.from(output.querySelectorAll<HTMLElement>('[data-script-row]'));
+    const timers: number[] = [];
+    let done = false;
+
+    function later(fn: () => void, ms: number) {
+      timers.push(window.setTimeout(fn, ms));
+    }
+
+    // Hand control to the visitor. Never focuses: that would steal focus and
+    // could scroll the page. Focus comes from the visitor's own click or tap.
+    function finish() {
+      if (done) return;
+      done = true;
+      timers.forEach((t) => clearTimeout(t));
+      rows.forEach((row) => {
+        row.style.visibility = '';
+        row.querySelector('[data-type-cursor]')?.remove();
+        const cmdEl = row.querySelector<HTMLElement>('[data-cmd]');
+        if (cmdEl) cmdEl.textContent = cmdEl.dataset.cmd ?? '';
+      });
+      widget!.removeAttribute('data-intro');
+      output!.setAttribute('aria-live', 'polite');
+      widget!.setAttribute('data-intro-done', '');
+      twDisplay?.classList.add('hidden');
+      input!.classList.remove('hidden');
+    }
+
+    if (!widget.hasAttribute('data-intro')) {
+      finish(); // reduced motion: final state immediately
+      return;
+    }
+
+    function reveal(row: HTMLElement) {
+      row.style.visibility = 'visible';
+      // Keep the newest line in view inside the terminal only (not the page).
+      const bottom = row.offsetTop + row.offsetHeight - output!.offsetTop;
+      if (bottom > output!.scrollTop + output!.clientHeight) {
+        output!.scrollTop = bottom - output!.clientHeight + 16;
+      }
+    }
+
+    function play(i: number) {
+      if (done) return;
+      if (i >= rows.length) { later(finish, 250); return; }
+      const row = rows[i];
+      const cmdEl = row.querySelector<HTMLElement>('[data-cmd]');
+      if (row.dataset.scriptRow !== 'echo' || !cmdEl) {
+        reveal(row);
+        later(() => play(i + 1), 45);
+        return;
+      }
+      const cmd = cmdEl.dataset.cmd ?? '';
+      cmdEl.textContent = '';
+      const cursor = document.createElement('span');
+      cursor.setAttribute('data-type-cursor', '');
+      cursor.setAttribute('aria-hidden', 'true');
+      cursor.className = 'inline-block align-middle w-1.75 h-3.25 bg-accent animate-[termBlink_1s_step-end_infinite]';
+      row.appendChild(cursor);
+      reveal(row);
+      let n = 0;
+      const type = () => {
+        if (done) return;
+        n++;
+        cmdEl.textContent = cmd.slice(0, n);
+        if (n < cmd.length) later(type, 45);
+        else later(() => { cursor.remove(); play(i + 1); }, 260);
+      };
+      later(type, i === 0 ? 350 : 380);
+    }
+
+    // Skip to the end if the visitor reaches for the terminal mid-intro.
+    widget.addEventListener('pointerdown', (e) => {
+      if (done) return;
+      const onLink = (e.target as HTMLElement).closest('a');
+      finish();
+      if (!onLink) queueMicrotask(() => input.focus());
+    });
+
+    // Start when the terminal is on screen (it may sit below the fold on phones).
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((en) => en.isIntersecting)) {
+        observer.disconnect();
+        play(0);
+      }
+    }, { threshold: 0.25 });
+    observer.observe(widget);
   })();
 </script>
 
 <style is:global>
+  #terminal-widget[data-intro] [data-script-row] { visibility: hidden; }
   #terminal-widget .group:hover .traffic-light-glyph { opacity: 1 !important; }
   /* Terminal widget — immersive palette (dark-mode values, work for all dark themes) */
   #terminal-widget[data-theme="green"] {
