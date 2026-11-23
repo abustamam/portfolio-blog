@@ -89,7 +89,12 @@
       const brightness = localStorage.getItem('theme') || 'light';
       const color      = localStorage.getItem('terminal:theme') || 'inherit';
       const icon = brightness === 'dark' ? '☾' : '☀';
-      label.textContent = `${icon} ${brightness} · ${color}`;
+      // The colour name is dropped below `sm`: the full label made the chrome bar
+      // overflow narrow phones (320px). The menu still shows the colour.
+      const suffix = document.createElement('span');
+      suffix.className = 'hidden sm:inline';
+      suffix.textContent = ` · ${color}`;
+      label.replaceChildren(`${icon} ${brightness}`, suffix);
 
       root.querySelectorAll<HTMLElement>('[data-brightness]').forEach(opt => {
         const check = opt.querySelector<HTMLElement>('.theme-picker-check');

@@ -122,20 +122,16 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#result-retry')).toBeVisible();
   });
 
-  // Measures the page body only. The shared TerminalChrome bar overflows ~12px at
-  // 375px on every page (pre-existing, tracked separately), so the whole document
-  // can't be the yardstick here yet.
-  test('content fits a phone screen without horizontal scroll', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    for (const path of ['/ai-quiz', '/writing/hands-on-ai-cohort']) {
-      await page.goto(path);
-      const overflow = await page.evaluate(() => {
-        const w = document.documentElement.clientWidth;
-        const root = document.querySelector('#terminal-inert-siblings')!;
-        const right = Math.max(...[...root.querySelectorAll('*')].map((e) => e.getBoundingClientRect().right));
-        return Math.round(right - w);
-      });
-      expect(overflow, `${path} content overflows by ${overflow}px`).toBeLessThanOrEqual(0);
+  test('pages fit a phone screen without horizontal scroll', async ({ page }) => {
+    for (const width of [375, 320]) {
+      await page.setViewportSize({ width, height: 812 });
+      for (const path of ['/ai-quiz', '/writing/hands-on-ai-cohort']) {
+        await page.goto(path);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, `${path} at ${width}px overflows by ${overflow}px`).toBeLessThanOrEqual(0);
+      }
     }
   });
 
