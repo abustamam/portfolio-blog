@@ -11,6 +11,8 @@ export interface Deps {
   limit?: number;
   windowMs?: number;
   log?: (msg: string, extra?: Record<string, unknown>) => void;
+  /** Called after a row is saved. Not awaited; a failure is logged, never returned. */
+  notify?: (row: Row) => Promise<void>;
 }
 
 const json = (status: number, body: unknown) =>
@@ -66,6 +68,9 @@ export function createHandler(deps: Deps) {
       return json(500, { ok: false, error: 'could not save' });
     }
     log('saved', { track: parsed.row.track });
+    if (deps.notify) {
+      deps.notify(parsed.row).catch((err) => log('notify failed', { error: String(err) }));
+    }
     return json(200, { ok: true, track: parsed.row.track });
   };
 }

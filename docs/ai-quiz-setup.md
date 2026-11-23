@@ -28,6 +28,12 @@ the endpoint in any build.
 - Limits each IP to 10 submissions an hour (`RATE_LIMIT`), keyed on
   `X-Real-IP`, which Caddy sets from `Cf-Connecting-Ip`.
 - Never echoes database errors to the client.
+- After a row is saved, sends a Telegram message (name, track, score, payer,
+  start, format, price, task) when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
+  are set. Contact details are never sent; read them from the database. The
+  message is fire-and-forget: a Telegram failure is logged as `notify failed`
+  and the submission still succeeds. The startup log line `notifications`
+  says whether it's on.
 
 Tests: `bun test services/ai-quiz-intake` (runs in CI).
 
@@ -62,6 +68,9 @@ docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
     mem_limit: 128m
     environment:
       DATABASE_URL: postgresql://ai_quiz:${AI_QUIZ_DB_PASSWORD}@postgres:5432/ai_quiz
+      # Optional: a Telegram message per new response. Unset = no notifications.
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
     depends_on:
       postgres:
         condition: service_healthy
