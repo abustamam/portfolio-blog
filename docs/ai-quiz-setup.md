@@ -1,76 +1,125 @@
-# AI quiz: response collection setup
+# AI quiz: response collection
 
-`/ai-quiz` is static. It POSTs each response as JSON to a Google Apps Script web
-app, which appends a row to a Google Sheet you own. Until you set the endpoint,
-the quiz still runs and shows a "responses aren't being collected yet" notice.
+`/ai-quiz` is static. On submit it POSTs JSON to `/api/ai-quiz` on the same
+origin. Caddy routes that path to the `ai-quiz-intake` container
+([`services/ai-quiz-intake`](../services/ai-quiz-intake)), which validates the
+answers, re-scores them, and inserts one row into the `ai_quiz` database on the
+box's Postgres.
 
-Status: the page's no-endpoint path is covered by a Playwright test (MEASURED).
-The Apps Script side has not been deployed or exercised against a real Sheet
-(ASSUMED until you run step 5).
-
-## 1. Create the Sheet and script
-
-1. Go to <https://sheets.new> and name the sheet, e.g. `AI cohort intake`.
-2. **Extensions → Apps Script.**
-3. Delete the starter code and paste in all of
-   [`scripts/ai-quiz-apps-script.gs`](../scripts/ai-quiz-apps-script.gs).
-4. Save (⌘S / Ctrl+S).
-
-## 2. Deploy it as a web app
-
-1. **Deploy → New deployment.**
-2. Gear icon → **Web app**.
-3. Set:
-   - **Execute as:** Me
-   - **Who has access:** Anyone
-4. **Deploy**, then approve the permission prompt (Google will warn that the app
-   is unverified. That's expected for your own script: **Advanced → Go to …**).
-5. Copy the **Web app URL**. It ends in `/exec`.
-
-"Anyone" means anyone can POST rows, not read them. The Sheet stays private.
-
-## 3. Check the deployment
-
-Open the `/exec` URL in a browser. You should see:
-
-```json
-{"ok":true,"service":"ai-quiz"}
+```
+browser ─POST /api/ai-quiz─▶ Cloudflare ─▶ Caddy (blog.bustamam.tech)
+                                             ├─ /api/ai-quiz* ─▶ ai-quiz-intake:3000 ─▶ postgres/ai_quiz.responses
+                                             └─ everything else ─▶ portfolio-blog:80
 ```
 
-## 4. Point the site at it
+Dev builds (`bun run dev`) have no backend, so the quiz shows a "responses
+aren't being collected yet" notice. Set `PUBLIC_AI_QUIZ_ENDPOINT` to override
+the endpoint in any build.
 
-Either:
+## What the service does
 
-- **Commit it** (simplest, since the Docker build has no build args): paste the URL
-  into the fallback string in [`src/consts/aiQuiz.ts`](../src/consts/aiQuiz.ts), or
-- **Set it at build time:** `PUBLIC_AI_QUIZ_ENDPOINT=https://script.google.com/macros/s/…/exec bun run build`.
-  For the Docker/CI build you'd also need to add an `ARG`/`ENV` to the `Dockerfile`.
+- Accepts only `POST /api/ai-quiz` (plus `GET /api/ai-quiz/health`).
+- Bodies over 16 KB get a 413. Option values must be short kebab-case tokens
+  from the form, and text fields are length-capped (task 600, name 120,
+  contact 160).
+- It ignores the browser's `track` and `score` and recomputes them with the
+  same `src/utils/aiQuiz.ts` the page uses.
+- The hidden `website` honeypot field gets a fake `ok` and nothing is stored.
+- Limits each IP to 10 submissions an hour (`RATE_LIMIT`), keyed on
+  `X-Real-IP`, which Caddy sets from `Cf-Connecting-Ip`.
+- Never echoes database errors to the client.
 
-The URL ends up in the public page either way. That's fine: it only accepts writes.
+Tests: `bun test services/ai-quiz-intake` (runs in CI).
 
-## 5. Test end to end
+## Server setup (one time)
 
-1. `bun run dev`, open <http://localhost:4321/ai-quiz>, complete the quiz.
-2. The result screen should say "Thanks, your answers were sent."
-3. A new row should appear on the `Responses` tab (created on the first submit).
+All of this is on the Hetzner box, in `/srv`.
 
-If the result screen says the answers didn't send, open the browser console for
-the error, and in Apps Script check **Executions** for the failed run.
+### 1. Database and role
 
-## Updating the script later
+The app connects as `ai_quiz`, which can `INSERT` into `responses` and nothing
+else: it can't read, update, or delete answers.
 
-Edits only go live after **Deploy → Manage deployments → ✏️ → Version: New
-version → Deploy**. This keeps the same `/exec` URL. Creating a *new*
-deployment gives you a new URL, which you'd then have to update on the site.
+```bash
+PW=$(openssl rand -hex 24)
+echo "AI_QUIZ_DB_PASSWORD=$PW" >> /srv/.env
+docker exec -i postgres psql -U postgres -v ON_ERROR_STOP=1 <<SQL
+create role ai_quiz login password '$PW';
+create database ai_quiz;
+revoke connect on database ai_quiz from public;
+grant connect on database ai_quiz to ai_quiz;
+SQL
+docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
+  < services/ai-quiz-intake/schema.sql
+```
 
-If you add or reorder `COLUMNS`, the header row on an existing `Responses` tab
-won't update itself. Fix the header by hand, or rename the tab so the next
-submit creates a fresh one.
+### 2. Compose service
 
-## Notes
+```yaml
+  ai-quiz-intake:
+    image: ghcr.io/abustamam/ai-quiz-intake:latest
+    container_name: ai-quiz-intake
+    mem_limit: 128m
+    environment:
+      DATABASE_URL: postgresql://ai_quiz:${AI_QUIZ_DB_PASSWORD}@postgres:5432/ai_quiz
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      - wud.watch=true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+```
 
-- Responses include name/contact only if the person filled them in. Treat the
-  Sheet as private; don't share it beyond whoever runs the cohort.
-- A hidden `website` field catches basic bots; the script drops those rows.
-- Cells that start with `=`, `+`, `-` or `@` are stored as text, so a response
-  can't inject a formula.
+The image is built and pushed by `.github/workflows/deploy.yml` on every push to
+`main`. WUD redeploys it like the blog.
+
+### 3. Caddy route
+
+```caddy
+blog.bustamam.tech {
+    handle /api/ai-quiz* {
+        request_body {
+            max_size 32KB
+        }
+        reverse_proxy ai-quiz-intake:3000 {
+            header_up X-Real-IP {client_ip}
+        }
+    }
+    handle {
+        reverse_proxy portfolio-blog:80
+    }
+}
+```
+
+`/srv/Caddyfile` is bind-mounted as a single file. Edit it **in place**
+(`cat new > Caddyfile`). Don't let an editor or `sed -i` replace it with a new
+file: the container keeps reading the old inode, and `caddy reload` then
+silently reloads the old config. Then:
+
+```bash
+docker exec caddy caddy validate --config /etc/caddy/Caddyfile
+docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+## Reading responses
+
+```bash
+docker exec -it postgres psql -U postgres -d ai_quiz
+```
+
+```sql
+select submitted_at, track, score, answers->>'payer' as payer,
+       answers->>'start' as start, weekly_task, name, contact
+from responses order by submitted_at desc;
+
+-- demand by track and who pays
+select track, answers->>'payer' as payer, count(*) from responses group by 1, 2 order by 1, 2;
+```
+
+Responses hold name and contact only when the person gave them. Keep the table
+private to whoever runs the cohort.

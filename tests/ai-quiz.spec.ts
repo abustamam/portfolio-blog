@@ -76,6 +76,9 @@ test.describe('AI quiz', () => {
 
   test('beginner lands on Foundations and sees the no-endpoint notice', async ({ page }) => {
     await page.goto('/ai-quiz');
+    await page.evaluate(() => {
+      document.getElementById('ai-quiz')!.dataset.endpoint = '';
+    });
     await complete(page, beginner);
     const result = page.locator('#quiz-result');
     await expect(result).toBeVisible();
@@ -87,19 +90,16 @@ test.describe('AI quiz', () => {
 
   test('advanced user lands on Builder and the response is POSTed', async ({ page }) => {
     let body: Record<string, unknown> | null = null;
-    await page.route('https://quiz.example.test/exec', async (route) => {
+    await page.route('**/api/ai-quiz', async (route) => {
       body = JSON.parse(route.request().postData() ?? '{}');
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ ok: true }),
       });
     });
     await page.goto('/ai-quiz');
-    await page.evaluate(() => {
-      document.getElementById('ai-quiz')!.dataset.endpoint = 'https://quiz.example.test/exec';
-    });
+    await expect(page.locator('#ai-quiz')).toHaveAttribute('data-endpoint', '/api/ai-quiz');
     await complete(page, builder);
     await expect(page.locator('#quiz-result')).toHaveAttribute('data-track', 'builder');
     await expect(page.locator('#result-status')).toContainText('answers were sent');
@@ -115,13 +115,8 @@ test.describe('AI quiz', () => {
   });
 
   test('a failed send shows an error and a retry button', async ({ page }) => {
-    await page.route('https://quiz.example.test/exec', (route) =>
-      route.fulfill({ status: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: 'nope' }),
-    );
+    await page.route('**/api/ai-quiz', (route) => route.fulfill({ status: 500, body: 'nope' }));
     await page.goto('/ai-quiz');
-    await page.evaluate(() => {
-      document.getElementById('ai-quiz')!.dataset.endpoint = 'https://quiz.example.test/exec';
-    });
     await complete(page, beginner);
     await expect(page.locator('#result-status')).toContainText("didn't send");
     await expect(page.locator('#result-retry')).toBeVisible();

@@ -1,10 +1,8 @@
 // Where /ai-quiz sends responses. See docs/ai-quiz-setup.md.
 //
-// Paste the Apps Script web app URL (ends in /exec) into FALLBACK_ENDPOINT,
-// or set PUBLIC_AI_QUIZ_ENDPOINT at build time (that wins when set).
-// Empty means "not collecting yet": the quiz still works and tells the
-// person their answers weren't sent.
-const FALLBACK_ENDPOINT = '';
+// Production builds post to /api/ai-quiz on the same origin, which Caddy routes
+// to the ai-quiz-intake service. Dev builds have no backend, so they default to
+// "not collecting" and the quiz says so. PUBLIC_AI_QUIZ_ENDPOINT overrides both.
+const DEFAULT_ENDPOINT = import.meta.env.PROD ? '/api/ai-quiz' : '';
 
-export const AI_QUIZ_ENDPOINT: string =
-  import.meta.env.PUBLIC_AI_QUIZ_ENDPOINT || FALLBACK_ENDPOINT;
+export const AI_QUIZ_ENDPOINT: string = import.meta.env.PUBLIC_AI_QUIZ_ENDPOINT ?? DEFAULT_ENDPOINT;

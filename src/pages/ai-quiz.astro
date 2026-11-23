@@ -393,10 +393,9 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     status.textContent = 'Sending your answers…';
     status.dataset.state = 'pending';
     try {
-      // text/plain keeps this a "simple" request, so Apps Script needs no CORS preflight.
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const body = await res.json().catch(() => null);
