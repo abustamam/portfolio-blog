@@ -8,7 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://blog.bustamam.tech',
+  site: 'https://bustamam.tech',
   integrations: [mdx(), sitemap()],
   redirects: {
     '/blog/:slug': '/writing/:slug',
