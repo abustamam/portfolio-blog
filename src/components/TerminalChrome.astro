@@ -8,7 +8,7 @@ const { path = '/writing' } = Astro.props;
 const displayPath = path === '/' ? '~' : `~${path}`;
 ---
 
-<div class="flex items-center h-8.5 border-b border-line bg-surface font-mono text-11 text-mute min-w-0">
+<div class="flex items-center h-8.5 border-b border-line bg-surface font-mono text-13 text-mute min-w-0">
   <!-- Traffic lights -->
   <div class="group flex items-center gap-1.5 px-3.5 border-r border-line h-full shrink-0">
     <button
@@ -52,7 +52,7 @@ const displayPath = path === '/' ? '~' : `~${path}`;
     <button
       type="button"
       id="terminal-expand-btn"
-      class="shrink-0 rounded-sm border border-line bg-surface px-2 py-1.5 font-mono text-10 uppercase tracking-snug text-mute transition-colors hover:border-ink hover:text-ink"
+      class="shrink-0 rounded-sm border border-line bg-surface px-2 py-1.5 font-mono text-12 uppercase tracking-snug text-mute transition-colors hover:border-ink hover:text-ink"
       aria-pressed="false"
       aria-label="Enter terminal mode"
     >

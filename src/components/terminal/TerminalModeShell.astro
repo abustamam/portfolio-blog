@@ -46,7 +46,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
   data-initial-path={initialPath}
 >
   <div id="terminal-live" class="sr-only" aria-live="polite"></div>
-  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute">
+  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-13 text-mute">
     <div class="group flex items-center gap-1.5">
       <button
         id="terminal-minimize-btn"
@@ -77,7 +77,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
       terminal <span class="text-faint">·</span> <span id="terminal-top-path">~</span>
     </div>
-    <div class="font-mono text-10 uppercase tracking-snug text-faint">simulated</div>
+    <div class="font-mono text-12 uppercase tracking-snug text-faint">simulated</div>
   </div>
   <div
     id="terminal-output"
@@ -95,7 +95,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
     ></pre>
     <div
       id="terminal-pager-meta"
-      class="border-t border-line px-4 font-mono text-[10px] text-mute flex items-center justify-between gap-2"
+      class="border-t border-line px-4 font-mono text-12 text-mute flex items-center justify-between gap-2"
     >
       <button
         id="terminal-pager-prev"

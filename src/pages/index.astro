@@ -85,7 +85,7 @@ const offers = [
           />
           <div>
             <div class="font-serif text-xl font-medium text-ink tracking-tight">Rasheed Bustamam</div>
-            <div class="inline-flex items-center gap-2 mt-1.5 py-1 px-2.5 bg-accent-bg text-accent-ink rounded-sm font-mono text-10 tracking-loose uppercase">
+            <div class="inline-flex items-center gap-2 mt-1.5 py-1 px-2.5 bg-accent-bg text-accent-ink rounded-sm font-mono text-12 tracking-loose uppercase">
               <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
               California · remote
             </div>
@@ -122,7 +122,7 @@ const offers = [
           outputClass="h-[22rem]"
           label="Terminal: a short introduction you can also type into"
         />
-        <p class="mt-2.5 font-mono text-10 text-faint tracking-snug m-0">
+        <p class="mt-2.5 font-mono text-12 text-faint tracking-snug m-0">
           simulated shell · tap it and type <span class="text-mute">help</span>
         </p>
       </div>
@@ -134,13 +134,13 @@ const offers = [
     <ul class="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-7">
       {proof.map((item) => (
         <li class="min-w-0">
-          <div class="font-mono text-10 text-accent-ink tracking-caps uppercase mb-2">{item.label}</div>
+          <div class="font-mono text-12 text-accent-ink tracking-caps uppercase mb-2">{item.label}</div>
           <p class="font-serif text-base text-ink leading-snug m-0">
             {item.href
               ? <a href={item.href} class="text-ink underline decoration-line underline-offset-3 hover:decoration-accent">{item.body}</a>
               : item.body}
           </p>
-          {item.note && <p class="font-mono text-10 text-faint mt-1.5 m-0">{item.note}</p>}
+          {item.note && <p class="font-mono text-12 text-faint mt-1.5 m-0">{item.note}</p>}
         </li>
       ))}
     </ul>
@@ -148,7 +148,7 @@ const offers = [
 
   <!-- Offers -->
   <section class="px-gutter py-12 border-b border-line" aria-labelledby="offers-heading">
-    <h2 id="offers-heading" class="font-mono text-10 text-faint tracking-caps uppercase font-normal m-0 mb-8">§ what you can hire me for</h2>
+    <h2 id="offers-heading" class="font-mono text-12 text-faint tracking-caps uppercase font-normal m-0 mb-8">§ what you can hire me for</h2>
     <ol class="list-none m-0 p-0 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-9">
       {offers.map((offer, i) => (
         <li class="min-w-0 border-t border-line-soft pt-4">
@@ -160,7 +160,7 @@ const offers = [
             {offer.body}
           </p>
           {offer.href && (
-            <a href={offer.href} class="inline-block mt-2.5 font-mono text-11 text-mute no-underline hover:text-ink">{offer.linkText}</a>
+            <a href={offer.href} class="inline-block mt-2.5 font-mono text-13 text-mute no-underline hover:text-ink">{offer.linkText}</a>
           )}
         </li>
       ))}
@@ -171,8 +171,8 @@ const offers = [
   {featuredWork.length > 0 && (
     <section class="px-gutter py-12 border-b border-line">
       <div class="flex items-center justify-between mb-6">
-        <div class="font-mono text-10 text-faint tracking-caps uppercase">§ selected work</div>
-        <a href="/work" class="font-mono text-11 text-mute no-underline">view all work →</a>
+        <div class="font-mono text-12 text-faint tracking-caps uppercase">§ selected work</div>
+        <a href="/work" class="font-mono text-13 text-mute no-underline">view all work →</a>
       </div>
       <div class="grid grid-cols-1 gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
         {featuredWork.map((entry, i) => (

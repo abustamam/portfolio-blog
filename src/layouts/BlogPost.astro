@@ -55,7 +55,7 @@ const readMinNum = readMin ?? 0;
     <div class="page-shell">
       <div style="padding-top: clamp(2.5rem, 6vw, 4.5rem); padding-bottom: clamp(2rem, 4vw, 2.75rem);">
         <!-- Breadcrumb row -->
-        <div class="flex gap-3.5 font-mono text-11 text-mute tracking-snug mb-7 items-center flex-wrap">
+        <div class="flex gap-3.5 font-mono text-13 text-mute tracking-snug mb-7 items-center flex-wrap">
           <a href="/writing" class="text-mute no-underline">← /writing</a>
           {tag && (
             <>
@@ -88,10 +88,10 @@ const readMinNum = readMin ?? 0;
           <img src={profilePic.src} alt="Rasheed Bustamam" class="w-10 h-10 rounded-full object-cover shrink-0" />
           <div class="flex-1 min-w-0">
             <div class="font-mono text-xs text-ink font-medium">Rasheed Bustamam</div>
-            <div class="font-mono text-11 text-faint mt-0.5">fractional founding engineer</div>
+            <div class="font-mono text-13 text-faint mt-0.5">fractional founding engineer</div>
           </div>
-          <div class="flex gap-2.5 font-mono text-11 shrink-0">
-            <button type="button" id="share-btn" data-title={title} class="bg-transparent border border-line text-ink py-1.5 px-3 rounded-sm cursor-pointer font-mono text-11">↗ share</button>
+          <div class="flex gap-2.5 font-mono text-13 shrink-0">
+            <button type="button" id="share-btn" data-title={title} class="bg-transparent border border-line text-ink py-1.5 px-3 rounded-sm cursor-pointer font-mono text-13">↗ share</button>
           </div>
         </div>
       </div>
@@ -116,7 +116,7 @@ const readMinNum = readMin ?? 0;
         </script>
         <summary class="post-toc-details__summary">§ contents</summary>
         <aside class="post-aside-left">
-          <div class="post-toc-eyebrow font-mono text-10 text-faint tracking-caps uppercase mb-3.5">
+          <div class="post-toc-eyebrow font-mono text-12 text-faint tracking-caps uppercase mb-3.5">
             § contents
           </div>
           {toc.length > 0 ? (
@@ -128,14 +128,14 @@ const readMinNum = readMin ?? 0;
               ))}
             </nav>
           ) : (
-            <p class="font-mono text-11 text-faint m-0">no headings</p>
+            <p class="font-mono text-13 text-faint m-0">no headings</p>
           )}
           <div class="mt-8 p-3.5 border border-line rounded bg-surface">
-            <div class="font-mono text-10 text-faint tracking-caps uppercase mb-2">progress</div>
+            <div class="font-mono text-12 text-faint tracking-caps uppercase mb-2">progress</div>
             <div class="h-0.75 bg-line-soft rounded overflow-hidden">
               <div id="progress-bar" class="w-0 h-full bg-accent transition-all duration-100"></div>
             </div>
-            <div id="progress-label" class="font-mono text-10 text-mute mt-2">
+            <div id="progress-label" class="font-mono text-12 text-mute mt-2">
               {readMin ? `${readMin} min` : ''}
             </div>
           </div>
@@ -168,20 +168,20 @@ const readMinNum = readMin ?? 0;
       </article>
 
       <!-- Right sidebar: margin notes -->
-      <aside class="post-aside-right" style="font-family:var(--font-mono); font-size:11px; color:var(--color-mute);">
+      <aside class="post-aside-right" style="font-family:var(--font-mono); font-size:13px; color:var(--color-mute);">
         <div style="padding:14px; background:var(--color-surface); border:1px solid var(--color-line); border-radius:3px; margin-bottom:14px;">
-          <div style="font-size:10px; color:var(--color-faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ about this post</div>
+          <div style="font-size:12px; color:var(--color-faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ about this post</div>
           {kind && <div style="margin-bottom:4px; color:var(--color-ink);">{kind}</div>}
           {words && <div style="color:var(--color-faint);">{words.toLocaleString()} words</div>}
           {updatedDate && (
-            <div style="margin-top:8px; font-size:10px; color:var(--color-faint);">
+            <div style="margin-top:8px; font-size:12px; color:var(--color-faint);">
               updated {fmtDate(updatedDate)}
             </div>
           )}
         </div>
         {series && (
           <div style="padding:14px; background:var(--color-surface); border:1px solid var(--color-line); border-radius:3px;">
-            <div style="font-size:10px; color:var(--color-faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ series</div>
+            <div style="font-size:12px; color:var(--color-faint); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;">§ series</div>
             <a href={`/series/${series.id}/`} style="color:var(--color-accent-ink); text-decoration:none; line-height:1.55;">{series.title}</a>
           </div>
         )}
@@ -196,13 +196,13 @@ const readMinNum = readMin ?? 0;
   {allPosts.length > 0 && (
     <div class="py-12 border-t border-line bg-surface">
       <div class="page-shell">
-        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-5">
+        <div class="font-mono text-12 text-faint tracking-caps uppercase mb-5">
           ↳ related writing
         </div>
         <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {allPosts.map(p => (
             <a href={`/writing/${p.id}/`} class="block p-5 pb-5.5 border border-line rounded bg-bg no-underline text-inherit">
-              <div class="flex justify-between font-mono text-10 text-faint tracking-loose uppercase mb-3.5">
+              <div class="flex justify-between font-mono text-12 text-faint tracking-loose uppercase mb-3.5">
                 <span>{p.data.tag?.toLowerCase() ?? ''}</span>
                 {p.data.readMin && <span>{p.data.readMin} min</span>}
               </div>

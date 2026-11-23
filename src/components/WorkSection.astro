@@ -24,7 +24,7 @@ const yearRange = (start: Date, end?: Date) => {
 ---
 
 <section class="mb-12" data-work-timeline>
-  <h2 class="font-mono text-11 font-normal text-faint tracking-caps uppercase m-0 mb-2 pb-2 border-b border-line">
+  <h2 class="font-mono text-13 font-normal text-faint tracking-caps uppercase m-0 mb-2 pb-2 border-b border-line">
     {title}
   </h2>
   <ol class="list-none m-0 p-0">
@@ -37,7 +37,7 @@ const yearRange = (start: Date, end?: Date) => {
             class="group grid grid-cols-[4.5rem_2rem_1fr] sm:grid-cols-[5.5rem_2rem_1fr_auto] items-center gap-x-3 sm:gap-x-4 py-3 no-underline text-inherit"
             data-timeline-row={entry.id}
           >
-            <span class="font-mono text-11 text-faint tracking-snug tabular-nums">{yearRange(startDate, endDate)}</span>
+            <span class="font-mono text-13 text-faint tracking-snug tabular-nums">{yearRange(startDate, endDate)}</span>
             <span class="w-8 h-8 flex items-center justify-center">
               {logo ? (
                 <Image
@@ -48,7 +48,7 @@ const yearRange = (start: Date, end?: Date) => {
                   class:list={['work-logo w-8 h-8 object-contain rounded-sm', darkLogo && 'is-dark']}
                 />
               ) : (
-                <span class="w-8 h-8 rounded-sm bg-accent-bg text-accent-ink font-mono text-10 font-semibold flex items-center justify-center">
+                <span class="w-8 h-8 rounded-sm bg-accent-bg text-accent-ink font-mono text-12 font-semibold flex items-center justify-center">
                   {company.slice(0, 2).toUpperCase()}
                 </span>
               )}
@@ -57,13 +57,13 @@ const yearRange = (start: Date, end?: Date) => {
               <span class="block font-sans text-sm font-semibold text-ink group-hover:text-accent-ink truncate">
                 {company}{projectName && <span class="font-normal text-mute"> · {projectName}</span>}
               </span>
-              <span class="block font-mono text-11 text-mute tracking-snug truncate">{role}</span>
+              <span class="block font-mono text-13 text-mute tracking-snug truncate">{role}</span>
             </span>
             <span class="hidden sm:flex items-center gap-1.5">
               {badges.map((b) => (
-                <span class="font-mono text-10 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">{badgeLabels[b] ?? b}</span>
+                <span class="font-mono text-12 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">{badgeLabels[b] ?? b}</span>
               ))}
-              <span class="font-mono text-10 text-faint tracking-loose uppercase">{type}</span>
+              <span class="font-mono text-12 text-faint tracking-loose uppercase">{type}</span>
             </span>
           </a>
         </li>
