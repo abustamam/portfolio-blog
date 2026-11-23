@@ -14,8 +14,16 @@ interface Props {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
+// Build-time card for writing/work/series detail pages (see src/pages/og/).
+// Platforms need a PNG/JPEG at 1200x630, so this wins over a per-page `image`
+// prop (hero covers and company logos are not social-card sized).
+const cardMatch = Astro.url.pathname.match(/^\/(writing|work|series)\/([^/]+)\/?$/);
+const generated = cardMatch ? `/og/${cardMatch[1]}/${cardMatch[2]}.png` : undefined;
+
 const { title, description, image = SOCIAL_FALLBACK_IMAGE } = Astro.props;
-const imageUrl = typeof image === 'string' ? image : image.src;
+const imageUrl = generated ?? (typeof image === 'string' ? image : image.src);
+const ogImage = new URL(imageUrl, Astro.site);
+const isPng = ogImage.pathname.endsWith('.png');
 ---
 
 <!-- Global Metadata -->
@@ -46,17 +54,20 @@ const imageUrl = typeof image === 'string' ? image : image.src;
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(imageUrl, Astro.url)} />
+<meta property="og:image" content={ogImage} />
+{isPng && <meta property="og:image:width" content="1200" />}
+{isPng && <meta property="og:image:height" content="630" />}
+{isPng && <meta property="og:image:type" content="image/png" />}
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:url" content={canonicalURL} />
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(imageUrl, Astro.url)} />
+<meta property="twitter:image" content={ogImage} />
 
 <!-- Pre-paint: prevent brightness + color theme flash -->
 <script is:inline>
