@@ -8,7 +8,7 @@
     type="button"
     aria-haspopup="true"
     aria-expanded="false"
-    class="bg-transparent border border-line text-ink cursor-pointer font-mono text-10 py-0.75 px-2 rounded-sm tracking-wider uppercase"
+    class="bg-transparent border border-line text-ink cursor-pointer font-mono text-12 py-0.75 px-2 rounded-sm tracking-wider uppercase"
   >
     <span id="theme-picker-label">☾ dark</span>
   </button>
@@ -20,7 +20,7 @@
     class="absolute right-0 top-full mt-1 z-50 bg-surface border border-line rounded shadow-lg min-w-[160px] py-1 text-left"
   >
     <!-- Group 1: Brightness -->
-    <div class="px-2.5 pt-1.5 pb-1 font-mono text-10 text-faint tracking-caps uppercase">brightness</div>
+    <div class="px-2.5 pt-1.5 pb-1 font-mono text-12 text-faint tracking-caps uppercase">brightness</div>
     <button type="button" role="menuitemradio" data-brightness="light"
       class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
       <span class="theme-picker-check opacity-0">✓</span> ☀ light
@@ -33,7 +33,7 @@
     <div class="my-1 border-t border-line"></div>
 
     <!-- Group 2: Color -->
-    <div class="px-2.5 pt-1.5 pb-1 font-mono text-10 text-faint tracking-caps uppercase">color</div>
+    <div class="px-2.5 pt-1.5 pb-1 font-mono text-12 text-faint tracking-caps uppercase">color</div>
     <button type="button" role="menuitemradio" data-color="inherit"
       class="theme-picker-opt w-full text-left px-3 py-1.5 font-mono text-xs text-ink hover:bg-accent-bg flex items-center gap-2">
       <span class="theme-picker-check opacity-0">✓</span>
@@ -145,3 +145,23 @@
   initThemePicker();
   document.addEventListener('astro:after-swap', initThemePicker);
 </script>
+
+<style>
+  /* The chrome bar is too short for a 44px button, so the visible pill stays
+     compact and an invisible ::after extends the hit area to ~45px tall. */
+  #theme-picker-btn {
+    position: relative;
+    z-index: 1; /* keep the hit area above the header below the bar */
+  }
+  #theme-picker-btn::after {
+    content: "";
+    position: absolute;
+    inset: -11px -6px;
+  }
+  /* Menu rows are full 44px targets on touch screens. */
+  @media (pointer: coarse) {
+    .theme-picker-opt {
+      min-height: 44px;
+    }
+  }
+</style>

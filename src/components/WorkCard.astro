@@ -44,18 +44,18 @@ const blurb = outcome ?? summary;
       <div class="font-sans text-sm font-semibold text-ink whitespace-nowrap overflow-hidden text-ellipsis">
         {company}{projectName && <span class="font-normal text-mute"> · {projectName}</span>}
       </div>
-      <div class="font-mono text-11 text-mute mt-0.5 tracking-snug">{role}</div>
+      <div class="font-mono text-13 text-mute mt-0.5 tracking-snug">{role}</div>
     </div>
   </div>
 
-  <div class="font-mono text-11 text-faint tracking-snug mb-3">
+  <div class="font-mono text-13 text-faint tracking-snug mb-3">
     {period}{location && <span class="text-faint"> · {location}</span>}
   </div>
 
   {badges.length > 0 && (
     <div class="flex flex-wrap gap-1.5 mb-2.5">
       {badges.map((b) => (
-        <span class="font-mono text-10 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">
+        <span class="font-mono text-12 tracking-loose uppercase py-0.5 px-1.75 rounded-sm bg-accent-bg text-accent-ink border border-accent">
           {badgeLabels[b] ?? b}
         </span>
       ))}
@@ -67,7 +67,7 @@ const blurb = outcome ?? summary;
   ) : skills.length > 0 && (
     <div class="flex flex-wrap gap-1.5">
       {skills.map((s) => (
-        <span class="font-mono text-10 text-mute bg-bg border border-line rounded-sm py-0.5 px-1.75 tracking-snug">
+        <span class="font-mono text-12 text-mute bg-bg border border-line rounded-sm py-0.5 px-1.75 tracking-snug">
           {s}
         </span>
       ))}

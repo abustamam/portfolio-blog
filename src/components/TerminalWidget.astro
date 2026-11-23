@@ -78,7 +78,7 @@ const hasScript = rows.length > 0;
   class="bg-code border border-line rounded font-mono text-xs overflow-hidden flex flex-col"
 >
   <!-- Chrome bar (matches TerminalModeShell) -->
-  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-11 text-mute shrink-0">
+  <div class="h-9 border-b border-line bg-surface flex items-center justify-between px-3.5 text-13 text-mute shrink-0">
     <div class="group flex items-center gap-1.5">
       <button
         id="widget-dot-1-btn"
@@ -110,7 +110,7 @@ const hasScript = rows.length > 0;
     <div class="font-mono tracking-tight text-ink min-w-0 px-3 overflow-hidden text-ellipsis whitespace-nowrap">
       terminal <span class="text-faint">·</span> <span id="widget-top-path">~</span>
     </div>
-    <div class="font-mono text-10 uppercase tracking-snug text-faint">simulated</div>
+    <div class="font-mono text-12 uppercase tracking-snug text-faint">simulated</div>
   </div>
 
   <!-- Scrollable output area. A scripted session is server-rendered here. -->
@@ -578,36 +578,37 @@ const hasScript = rows.length > 0;
 <style is:global>
   #terminal-widget[data-intro] [data-script-row] { visibility: hidden; }
   #terminal-widget .group:hover .traffic-light-glyph { opacity: 1 !important; }
-  /* Terminal widget — immersive palette (dark-mode values, work for all dark themes) */
+  /* Terminal widget — immersive palette. Text tokens (ink/mute/faint) all clear
+     WCAG AA 4.5:1 on bg, surface and code; line/line-soft stay dim for borders. */
   #terminal-widget[data-theme="green"] {
     --color-bg: #0a0a0a; --color-surface: #111111; --color-code: #050505;
-    --color-ink: #33ff33; --color-mute: #1a661a; --color-faint: #0f3a0f;
+    --color-ink: #33ff33; --color-mute: #18aa18; --color-faint: #159315;
     --color-accent: #00ff88; --color-line: #1a661a; --color-line-soft: #0f2a0f;
   }
   #terminal-widget[data-theme="amber"] {
     --color-bg: #0d0800; --color-surface: #1a1000; --color-code: #080400;
-    --color-ink: #ffb000; --color-mute: #664a00; --color-faint: #3d2c00;
+    --color-ink: #ffb000; --color-mute: #bb8a1b; --color-faint: #a37817;
     --color-accent: #ffcc44; --color-line: #664a00; --color-line-soft: #3d2c00;
   }
   #terminal-widget[data-theme="ice"] {
     --color-bg: #060d14; --color-surface: #0d1a26; --color-code: #030a10;
-    --color-ink: #7dd3fc; --color-mute: #1e3a4f; --color-faint: #102030;
+    --color-ink: #7dd3fc; --color-mute: #26a1db; --color-faint: #1f8bbe;
     --color-accent: #38bdf8; --color-line: #1e3a4f; --color-line-soft: #102030;
   }
   /* Light-mode overrides for terminal widget color themes */
   html:not(.dark) #terminal-widget[data-theme="green"] {
     --color-bg: #f0fdf4; --color-surface: #ffffff; --color-code: #e8fdf0;
-    --color-ink: #1f6f43; --color-mute: #3a8f5f; --color-faint: #86c9a2;
+    --color-ink: #175332; --color-mute: #296b47; --color-faint: #377e57;
     --color-accent: #1f6f43; --color-line: #bbdece; --color-line-soft: #d5eed9;
   }
   html:not(.dark) #terminal-widget[data-theme="amber"] {
     --color-bg: #fffbf0; --color-surface: #ffffff; --color-code: #fff8e6;
-    --color-ink: #9a5f00; --color-mute: #b87800; --color-faint: #d4a847;
+    --color-ink: #674000; --color-mute: #83560f; --color-faint: #97671b;
     --color-accent: #9a5f00; --color-line: #e8d5a3; --color-line-soft: #f0e4c0;
   }
   html:not(.dark) #terminal-widget[data-theme="ice"] {
     --color-bg: #f0f9ff; --color-surface: #ffffff; --color-code: #e8f5ff;
-    --color-ink: #0369a1; --color-mute: #0284c7; --color-faint: #7dd3fc;
+    --color-ink: #024a72; --color-mute: #12618c; --color-faint: #2074a2;
     --color-accent: #0369a1; --color-line: #b8dcf0; --color-line-soft: #d0eaf8;
   }
 </style>
