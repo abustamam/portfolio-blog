@@ -2,7 +2,6 @@
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Metrics from './_Metrics.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('work', ({ data }) => !data.draft);
@@ -94,10 +93,6 @@ const description = flagship && outcome ? outcome : `${role} at ${company}. ${pe
 
         {flagship ? (
           <>
-            {metrics && metrics.length > 0 && (
-              <div class="mb-10"><Metrics metrics={metrics} size="lg" /></div>
-            )}
-
             {problem && (
               <section class="mb-10" data-section="problem">
                 <h2 class={sectionHeading}>§ The situation</h2>

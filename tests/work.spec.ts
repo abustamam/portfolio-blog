@@ -41,7 +41,7 @@ test.describe('/work/ index', () => {
   test('shows the sourced acquisition figure with its source link', async ({ page }) => {
     await page.goto('/work/');
     const salty = page.locator('[data-flagship="salty"]');
-    await expect(salty).toContainText('~$150M');
+    await expect(salty).toContainText('about $150M');
     await expect(salty.locator(`a[href="${MARKETSCREENER}"]`)).toBeVisible();
   });
 
@@ -65,24 +65,22 @@ test.describe('flagship case studies', () => {
       }
       // Quotes are not approved yet, so the slot must not render.
       await expect(page.locator('[data-section="quote"]')).toHaveCount(0);
-      // Every flagship has at least one sourced fact or an outcome figure.
-      expect(await page.locator('[data-metric]').count()).toBeGreaterThan(0);
+      // Stat tiles were removed: figures live in the prose, sources in a footnote.
+      await expect(page.locator('[data-metric]')).toHaveCount(0);
       const body = await page.locator('main').innerText();
       expect(body).not.toMatch(/lorem|TODO|placeholder/i);
     });
   }
 
   for (const id of FLAGSHIPS) {
-    test(`${id} at 375px puts the title and figures above the metadata box`, async ({ page }) => {
+    test(`${id} at 375px puts the title above the metadata box`, async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto(`/work/${id}/`);
       const top = (sel: string) =>
         page.locator(sel).first().evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
       const titleTop = await top('h1');
-      const metricsTop = await top('[data-metrics]');
       const metaTop = await top('[data-work-meta]');
       expect(titleTop).toBeLessThan(metaTop);
-      expect(metricsTop).toBeLessThan(metaTop);
     });
   }
 

@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorkSection from '../../components/WorkSection.astro';
-import Metrics from './_Metrics.astro';
 
 const allWork = await getCollection('work', ({ data }) => !data.draft);
 
@@ -76,9 +75,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
                   <p class="font-serif text-[1.2rem] leading-[1.55] text-ink m-0 mb-6 max-w-2xl">{outcome}</p>
                 )}
 
-                {metrics && metrics.length > 0 && (
-                  <div class="mb-6"><Metrics metrics={metrics} size="md" /></div>
-                )}
+                {(metrics ?? []).filter((m) => m.source).map((m) => (
+                  <p class="font-mono text-11 text-faint tracking-snug m-0 -mt-3 mb-6">
+                    source:{' '}
+                    <a href={m.source} target="_blank" rel="noopener noreferrer" class="text-mute underline decoration-line underline-offset-2 hover:text-ink">
+                      {m.sourceLabel ?? m.source} ↗
+                    </a>
+                  </p>
+                ))}
 
                 <a
                   href={`/work/${entry.id}/`}
