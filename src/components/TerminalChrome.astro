@@ -43,12 +43,12 @@ const displayPath = path === '/' ? '~' : `~${path}`;
     </span>
   </div>
   <!-- Right: availability + theme toggle -->
-  <div class="px-3.5 border-l border-line h-full flex items-center gap-3 shrink-0 min-w-0">
+  <div class="px-2.5 sm:px-3.5 border-l border-line h-full flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
     <span class="inline-flex items-center gap-1.5 min-w-0">
       <span class="w-1.5 h-1.5 rounded-full bg-accent shrink-0"></span>
-      <span class="hidden sm:inline text-ink overflow-hidden text-ellipsis whitespace-nowrap max-w-28vw sm:max-w-none">available for work</span>
+      <span class="hidden sm:inline text-ink overflow-hidden text-ellipsis whitespace-nowrap max-w-28vw sm:max-w-none">limited availability</span>
     </span>
-    <span class="text-faint">·</span>
+    <span class="hidden sm:inline text-faint">·</span>
     <button
       type="button"
       id="terminal-expand-btn"
@@ -58,7 +58,7 @@ const displayPath = path === '/' ? '~' : `~${path}`;
     >
       <span data-terminal-expand-label>Terminal</span>
     </button>
-    <span class="text-faint">·</span>
+    <span class="hidden sm:inline text-faint">·</span>
     <ThemePicker />
   </div>
 </div>
