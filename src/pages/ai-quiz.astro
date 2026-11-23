@@ -213,12 +213,32 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         </div>
 
         <div class="quiz-group">
+          <div class="quiz-sublabel">When could you start?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="start" value="within-month" /><span>Within a month</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="1-3-months" /><span>In 1–3 months</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="later" /><span>Later this year or after</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="exploring" /><span>Just exploring for now</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
           <div class="quiz-sublabel">What would you pay for a 4-session cohort?</div>
           <div class="quiz-options">
             <label class="quiz-option"><input type="radio" name="price" value="under-100" /><span>Under $100</span></label>
             <label class="quiz-option"><input type="radio" name="price" value="100-200" /><span>$100–200</span></label>
             <label class="quiz-option"><input type="radio" name="price" value="200-400" /><span>$200–400</span></label>
-            <label class="quiz-option"><input type="radio" name="price" value="400-plus" /><span>$400+, or my employer pays</span></label>
+            <label class="quiz-option"><input type="radio" name="price" value="400-plus" /><span>$400+</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">Who would pay?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="payer" value="self" /><span>Me</span></label>
+            <label class="quiz-option"><input type="radio" name="payer" value="organization" /><span>My organization or nonprofit</span></label>
+            <label class="quiz-option"><input type="radio" name="payer" value="employer" /><span>My employer</span></label>
+            <label class="quiz-option"><input type="radio" name="payer" value="unsure" /><span>Not sure yet</span></label>
           </div>
         </div>
 
@@ -229,6 +249,16 @@ const steps = 9; // 6 skill + free text + privacy + logistics
             <label class="quiz-option"><input type="radio" name="context" value="sales" /><span>Sales</span></label>
             <label class="quiz-option"><input type="radio" name="context" value="real-estate" /><span>Real estate</span></label>
             <label class="quiz-option"><input type="radio" name="context" value="other" /><span>Something else</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">After the cohort, would any of these help? <span class="text-faint">(pick any)</span></div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="office-hours" /><span>Monthly drop-in help</span></label>
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="team-workshop" /><span>A workshop for my team or org</span></label>
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="done-for-you" /><span>Someone to set up the automation for us</span></label>
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="none" /><span>No, the cohort is enough</span></label>
           </div>
         </div>
 
@@ -339,6 +369,9 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       schedule: many('schedule'),
       price: one('price'),
       context: one('context'),
+      start: one('start'),
+      payer: one('payer'),
+      followUp: many('followUp'),
       name: one('name').trim(),
       contact: one('contact').trim(),
       website: one('website'),

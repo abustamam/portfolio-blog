@@ -55,6 +55,10 @@ async function complete(page: Page, p: Path) {
   for (const v of p.neverPaste) await pick(page, 'neverPaste', v);
   await next(page);
   await pick(page, 'format', 'either');
+  await pick(page, 'start', 'within-month');
+  await pick(page, 'payer', 'organization');
+  await pick(page, 'followUp', 'team-workshop');
+  await pick(page, 'followUp', 'done-for-you');
   await page.locator('#quiz-submit').click();
 }
 
@@ -104,6 +108,9 @@ test.describe('AI quiz', () => {
       weeklyTask: builder.weeklyTask,
       tools: builder.tools,
       format: 'either',
+      start: 'within-month',
+      payer: 'organization',
+      followUp: ['team-workshop', 'done-for-you'],
     });
   });
 

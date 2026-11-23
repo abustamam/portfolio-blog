@@ -9,6 +9,7 @@ const COLUMNS = [
   'frequency', 'tools', 'wrongAnswer', 'prompt', 'files', 'connected',
   'weeklyTask', 'neverPaste',
   'format', 'schedule', 'price', 'context',
+  'start', 'payer', 'followUp',
   'name', 'contact', 'userAgent',
 ];
 

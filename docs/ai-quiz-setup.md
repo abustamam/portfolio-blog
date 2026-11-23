@@ -63,6 +63,10 @@ Edits only go live after **Deploy → Manage deployments → ✏️ → Version:
 version → Deploy**. This keeps the same `/exec` URL. Creating a *new*
 deployment gives you a new URL, which you'd then have to update on the site.
 
+If you add or reorder `COLUMNS`, the header row on an existing `Responses` tab
+won't update itself. Fix the header by hand, or rename the tab so the next
+submit creates a fresh one.
+
 ## Notes
 
 - Responses include name/contact only if the person filled them in. Treat the
