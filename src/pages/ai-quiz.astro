@@ -1,0 +1,628 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AI_QUIZ_ENDPOINT } from '../consts/aiQuiz';
+
+type Opt = { value: string; label: string };
+type Q = {
+  name: string;
+  title: string;
+  hint?: string;
+  type: 'radio' | 'checkbox';
+  options: Opt[];
+  required?: boolean;
+};
+
+// Questions 1–5 and 7. Q6 (free text) and Q8 (logistics) are written out below.
+const skillQuestions: Q[] = [
+  {
+    name: 'frequency',
+    title: 'How often do you use AI tools?',
+    type: 'radio',
+    required: true,
+    options: [
+      { value: 'never', label: "Rarely or never" },
+      { value: 'monthly', label: 'A few times a month' },
+      { value: 'weekly', label: 'Most weeks' },
+      { value: 'daily', label: 'Every day' },
+    ],
+  },
+  {
+    name: 'tools',
+    title: 'Which ones have you used?',
+    hint: 'Pick all that apply.',
+    type: 'checkbox',
+    options: [
+      { value: 'chatgpt', label: 'ChatGPT' },
+      { value: 'claude', label: 'Claude' },
+      { value: 'gemini', label: 'Gemini' },
+      { value: 'copilot', label: 'Microsoft Copilot' },
+      { value: 'meta', label: 'Meta AI (WhatsApp, Instagram)' },
+      { value: 'local', label: 'A model running on my own computer' },
+      { value: 'api', label: 'An AI API, from code or a no-code tool' },
+      { value: 'none', label: "None yet" },
+    ],
+  },
+  {
+    name: 'wrongAnswer',
+    title: 'The last time AI gave you a wrong answer, what did you do?',
+    type: 'radio',
+    required: true,
+    options: [
+      { value: 'didnt-notice', label: "I'm not sure I've noticed one" },
+      { value: 'gave-up', label: 'Stopped using it for that' },
+      { value: 'asked-again', label: 'Asked again until the answer looked right' },
+      { value: 'checked-source', label: 'Checked it against another source' },
+      { value: 'reprompted-and-verified', label: 'Worked out why, gave it better context, then checked the new answer' },
+    ],
+  },
+  {
+    name: 'prompt',
+    title: 'You need a summary of last month\'s volunteer sign-ups for a board meeting. Which would you send?',
+    type: 'radio',
+    required: true,
+    options: [
+      { value: 'short', label: '"Summarize this spreadsheet."' },
+      { value: 'medium', label: '"Summarize this spreadsheet of volunteer sign-ups for a board meeting."' },
+      {
+        value: 'rich',
+        label:
+          '"This is last month\'s volunteer sign-ups. The board wants to know which events were short-staffed and the trend since spring. Give me five bullet points and flag anything you\'re unsure about."',
+      },
+    ],
+  },
+  {
+    name: 'files',
+    title: 'Have you given AI a file or spreadsheet to work on?',
+    type: 'radio',
+    required: true,
+    options: [
+      { value: 'never', label: 'Not yet' },
+      { value: 'went-badly', label: 'Tried, and the result was wrong or unusable' },
+      { value: 'summaries', label: 'Yes, for summaries or quick questions' },
+      { value: 'checked-output', label: 'Yes, regularly, and I check its formulas or numbers' },
+    ],
+  },
+  {
+    name: 'connected',
+    title: 'Have you connected AI to another tool, or automated a step?',
+    hint: 'For example email, Google Sheets or a calendar.',
+    type: 'radio',
+    required: true,
+    options: [
+      { value: 'no', label: 'No' },
+      { value: 'built-in', label: "I've used built-in AI features (Gmail, Sheets, Copilot in Excel)" },
+      { value: 'automation', label: "I've set up an automation (Zapier, Make, Apps Script, macros)" },
+      { value: 'agents', label: "I've built agents or multi-step pipelines" },
+    ],
+  },
+];
+
+const privacyQuestion: Q = {
+  name: 'neverPaste',
+  title: 'What would you never paste into an AI tool?',
+  hint: 'Pick all that apply.',
+  type: 'checkbox',
+  options: [
+    { value: 'personal-info', label: "Other people's names, phone numbers or addresses" },
+    { value: 'passwords', label: 'Passwords or login codes' },
+    { value: 'financial', label: 'Bank, donor or client financial details' },
+    { value: 'health', label: 'Health or family situations' },
+    { value: 'nothing', label: "Nothing, it's private already" },
+    { value: 'unsure', label: "I'm not sure" },
+  ],
+};
+
+const steps = 9; // 6 skill + free text + privacy + logistics
+---
+
+<BaseLayout
+  title="AI training quiz — Rasheed Bustamam"
+  description="Nine short questions to find the right track for a small, hands-on AI cohort in Natomas and online."
+  chromePath="/ai-quiz"
+>
+  <div class="page-shell pt-10 pb-20 max-w-2xl">
+    <div class="mb-6 font-mono text-11 text-mute tracking-[.04em]">
+      <a href="/writing/hands-on-ai-cohort" class="text-mute no-underline">← about the cohort</a>
+    </div>
+
+    <header id="quiz-intro" class="mb-8">
+      <div class="font-mono text-10 text-faint tracking-caps uppercase mb-3">§ ai training intake</div>
+      <h1 class="font-serif text-[clamp(2rem,7vw,3.25rem)] font-medium tracking-[-0.028em] leading-[1.1] text-ink m-0 mb-4">
+        Which AI track fits you?
+      </h1>
+      <p class="font-serif text-lg text-mute m-0 leading-[1.5]">
+        Nine short questions about what you actually do with AI. No right answers. It takes about four minutes, and
+        you'll get a result at the end.
+      </p>
+    </header>
+
+    <noscript>
+      <p class="quiz-status" data-state="warn">This quiz needs JavaScript. If you can't turn it on, email admin@bustamam.tech and I'll send the questions.</p>
+    </noscript>
+
+    <form id="ai-quiz" class="quiz" novalidate data-endpoint={AI_QUIZ_ENDPOINT}>
+      <div class="quiz-progress mb-6" aria-hidden="true">
+        <div class="flex justify-between font-mono text-11 text-faint mb-2">
+          <span id="quiz-step-label">question 1 of {steps}</span>
+        </div>
+        <div class="h-1 bg-line-soft rounded-full overflow-hidden">
+          <div id="quiz-bar" class="h-full bg-accent transition-[width] duration-300" style={`width:${100 / steps}%`}></div>
+        </div>
+      </div>
+
+      {skillQuestions.map((q) => (
+        <fieldset class="quiz-step" data-required={q.required ? 'true' : undefined}>
+          <legend class="quiz-legend">{q.title}</legend>
+          {q.hint && <p class="quiz-hint">{q.hint}</p>}
+          <div class="quiz-options">
+            {q.options.map((o) => (
+              <label class="quiz-option">
+                <input type={q.type} name={q.name} value={o.value} required={q.type === 'radio' && q.required} />
+                <span>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+
+      <fieldset class="quiz-step" data-required="true">
+        <legend class="quiz-legend">What's one task you do every week that you wish took half the time?</legend>
+        <p class="quiz-hint">A sentence or two is plenty. Leave out names and anything private.</p>
+        <textarea
+          name="weeklyTask"
+          rows="4"
+          maxlength="600"
+          required
+          class="quiz-input"
+          placeholder="e.g. Turning the weekly sign-up sheet into a schedule and reminder messages"
+        ></textarea>
+      </fieldset>
+
+      <fieldset class="quiz-step" data-required="true">
+        <legend class="quiz-legend">{privacyQuestion.title}</legend>
+        <p class="quiz-hint">{privacyQuestion.hint}</p>
+        <div class="quiz-options">
+          {privacyQuestion.options.map((o) => (
+            <label class="quiz-option">
+              <input type="checkbox" name={privacyQuestion.name} value={o.value} />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="quiz-step">
+        <legend class="quiz-legend">Last one: logistics</legend>
+        <p class="quiz-hint">This helps me plan sessions and set a fair price.</p>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">Format</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="format" value="onsite" /><span>In person, Natomas</span></label>
+            <label class="quiz-option"><input type="radio" name="format" value="online" /><span>Online</span></label>
+            <label class="quiz-option"><input type="radio" name="format" value="either" /><span>Either works</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">When</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="checkbox" name="schedule" value="weekday-evenings" /><span>Weekday evenings</span></label>
+            <label class="quiz-option"><input type="checkbox" name="schedule" value="weekends" /><span>Weekends</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">When could you start?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="start" value="within-month" /><span>Within a month</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="1-3-months" /><span>In 1–3 months</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="later" /><span>Later this year or after</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="exploring" /><span>Just exploring for now</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">What would you pay for a 4-session cohort?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="price" value="under-100" /><span>Under $100</span></label>
+            <label class="quiz-option"><input type="radio" name="price" value="100-200" /><span>$100–200</span></label>
+            <label class="quiz-option"><input type="radio" name="price" value="200-400" /><span>$200–400</span></label>
+            <label class="quiz-option"><input type="radio" name="price" value="400-plus" /><span>$400+</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">Who would pay?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="payer" value="self" /><span>Me</span></label>
+            <label class="quiz-option"><input type="radio" name="payer" value="organization" /><span>My organization or nonprofit</span></label>
+            <label class="quiz-option"><input type="radio" name="payer" value="employer" /><span>My employer</span></label>
+            <label class="quiz-option"><input type="radio" name="payer" value="unsure" /><span>Not sure yet</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">Your work context</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="context" value="nonprofit" /><span>Nonprofit, masjid, school or community org</span></label>
+            <label class="quiz-option"><input type="radio" name="context" value="sales" /><span>Sales</span></label>
+            <label class="quiz-option"><input type="radio" name="context" value="real-estate" /><span>Real estate</span></label>
+            <label class="quiz-option"><input type="radio" name="context" value="other" /><span>Something else</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">After the cohort, would any of these help? <span class="text-faint">(pick any)</span></div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="office-hours" /><span>Monthly drop-in help</span></label>
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="team-workshop" /><span>A workshop for my team or org</span></label>
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="done-for-you" /><span>Someone to set up the automation for us</span></label>
+            <label class="quiz-option"><input type="checkbox" name="followUp" value="none" /><span>No, the cohort is enough</span></label>
+          </div>
+        </div>
+
+        <div class="quiz-group">
+          <div class="quiz-sublabel">Name and contact <span class="text-faint">(optional)</span></div>
+          <p class="quiz-hint mt-0">Only if you'd like me to tell you when the cohort opens.</p>
+          <input type="text" name="name" autocomplete="name" placeholder="Name" class="quiz-input mb-2" maxlength="120" />
+          <input type="text" name="contact" autocomplete="email" placeholder="Email or phone" class="quiz-input" maxlength="160" />
+        </div>
+
+        <!-- Spam trap: hidden from people, filled by bots. -->
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="quiz-trap" aria-hidden="true" />
+      </fieldset>
+
+      <p id="quiz-error" class="quiz-error" role="alert" hidden></p>
+
+      <div class="quiz-nav">
+        <button type="button" id="quiz-back" class="quiz-btn quiz-btn-ghost" hidden>Back</button>
+        <button type="button" id="quiz-next" class="quiz-btn">Next</button>
+        <button type="submit" id="quiz-submit" class="quiz-btn" hidden>See my track</button>
+      </div>
+    </form>
+
+    <section id="quiz-result" class="quiz-result" hidden aria-live="polite">
+      <div class="font-mono text-10 text-faint tracking-caps uppercase mb-3">§ your track</div>
+      <h2 id="result-track" class="font-serif text-[clamp(2rem,7vw,3rem)] font-medium tracking-[-0.02em] text-ink m-0 mb-4"></h2>
+      <p id="result-summary" class="font-serif text-lg leading-[1.55] text-ink m-0 mb-6"></p>
+
+      <div class="p-5 border border-line rounded bg-surface mb-6">
+        <div class="font-mono text-10 text-faint tracking-caps uppercase mb-3">what you'd build</div>
+        <p id="result-build" class="font-serif text-base leading-[1.6] text-ink m-0"></p>
+      </div>
+
+      <div class="font-mono text-10 text-faint tracking-caps uppercase mb-3">what we'd cover</div>
+      <ul id="result-covers" class="list-disc font-serif text-base leading-[1.6] text-ink m-0 mb-6 pl-5"></ul>
+
+      <p id="result-privacy" class="font-serif text-base leading-[1.6] text-mute m-0 mb-6" hidden>
+        One more thing: your privacy answer tells me we should start with what never to paste into an AI tool. It's a
+        short session and it'll save you trouble.
+      </p>
+
+      <p id="result-status" class="quiz-status" role="status"></p>
+      <button type="button" id="result-retry" class="quiz-btn mb-6" hidden>Try sending again</button>
+
+      <p class="font-serif text-base text-mute m-0">
+        Questions? Email <a href="mailto:admin@bustamam.tech" class="text-accent">admin@bustamam.tech</a>.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { scoreQuiz, TRACKS, type QuizAnswers } from '../utils/aiQuiz';
+
+  const form = document.getElementById('ai-quiz') as HTMLFormElement;
+  const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>('.quiz-step'));
+  const back = document.getElementById('quiz-back') as HTMLButtonElement;
+  const next = document.getElementById('quiz-next') as HTMLButtonElement;
+  const submit = document.getElementById('quiz-submit') as HTMLButtonElement;
+  const label = document.getElementById('quiz-step-label')!;
+  const bar = document.getElementById('quiz-bar')!;
+  const error = document.getElementById('quiz-error')!;
+  let current = 0;
+  let lastPayload: Record<string, unknown> | null = null;
+
+  form.classList.add('js');
+
+  function show(i: number) {
+    current = i;
+    steps.forEach((s, j) => (s.hidden = j !== i));
+    back.hidden = i === 0;
+    next.hidden = i === steps.length - 1;
+    submit.hidden = i !== steps.length - 1;
+    label.textContent = `question ${i + 1} of ${steps.length}`;
+    bar.style.width = `${((i + 1) / steps.length) * 100}%`;
+    error.hidden = true;
+  }
+
+  function stepValid(step: HTMLFieldSetElement): boolean {
+    if (step.dataset.required !== 'true') return true;
+    const inputs = Array.from(step.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea'));
+    const text = inputs.find((el) => el.tagName === 'TEXTAREA') as HTMLTextAreaElement | undefined;
+    if (text) return text.value.trim().length > 0;
+    return inputs.some((el) => (el as HTMLInputElement).checked);
+  }
+
+  function requireStep(): boolean {
+    if (stepValid(steps[current])) return true;
+    error.textContent = 'Pick an answer (or write a short one) to continue.';
+    error.hidden = false;
+    return false;
+  }
+
+  function answers(): QuizAnswers & Record<string, unknown> {
+    const fd = new FormData(form);
+    const one = (k: string) => (fd.get(k) as string | null) ?? '';
+    const many = (k: string) => fd.getAll(k) as string[];
+    return {
+      frequency: one('frequency'),
+      tools: many('tools'),
+      wrongAnswer: one('wrongAnswer'),
+      prompt: one('prompt'),
+      files: one('files'),
+      connected: one('connected'),
+      weeklyTask: one('weeklyTask').trim(),
+      neverPaste: many('neverPaste'),
+      format: one('format'),
+      schedule: many('schedule'),
+      price: one('price'),
+      context: one('context'),
+      start: one('start'),
+      payer: one('payer'),
+      followUp: many('followUp'),
+      name: one('name').trim(),
+      contact: one('contact').trim(),
+      website: one('website'),
+    };
+  }
+
+  const status = document.getElementById('result-status')!;
+  const retry = document.getElementById('result-retry') as HTMLButtonElement;
+
+  async function send(payload: Record<string, unknown>) {
+    retry.hidden = true;
+    const endpoint = (form.dataset.endpoint ?? '').trim();
+    if (!endpoint) {
+      status.textContent =
+        "Heads up: responses aren't being collected yet, so your answers weren't sent. Screenshot this page or email me your track.";
+      status.dataset.state = 'warn';
+      return;
+    }
+    status.textContent = 'Sending your answers…';
+    status.dataset.state = 'pending';
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
+      status.textContent = "Thanks, your answers were sent. I'll use them to plan the cohort.";
+      status.dataset.state = 'ok';
+    } catch (err) {
+      console.error('ai-quiz submit failed', err);
+      status.textContent = "Your answers didn't send. Check your connection and try again, or email me your track.";
+      status.dataset.state = 'error';
+      retry.hidden = false;
+    }
+  }
+
+  function showResult() {
+    const a = answers();
+    const result = scoreQuiz(a);
+    const t = TRACKS[result.track];
+
+    document.getElementById('result-track')!.textContent = t.name;
+    document.getElementById('result-summary')!.textContent = t.summary;
+
+    const task = a.weeklyTask ?? '';
+    const shortTask = task.length > 160 ? `${task.slice(0, 157)}…` : task;
+    document.getElementById('result-build')!.textContent = shortTask
+      ? `You said you'd like this to take half the time: "${shortTask}". In the cohort you'd bring it and leave with ${t.build}.`
+      : `You'd bring one real task from your week and leave with ${t.build}.`;
+
+    const ul = document.getElementById('result-covers')!;
+    ul.replaceChildren(
+      ...t.covers.map((c) => {
+        const li = document.createElement('li');
+        li.textContent = c;
+        return li;
+      }),
+    );
+    document.getElementById('result-privacy')!.hidden = !(result.privacyGap && result.track !== 'foundations');
+
+    form.hidden = true;
+    document.getElementById('quiz-intro')!.hidden = true;
+    const section = document.getElementById('quiz-result')!;
+    section.hidden = false;
+    section.dataset.track = result.track;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    lastPayload = {
+      ...a,
+      track: result.track,
+      score: result.score,
+      privacyGap: result.privacyGap,
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+    };
+    send(lastPayload);
+  }
+
+  next.addEventListener('click', () => {
+    if (requireStep()) show(current + 1);
+  });
+  back.addEventListener('click', () => show(current - 1));
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (requireStep()) showResult();
+  });
+  retry.addEventListener('click', () => lastPayload && send(lastPayload));
+
+  // "None yet" is exclusive with the other tools.
+  form.addEventListener('change', (e) => {
+    const el = e.target as HTMLInputElement;
+    if (el.name !== 'tools' || !el.checked) return;
+    form.querySelectorAll<HTMLInputElement>('input[name="tools"]').forEach((box) => {
+      if (el.value === 'none' ? box.value !== 'none' : box.value === 'none') box.checked = false;
+    });
+  });
+
+  show(0);
+</script>
+
+<style>
+  .quiz-step {
+    border: 0;
+    padding: 0;
+    margin: 0 0 2rem;
+    min-width: 0;
+  }
+  .quiz-legend {
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 4.5vw, 1.5rem);
+    line-height: 1.3;
+    color: var(--color-ink);
+    margin-bottom: 0.75rem;
+    padding: 0;
+  }
+  .quiz-hint {
+    font-family: var(--font-mono);
+    font-size: var(--text-11);
+    color: var(--color-faint);
+    margin: 0 0 1rem;
+  }
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .quiz-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-surface);
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .quiz-option:has(input:checked) {
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .quiz-option:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .quiz-option input {
+    accent-color: var(--color-accent);
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+  .quiz-group {
+    margin-bottom: 1.5rem;
+  }
+  .quiz-sublabel {
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    color: var(--color-ink);
+    margin-bottom: 0.5rem;
+  }
+  .quiz-input {
+    display: block;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: 1.0625rem; /* ≥16px stops iOS zooming on focus */
+    line-height: 1.45;
+  }
+  .quiz-input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+  .quiz-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .quiz-nav {
+    display: flex;
+    gap: 0.75rem;
+    position: sticky;
+    bottom: 0;
+    padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom));
+    background: var(--color-bg);
+  }
+  .quiz-btn {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 1.25rem;
+    border: 1px solid var(--color-accent);
+    border-radius: 6px;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    letter-spacing: var(--tracking-snug);
+    cursor: pointer;
+  }
+  .quiz-btn-ghost {
+    flex: 0 0 auto;
+    background: transparent;
+    color: var(--color-ink);
+    border-color: var(--color-line);
+  }
+  .quiz-btn[hidden] {
+    display: none;
+  }
+  .quiz-error {
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    color: var(--color-danger);
+    margin: 0 0 0.75rem;
+  }
+  .quiz-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    line-height: 1.5;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-line);
+    margin: 0 0 1rem;
+  }
+  .quiz-status:empty {
+    display: none;
+  }
+  .quiz-status[data-state='ok'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent-ink);
+    background: var(--color-accent-bg);
+  }
+  .quiz-status[data-state='warn'],
+  .quiz-status[data-state='error'] {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+  /* Without JS every question shows and the nav is useless, so hide it. */
+  .quiz:not(.js) .quiz-nav,
+  .quiz:not(.js) .quiz-progress {
+    display: none;
+  }
+</style>
