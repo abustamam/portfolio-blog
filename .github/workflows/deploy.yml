@@ -3,6 +3,16 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Re-run a deploy by hand, e.g. after the server-side setup or to roll forward.
+  workflow_dispatch:
+
+# Several merges can land close together. Cancel the older run: the newest run
+# always deploys its own, newer SHA. Cancelling mid-deploy is safe because the
+# server's deploy-blog runs the recreate in its own session and only streams the
+# log back over ssh; its flock makes the next deploy wait for it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
@@ -26,23 +36,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Required. Without the docker-container driver that setup-buildx provides,
-      # build-push-action falls back to the plain docker driver, which cannot emit
-      # provenance attestations — so the push lands as a single-arch v2 manifest
-      # instead of an OCI index. WUD (which deploys this box) can only resolve a
-      # digest baseline from an OCI index; against a v2 manifest it records
-      # digest.value=null, reports "no update" with NO error, and silently stops
-      # deploying. That left the blog serving a 3-week-old image while every build
-      # succeeded and landed in ghcr.
+      # The docker-container driver is what allows the registry cache below.
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
+      # `:<full sha>` is what the deploy job deploys. `:latest` and `:sha-<short>`
+      # are kept for humans and older tooling; nothing on the box pulls :latest.
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=${{ github.sha }}
             type=sha,prefix=sha-
             type=raw,value=latest
 
@@ -53,13 +59,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Registry cache, not inline: inline cache conflicts with the provenance
-          # attestations that make the push an OCI index (see the Buildx note above).
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-  # The /api/ai-quiz backend. Same Buildx/OCI-index requirement as the blog image
-  # above, or WUD won't pick it up.
+  # The /api/ai-quiz backend, built from the same commit and deployed with the site.
   build-and-push-quiz-intake:
     runs-on: ubuntu-latest
     permissions:
@@ -88,6 +93,7 @@ jobs:
         with:
           images: ${{ env.INTAKE_IMAGE }}
           tags: |
+            type=raw,value=${{ github.sha }}
             type=sha,prefix=sha-
             type=raw,value=latest
 
@@ -99,5 +105,60 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           cache-from: type=registry,ref=${{ env.INTAKE_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.INTAKE_IMAGE }}:buildcache,mode=max
+
+  # Deploy both images this run just pushed, by SHA, and fail the run unless they
+  # come up healthy and report this commit. This replaced wud's hourly poll of
+  # :latest: a merge is live in minutes, a failed deploy is a red run instead of
+  # nothing, and the newest green run names the commit that is live.
+  #
+  # The key is locked server-side to a forced command,
+  # `command="/usr/local/sbin/deploy-blog",restrict`, which accepts only a
+  # 40-char hex SHA. That script and the one-time setup (key, authorized_keys
+  # line, the secret and variables below) live in abustamam/hetzner-deploy
+  # `docs/ci-deploy-blog.md`. Same mechanism as metadata's remix deploy.
+  #
+  # Missing secret or variables FAIL the run rather than skip it: with wud no
+  # longer watching the blog, a quiet skip would mean merges that never deploy.
+  deploy:
+    needs: [build-and-push, build-and-push-quiz-intake]
+    # `workflow_dispatch` can run on any branch; only main deploys.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Deploy ${{ github.sha }}
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ] || [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "::error::DEPLOY_KEY, DEPLOY_HOST or DEPLOY_KNOWN_HOSTS is not set (hetzner-deploy docs/ci-deploy-blog.md)"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # The remote "command" is only the SHA: the forced command reads it from
+          # SSH_ORIGINAL_COMMAND and rejects anything else (exit 2).
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=4 \
+            "root@$DEPLOY_HOST" "$SHA"
+
+      # The server checked the container; this checks what visitors get, through
+      # Cloudflare and Caddy. The query string keeps any cache out of the answer.
+      - name: Check the public site serves ${{ github.sha }}
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          body=$(curl -fsS --max-time 15 "https://bustamam.tech/build-info.json?ci=$SHA")
+          echo "$body"
+          case "$body" in *"\"commit\":\"$SHA\""*) ;; *) echo "::error::bustamam.tech does not serve $SHA"; exit 1 ;; esac
