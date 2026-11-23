@@ -1,6 +1,6 @@
 ---
 title: "I'm Running a Small, Hands-On AI Cohort"
-description: "Bring one real workflow, leave with it automated. A small local AI cohort in Natomas, with an online option. Take the quiz to find your track."
+description: "Bring one real workflow, leave with it automated. A small local AI cohort in Roseville, with an online option. Take the quiz to find your track."
 pubDate: '2026-11-22'
 dek: "Not a course about AI. A few sessions where you point AI at your actual work and leave with something that runs."
 tag: "AI"
@@ -32,7 +32,7 @@ That range is the reason I'm not building one generic course. A beginner and som
 
 **Taught by a practitioner.** I build software for a living, and I run AI agent pipelines every day. I know where these tools are good, and I know where they confidently make things up, because I've been burned by both. I [wrote about some of that](/writing/six-ways-i-fooled-myself-benchmarking) recently.
 
-**A small local cohort.** In person in Natomas, with an online option for people who can't make it. Small enough that everyone gets their own workflow looked at.
+**A small local cohort.** In person in Roseville, with an online option for people who can't make it. Small enough that everyone gets their own workflow looked at.
 
 **Built for masjid, school and nonprofit work.** Most AI training assumes you work at a tech company. A lot of the people asking me run community organizations on volunteer time and thin budgets, so that's what the examples come from. We'll also spend real time on privacy and ethics: what you should never paste into an AI tool, and how to get the same help without exposing someone's personal details.
 
