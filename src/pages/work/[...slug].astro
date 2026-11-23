@@ -172,7 +172,12 @@ const description = flagship && outcome ? outcome : `${role} at ${company}. ${pe
         )}
       </article>
 
-      <aside class="sticky top-8 max-[700px]:static max-[700px]:order-[-1]">
+      <!-- On narrow screens a case study keeps the story first, so the metadata box
+           drops below the article; other entries keep it on top. -->
+      <aside
+        class:list={['sticky top-8 max-[700px]:static', !flagship && 'max-[700px]:order-[-1]']}
+        data-work-meta
+      >
         <dl class="border border-line rounded-[3px] py-4 px-[18px] bg-surface m-0">
           <div class="py-2 border-b border-line-soft first:pt-0 last:border-b-0 last:pb-0">
             <dt class="font-mono text-10 tracking-[0.1em] uppercase text-faint mb-1">Period</dt>

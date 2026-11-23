@@ -72,6 +72,20 @@ test.describe('flagship case studies', () => {
     });
   }
 
+  for (const id of FLAGSHIPS) {
+    test(`${id} at 375px puts the title and figures above the metadata box`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 });
+      await page.goto(`/work/${id}/`);
+      const top = (sel: string) =>
+        page.locator(sel).first().evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+      const titleTop = await top('h1');
+      const metricsTop = await top('[data-metrics]');
+      const metaTop = await top('[data-work-meta]');
+      expect(titleTop).toBeLessThan(metaTop);
+      expect(metricsTop).toBeLessThan(metaTop);
+    });
+  }
+
   test('Salty never claims an early or founding role', async ({ page }) => {
     await page.goto('/work/salty/');
     const body = await page.locator('main').innerText();
