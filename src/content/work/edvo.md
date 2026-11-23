@@ -10,8 +10,8 @@ skills: [Firestore, React, TypeScript, Electron, Browser Extensions, Graph Data 
 logo: ../../assets/work/logos/edvo-logo.jpeg
 badges: [zeroToOne]
 flagship: true
-problem: "Edvo was starting from zero. It needed a data model, its first apps, and a way for its engineering team to work."
-outcome: "Four years as Edvo's founding engineer, from zero to a product on the web, in the browser as an extension, and on the desktop, all on one real-time, graph-based data model."
+problem: "Edvo had no product yet when I joined as its founding engineer."
+outcome: "Four years later Edvo had a web app, a browser extension and a desktop app, all on one real-time data model."
 metrics:
   - label: "Years as founding engineer"
     value: "4"
@@ -21,8 +21,8 @@ featured: true
 order: 2
 ---
 
-I was Edvo's founding engineer from August 2020 to July 2024, and I built the product from zero.
+I was Edvo's founding engineer from August 2020 to July 2024.
 
-- **The data model.** I designed a graph-based data model on Firestore, with real-time collaboration.
-- **Three apps on one model.** I built the web app, the browser extension and the Electron desktop app on top of it.
-- **The team.** I set much of the team's culture and mentored the junior developers.
+I started with the data model: a graph stored in Firestore, built so people could collaborate in real time. Then I built three apps on top of it: the web app, a browser extension, and an Electron desktop app.
+
+As the team grew I mentored the junior developers, and had a lot to do with how the team worked.

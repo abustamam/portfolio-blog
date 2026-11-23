@@ -53,7 +53,7 @@ const MAN_PAGES: Record<string, string[]> = {
 // enough to fit a 375px-wide phone without wrapping (~40 chars).
 export const WHOAMI_LINES = [
 	'rasheed bustamam',
-	'fractional founding engineer + advisor',
+	'part-time founding engineer + advisor',
 ];
 
 export const OFFERS_LINES = [
@@ -61,12 +61,12 @@ export const OFFERS_LINES = [
 	'02  technical advisory',
 	'    architecture · hiring · roadmap',
 	'03  scoped zero-to-one builds',
-	'04  ai-assisted delivery, measured',
+	'04  ai coding tools, checked',
 ];
 
 export const CAPACITY_LINES = [
-	'a few engagements at a time',
-	'fractional hours, beside a full-time role',
+	'a few clients at a time',
+	'a few hours a week each. i have a day job',
 ];
 
 export const START_HERE_LINES = [
@@ -210,7 +210,7 @@ export function runCommandLine(
 				'   |      |]',
 				'   \\      /',
 				"    `----'",
-				'> brewing ideas since 2019',
+				'> brewing ideas',
 			],
 		};
 	}

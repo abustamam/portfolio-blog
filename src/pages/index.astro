@@ -23,21 +23,21 @@ const heroScript = ['whoami', 'offers', 'capacity', 'start-here'];
 
 const proof = [
   {
-    label: 'zero to one',
-    body: 'Founding engineer at Edvo for four years: web app, browser extension and Electron, from nothing to shipped.',
+    label: '2020–24',
+    body: 'Founding engineer at Edvo. I built the web app, the browser extension and the desktop app.',
   },
   {
-    label: 'acquired · cdk global',
-    body: 'At Salty through its acquisition by CDK Global (about $150M), then promoted to Staff Engineer, leading three automation engineers.',
+    label: '2021–23',
+    body: 'I joined Salty right before CDK Global bought it for about $150M. I stayed, made Staff, and ran a team of three.',
     note: 'Deal value: S&P Capital IQ, via MarketScreener.',
   },
   {
-    label: 'acquired · xyo',
-    body: 'Part of the four-person LayerOne team that XYO acquired in 2018.',
+    label: '2018',
+    body: 'One of four people at LayerOne. XYO bought the company that July.',
   },
   {
-    label: 'measured ai',
-    body: 'I write about measuring AI tooling, including the six ways I nearly fooled myself benchmarking one.',
+    label: 'writing',
+    body: 'Six ways I nearly fooled myself benchmarking an AI tool.',
     href: benchmarkPost,
   },
 ];
@@ -45,21 +45,21 @@ const proof = [
 const offers = [
   {
     title: 'Fractional founding engineer',
-    body: 'A set number of hours each week inside your team. I make the early technical calls, write the code that sets the patterns, and leave a codebase your next hires can pick up.',
+    body: 'A fixed number of hours a week on your team. I make the early architecture calls and write the first version of the hard parts.',
   },
   {
     title: 'Technical advisory',
-    body: 'Architecture, hiring and roadmap. A standing call plus async review for the founder or CTO who wants a second senior opinion before the expensive decisions.',
+    body: 'A regular call, plus review in between. Good for a technical founder who wants a second opinion before committing to something expensive.',
   },
   {
     title: 'Scoped zero-to-one builds',
-    body: 'A first version with a fixed scope and a clear end: a prototype, an MVP, or one hard subsystem. I build it, document it, and hand it over.',
+    body: 'One prototype, MVP or subsystem, with an end date. You keep the code and the docs.',
   },
   {
-    title: 'AI-assisted delivery, measured',
-    body: 'I set up AI coding tools in your workflow and measure whether they help, against your own history, before anyone calls it a win.',
+    title: 'AI coding tools that earn their keep',
+    body: "I set up AI coding tools for your team, then check whether they're helping. I've been wrong about that before, and wrote it up.",
     href: benchmarkPost,
-    linkText: 'how I measure →',
+    linkText: 'the write-up →',
   },
 ];
 ---
@@ -87,19 +87,18 @@ const offers = [
             <div class="font-serif text-xl font-medium text-ink tracking-tight">Rasheed Bustamam</div>
             <div class="inline-flex items-center gap-2 mt-1.5 py-1 px-2.5 bg-accent-bg text-accent-ink rounded-sm font-mono text-10 tracking-loose uppercase">
               <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
-              a few engagements at a time
+              California · remote
             </div>
           </div>
         </div>
-        <p class="font-mono text-10 text-faint tracking-caps uppercase m-0 mb-4">§ for founders &amp; CTOs of funded startups</p>
         <h1 id="hero-heading" class="display-hero font-serif font-medium m-0 text-ink tracking-tight max-w-2xl [text-wrap:balance]">
-          Founding-engineer judgment, <em class="italic text-accent font-medium">a few hours a week.</em>
+          I've been the first engineer. <em class="italic text-accent font-medium">Now I do it part-time.</em>
         </h1>
         <p class="mt-6.5 max-w-[560px] font-serif text-lg leading-[1.55] text-mute">
-          I'm a fractional founding engineer and technical advisor. I help funded startups make
-          the early technical calls (architecture, hiring, roadmap) and build the first versions
-          the rest of the company stands on. I keep a full-time role, so I take on a few
-          engagements at a time.
+          I spent four years as a startup's founding engineer, and I've been on two teams that
+          got acquired. I have a day job now, so I work with a few startups at a time, a few
+          hours a week each: making the early architecture calls, reviewing code, and building
+          the parts nobody on the team has built before.
         </p>
         <div class="flex flex-wrap gap-3.5 mt-8">
           <a
@@ -149,7 +148,7 @@ const offers = [
 
   <!-- Offers -->
   <section class="px-gutter py-12 border-b border-line" aria-labelledby="offers-heading">
-    <h2 id="offers-heading" class="font-mono text-10 text-faint tracking-caps uppercase font-normal m-0 mb-8">§ how i can help</h2>
+    <h2 id="offers-heading" class="font-mono text-10 text-faint tracking-caps uppercase font-normal m-0 mb-8">§ what you can hire me for</h2>
     <ol class="list-none m-0 p-0 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-9">
       {offers.map((offer, i) => (
         <li class="min-w-0 border-t border-line-soft pt-4">

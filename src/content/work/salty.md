@@ -11,8 +11,8 @@ skills: [TypeScript, React, Puppeteer, Stripe, PCI Compliance, Team Leadership]
 logo: ../../assets/work/logos/salty-logo.jpeg
 badges: [acquired]
 flagship: true
-problem: "Salty was acquired by CDK Global. The job through and after the acquisition was to keep the product moving inside a much larger company, and to build a platform that could quote insurance dynamically and take payment for it."
-outcome: "I stayed through the acquisition, was promoted to Staff Engineer, and led a team of three automation engineers. When the team later re-formed, I went back: that company is now Salty.ai, where I work full time today."
+problem: "CDK Global bought Salty right after I joined. From then on the job was building an insurance quoting platform inside a much bigger company."
+outcome: "I stayed, was promoted to Staff Engineer, and led three automation engineers. The team later re-formed as Salty.ai, and I work there now."
 metrics:
   - label: "CDK Global's acquisition of Salty"
     value: "~$150M"
@@ -20,8 +20,6 @@ metrics:
     sourceLabel: "S&P Capital IQ via MarketScreener"
   - label: "Automation engineers I led"
     value: "3"
-  - label: "Promoted to after the acquisition"
-    value: "Staff"
 additionalRoles:
   - role: Front-End Engineer, Salty
     period: "Sep 2021 – Jan 2022"
@@ -36,14 +34,8 @@ featured: true
 order: 1
 ---
 
-I joined Salty as a front-end engineer in September 2021, building user interfaces and features for the platform. Salty was then acquired by CDK Global, and I stayed on.
+I joined Salty in September 2021 as a front-end engineer. CDK Global bought the company soon after, and I stayed.
 
-After the acquisition I was promoted to Staff Engineer and led a team of three automation engineers. The main thing we built was a dynamic insurance quoting platform:
+After the acquisition I was promoted to Staff Engineer and led three automation engineers. We built a platform that quotes insurance by filling out forms with Puppeteer, and takes payment through Stripe. Taking card payments meant it had to be PCI compliant.
 
-- **Form automation.** I led the web automation work, using Puppeteer to fill out forms programmatically.
-- **Payments.** The platform took payment through Stripe.
-- **PCI compliance.** Because it handled card payments, the platform had to be PCI compliant.
-
-I also mentored the team on web automation practices.
-
-Later the team re-formed and I went back. The company was called Embedded Insurance then and is now [Salty.ai](/work/salty-ai/), where I'm a full-time Senior Software Engineer.
+The team later re-formed as a new company. It was called Embedded Insurance then, and is now [Salty.ai](/work/salty-ai/), where I work full time.

@@ -9,7 +9,7 @@ skills: [React, CSS, Web3]
 logo: ../../assets/work/logos/xyo-logo.svg
 badges: [acquired]
 flagship: true
-problem: "LayerOne was a four-person team building a web3 application that let people buy virtual land through smart contracts. It needed a front end for those purchases."
+problem: "LayerOne sold virtual land through smart contracts. There were four of us, and I built the front end."
 outcome: "XYO acquired LayerOne in July 2018."
 metrics:
   - label: "People on the team"
@@ -22,9 +22,6 @@ featured: true
 order: 3
 ---
 
-I was the front-end engineer on LayerOne's four-person team in 2018.
+I was the front-end engineer on a four-person team in 2018. I built the interface for buying virtual land and wired it to the smart contracts that handled the purchase.
 
-- **The interface.** I built the user interface for buying virtual land.
-- **Web3 integration.** I integrated Web3 so purchases went through smart contracts on the blockchain.
-
-In July 2018, XYO acquired LayerOne.
+XYO acquired the company that July.
