@@ -106,14 +106,14 @@ const description = flagship && outcome ? outcome : `${role} at ${company}. ${pe
             </section>
 
             {outcome && (
-              <section class="mb-10" data-section="outcome">
+              <section class="mb-10" data-section="outcome" data-reveal>
                 <h2 class={sectionHeading}>§ How it went</h2>
                 <p class="font-serif text-[1.3rem] leading-[1.5] text-ink m-0">{outcome}</p>
               </section>
             )}
 
             {quote && (
-              <figure class="m-0 mb-10 border-l-3 border-accent pl-5" data-section="quote">
+              <figure class="m-0 mb-10 border-l-3 border-accent pl-5" data-section="quote" data-reveal>
                 <blockquote class="m-0 font-serif text-[1.3rem] italic leading-[1.5] text-ink">
                   “{quote.text}”
                 </blockquote>
@@ -124,7 +124,7 @@ const description = flagship && outcome ? outcome : `${role} at ${company}. ${pe
             )}
 
             {sourced.length > 0 && (
-              <section class="mb-10" data-section="sources">
+              <section class="mb-10" data-section="sources" data-reveal>
                 <h2 class={sectionHeading}>§ Sources</h2>
                 <ul class="list-none m-0 p-0">
                   {sourced.map((m) => (

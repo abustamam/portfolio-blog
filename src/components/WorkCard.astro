@@ -21,7 +21,7 @@ const blurb = outcome ?? summary;
 
 <a
   href={`/work/${entry.id}/`}
-  class="flex flex-col no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-colors duration-150 hover:border-accent hover:shadow-sm"
+  class="group flex flex-col no-underline text-inherit border border-line rounded p-5 px-6 bg-surface transition-[border-color,box-shadow,translate] duration-200 ease-out hover:border-accent hover:shadow-md focus-visible:border-accent focus-visible:shadow-md motion-safe:hover:-translate-y-0.5 motion-safe:focus-visible:-translate-y-0.5"
   data-work-card={entry.id}
 >
   <div class="flex items-center gap-3.5 mb-2.5">
@@ -41,7 +41,7 @@ const blurb = outcome ?? summary;
       )}
     </div>
     <div class="flex-1 min-w-0">
-      <div class="font-sans text-sm font-semibold text-ink whitespace-nowrap overflow-hidden text-ellipsis">
+      <div class="font-sans text-sm font-semibold text-ink whitespace-nowrap overflow-hidden text-ellipsis transition-colors duration-200 group-hover:text-accent-ink group-focus-visible:text-accent-ink">
         {company}{projectName && <span class="font-normal text-mute"> · {projectName}</span>}
       </div>
       <div class="font-mono text-13 text-mute mt-0.5 tracking-snug">{role}</div>

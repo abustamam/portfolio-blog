@@ -69,6 +69,19 @@ const isPng = ogImage.pathname.endsWith('.png');
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={ogImage} />
 
+<!-- View transitions between pages: the browser's native cross-document
+     transition, so no router script joins the critical path (Astro's
+     <ClientRouter /> measured as an LCP regression on throttled loads; see
+     the PR for #33). Opted in only when motion is welcome; with reduced
+     motion, or in a browser without support, links are plain page loads.
+     Inline, not in global.css: the new page must have the opt-in when it is
+     first revealed, and an external stylesheet may still be loading then. -->
+<style is:inline>
+  @media (prefers-reduced-motion: no-preference) {
+    @view-transition { navigation: auto; }
+  }
+</style>
+
 <!-- Pre-paint: prevent brightness + color theme flash -->
 <script is:inline>
   (function () {
