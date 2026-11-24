@@ -280,7 +280,7 @@ This is harmless at our scale, but worth knowing: the sorted set grows with tota
 
 ## Trade-offs
 
-An in-memory `Map<ip, timestamps[]>` would have been simpler with zero network overhead. But it would not survive restarts, would not work across multiple app instances, and could not be inspected externally. Redis was chosen because Phase 4 adds a second app node — the rate limit state will already be shared.
+An in-memory `Map<ip, timestamps[]>` would have been simpler with zero network overhead. But it would not survive restarts, would not work across multiple app instances, and could not be inspected externally. Redis was chosen so the rate limit state is shared from the start: if a second app node is ever added, both nodes already count against the same window.
 
 A second `new Redis(...)` connection was almost created in the rate limiter. That would have meant two TCP connections and two error handlers for the same Redis server. PR review caught this; the singleton import from `src/lib/redis.ts` replaced it. When adding Redis features incrementally, watch for duplicate connections.
 
@@ -292,7 +292,7 @@ Per-IP limiting won't stop someone with a botnet — each IP stays under the lim
 
 ## Closer
 
-Rate limiting is a shared-state problem — it only works because Redis is available to all app processes. That shared-state dependency becomes central in the next post, when a second server is added and every piece of state the app holds is audited. Choosing Redis over an in-memory `Map` here makes that scaling almost trivial.
+Rate limiting is a shared-state problem — it only works because Redis is available to all app processes. Keeping that state in Redis rather than an in-memory `Map` means the limit holds no matter how many app processes sit behind Caddy, and survives a restart.
 
 The trickiest part of this phase was not the Redis code — it was deciding between fixed and sliding window. Once sliding window was chosen, the implementation was straightforward.
 
