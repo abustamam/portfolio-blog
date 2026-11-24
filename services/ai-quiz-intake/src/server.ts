@@ -1,6 +1,6 @@
 import { SQL } from 'bun';
 import { createHandler } from './app';
-import { createIntakeNotifier, createTelegramNotifier } from './notify';
+import { createIntakeNotifier, createTelegramNotifier, createWaitlistNotifier } from './notify';
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is required');
@@ -9,6 +9,7 @@ const sql = new SQL(url);
 const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId } = process.env;
 const notify = token && chatId ? createTelegramNotifier({ token, chatId }) : undefined;
 const notifyIntake = token && chatId ? createIntakeNotifier({ token, chatId }) : undefined;
+const notifyWaitlist = token && chatId ? createWaitlistNotifier({ token, chatId }) : undefined;
 console.log(JSON.stringify({ msg: 'notifications', telegram: Boolean(notify) }));
 
 const handle = createHandler({
@@ -28,6 +29,12 @@ const handle = createHandler({
       values (${row.name}, ${row.contact}, ${row.weeklyTask}, ${row.timeTaken}, ${row.inputs}::jsonb,
               ${row.tools}::jsonb, ${row.workRestricts}, ${row.track}, ${row.privateConcerns},
               ${row.recordingConsent}, ${userAgent})`;
+  },
+  notifyWaitlist,
+  insertWaitlist: async (row, userAgent) => {
+    await sql`
+      insert into cohort_waitlist (name, contact, note, user_agent)
+      values (${row.name}, ${row.contact}, ${row.note}, ${userAgent})`;
   },
   ping: async () => {
     await sql`select 1`;

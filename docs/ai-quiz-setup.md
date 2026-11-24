@@ -61,6 +61,23 @@ rules as the quiz:
   name, track, time taken and task. Contact details and the private-files note
   are never sent. A failure is logged as `intake notify failed`.
 
+## Cohort waitlist
+
+`/ai-cohort/waitlist` is where people go once the cohort's Stripe payment link
+sells out (it stops after 8 payments). Put the URL in the payment link's
+sold-out message, and share it in the WhatsApp group once seats are gone. It's
+unlisted the same way as the intake form, and not in the cohort nav, because
+that nav is for participants.
+
+It asks for name and contact (both required) and an optional note (capped at
+400 characters), and POSTs to `POST /api/ai-quiz/waitlist`. Same service, same
+Caddy route, same honeypot and body limit, and the same per-IP rate limit as
+the quiz and the intake form. Each row goes in `cohort_waitlist` and sends a
+Telegram message with the name and note, never the contact details. Failures
+are logged as `waitlist insert failed` and `waitlist notify failed`. Rules live
+in `services/ai-quiz-intake/src/waitlist.ts`; browser tests in
+`tests/ai-cohort-waitlist.spec.ts`.
+
 ## Server setup (one time)
 
 All of this is on the Hetzner box, in `/srv`.
@@ -109,6 +126,27 @@ create table if not exists cohort_intake (
 );
 revoke all on cohort_intake from public;
 grant insert on cohort_intake to ai_quiz;
+SQL
+```
+
+### 1c. Cohort waitlist table
+
+The only server step the waitlist needs. Idempotent, and also at the bottom of
+`schema.sql`. Until it runs, waitlist submissions get a 500 and the other forms
+keep working.
+
+```bash
+docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 <<'SQL'
+create table if not exists cohort_waitlist (
+  id           bigint generated always as identity primary key,
+  submitted_at timestamptz not null default now(),
+  name         text not null,
+  contact      text not null,
+  note         text,
+  user_agent   text
+);
+revoke all on cohort_waitlist from public;
+grant insert on cohort_waitlist to ai_quiz;
 SQL
 ```
 
@@ -199,6 +237,12 @@ select submitted_at, name, contact, track, time_taken, weekly_task, inputs, tool
 from cohort_intake order by submitted_at desc;
 ```
 
+Cohort waitlist, oldest first (that's the order to offer seats in):
+
+```sql
+select submitted_at, name, contact, note from cohort_waitlist order by submitted_at;
+```
+
 Quiz responses hold name and contact only when the person gave them; every
-intake row has both. Keep the table
+intake and waitlist row has both. Keep the table
 private to whoever runs the cohort.

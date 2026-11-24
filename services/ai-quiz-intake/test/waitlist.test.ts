@@ -1,0 +1,144 @@
+import { describe, expect, test } from 'bun:test';
+import { createHandler, INTAKE_PATH, PATH, WAITLIST_PATH } from '../src/app';
+import { parseWaitlist, type WaitlistRow } from '../src/waitlist';
+import { createWaitlistNotifier, formatWaitlistNotification } from '../src/notify';
+import type { IntakeRow } from '../src/intake';
+
+const valid = { name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best', website: '' };
+
+function setup(limit = 10) {
+  const rows: WaitlistRow[] = [];
+  const intakeRows: IntakeRow[] = [];
+  const notified: WaitlistRow[] = [];
+  const handle = createHandler({
+    insert: async () => {},
+    insertIntake: async (r) => void intakeRows.push(r),
+    insertWaitlist: async (r) => void rows.push(r),
+    notifyWaitlist: async (r) => void notified.push(r),
+    ping: async () => {},
+    limit,
+    log: () => {},
+  });
+  const post = (body: unknown, ip = '1.2.3.4', path = WAITLIST_PATH) =>
+    handle(
+      new Request(`http://x${path}`, {
+        method: 'POST',
+        headers: { 'x-real-ip': ip },
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+      }),
+    );
+  return { rows, intakeRows, notified, handle, post };
+}
+
+describe('parseWaitlist', () => {
+  test('keeps name, contact and note, trimmed', () => {
+    const p = parseWaitlist({ ...valid, name: '  Test Person ' });
+    expect(p).toEqual({ kind: 'ok', row: { name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best' } });
+  });
+
+  test('the note is optional', () => {
+    const p = parseWaitlist({ name: 'A', contact: 'a@example.com' });
+    expect(p.kind === 'ok' && p.row.note).toBeNull();
+  });
+
+  test('requires name and contact', () => {
+    expect(parseWaitlist({ ...valid, name: '  ' })).toEqual({ kind: 'invalid', error: 'missing name' });
+    expect(parseWaitlist({ ...valid, contact: '' })).toEqual({ kind: 'invalid', error: 'missing contact' });
+  });
+
+  test('rejects non-text and over-long fields', () => {
+    expect(parseWaitlist({ ...valid, contact: 42 }).kind).toBe('invalid');
+    expect(parseWaitlist({ ...valid, note: 'x'.repeat(401) })).toEqual({ kind: 'invalid', error: 'note longer than 400' });
+    expect(parseWaitlist([valid]).kind).toBe('invalid');
+  });
+
+  test('flags the honeypot as spam', () => {
+    expect(parseWaitlist({ ...valid, website: 'http://spam' }).kind).toBe('spam');
+  });
+});
+
+describe('waitlist handler', () => {
+  test('stores a valid signup in the waitlist only, and notifies once', async () => {
+    const { rows, intakeRows, notified, post } = setup();
+    const res = await post(valid);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+    expect(rows).toEqual([{ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best' }]);
+    expect(intakeRows).toHaveLength(0);
+    expect(notified).toHaveLength(1);
+  });
+
+  test('answers bots with ok but stores nothing', async () => {
+    const { rows, notified, post } = setup();
+    expect((await post({ ...valid, website: 'x' })).status).toBe(200);
+    expect(rows).toHaveLength(0);
+    expect(notified).toHaveLength(0);
+  });
+
+  test('rejects bad JSON, missing fields and the wrong method', async () => {
+    const { rows, post, handle } = setup();
+    expect((await post('{nope')).status).toBe(400);
+    expect((await post({ name: 'A' })).status).toBe(400);
+    expect((await handle(new Request(`http://x${WAITLIST_PATH}`))).status).toBe(405);
+    expect(rows).toHaveLength(0);
+  });
+
+  test('shares the rate limit with the other forms', async () => {
+    const { post } = setup(2);
+    expect((await post(valid, 'a')).status).toBe(200);
+    expect((await post({}, 'a', INTAKE_PATH)).status).toBe(400);
+    expect((await post(valid, 'a')).status).toBe(429);
+    expect((await post({}, 'a', PATH)).status).toBe(429);
+  });
+
+  test('is a 404 when the service has no waitlist store', async () => {
+    const handle = createHandler({ insert: async () => {}, ping: async () => {}, log: () => {} });
+    const res = await handle(new Request(`http://x${WAITLIST_PATH}`, { method: 'POST', body: JSON.stringify(valid) }));
+    expect(res.status).toBe(404);
+  });
+
+  test('returns 500 without leaking the error, and does not notify, when the insert fails', async () => {
+    const notified: WaitlistRow[] = [];
+    const logs: string[] = [];
+    const handle = createHandler({
+      insert: async () => {},
+      insertWaitlist: async () => {
+        throw new Error('relation "cohort_waitlist" does not exist');
+      },
+      notifyWaitlist: async (r) => void notified.push(r),
+      ping: async () => {},
+      log: (m) => void logs.push(m),
+    });
+    const res = await handle(new Request(`http://x${WAITLIST_PATH}`, { method: 'POST', body: JSON.stringify(valid) }));
+    expect(res.status).toBe(500);
+    expect(await res.text()).not.toContain('cohort_waitlist');
+    expect(notified).toHaveLength(0);
+    expect(logs).toContain('waitlist insert failed');
+  });
+});
+
+describe('waitlist notifications', () => {
+  test('names the person and their note, never the contact details', () => {
+    const text = formatWaitlistNotification({ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights' });
+    expect(text).toBe('New cohort waitlist signup: Test Person\nNote: Weeknights');
+    expect(text).not.toContain('555');
+    expect(formatWaitlistNotification({ name: 'B', contact: 'b@example.com', note: null })).toBe(
+      'New cohort waitlist signup: B',
+    );
+  });
+
+  test('posts plain text to the chat', async () => {
+    const calls: RequestInit[] = [];
+    const notify = createWaitlistNotifier({
+      token: 'T0K3N',
+      chatId: '42',
+      fetch: (async (_url: string, init: RequestInit) => {
+        calls.push(init);
+        return new Response('{}');
+      }) as typeof fetch,
+    });
+    await notify({ name: 'B', contact: 'b@example.com', note: null });
+    const sent = JSON.parse(String(calls[0].body));
+    expect(sent).toEqual({ chat_id: '42', text: 'New cohort waitlist signup: B', disable_web_page_preview: true });
+  });
+});

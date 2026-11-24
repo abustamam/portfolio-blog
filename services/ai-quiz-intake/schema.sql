@@ -36,3 +36,17 @@ create table if not exists cohort_intake (
 
 revoke all on cohort_intake from public;
 grant insert on cohort_intake to ai_quiz;
+
+-- Cohort waitlist (/ai-cohort/waitlist, POST /api/ai-quiz/waitlist), where the
+-- sold-out payment link sends people. Same rule: insert only.
+create table if not exists cohort_waitlist (
+  id           bigint generated always as identity primary key,
+  submitted_at timestamptz not null default now(),
+  name         text not null,
+  contact      text not null,
+  note         text,
+  user_agent   text
+);
+
+revoke all on cohort_waitlist from public;
+grant insert on cohort_waitlist to ai_quiz;
