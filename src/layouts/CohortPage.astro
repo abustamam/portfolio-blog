@@ -1,0 +1,115 @@
+---
+// Layout for the unlisted /ai-cohort/ pages (noindex; astro.config.mjs keeps
+// /ai-cohort/ out of the sitemap). Used directly by .astro pages and as the
+// `layout:` of the Markdown handouts, which pass their frontmatter.
+import BaseLayout from './BaseLayout.astro';
+import CopyButton from '../components/CopyButton.astro';
+import { COHORT_LINKS } from '../consts/aiCohort';
+
+interface Props {
+  title?: string;
+  kicker?: string;
+  lead?: string;
+  frontmatter?: { title: string; kicker?: string; lead?: string };
+}
+
+const fm = Astro.props.frontmatter ?? Astro.props;
+const title = fm.title ?? 'Hands-on AI cohort';
+const kicker = fm.kicker ?? 'cohort 1';
+const lead = fm.lead;
+
+const here = Astro.url.pathname.replace(/\/?$/, '/');
+const nav = [
+  { label: 'Cohort home', href: COHORT_LINKS.home },
+  { label: 'Prompt', href: COHORT_LINKS.prompt },
+  { label: 'Never paste', href: COHORT_LINKS.neverPaste },
+  { label: 'Hand-off', href: COHORT_LINKS.handoff },
+  { label: 'Intake form', href: COHORT_LINKS.intake },
+];
+---
+
+<BaseLayout
+  title={`${title} — Hands-on AI cohort`}
+  description="For participants in the hands-on AI cohort."
+  chromePath={here}
+  noindex
+>
+  <div class="page-shell pt-10 pb-20 max-w-2xl">
+    <nav class="cohort-nav font-mono text-12 tracking-[.04em] mb-8" aria-label="Cohort pages">
+      {nav.map((l) => (
+        <a href={l.href} aria-current={here === l.href ? 'page' : undefined}>{l.label}</a>
+      ))}
+    </nav>
+
+    <header class="mb-8">
+      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ {kicker}</div>
+      <h1 class="font-serif text-[clamp(2rem,7vw,3.25rem)] font-medium tracking-[-0.028em] leading-[1.1] text-ink m-0 mb-4">
+        {title}
+      </h1>
+      {lead && <p class="font-serif text-lg text-mute m-0 leading-[1.5]">{lead}</p>}
+    </header>
+
+    <article class="post-prose cohort-prose">
+      <slot />
+    </article>
+  </div>
+  <CopyButton />
+</BaseLayout>
+
+<style is:global>
+  .cohort-nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .cohort-nav a { color: var(--color-mute); text-decoration: none; }
+  .cohort-nav a:hover { color: var(--color-ink); }
+  .cohort-nav a[aria-current='page'] { color: var(--color-accent); }
+
+  .cohort-prose { font-family: var(--font-serif); font-size: 18px; line-height: 1.65; color: var(--color-ink); }
+  .cohort-prose p { margin: 0 0 20px; }
+  .cohort-prose h2 {
+    font-family: var(--font-serif); font-size: 28px; font-weight: 500; letter-spacing: -.015em; line-height: 1.15;
+    margin: 44px 0 14px; color: var(--color-ink);
+  }
+  .cohort-prose h3 { font-family: var(--font-serif); font-size: 22px; font-weight: 500; margin: 32px 0 10px; }
+  .cohort-prose a { color: var(--color-accent); }
+  .cohort-prose ul, .cohort-prose ol { margin: 0 0 20px; padding-left: 1.3em; }
+  /* The site's reset removes list markers; prose lists need them back. */
+  .cohort-prose ul { list-style: disc; }
+  .cohort-prose ol { list-style: decimal; }
+  .cohort-prose li { margin: 0 0 8px; }
+  .cohort-prose li::marker { color: var(--color-faint); }
+  .cohort-prose code {
+    font-family: var(--font-mono); font-size: .85em; background: var(--color-code); padding: 1px 6px;
+    border-radius: 2px; color: var(--color-accent-ink);
+  }
+  .cohort-prose pre {
+    margin: 28px 0; background: var(--color-code); border: 1px solid var(--color-line); border-radius: 4px;
+    padding: 16px 18px; overflow: auto; line-height: 1.65; white-space: pre-wrap;
+  }
+  .cohort-prose pre code { background: none; padding: 0; color: var(--color-ink); font-size: 13px; }
+  .cohort-prose blockquote {
+    margin: 24px 0; padding: 14px 20px; border-left: 2px solid var(--color-accent);
+    background: var(--color-surface); color: var(--color-ink);
+  }
+  .cohort-prose blockquote p:last-child { margin-bottom: 0; }
+  .cohort-prose table {
+    display: block; overflow-x: auto; max-width: 100%; border-collapse: collapse; margin: 8px 0 28px;
+    font-size: 16px; line-height: 1.5;
+  }
+  .cohort-prose th, .cohort-prose td { border: 1px solid var(--color-line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  .cohort-prose th {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--color-mute); background: var(--color-surface);
+  }
+  .cohort-prose td:empty::after { content: '\00a0'; }
+  .cohort-prose ul.contains-task-list { list-style: none; padding-left: 0; }
+  .cohort-prose .task-list-item input { margin: 0 10px 0 0; accent-color: var(--color-accent); }
+  .cohort-prose hr { border: 0; border-top: 1px solid var(--color-line-soft); margin: 40px 0; }
+
+  @media (max-width: 767px) {
+    .cohort-prose { font-size: 17px; }
+    .cohort-prose h2 { font-size: 1.55rem; margin-top: 2rem; }
+  }
+  @media print {
+    .cohort-nav, .copy-btn { display: none !important; }
+    .cohort-prose { font-size: 12pt; }
+  }
+</style>

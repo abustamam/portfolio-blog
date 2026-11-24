@@ -1,0 +1,37 @@
+---
+layout: ../../layouts/CohortPage.astro
+title: Never paste these
+kicker: handout · sessions 1 and 2
+lead: Whatever you paste into an AI chat leaves your computer. Depending on your account and settings, it may be stored, reviewed or used for training. Treat the chat box like an email to a stranger.
+---
+| Never paste | Do this instead |
+|---|---|
+| **Other people's personal details**: names, emails, phone numbers, addresses | Swap in placeholders: PERSON-1, EMAIL-1, PHONE-1. Keep the key (who is who) in your own file. |
+| **Passwords, API keys, one-time codes** | Never, not even "just to check it". Describe the problem without the secret. |
+| **Account and card numbers** | Mask them: \*\*\*\*4821, or ACCOUNT-1. |
+| **Health details** about you or anyone else | Generalise: "a family member with a chronic condition". |
+
+## Make a file safe in three steps
+
+1. **Decide what the AI actually needs.** To get formulas, it needs the column headers and three example rows, not the whole sheet. To group errors in a log, it needs the error messages, not the usernames.
+2. **Replace, don't delete.** Use the same placeholder for the same thing every time (every appearance of one person becomes PERSON-1). That keeps the patterns, such as "the same person gave 12 times", without the identity.
+3. **Keep the key yourself.** The list of PERSON-1 = the real name stays in your own sheet and never goes into the chat.
+
+### Tricks that help
+- *Spreadsheets:* add an ID column, then make a copy with the name and email columns deleted. Upload the copy.
+- *Text:* Find and replace (Ctrl+H or Cmd+Shift+H) each name with a placeholder before you copy anything.
+- *Ask for the method, not the answer:* "Write me a formula that..." means your data never has to leave the sheet.
+
+## Check before you press Enter
+
+- [ ] Could anyone in this text be recognised by someone who knows them?
+- [ ] Is there any number that unlocks money or an account?
+- [ ] Would I be comfortable if this text were shown to the people it's about?
+
+## Work accounts
+
+Your employer may allow only certain tools (often Copilot on a work login), and may forbid putting work files into personal accounts. Their rule comes before anything on this page.
+
+## If you already pasted something
+
+Delete the conversation, and turn off chat history or training in the tool's settings if you can. If it was a password or key, **change it now**. Deleting the chat doesn't un-send it.

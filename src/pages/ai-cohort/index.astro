@@ -1,0 +1,98 @@
+---
+// Cohort home: the welcome pack and the week-by-week hub on one page.
+// Unlisted (noindex via CohortPage, out of the sitemap via astro.config.mjs).
+import CohortPage from '../../layouts/CohortPage.astro';
+import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
+---
+
+<CohortPage
+  title="Welcome to the cohort"
+  kicker="cohort 1 · jan 11 – feb 1, 2027"
+  lead="Assalamu alaikum, and welcome. Your seat is confirmed. Everything you need is on this page, and it's where each week's recording and next step will go."
+>
+  <p class="cohort-facts font-mono">
+    4 Mondays · {COHORT.time} · {COHORT.platform} · up to 8 people
+  </p>
+
+  <h2 id="before-jan-4">Before January 4</h2>
+  <ol>
+    <li>
+      <strong>Fill in the <a href={COHORT_LINKS.intake}>intake form</a>.</strong> It takes about five minutes. Describe
+      the weekly task you want to work on; I read every answer before session 1.
+    </li>
+    <li>
+      <strong>Send me one sample file on WhatsApp</strong> that your task uses (a spreadsheet, document, email or log),
+      <strong>with private details removed first</strong>: swap real names for PERSON-1, PERSON-2 and take out account
+      numbers. Not sure how? Send a description of the file instead and we'll do it together in session 2. The
+      <a href={COHORT_LINKS.neverPaste}>never-paste guide</a> shows the steps.
+    </li>
+  </ol>
+
+  <h2 id="what-to-have-ready">What to have ready on January 11</h2>
+  <ul>
+    <li>A laptop or desktop, not a phone. You'll be working in the tool while we talk.</li>
+    <li>
+      One AI tool you can log in to: Gemini, ChatGPT, Copilot or Claude. <strong>A free account is enough.</strong>
+      If your employer limits which tools you may use for work files, bring that one.
+    </li>
+    <li>The task you described in the intake form.</li>
+  </ul>
+  <p>
+    The Meet link is the same every week. It's in your calendar invite and pinned in the participants' WhatsApp group.
+  </p>
+
+  <h2 id="sessions">The four sessions</h2>
+  <p>
+    Every session has the same shape: 10 minutes of check-in, 25 minutes of teaching, 40 minutes of hands-on work on
+    <strong>your own task</strong> while I go round the group, and 15 minutes to show what worked.
+  </p>
+
+  <ol class="cohort-sessions">
+    {SESSIONS.map((s) => (
+      <li id={`session-${s.n}`}>
+        <div class="font-mono session-date">Session {s.n} · {s.date}</div>
+        <h3>{s.title}</h3>
+        <p><strong>You leave with:</strong> {s.outcome}</p>
+        <p><strong>Try this week:</strong> {s.tryThis}</p>
+        <p class="font-mono session-links">
+          {s.handouts.map((h) => <a href={h.href}>{h.label}</a>)}
+          {s.recordingUrl
+            ? <a href={s.recordingUrl}>Recording</a>
+            : <span class="session-pending">Recording: posted after the session</span>}
+        </p>
+      </li>
+    ))}
+  </ol>
+
+  <h2 id="recordings">Recordings</h2>
+  <p>
+    I record the teaching part of each session so you can catch up if you miss one. I stop recording before we work on
+    your own files. Recordings are shared only with this group, in a
+    <a href={COHORT.recordingsUrl}>Google Drive folder</a> shared with your email address. If you miss a session, watch
+    the recording and come to office hours for 15 minutes on your own task.
+  </p>
+
+  <h2 id="between-sessions">Between sessions</h2>
+  <ul>
+    <li><strong>The participants' WhatsApp group</strong>: questions between sessions, and what worked for you.</li>
+    <li><strong>Office hours</strong>: an optional 30 minutes each week on the same Meet link, for anything you're stuck on.</li>
+    <li>Message me directly on WhatsApp for anything private.</li>
+  </ul>
+
+  <h2 id="refunds">Refunds</h2>
+  <p>
+    Full refund up to {COHORT.refundUntil} if the cohort isn't for you; just message me. No refunds after that.
+  </p>
+  <p>JazakAllahu khair, and see you on the 11th.<br />Rasheed</p>
+</CohortPage>
+
+<style>
+  .cohort-facts { font-size: 13px; color: var(--color-faint); margin: -8px 0 28px; letter-spacing: .02em; }
+  .cohort-sessions { list-style: none; padding: 0; margin: 0 0 20px; }
+  .cohort-sessions > li { border-top: 1px solid var(--color-line-soft); padding: 22px 0 6px; margin: 0; }
+  .cohort-sessions h3 { margin: 4px 0 10px; }
+  .cohort-sessions p { margin: 0 0 10px; font-size: 17px; }
+  .session-date { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); }
+  .session-links { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; }
+  .session-pending { color: var(--color-faint); }
+</style>
