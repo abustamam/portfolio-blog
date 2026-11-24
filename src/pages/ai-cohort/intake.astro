@@ -130,13 +130,14 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
       </fieldset>
 
       <fieldset class="quiz-step">
-        <legend class="quiz-legend">Recording</legend>
+        <legend class="quiz-legend">Consent to recording</legend>
+        <p class="quiz-hint">
+          I record the teaching part of each session so you can catch up if you miss one. I stop recording before we
+          work on your own files. Recordings are shared only with this group.
+        </p>
         <label class="quiz-option">
           <input type="checkbox" name="recordingConsent" value="yes" required />
-          <span>
-            I record the teaching part of each session so you can catch up if you miss one. I stop recording before we
-            work on your own files. Recordings are shared only with this group.
-          </span>
+          <span><strong>I agree to be recorded</strong> during the teaching part of each session.</span>
         </label>
       </fieldset>
 
@@ -203,7 +204,7 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
 
   function missing(p: ReturnType<typeof payload>): string[] {
     const out = REQUIRED.filter(([k]) => !(p as Record<string, unknown>)[k]).map(([, label]) => label);
-    if (!p.recordingConsent) out.push('the recording consent');
+    if (!p.recordingConsent) out.push('your agreement to be recorded');
     return out;
   }
 
