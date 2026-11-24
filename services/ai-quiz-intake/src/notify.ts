@@ -1,6 +1,7 @@
 // Tells the cohort runner a new response arrived. Optional: the service runs
 // without it, and a failed notification never fails the submission.
 import type { Row } from './validate';
+import { INTAKE_OPTIONS, type IntakeRow } from './intake';
 
 const TRACK_NAMES = { foundations: 'Foundations', applied: 'Applied', builder: 'Builder' } as const;
 
@@ -20,21 +21,44 @@ export function formatNotification(row: Row): string {
   ].join('\n');
 }
 
-export function createTelegramNotifier(opts: {
+const TIME_LABELS: Record<string, string> = Object.fromEntries(INTAKE_OPTIONS.timeTaken.map((o) => [o.value, o.label]));
+
+/** Same rules as formatNotification: plain text, and no contact details. */
+export function formatIntakeNotification(row: IntakeRow): string {
+  return [
+    `New cohort intake: ${row.name}`,
+    `Track: ${TRACK_NAMES[row.track]}`,
+    `Time now: ${TIME_LABELS[row.timeTaken]}`,
+    `Task: ${row.weeklyTask}`,
+  ].join('\n');
+}
+
+interface TelegramOpts {
   token: string;
   chatId: string;
   fetch?: typeof fetch;
   timeoutMs?: number;
-}): (row: Row) => Promise<void> {
+}
+
+/** Sends one plain-text message per row, formatted by `format`. */
+export function createTelegramSender<T>(opts: TelegramOpts, format: (row: T) => string): (row: T) => Promise<void> {
   const f = opts.fetch ?? fetch;
   return async (row) => {
     const res = await f(`https://api.telegram.org/bot${opts.token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: opts.chatId, text: formatNotification(row), disable_web_page_preview: true }),
+      body: JSON.stringify({ chat_id: opts.chatId, text: format(row), disable_web_page_preview: true }),
       signal: AbortSignal.timeout(opts.timeoutMs ?? 5000),
     });
     // Never include the URL in errors: it carries the bot token.
     if (!res.ok) throw new Error(`telegram sendMessage returned ${res.status}`);
   };
+}
+
+export function createTelegramNotifier(opts: TelegramOpts): (row: Row) => Promise<void> {
+  return createTelegramSender(opts, formatNotification);
+}
+
+export function createIntakeNotifier(opts: TelegramOpts): (row: IntakeRow) => Promise<void> {
+  return createTelegramSender(opts, formatIntakeNotification);
 }

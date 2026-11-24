@@ -37,6 +37,30 @@ the endpoint in any build.
 
 Tests: `bun test services/ai-quiz-intake` (runs in CI).
 
+## Cohort intake form
+
+`/ai-cohort/intake` is the pre-session form for people who have paid for
+cohort 1. It is unlisted: the page has `<meta name="robots" content="noindex">`,
+the sitemap filter in `astro.config.mjs` drops `/ai-cohort/`, and nothing in
+the nav links to it. Share the link in the participants' WhatsApp group.
+`tests/ai-cohort-intake.spec.ts` checks the built `dist` for both.
+
+It POSTs to `POST /api/ai-quiz/intake`, which sits under the existing Caddy
+route, so Caddy needs no change. The same service handles it, with the same
+rules as the quiz:
+
+- Bodies over 16 KB get a 413, and the hidden `website` honeypot gets a fake
+  `ok` with nothing stored.
+- The quiz and the intake form share one rate limit per IP (`RATE_LIMIT`).
+- Choices must be values from the whitelist in
+  `services/ai-quiz-intake/src/intake.ts`, which is also what the page renders.
+  Text is length-capped (name 120, contact 160, task 600, private-files note
+  400). Name, contact, task, time taken, track, and recording consent
+  (`recordingConsent: true`) are required.
+- Each saved row goes in `cohort_intake` and triggers a Telegram message with
+  name, track, time taken and task. Contact details and the private-files note
+  are never sent. A failure is logged as `intake notify failed`.
+
 ## Server setup (one time)
 
 All of this is on the Hetzner box, in `/srv`.
@@ -57,6 +81,35 @@ grant connect on database ai_quiz to ai_quiz;
 SQL
 docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
   < services/ai-quiz-intake/schema.sql
+```
+
+### 1b. Cohort intake table
+
+If the database above already exists, this is the only server step the
+intake form needs. It is idempotent, and it also lives at the bottom of
+`schema.sql`. Until it runs, intake submissions get a 500 (logged as
+`intake insert failed`) and the quiz keeps working.
+
+```bash
+docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 <<'SQL'
+create table if not exists cohort_intake (
+  id                bigint generated always as identity primary key,
+  submitted_at      timestamptz not null default now(),
+  name              text not null,
+  contact           text not null,
+  weekly_task       text not null,
+  time_taken        text not null check (time_taken in ('under-30m', '30-60m', '1-2h', '2h-plus')),
+  inputs            jsonb not null,
+  tools             jsonb not null,
+  work_restricts    text check (work_restricts in ('yes', 'no', 'not-sure')),
+  track             text not null check (track in ('foundations', 'applied', 'builder')),
+  private_concerns  text,
+  recording_consent boolean not null check (recording_consent),
+  user_agent        text
+);
+revoke all on cohort_intake from public;
+grant insert on cohort_intake to ai_quiz;
+SQL
 ```
 
 ### 2. Compose service
@@ -138,5 +191,14 @@ from responses order by submitted_at desc;
 select track, answers->>'payer' as payer, count(*) from responses group by 1, 2 order by 1, 2;
 ```
 
-Responses hold name and contact only when the person gave them. Keep the table
+Cohort intake:
+
+```sql
+select submitted_at, name, contact, track, time_taken, weekly_task, inputs, tools,
+       work_restricts, private_concerns
+from cohort_intake order by submitted_at desc;
+```
+
+Quiz responses hold name and contact only when the person gave them; every
+intake row has both. Keep the table
 private to whoever runs the cohort.
