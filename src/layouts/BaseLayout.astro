@@ -12,15 +12,17 @@ interface Props {
   chromePath?: string;
   /** Open Graph / Twitter preview image (per-page); omit for canonical wordmark fallback */
   image?: ImageMetadata;
+  /** Unlisted page: adds a robots noindex meta. Off by default. */
+  noindex?: boolean;
 }
 
-const { title, description, chromePath = '/writing', image } = Astro.props;
+const { title, description, chromePath = '/writing', image, noindex = false } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={title} description={description} image={image} />
+    <BaseHead title={title} description={description} image={image} noindex={noindex} />
   </head>
   <body>
     <TerminalChrome path={chromePath} />

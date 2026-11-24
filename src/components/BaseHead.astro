@@ -10,6 +10,8 @@ interface Props {
 	title: string;
 	description: string;
 	image?: ImageMetadata | string;
+	/** Ask search engines not to index this page (unlisted pages). Off by default. */
+	noindex?: boolean;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -20,7 +22,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const cardMatch = Astro.url.pathname.match(/^\/(writing|work|series)\/([^/]+)\/?$/);
 const generated = cardMatch ? `/og/${cardMatch[1]}/${cardMatch[2]}.png` : undefined;
 
-const { title, description, image = SOCIAL_FALLBACK_IMAGE } = Astro.props;
+const { title, description, image = SOCIAL_FALLBACK_IMAGE, noindex = false } = Astro.props;
 const imageUrl = generated ?? (typeof image === 'string' ? image : image.src);
 const ogImage = new URL(imageUrl, Astro.site);
 const isPng = ogImage.pathname.endsWith('.png');
@@ -51,6 +53,7 @@ const isPng = ogImage.pathname.endsWith('.png');
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex" />}
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />

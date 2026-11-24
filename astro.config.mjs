@@ -14,7 +14,8 @@ export default defineConfig({
     sitemap({
       // Redirect-only pages (harmless if they do not exist)
       filter: (page) =>
-        !/\/work\/(cdk-global|embedded-insurance)\/?$/.test(page),
+        !/\/work\/(cdk-global|embedded-insurance)\/?$/.test(page) &&
+        !/\/ai-cohort\//.test(page), // unlisted cohort pages (noindex too)
     }),
   ],
   markdown: {

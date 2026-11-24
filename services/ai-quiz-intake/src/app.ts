@@ -1,7 +1,10 @@
 import { parseSubmission, type Row } from './validate';
+import { parseIntake, type IntakeRow } from './intake';
 import { createRateLimiter } from './rateLimit';
 
 export const PATH = '/api/ai-quiz';
+/** The cohort pre-session form. Under PATH so the existing Caddy route covers it. */
+export const INTAKE_PATH = `${PATH}/intake`;
 const MAX_BODY = 16 * 1024;
 
 export interface Deps {
@@ -13,6 +16,10 @@ export interface Deps {
   log?: (msg: string, extra?: Record<string, unknown>) => void;
   /** Called after a row is saved. Not awaited; a failure is logged, never returned. */
   notify?: (row: Row) => Promise<void>;
+  /** Saves a cohort intake row. Without it, the intake path is a 404. */
+  insertIntake?: (row: IntakeRow, userAgent: string | null) => Promise<void>;
+  /** Like notify, for intake rows. */
+  notifyIntake?: (row: IntakeRow) => Promise<void>;
 }
 
 const json = (status: number, body: unknown) =>
@@ -37,10 +44,11 @@ export function createHandler(deps: Deps) {
       }
     }
 
-    if (url.pathname !== PATH) return json(404, { ok: false, error: 'not found' });
+    const intake = url.pathname === INTAKE_PATH && Boolean(deps.insertIntake);
+    if (url.pathname !== PATH && !intake) return json(404, { ok: false, error: 'not found' });
     if (req.method !== 'POST') return json(405, { ok: false, error: 'method not allowed' });
 
-    // Caddy sets X-Real-IP from Cf-Connecting-Ip (see docs/ai-quiz-setup.md).
+    // One limiter for both forms. Caddy sets X-Real-IP from Cf-Connecting-Ip (see docs/ai-quiz-setup.md).
     const ip = req.headers.get('x-real-ip') ?? 'unknown';
     if (!allow(ip)) return json(429, { ok: false, error: 'too many submissions, try again later' });
 
@@ -56,13 +64,16 @@ export function createHandler(deps: Deps) {
       return json(400, { ok: false, error: 'invalid JSON' });
     }
 
+    const userAgent = req.headers.get('user-agent')?.slice(0, 300) ?? null;
+    if (intake) return saveIntake(body, userAgent);
+
     const parsed = parseSubmission(body);
     // Pretend success to bots so they don't adapt.
     if (parsed.kind === 'spam') return json(200, { ok: true });
     if (parsed.kind === 'invalid') return json(400, { ok: false, error: parsed.error });
 
     try {
-      await deps.insert(parsed.row, req.headers.get('user-agent')?.slice(0, 300) ?? null);
+      await deps.insert(parsed.row, userAgent);
     } catch (err) {
       log('insert failed', { error: String(err) });
       return json(500, { ok: false, error: 'could not save' });
@@ -73,4 +84,23 @@ export function createHandler(deps: Deps) {
     }
     return json(200, { ok: true, track: parsed.row.track });
   };
+
+  async function saveIntake(body: unknown, userAgent: string | null): Promise<Response> {
+    const parsed = parseIntake(body);
+    // Pretend success to bots so they don't adapt.
+    if (parsed.kind === 'spam') return json(200, { ok: true });
+    if (parsed.kind === 'invalid') return json(400, { ok: false, error: parsed.error });
+
+    try {
+      await deps.insertIntake!(parsed.row, userAgent);
+    } catch (err) {
+      log('intake insert failed', { error: String(err) });
+      return json(500, { ok: false, error: 'could not save' });
+    }
+    log('intake saved', { track: parsed.row.track });
+    if (deps.notifyIntake) {
+      deps.notifyIntake(parsed.row).catch((err) => log('intake notify failed', { error: String(err) }));
+    }
+    return json(200, { ok: true });
+  }
 }
