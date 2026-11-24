@@ -2,13 +2,18 @@ import { parseSubmission, type Row } from './validate';
 import { parseIntake, type IntakeRow } from './intake';
 import { parseWaitlist, type WaitlistRow } from './waitlist';
 import { createRateLimiter } from './rateLimit';
+import { paymentFromEvent, verifyStripeSignature, type Payment } from './stripe';
 
 export const PATH = '/api/ai-quiz';
 /** The cohort pre-session form. Under PATH so the existing Caddy route covers it. */
 export const INTAKE_PATH = `${PATH}/intake`;
 /** The cohort waitlist, where the sold-out payment link points. Same Caddy route. */
 export const WAITLIST_PATH = `${PATH}/waitlist`;
+/** Stripe's webhook for the cohort payment link. Same Caddy route. */
+export const STRIPE_PATH = `${PATH}/stripe-webhook`;
 const MAX_BODY = 16 * 1024;
+/** Stripe events are bigger than form posts. */
+const MAX_STRIPE_BODY = 256 * 1024;
 
 export interface Deps {
   insert: (row: Row, userAgent: string | null) => Promise<void>;
@@ -27,6 +32,12 @@ export interface Deps {
   insertWaitlist?: (row: WaitlistRow, userAgent: string | null) => Promise<void>;
   /** Like notify, for waitlist rows. */
   notifyWaitlist?: (row: WaitlistRow) => Promise<void>;
+  /** The webhook endpoint's signing secret (whsec_...). Without it, the Stripe path is a 404. */
+  stripeWebhookSecret?: string;
+  /** Only payments through this payment link notify (plink_...). Unset = any paid checkout. */
+  stripePaymentLink?: string;
+  /** Awaited: a failure returns 500 so Stripe retries the event. */
+  notifyPayment?: (p: Payment) => Promise<void>;
 }
 
 type Parse<T> = (raw: unknown) => { kind: 'ok'; row: T } | { kind: 'spam' } | { kind: 'invalid'; error: string };
@@ -70,6 +81,12 @@ export function createHandler(deps: Deps) {
       }
     }
 
+    // Before the rate limiter: Stripe sends from a few shared IPs, and the signature is the gate.
+    if (url.pathname === STRIPE_PATH && deps.stripeWebhookSecret) {
+      if (req.method !== 'POST') return json(405, { ok: false, error: 'method not allowed' });
+      return stripeWebhook(req, deps.stripeWebhookSecret);
+    }
+
     const form = forms.get(url.pathname);
     if (url.pathname !== PATH && !form) return json(404, { ok: false, error: 'not found' });
     if (req.method !== 'POST') return json(405, { ok: false, error: 'method not allowed' });
@@ -110,6 +127,35 @@ export function createHandler(deps: Deps) {
     }
     return json(200, { ok: true, track: parsed.row.track });
   };
+
+  async function stripeWebhook(req: Request, secret: string): Promise<Response> {
+    if (Number(req.headers.get('content-length') ?? 0) > MAX_STRIPE_BODY) return json(413, { ok: false, error: 'too large' });
+    const raw = await req.text();
+    if (raw.length > MAX_STRIPE_BODY) return json(413, { ok: false, error: 'too large' });
+    if (!(await verifyStripeSignature(req.headers.get('stripe-signature'), raw, secret))) {
+      log('stripe signature rejected');
+      return json(400, { ok: false, error: 'bad signature' });
+    }
+    let event: unknown;
+    try {
+      event = JSON.parse(raw);
+    } catch {
+      return json(400, { ok: false, error: 'invalid JSON' });
+    }
+    const payment = paymentFromEvent(event, deps.stripePaymentLink);
+    // Anything else (other types, other links, unpaid) is acknowledged so Stripe stops sending it.
+    if (!payment) return json(200, { ok: true, ignored: true });
+    log('stripe payment', { amount: payment.amount });
+    if (deps.notifyPayment) {
+      try {
+        await deps.notifyPayment(payment);
+      } catch (err) {
+        log('payment notify failed', { error: String(err) });
+        return json(500, { ok: false, error: 'notify failed' });
+      }
+    }
+    return json(200, { ok: true });
+  }
 
   async function save<T>(form: Form<T>, body: unknown, userAgent: string | null): Promise<Response> {
     const parsed = form.parse(body);

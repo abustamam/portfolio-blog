@@ -1,6 +1,6 @@
 import { SQL } from 'bun';
 import { createHandler } from './app';
-import { createIntakeNotifier, createTelegramNotifier, createWaitlistNotifier } from './notify';
+import { createIntakeNotifier, createPaymentNotifier, createTelegramNotifier, createWaitlistNotifier } from './notify';
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is required');
@@ -10,7 +10,9 @@ const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId } = process.env;
 const notify = token && chatId ? createTelegramNotifier({ token, chatId }) : undefined;
 const notifyIntake = token && chatId ? createIntakeNotifier({ token, chatId }) : undefined;
 const notifyWaitlist = token && chatId ? createWaitlistNotifier({ token, chatId }) : undefined;
-console.log(JSON.stringify({ msg: 'notifications', telegram: Boolean(notify) }));
+const notifyPayment = token && chatId ? createPaymentNotifier({ token, chatId }) : undefined;
+const { STRIPE_WEBHOOK_SECRET: stripeWebhookSecret, STRIPE_PAYMENT_LINK: stripePaymentLink } = process.env;
+console.log(JSON.stringify({ msg: 'notifications', telegram: Boolean(notify), stripe: Boolean(stripeWebhookSecret) }));
 
 const handle = createHandler({
   notify,
@@ -36,6 +38,9 @@ const handle = createHandler({
       insert into cohort_waitlist (name, contact, note, user_agent)
       values (${row.name}, ${row.contact}, ${row.note}, ${userAgent})`;
   },
+  stripeWebhookSecret: stripeWebhookSecret || undefined,
+  stripePaymentLink: stripePaymentLink || undefined,
+  notifyPayment,
   ping: async () => {
     await sql`select 1`;
   },

@@ -78,6 +78,31 @@ are logged as `waitlist insert failed` and `waitlist notify failed`. Rules live
 in `services/ai-quiz-intake/src/waitlist.ts`; browser tests in
 `tests/ai-cohort-waitlist.spec.ts`.
 
+## Payment alerts (Stripe webhook)
+
+Each paid checkout on the cohort payment link sends a Telegram message with the
+payer's name and amount, never their email or address. Stripe calls
+`POST /api/ai-quiz/stripe-webhook` (same service and Caddy route) for
+`checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+
+- The `Stripe-Signature` header is checked against `STRIPE_WEBHOOK_SECRET`
+  (HMAC-SHA256, 5-minute tolerance). A bad signature is a 400 and logged as
+  `stripe signature rejected`. Without the secret the path is a 404.
+- Only sessions with `payment_status: paid` on `STRIPE_PAYMENT_LINK` notify;
+  every other event gets a 200 so Stripe stops resending it.
+- Not rate limited (Stripe sends from shared IPs; the signature is the gate).
+- A Telegram failure returns 500 and is logged as `payment notify failed`, so
+  Stripe retries the event.
+
+Setup: in the Stripe dashboard, Developers → Webhooks → Add endpoint, URL
+`https://bustamam.tech/api/ai-quiz/stripe-webhook`, events
+`checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+Copy its signing secret (`whsec_...`) into `/srv/.env` as
+`STRIPE_WEBHOOK_SECRET`, add `STRIPE_PAYMENT_LINK=plink_...` (the cohort link's
+id), and recreate the container. Use "Send test event" in the dashboard to check:
+the test event's session is not on the cohort link, so expect a 200 and no
+message; a real payment sends one.
+
 ## Server setup (one time)
 
 All of this is on the Hetzner box, in `/srv`.
@@ -163,6 +188,9 @@ SQL
       # Optional: a Telegram message per new response. Unset = no notifications.
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      # Optional: payment alerts from the Stripe webhook. Unset = the path is a 404.
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PAYMENT_LINK: ${STRIPE_PAYMENT_LINK}
     depends_on:
       postgres:
         condition: service_healthy

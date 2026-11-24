@@ -3,6 +3,7 @@
 import type { Row } from './validate';
 import { INTAKE_OPTIONS, type IntakeRow } from './intake';
 import type { WaitlistRow } from './waitlist';
+import { formatPaymentNotification, type Payment } from './stripe';
 
 const TRACK_NAMES = { foundations: 'Foundations', applied: 'Applied', builder: 'Builder' } as const;
 
@@ -71,4 +72,8 @@ export function createIntakeNotifier(opts: TelegramOpts): (row: IntakeRow) => Pr
 
 export function createWaitlistNotifier(opts: TelegramOpts): (row: WaitlistRow) => Promise<void> {
   return createTelegramSender(opts, formatWaitlistNotification);
+}
+
+export function createPaymentNotifier(opts: TelegramOpts): (p: Payment) => Promise<void> {
+  return createTelegramSender(opts, formatPaymentNotification);
 }
