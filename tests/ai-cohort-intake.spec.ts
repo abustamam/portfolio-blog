@@ -69,12 +69,12 @@ test.describe('cohort intake', () => {
     const error = page.locator('#intake-error');
     await expect(error).toBeVisible();
     await expect(error).toContainText('your name');
-    await expect(error).toContainText('the recording consent');
+    await expect(error).toContainText('agreement to be recorded');
 
     await fill(page);
     await page.locator('input[name="recordingConsent"]').uncheck();
     await page.locator('#intake-submit').click();
-    await expect(error).toHaveText('Please add the recording consent.');
+    await expect(error).toHaveText('Please add your agreement to be recorded.');
     expect(posts).toBe(0);
   });
 
