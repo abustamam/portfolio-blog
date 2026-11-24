@@ -20,13 +20,13 @@ const handle = createHandler({
               ${row.answers}::jsonb, ${userAgent})`;
   },
   notifyIntake,
-  // Lists go in as JSON text cast to jsonb, so there's no array binding to get wrong.
+  // Pass the arrays themselves: Bun SQL binds them as JSON. JSON.stringify(...) here would store a JSON *string*.
   insertIntake: async (row, userAgent) => {
     await sql`
       insert into cohort_intake (name, contact, weekly_task, time_taken, inputs, tools, work_restricts, track,
                                  private_concerns, recording_consent, user_agent)
-      values (${row.name}, ${row.contact}, ${row.weeklyTask}, ${row.timeTaken}, ${JSON.stringify(row.inputs)}::jsonb,
-              ${JSON.stringify(row.tools)}::jsonb, ${row.workRestricts}, ${row.track}, ${row.privateConcerns},
+      values (${row.name}, ${row.contact}, ${row.weeklyTask}, ${row.timeTaken}, ${row.inputs}::jsonb,
+              ${row.tools}::jsonb, ${row.workRestricts}, ${row.track}, ${row.privateConcerns},
               ${row.recordingConsent}, ${userAgent})`;
   },
   ping: async () => {
