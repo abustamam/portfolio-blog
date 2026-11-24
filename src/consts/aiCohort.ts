@@ -31,6 +31,8 @@ export interface CohortSession {
 export const COHORT_LINKS = {
   home: '/ai-cohort/',
   intake: '/ai-cohort/intake/',
+  /** Not in the cohort nav: it's for people who didn't get a seat. */
+  waitlist: '/ai-cohort/waitlist/',
   prompt: '/ai-cohort/prompt/',
   neverPaste: '/ai-cohort/never-paste/',
   handoff: '/ai-cohort/hand-off/',

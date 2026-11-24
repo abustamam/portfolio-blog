@@ -1,0 +1,226 @@
+---
+// Where people go once cohort 1 is sold out: the Stripe payment link's
+// sold-out message and the WhatsApp group point here. Unlisted like the other
+// /ai-cohort/ pages: noindex, out of the sitemap, not in the nav.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { AI_QUIZ_ENDPOINT } from '../../consts/aiQuiz';
+import { WAITLIST_LIMITS } from '../../../services/ai-quiz-intake/src/waitlist';
+
+// Same service and Caddy route as the quiz: POST /api/ai-quiz/waitlist.
+const endpoint = AI_QUIZ_ENDPOINT ? `${AI_QUIZ_ENDPOINT.replace(/\/$/, '')}/waitlist` : '';
+---
+
+<BaseLayout
+  title="Cohort waitlist — Rasheed Bustamam"
+  description="Join the waitlist for the next hands-on AI cohort."
+  chromePath="/ai-cohort/waitlist"
+  noindex
+>
+  <div class="page-shell pt-10 pb-20 max-w-2xl">
+    <header id="waitlist-intro" class="mb-8">
+      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ hands-on AI cohort · waitlist</div>
+      <h1 class="font-serif text-[clamp(2rem,7vw,3.25rem)] font-medium tracking-[-0.028em] leading-[1.1] text-ink m-0 mb-4">
+        This cohort is full
+      </h1>
+      <p class="font-serif text-lg text-mute m-0 leading-[1.5]">
+        All 8 seats are taken. Leave your name and I'll message you first if a seat opens up or when the next cohort
+        is scheduled. It takes under a minute, and joining doesn't commit you to anything.
+      </p>
+    </header>
+
+    <noscript>
+      <p class="quiz-status" data-state="warn">This form needs JavaScript. If you can't turn it on, message Rasheed on WhatsApp to join the waitlist.</p>
+    </noscript>
+
+    <form id="cohort-waitlist" class="quiz" novalidate data-endpoint={endpoint}>
+      <fieldset class="quiz-step">
+        <legend class="quiz-legend">Your name</legend>
+        <input type="text" name="name" autocomplete="name" required maxlength={WAITLIST_LIMITS.name} class="quiz-input" />
+      </fieldset>
+
+      <fieldset class="quiz-step">
+        <legend class="quiz-legend">How should I reach you?</legend>
+        <p class="quiz-hint">Your email or WhatsApp number.</p>
+        <input type="text" name="contact" autocomplete="email" required maxlength={WAITLIST_LIMITS.contact} class="quiz-input" />
+      </fieldset>
+
+      <fieldset class="quiz-step">
+        <legend class="quiz-legend">Anything I should know? <span class="text-faint">(optional)</span></legend>
+        <p class="quiz-hint">For example which days or times suit you, or what you'd want to use AI for.</p>
+        <textarea name="note" rows="3" maxlength={WAITLIST_LIMITS.note} class="quiz-input"></textarea>
+      </fieldset>
+
+      <!-- Spam trap: hidden from people, filled by bots. -->
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="quiz-trap" aria-hidden="true" />
+
+      <p id="waitlist-error" class="quiz-error" role="alert" hidden></p>
+      <p id="waitlist-status" class="quiz-status" role="status"></p>
+
+      <div class="quiz-nav">
+        <button type="submit" id="waitlist-submit" class="quiz-btn">Join the waitlist</button>
+      </div>
+    </form>
+
+    <section id="waitlist-thanks" class="quiz-result" hidden aria-live="polite">
+      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ you're on the list</div>
+      <h2 class="font-serif text-[clamp(2rem,7vw,3rem)] font-medium tracking-[-0.02em] text-ink m-0 mb-4">
+        Thank you, you're on the waitlist.
+      </h2>
+      <p class="font-serif text-lg leading-[1.55] text-ink m-0">
+        I'll message you as soon as a seat opens or the next cohort has dates. Nothing else to do for now.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('cohort-waitlist') as HTMLFormElement;
+  const error = document.getElementById('waitlist-error')!;
+  const status = document.getElementById('waitlist-status')!;
+  const submit = document.getElementById('waitlist-submit') as HTMLButtonElement;
+
+  function payload() {
+    const fd = new FormData(form);
+    const one = (k: string) => ((fd.get(k) as string | null) ?? '').trim();
+    return { name: one('name'), contact: one('contact'), note: one('note'), website: (fd.get('website') as string | null) ?? '' };
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const p = payload();
+    const gaps = [
+      [p.name, 'your name'],
+      [p.contact, 'how to reach you'],
+    ].filter(([v]) => !v).map(([, label]) => label);
+    if (gaps.length) {
+      error.textContent = `Please add ${gaps.join(' and ')}.`;
+      error.hidden = false;
+      return;
+    }
+    error.hidden = true;
+
+    const endpoint = (form.dataset.endpoint ?? '').trim();
+    if (!endpoint) {
+      status.textContent = "Heads up: this form isn't collecting answers here, so nothing was sent.";
+      status.dataset.state = 'warn';
+      return;
+    }
+
+    submit.disabled = true;
+    status.textContent = 'Sending…';
+    status.dataset.state = 'pending';
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(p),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
+      form.hidden = true;
+      document.getElementById('waitlist-intro')!.hidden = true;
+      document.getElementById('waitlist-thanks')!.hidden = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      console.error('cohort waitlist submit failed', err);
+      status.textContent = "That didn't send. Check your connection and try again, or message Rasheed on WhatsApp.";
+      status.dataset.state = 'error';
+      submit.textContent = 'Try again';
+    } finally {
+      submit.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  /* Same look as /ai-quiz (its styles are scoped to that page). */
+  .quiz-step {
+    border: 0;
+    padding: 0;
+    margin: 0 0 2rem;
+    min-width: 0;
+  }
+  .quiz-legend {
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 4.5vw, 1.5rem);
+    line-height: 1.3;
+    color: var(--color-ink);
+    margin-bottom: 0.75rem;
+    padding: 0;
+  }
+  .quiz-hint {
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    color: var(--color-faint);
+    margin: 0 0 1rem;
+  }
+  .quiz-input {
+    display: block;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: 1.0625rem; /* ≥16px stops iOS zooming on focus */
+    line-height: 1.45;
+  }
+  .quiz-input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+  .quiz-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  /* One page, not steps: the button sits at the end instead of sticking over the fields. */
+  .quiz-nav {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom));
+  }
+  .quiz-btn {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 1.25rem;
+    border: 1px solid var(--color-accent);
+    border-radius: 6px;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    letter-spacing: var(--tracking-snug);
+    cursor: pointer;
+  }
+  .quiz-btn:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .quiz-error {
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    color: var(--color-danger);
+    margin: 0 0 0.75rem;
+  }
+  .quiz-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    line-height: 1.5;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-line);
+    margin: 0 0 1rem;
+  }
+  .quiz-status:empty {
+    display: none;
+  }
+  .quiz-status[data-state='warn'],
+  .quiz-status[data-state='error'] {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+</style>

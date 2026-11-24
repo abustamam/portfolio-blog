@@ -2,6 +2,7 @@
 // without it, and a failed notification never fails the submission.
 import type { Row } from './validate';
 import { INTAKE_OPTIONS, type IntakeRow } from './intake';
+import type { WaitlistRow } from './waitlist';
 
 const TRACK_NAMES = { foundations: 'Foundations', applied: 'Applied', builder: 'Builder' } as const;
 
@@ -33,6 +34,11 @@ export function formatIntakeNotification(row: IntakeRow): string {
   ].join('\n');
 }
 
+/** Same rules: plain text, and no contact details. The note is the person's own words, so it stays in. */
+export function formatWaitlistNotification(row: WaitlistRow): string {
+  return [`New cohort waitlist signup: ${row.name}`, ...(row.note ? [`Note: ${row.note}`] : [])].join('\n');
+}
+
 interface TelegramOpts {
   token: string;
   chatId: string;
@@ -61,4 +67,8 @@ export function createTelegramNotifier(opts: TelegramOpts): (row: Row) => Promis
 
 export function createIntakeNotifier(opts: TelegramOpts): (row: IntakeRow) => Promise<void> {
   return createTelegramSender(opts, formatIntakeNotification);
+}
+
+export function createWaitlistNotifier(opts: TelegramOpts): (row: WaitlistRow) => Promise<void> {
+  return createTelegramSender(opts, formatWaitlistNotification);
 }
