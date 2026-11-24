@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { isPublished } from '../../utils/content';
+import { isPublished, readingStats } from '../../utils/content';
 import type { SiteTerminalData } from './terminal-types';
 
 interface Props {
@@ -15,8 +15,7 @@ const blog: SiteTerminalData['blog'] = blogRaw.map((p) => ({
 	body: typeof p.body === 'string' ? p.body : '',
 	pubDate: p.data.pubDate.toISOString().slice(0, 10),
 	tag: p.data.tag,
-	readMin: p.data.readMin,
-	words: p.data.words,
+	...readingStats(p),
 }));
 
 const seriesRaw = await getCollection('series', ({ data }) => isPublished(data));

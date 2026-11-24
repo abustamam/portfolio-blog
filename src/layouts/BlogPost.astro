@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import { fmtDate } from '../utils/date';
+import { readingStats } from '../utils/content';
 import CopyButton from '../components/CopyButton.astro';
 import AvailabilityCard from '../components/AvailabilityCard.astro';
 import profilePic from '../assets/profile-pic.jpeg';
@@ -36,7 +37,8 @@ const {
 const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .filter(p => p.id !== slug)
-  .slice(0, 3);
+  .slice(0, 3)
+  .map((p) => ({ ...p, data: { ...p.data, ...readingStats(p) } }));
 
 
 // TOC: depth-2 headings only (h2)

@@ -2,7 +2,7 @@
 import { type CollectionEntry, getEntry, getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 import { getSeriesPosts } from '../../utils/series';
-import { isPublished } from '../../utils/content';
+import { isPublished, readingStats } from '../../utils/content';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('writing', ({ data }) => isPublished(data));
@@ -16,12 +16,7 @@ type Props = CollectionEntry<'writing'>;
 const post = Astro.props;
 const { Content, headings } = await render(post);
 
-// Compute word count and reading time from markdown body
-// Simple approach: strip frontmatter, count everything else (code is still content)
-const bodyText = post.body ?? '';
-const contentWithoutFrontmatter = bodyText.replace(/^---[\s\S]*?---/, '').trim();
-const computedWords = contentWithoutFrontmatter.split(/\s+/).length;
-const computedReadMin = Math.max(1, Math.ceil(computedWords / 200));
+const { words: computedWords, readMin: computedReadMin } = readingStats(post);
 
 // This route intentionally has no page-scoped styles; BlogPost handles presentation.
 let series: { id: string; title: string } | undefined;
