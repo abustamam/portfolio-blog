@@ -1,10 +1,43 @@
-# gstack
+## gstack (REQUIRED — global install)
+
+**Before doing ANY work, verify gstack is installed:**
+
+```bash
+_GS=""
+for _D in "${GSTACK_ROOT:-}" "$HOME/.claude/skills/gstack" "$HOME/.codex/skills/gstack" "$HOME/.factory/skills/gstack" "$HOME/.kiro/skills/gstack" "$HOME/.config/opencode/skills/gstack" "$HOME/.slate/skills/gstack" "$HOME/.cursor/skills/gstack" "$HOME/.openclaw/skills/gstack" "$HOME/.hermes/skills/gstack" "$HOME/.gbrain/skills/gstack" "$HOME/.copilot/skills/gstack" "$HOME/.gemini/antigravity-cli/skills/gstack" "$HOME/.gemini/skills/gstack" "$HOME/.gstack/repos/gstack"; do
+  [ -z "$_GS" ] && [ -n "$_D" ] && [ -d "$_D/bin" ] && _GS="$_D"
+done
+[ -n "$_GS" ] && echo "GSTACK_OK: $_GS" || echo "GSTACK_MISSING"
+```
+
+If GSTACK_MISSING: STOP. Do not proceed. Tell the user:
+
+> gstack is required for all AI-assisted work in this repo.
+> Install it:
+> ```bash
+> git clone --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+> cd ~/.claude/skills/gstack && ./setup --team
+> ```
+> Then restart your AI coding tool.
+
+Do not skip skills, ignore gstack errors, or work around missing gstack.
+
+Using gstack skills: After install, skills like /qa, /ship, /review
+and /browse are available. Use /browse for all web browsing (Aside first, the bundled gstack browser as fallback).
+Use the resolved install path above for gstack file paths
+(default: ~/.claude/skills/gstack).
+
+The Skill gate in .claude/settings.json runs .claude/hooks/check-gstack.cjs with
+Node.js and blocks when it cannot run. If a skill is blocked with "node: not
+found", tell the user to install Node.js (https://nodejs.org); if it is blocked
+with "Cannot find module ... check-gstack.cjs", the hook file is missing from
+this checkout. Do not work around either block.
 
 Use the /browse skill from gstack for all web browsing. NEVER use mcp__claude-in-chrome__* tools — they are slow, unreliable, and not what this project uses.
 
 Available gstack skills: /plan-ceo-review, /plan-eng-review, /review, /ship, /browse, /qa, /setup-browser-cookies, /retro
 
-gstack is installed globally at `~/.claude/skills/gstack`; this repo does not vendor a copy. If gstack skills aren't working, run `cd ~/.claude/skills/gstack && ./setup` to build the binary and register skills.
+This repo does not vendor gstack; `.claude/skills/gstack/` is gitignored. If skills misbehave after an update, rerun `cd ~/.claude/skills/gstack && ./setup --team`.
 
 ## Git Workflow
 

@@ -38,6 +38,11 @@ pnpm-debug.log*
 !.codeledger/team-ledger/**
 .claude/*
 !.claude/hooks.json
+!.claude/settings.json
+!.claude/hooks/
+.claude/hooks/*
+!.claude/hooks/check-gstack.cjs
+.claude/skills/gstack/
 CLAUDE.local.md
 .release-worktree/
 test-results/
