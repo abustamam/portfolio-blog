@@ -2,9 +2,11 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { fmtDate } from '../../utils/date';
+import { readingStats } from '../../utils/content';
 
 // Engineering posts lead; general-audience posts follow. Each group is newest first.
 const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
+  .map((p) => ({ ...p, data: { ...p.data, ...readingStats(p) } }))
   .sort((a, b) => {
     const rank = (p: typeof a) => (p.data.audience === 'general' ? 1 : 0);
     return rank(a) - rank(b) || b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
