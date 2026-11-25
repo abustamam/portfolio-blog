@@ -34,6 +34,11 @@ jobs:
       - name: Test the quiz intake service
         run: bun test services/ai-quiz-intake
 
+      # Includes the scrub.ps1 / scrub.py parity test: ubuntu-latest has pwsh,
+      # and with CI set a missing pwsh fails the run instead of skipping.
+      - name: Test the log-analysis kit
+        run: bun test kits/log-analysis
+
       - name: Install Playwright browsers
         run: bunx playwright install chromium
 

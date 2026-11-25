@@ -1,0 +1,197 @@
+2026-11-03T09:00:00.000Z INFO  [app] shop-api 2.13.4 started env=production
+2026-11-03T09:00:00.000Z INFO  [db] connected host=10.0.3.12 pool=20
+2026-11-03T09:00:49.182Z INFO  [http] req-8b0aa258 POST /api/checkout user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T09:01:20.774Z ERROR [payments] req-8b0aa258 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_it2rr5c0
+2026-11-03T09:01:20.774Z INFO  [http] req-8b0aa258 POST /api/checkout 504 30012ms
+2026-11-03T09:02:07.573Z INFO  [http] req-907248b4 POST /api/checkout user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T09:02:38.600Z ERROR [payments] req-907248b4 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_qwqlybjf
+2026-11-03T09:02:38.600Z INFO  [http] req-907248b4 POST /api/checkout 504 30012ms
+2026-11-03T09:03:37.574Z INFO  [http] req-e8088638 GET /api/products 200 40ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:04:20.819Z INFO  [http] req-25f1fc0c GET /api/products 200 42ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T09:04:45.610Z DEBUG [auth] req-b32c6d24 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJMK4BY11DJ4Z2Z5MABlFPXrrFucKvonJnvXOcmxC4.sjeEpirhZjlErZihV_Gr0POOupKSFx0JCI6SU9WPijh for user=usr_pyzbavb7
+2026-11-03T09:05:17.596Z INFO  [http] req-689aab55 POST /api/cart/items 201 133ms user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T09:06:36.171Z INFO  [http] req-d9effd7e POST /api/cart/items 201 82ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:07:44.046Z INFO  [http] req-e7826b5c GET /api/orders 200 231ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T09:08:40.034Z INFO  [http] req-b61f9700 GET /api/orders 200 89ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:09:57.747Z INFO  [http] req-5b9bc49c GET /health 200 42ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:11:01.105Z INFO  [http] req-eae251e3 POST /api/checkout user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:11:31.820Z ERROR [payments] req-eae251e3 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_dtvndgu8
+2026-11-03T09:11:31.820Z INFO  [http] req-eae251e3 POST /api/checkout 504 30012ms
+2026-11-03T09:12:28.510Z INFO  [accounts] req-fb90e601 password reset email sent to priya.khan@example.org
+2026-11-03T09:12:54.272Z INFO  [http] req-0046408c GET /api/cart 200 96ms user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T09:13:21.886Z DEBUG [auth] req-19e8c9fb validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlU50zE8hBVBdWN1LtTPzKSnPYTUzFqteWPsvk92g.3_zbZFTmVyMENz2L_6vzVBzd7luyn2NZbC-csYIQ-f4 for user=usr_ujc9j003
+2026-11-03T09:14:02.200Z INFO  [http] req-28445de2 GET /api/orders 200 180ms user=usr_xic7y5qv ip=192.0.2.178
+2026-11-03T09:14:34.227Z WARN  [payments] req-dc4b8c63 card declined card=4111 1111 1111 1111 user=usr_qwqlybjf email=li.park@example.org
+2026-11-03T09:15:02.847Z INFO  [http] req-9a4b5cb7 GET /api/orders 200 126ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T09:15:34.343Z INFO  [http] req-876a2a01 GET /health 200 65ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T09:16:31.105Z INFO  [http] req-96822404 POST /api/checkout user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:17:02.682Z ERROR [payments] req-96822404 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_dtvndgu8
+2026-11-03T09:17:02.682Z INFO  [http] req-96822404 POST /api/checkout 504 30012ms
+2026-11-03T09:17:51.287Z INFO  [http] req-1e0e9402 POST /api/checkout user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T09:18:23.149Z ERROR [payments] req-1e0e9402 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_r6ap3h1d
+2026-11-03T09:18:23.149Z INFO  [http] req-1e0e9402 POST /api/checkout 504 30012ms
+2026-11-03T09:18:54.465Z INFO  [http] req-32b6468f GET /health 200 167ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:20:07.209Z INFO  [http] req-7eac0e06 GET /health 200 127ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T09:21:27.151Z WARN  [payments] req-33db435b card declined card=5555-5555-5555-4444 user=usr_hwpm3sj7 email=noah.smith@example.com
+2026-11-03T09:21:52.847Z INFO  [accounts] req-9a74638e new signup email=noah.smith@example.com user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T09:22:39.346Z INFO  [http] req-35759a66 GET /api/products/759 200 240ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:23:23.019Z INFO  [http] req-fbc088ff GET /api/cart 200 111ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:24:35.806Z INFO  [http] req-973ea849 GET /api/products 200 87ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:25:12.130Z WARN  [payments] req-6f0e3c31 card declined card=4111 1111 1111 1111 user=usr_hwpm3sj7 email=noah.smith@example.com
+2026-11-03T09:26:23.190Z INFO  [http] req-3de1947e GET /api/products 200 124ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T09:27:35.117Z INFO  [http] req-00d27594 GET /api/products 200 106ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T09:28:36.562Z INFO  [http] req-64eaca40 GET /api/orders 200 68ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T09:29:07.441Z INFO  [http] req-de4dfa81 GET /api/products 200 43ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T09:29:32.390Z INFO  [http] req-763ae21a GET /api/cart 200 57ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T09:30:21.794Z INFO  [http] req-bb8eca3f GET /api/cart 200 166ms user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T09:30:58.179Z DEBUG [auth] req-fac2a547 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJce246jpzvD4_PpRBDavywN1_cf41anOWok4hgHf-.laLGdvOAmgkMSUFyQhmlMmowjgqBN9G-wNWzmK0DVsG for user=usr_hwpm3sj7
+2026-11-03T09:31:54.126Z DEBUG [auth] req-023d6134 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJQZFFAphomN-FxkMc40VnGUzn97RQ9J1d3tZvFkbG.BKJEI7emF6GyEOzyh6ODBx-CiPXD2qSM5-HKGdJDbiZ for user=usr_ujc9j003
+2026-11-03T09:33:10.574Z INFO  [http] req-1f3f445a GET /api/cart 200 132ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:33:37.147Z INFO  [http] req-1c8a9371 POST /api/cart/items 201 186ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T09:34:22.452Z WARN  [payments] req-284822d5 card declined card=378282246310005 user=usr_pyzbavb7 email=maria.silva@example.com
+2026-11-03T09:35:34.227Z INFO  [http] req-de5196db GET /api/products/905 200 70ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:36:52.505Z WARN  [payments] req-8bd70c61 card declined card=4111 1111 1111 1111 user=usr_gq832icz email=sam.lee@example.net
+2026-11-03T09:37:40.202Z INFO  [http] req-1f3ed3cb GET /api/orders 200 171ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:38:36.542Z INFO  [http] req-3302ef79 GET /api/cart 200 103ms user=usr_xic7y5qv ip=192.0.2.178
+2026-11-03T09:39:44.334Z INFO  [http] req-aa984097 POST /api/cart/items 201 199ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T09:40:21.683Z INFO  [http] req-ec161089 GET /api/products/456 200 214ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:41:07.541Z INFO  [http] req-90ee8eb0 GET /health 200 219ms user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T09:42:14.167Z INFO  [http] req-953a3ec4 GET /api/products/667 200 146ms user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T09:42:35.923Z INFO  [http] req-bc6dbdc9 GET /api/orders 200 157ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T09:43:32.337Z INFO  [http] req-045747ce GET /health 200 28ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:44:49.665Z INFO  [accounts] req-3b5ed3e8 new signup email=jane.doe@example.com user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T09:45:41.443Z INFO  [http] req-d55f6ba8 GET /api/orders 200 179ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T09:46:47.883Z INFO  [http] req-8ef48d0b POST /api/cart/items 201 164ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T09:48:01.012Z INFO  [http] req-746b4b19 GET /api/products/242 200 55ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:48:53.649Z INFO  [http] req-6d93ba44 GET /api/cart 200 14ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T09:49:32.056Z INFO  [http] req-651aaa99 GET /api/cart 200 111ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T09:50:44.015Z INFO  [accounts] req-0698fab1 password reset email sent to sam.lee@example.net
+2026-11-03T09:51:21.559Z INFO  [http] req-1e3be59f GET /api/orders 200 195ms user=usr_xic7y5qv ip=192.0.2.178
+2026-11-03T09:52:42.027Z DEBUG [auth] req-8023ccbc validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJP5okoxZyVs6W6twhYT1QaDUuGnkA_9_qrMDF13sg.5RTZV7dCdQQ1vuRN3dcyrN3NM-3qzjIPyitrEBcexZX for user=usr_ujc9j003
+2026-11-03T09:53:27.658Z INFO  [http] req-ed10d6a0 POST /api/cart/items 201 178ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T09:54:06.447Z INFO  [http] req-d7b60ebb GET /api/products/173 200 118ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T09:55:08.001Z INFO  [http] req-799f43a8 POST /api/checkout user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T09:55:38.853Z ERROR [payments] req-799f43a8 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_it2rr5c0
+2026-11-03T09:55:38.853Z INFO  [http] req-799f43a8 POST /api/checkout 504 30012ms
+2026-11-03T09:56:24.750Z INFO  [http] req-0e3372a2 GET /api/orders 200 227ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T09:56:46.305Z INFO  [http] req-51a299c3 POST /api/cart/items 201 83ms user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T09:57:14.315Z INFO  [http] req-45ba203a GET /api/orders 200 58ms user=usr_xic7y5qv ip=192.0.2.178
+2026-11-03T09:58:26.808Z INFO  [http] req-64ea91dc GET /api/orders 200 165ms user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T09:59:17.630Z DEBUG [auth] req-98139a76 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJy3EtgMHA9vXADuERJA06B2hCfjRhU8KAWQpyDwAA.snbCFjUZ0HETp-8P3ackko1W7aIL98XiONmQOrfeGx8 for user=usr_lvazyiu7
+2026-11-03T09:59:54.088Z INFO  [http] req-5c22daae GET /health 200 117ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:01:08.455Z INFO  [deploy] rolling out shop-api 2.14.0
+2026-11-03T10:01:08.455Z INFO  [app] shop-api 2.14.0 started env=production
+2026-11-03T10:02:12.787Z DEBUG [auth] req-5e1f809b validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJAGSMRC0HOOf9CATWYYfr1a4SN5J0RbV4KQvzXiUk.YK-T6WIhALQejhwfokMrUzluf0GWPqgOfXIrWqI1yCy for user=usr_hwpm3sj7
+2026-11-03T10:03:07.900Z INFO  [http] req-9623ce1e POST /api/cart/items 201 57ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:03:47.771Z INFO  [http] req-a2aa800c GET /api/products 200 33ms user=usr_pyzbavb7 ip=203.0.113.196
+2026-11-03T10:04:27.008Z DEBUG [auth] req-f21deed5 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJgaK6GdAShbiThux0b1f8IreviP1fm--MN9gizqaN.tUM8WLFgh3h-a3H6I7q8i__Vph_Tr6X43H95UaSUgiE for user=usr_dtvndgu8
+2026-11-03T10:05:25.764Z INFO  [http] req-1a4d3802 GET /api/products/901 200 207ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:06:02.628Z DEBUG [auth] req-f8f923c2 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJr3sV6fY_SlNKRvFcAR3bIvAFDuo90XjbvXcw4cLX.7wdenW3FdwieSN5TKMeIr135AuVNW7Apu3h8BFJ9D-k for user=usr_gq832icz
+2026-11-03T10:06:42.759Z INFO  [http] req-452ec4f3 POST /api/cart/items 201 121ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T10:07:15.314Z INFO  [http] req-af7d0681 POST /api/cart/items 201 36ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T10:07:42.807Z INFO  [http] req-c4c060e0 GET /api/reports/export?format=csv&api_key=demo_key_slyeh8xsjwecw6diq0qurs7t 200 852ms ip=198.51.100.157
+2026-11-03T10:08:42.168Z INFO  [http] req-01d4cf32 GET /health 200 26ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T10:09:29.354Z ERROR [orders] req-4ea33461 Unhandled exception in GET /api/orders/{id}/total user=usr_r6ap3h1d
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Shop.Orders.OrderService.GetTotal(Order order) in /src/Shop/Orders/OrderService.cs:line 88
+   at Shop.Orders.OrdersController.Total(Int32 id) in /src/Shop/Orders/OrdersController.cs:line 41
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.Execute(Object controller)
+2026-11-03T10:09:29.354Z INFO  [http] req-4ea33461 GET /api/orders/6456/total 500 22ms
+2026-11-03T10:10:16.438Z INFO  [http] req-d80af17e POST /api/cart/items 201 27ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T10:10:59.622Z INFO  [http] req-5e360c86 GET /api/products/155 200 132ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:12:16.999Z INFO  [http] req-60d5b327 GET /api/cart 200 91ms user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T10:13:30.756Z INFO  [http] req-eb9ee13e POST /api/cart/items 201 49ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:13:52.534Z ERROR [orders] req-0e9e10bd Unhandled exception in GET /api/orders/{id}/total user=usr_dtvndgu8
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Shop.Orders.OrderService.GetTotal(Order order) in /src/Shop/Orders/OrderService.cs:line 88
+   at Shop.Orders.OrdersController.Total(Int32 id) in /src/Shop/Orders/OrdersController.cs:line 41
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.Execute(Object controller)
+2026-11-03T10:13:52.534Z INFO  [http] req-0e9e10bd GET /api/orders/1576/total 500 31ms
+2026-11-03T10:14:46.168Z INFO  [accounts] req-52c0ba80 new signup email=ava.nguyen@example.net user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T10:15:25.439Z INFO  [http] req-0093127c GET /api/products 200 132ms user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T10:16:22.660Z INFO  [http] req-383deada GET /api/products/751 200 149ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T10:17:19.210Z INFO  [http] req-5dfafab3 GET /api/cart 200 132ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:18:36.837Z INFO  [http] req-80da738f GET /api/orders 200 40ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T10:19:07.340Z DEBUG [auth] req-9dd80eb2 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJor9_mfcpoaGmW0ZDpmo6_TvwoGCzNIRHxdBJlvux.epjZTL8XWwFExSAwatKtPvKZyroPr4W4dzROeK8GPUa for user=usr_hwpm3sj7
+2026-11-03T10:20:19.158Z INFO  [http] req-64e9faf3 GET /api/orders 200 60ms user=usr_r6ap3h1d ip=198.51.100.245
+2026-11-03T10:21:27.972Z INFO  [http] req-8be02913 GET /api/reports/export?format=csv&api_key=demo_key_oj7hf20r8tpzz2q09vt4pg43 200 695ms ip=192.0.2.105
+2026-11-03T10:22:44.389Z DEBUG [auth] req-47e59afb validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJS36woiCoDhzjdJEqDKMPtywVtNbCYbrfPfivOuD8.c8nsXgkz35rXmtMPoZpk9kErsryIJBPTGevErGiK0HX for user=usr_it2rr5c0
+2026-11-03T10:23:12.084Z WARN  [payments] req-c205f7de card declined card=4012888888881881 user=usr_hwpm3sj7 email=noah.smith@example.com
+2026-11-03T10:24:12.962Z INFO  [http] req-5cf35d82 GET /api/orders 200 212ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:24:36.089Z INFO  [http] req-e5b0a188 POST /api/checkout user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:25:07.398Z ERROR [payments] req-e5b0a188 PaymentGatewayTimeout: no response from gateway after 30000ms user=usr_gq832icz
+2026-11-03T10:25:07.398Z INFO  [http] req-e5b0a188 POST /api/checkout 504 30012ms
+2026-11-03T10:26:23.680Z DEBUG [auth] req-ec62875c validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJKdWGjEY60tfDTrb0_M_jwDw0aZYJOnFNRKnp45-4.YNV_QzBZZ7szVM8bo8mDiDzNeoEPRRhGBZp2JZLdu6K for user=usr_xic7y5qv
+2026-11-03T10:27:17.563Z INFO  [http] req-80fd8fd7 GET /api/orders 200 231ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:28:12.029Z DEBUG [auth] req-380e1f87 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJPKw8-5MXrm32GM8T8n2Uvkk6cFTbkVbfP4uUWFCz.Yam2UrmqtyiBenQsxgkWunKW5V91QncpsVEHgzFMJKa for user=usr_lvazyiu7
+2026-11-03T10:29:02.576Z INFO  [http] req-09be9500 GET /api/orders 200 151ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:29:43.081Z INFO  [http] req-40c44042 POST /api/cart/items 201 226ms user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T10:30:46.638Z INFO  [http] req-0096f434 GET /api/products/509 200 106ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:31:15.003Z INFO  [accounts] req-6a0b4ca8 new signup email=noah.smith@example.com user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:31:39.595Z INFO  [http] req-4e24c85b GET /api/products 200 122ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:32:40.266Z INFO  [http] req-2bc9e2f7 GET /api/products 200 109ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:33:07.224Z INFO  [http] req-c6a9bafa GET /api/cart 200 182ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:33:40.156Z INFO  [http] req-d5272fb5 POST /api/cart/items 201 194ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:34:24.746Z ERROR [orders] req-6598dad8 Unhandled exception in GET /api/orders/{id}/total user=usr_r6ap3h1d
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Shop.Orders.OrderService.GetTotal(Order order) in /src/Shop/Orders/OrderService.cs:line 88
+   at Shop.Orders.OrdersController.Total(Int32 id) in /src/Shop/Orders/OrdersController.cs:line 41
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.Execute(Object controller)
+2026-11-03T10:34:24.746Z INFO  [http] req-6598dad8 GET /api/orders/2429/total 500 17ms
+2026-11-03T10:35:31.661Z WARN  [db] connection pool at 18/20 host=10.0.3.12
+2026-11-03T10:35:47.072Z ERROR [db] req-16c2ba9f TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_xic7y5qv
+2026-11-03T10:36:03.071Z ERROR [db] req-09a90a27 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_xic7y5qv
+2026-11-03T10:36:20.980Z ERROR [db] req-77909476 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_xic7y5qv
+2026-11-03T10:36:39.055Z ERROR [db] req-d54edca1 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_lvazyiu7
+2026-11-03T10:36:51.893Z ERROR [db] req-626454d5 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_xic7y5qv
+2026-11-03T10:37:06.982Z ERROR [db] req-0bbe31a6 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_xic7y5qv
+2026-11-03T10:37:29.144Z ERROR [db] req-0d276cbe TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_lvazyiu7
+2026-11-03T10:37:42.832Z ERROR [db] req-c127a2ba TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_gq832icz
+2026-11-03T10:37:48.912Z ERROR [db] req-c234c5a7 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_pyzbavb7
+2026-11-03T10:38:03.412Z ERROR [db] req-4499d11a TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_qwqlybjf
+2026-11-03T10:38:22.754Z ERROR [db] req-b869a6d6 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_ujc9j003
+2026-11-03T10:38:29.245Z ERROR [db] req-2bced730 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_hwpm3sj7
+2026-11-03T10:38:52.735Z ERROR [db] req-99e9bb49 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_pyzbavb7
+2026-11-03T10:39:02.243Z ERROR [db] req-8b73b998 TimeoutException: could not get a connection from the pool within 5000ms (max=20) user=usr_hwpm3sj7
+System.TimeoutException: Timeout expired. The timeout period elapsed prior to obtaining a connection from the pool.
+   at Shop.Data.Db.OpenAsync() in /src/Shop/Data/Db.cs:line 23
+   at Shop.Products.ProductRepository.ListAsync() in /src/Shop/Products/ProductRepository.cs:line 57
+2026-11-03T10:39:37.102Z INFO  [db] connection pool recovered 6/20 host=10.0.3.12
+2026-11-03T10:40:08.163Z INFO  [http] req-0c1ec15a GET /api/products 200 51ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T10:40:42.129Z INFO  [accounts] req-5ffb624b new signup email=ava.nguyen@example.net user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T10:41:21.802Z ERROR [orders] req-662dd334 Unhandled exception in GET /api/orders/{id}/total user=usr_gq832icz
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Shop.Orders.OrderService.GetTotal(Order order) in /src/Shop/Orders/OrderService.cs:line 88
+   at Shop.Orders.OrdersController.Total(Int32 id) in /src/Shop/Orders/OrdersController.cs:line 41
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.Execute(Object controller)
+2026-11-03T10:41:21.802Z INFO  [http] req-662dd334 GET /api/orders/8398/total 500 28ms
+2026-11-03T10:42:10.248Z INFO  [http] req-becb85e2 GET /api/products 200 33ms user=usr_dtvndgu8 ip=198.51.100.157
+2026-11-03T10:42:47.311Z INFO  [accounts] req-d54c62c8 new signup email=jane.doe@example.com user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:43:49.096Z DEBUG [auth] req-0104596e validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJFpKDkatVr_rD17bMIQMOX4SngDZZf9pTq-1upHI2.MRr4wQgfbL8rVnf8q8cQN0a9MsDWRUmdoouGdD1I9aE for user=usr_xic7y5qv
+2026-11-03T10:44:19.940Z INFO  [http] req-04cd604e GET /health 200 57ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T10:45:40.258Z DEBUG [auth] req-b4d5fe08 validating Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJJGdWAIG9dWQXY-cnMuLVfXzTn7xmwohrmJTJeOQD.mus7s2AwFQqsIJdNRI-VXpAnTiC__64iterbmvkwohG for user=usr_ujc9j003
+2026-11-03T10:46:04.625Z INFO  [http] req-0e716ec8 GET /api/products/955 200 41ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:46:41.316Z INFO  [http] req-9e0e96ca GET /api/orders 200 58ms user=usr_xic7y5qv ip=192.0.2.178
+2026-11-03T10:47:49.732Z INFO  [accounts] req-2e09b6d1 password reset email sent to ava.nguyen@example.net
+2026-11-03T10:48:41.480Z INFO  [http] req-2f8622ba GET /api/orders 200 128ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:49:51.551Z INFO  [http] req-1ae3d2d2 GET /api/orders 200 86ms user=usr_gq832icz ip=198.51.100.229
+2026-11-03T10:50:50.447Z ERROR [orders] req-f510cf79 Unhandled exception in GET /api/orders/{id}/total user=usr_hwpm3sj7
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Shop.Orders.OrderService.GetTotal(Order order) in /src/Shop/Orders/OrderService.cs:line 88
+   at Shop.Orders.OrdersController.Total(Int32 id) in /src/Shop/Orders/OrdersController.cs:line 41
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.Execute(Object controller)
+2026-11-03T10:50:50.447Z INFO  [http] req-f510cf79 GET /api/orders/9113/total 500 13ms
+2026-11-03T10:52:11.436Z INFO  [http] req-77e02920 GET /api/products 200 238ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:52:46.777Z INFO  [http] req-40144f5d GET /api/products 200 65ms user=usr_it2rr5c0 ip=203.0.113.116
+2026-11-03T10:53:44.472Z INFO  [http] req-78a7ba0d GET /api/products 200 46ms user=usr_qwqlybjf ip=192.0.2.105
+2026-11-03T10:54:25.273Z INFO  [http] req-849440ac GET /api/products/850 200 120ms user=usr_ujc9j003 ip=192.0.2.145
+2026-11-03T10:55:15.563Z INFO  [accounts] req-eb963a91 new signup email=yusuf.ali@example.org user=usr_xic7y5qv ip=192.0.2.178
+2026-11-03T10:56:13.070Z INFO  [http] req-d302675d POST /api/cart/items 201 219ms user=usr_hwpm3sj7 ip=203.0.113.54
+2026-11-03T10:57:14.392Z INFO  [http] req-3c87100d GET /api/cart 200 176ms user=usr_lvazyiu7 ip=203.0.113.164
+2026-11-03T10:58:11.305Z INFO  [accounts] req-fd9db824 password reset email sent to grace.brown@example.com
+2026-11-03T10:59:31.259Z ERROR [orders] req-767c5f09 Unhandled exception in GET /api/orders/{id}/total user=usr_pyzbavb7
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Shop.Orders.OrderService.GetTotal(Order order) in /src/Shop/Orders/OrderService.cs:line 88
+   at Shop.Orders.OrdersController.Total(Int32 id) in /src/Shop/Orders/OrdersController.cs:line 41
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.Execute(Object controller)
+2026-11-03T10:59:31.259Z INFO  [http] req-767c5f09 GET /api/orders/3708/total 500 36ms

@@ -84,6 +84,14 @@ export const AI_CARDS: AiCard[] = [
     subtitle: 'The one-page hand-off · session 4',
     motif: 'hand-off',
   },
+  {
+    id: 'log-analysis',
+    path: '/ai-cohort/log-analysis/',
+    eyebrow: 'AI training · resource',
+    title: 'Find errors in app logs with AI, safely',
+    subtitle: 'Scrub first, then analyze · kit for IT',
+    motif: 'never-paste',
+  },
 ];
 
 /** What guideCards() needs from each published guide (the collection entry fits). */
