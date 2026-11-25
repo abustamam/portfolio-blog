@@ -1,0 +1,31 @@
+---
+title: One weekly task, by profession
+description: "One ordinary weekly task for each of five jobs, with the prompt someone in that job might type and what they check before using the answer."
+lead: "I wrote up one ordinary weekly task for each of five jobs, with the prompt someone in that job might type, what they check before using the answer, and how the week goes before and after. Pick the job closest to yours and try the prompt."
+step: 5
+minutes: 4
+tool: Example cards
+ctaLine: "In the hands-on training I work through one task from your own week with you."
+---
+import ExampleCards from '../../components/guides/ExampleCards.astro';
+import PromptBuilder from '../../components/guides/PromptBuilder.astro';
+import { EXAMPLE_CARDS, toPresets } from '../../consts/guides/examples';
+
+## Five weekly tasks
+
+Each card is one task that comes round every week in that job. The Before and After buttons show how the week goes without AI and with it. Try this prompt puts that card's prompt into the builder further down.
+
+<ExampleCards builderId="examples-builder" />
+
+## The prompt in five parts
+
+The prompt from the card you picked shows up here, split into its five parts. Change any part to fit your own week and the full prompt underneath changes with it. Copy it into whichever AI app you use ([Which AI app should I use?](/ai-guides/which-tool/) helps if you haven't picked one), then check the answer the way the card says.
+
+<PromptBuilder
+  presets={toPresets(EXAMPLE_CARDS)}
+  storageKey="examples"
+  id="examples-builder"
+  chipsLabel="Or start from another example"
+/>
+
+[The five-part prompt](/ai-guides/prompt/) explains what each part is for. Before you paste in anything of your own, read [what's safe to paste into AI](/ai-guides/never-paste/).
