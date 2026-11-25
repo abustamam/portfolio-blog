@@ -1,11 +1,13 @@
 ---
 import CohortPage from '../../layouts/CohortPage.astro';
-import { Content } from '../../content/ai-partials/never-paste.md';
+import { Content as Before } from '../../content/ai-partials/never-paste-before.mdx';
+import { Content as After } from '../../content/ai-partials/never-paste-after.mdx';
 ---
 <CohortPage
   title="What's safe to paste into AI"
   kicker="handout · sessions 1 and 2"
   lead="Whatever you paste into an AI chat leaves your computer. What you may paste depends on which account you use, so start there."
 >
-  <Content />
+  <Before />
+  <After />
 </CohortPage>
