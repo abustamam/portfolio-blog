@@ -11,6 +11,7 @@ ctaLine: "In the hands-on training you make one weekly task repeatable, so the A
 import Term from '../../components/guides/Term.astro';
 import { Image } from 'astro:assets';
 import projectInstructions from '../../assets/guides/projects/project-instructions.png';
+import napChat from '../../assets/guides/projects/nap-chat.png';
 import napAppWeek from '../../assets/guides/projects/nap-app-week.png';
 import TwoNewChats from '../../components/guides/TwoNewChats.astro';
 import { PROJECT_APPS, PROJECT_LABELS, PROJECT_ORDER, UNCONFIRMED, GEMS_NOTICE, oldestChecked } from '../../consts/guides/projects';
@@ -35,7 +36,7 @@ Here is the difference. Same job, same answer, two ways to get there. The exampl
 This is the project I use most. My toddler's sleep is hard to predict, so I keep a project for it.
 
 - **The instructions:** her age (worked out from her birth date), that we speak French only at home, and a "How to help" list of what matters most.
-- **When I need it:** I take a screenshot of the nap-tracking app and ask, "When should her next nap be?" It already knows everything else.
+- **When I need it:** I send a screenshot of the nap-tracking app and one casual line, like "Rough night but she woke at 8a and she is happy". It already knows everything else, and it answers with a nap window, a bedtime, and what to do if she wakes tonight.
 
 <figure class="nap-shot nap-shot-narrow">
   <Image src={projectInstructions} alt="A project's custom-instructions box. Names and the birth date are blanked out; it says to infer her age from today's date, that we speak French only at home, and to default to French for songs, games and soothing." width={540} />
@@ -47,7 +48,11 @@ This is the kind of screenshot I send: a week of her sleep in the tracking app.
   <Image src={napAppWeek} alt="A week of a toddler's sleep in a nap-tracking app: colored bars for night sleep, naps and feeds, one column per day." width={720} />
 </figure>
 
-<div class="ai-label" data-todo-screenshot>TODO(author): screenshot of one chat with the nap-app screenshot and the answer.</div>
+Here is that chat, inside the project.
+
+<figure class="nap-shot nap-shot-chat">
+  <Image src={napChat} alt="A chat inside the project: a screenshot of the nap-tracking app and one line, 'Rough night but she woke at 8a and she is happy'. The reply suggests a nap from about 12:00 to 3:00 and an 8:00 bedtime." width={720} />
+</figure>
 
 Notice what's not in it: her name, her photo, where we live. It doesn't need them. And this is a low-stakes job: it's a suggestion, I can overrule it, and a nap that runs a little long costs nothing. I wouldn't hand a project anything where a wrong answer is expensive without checking it.
 
@@ -111,5 +116,5 @@ What each app says about its version of a project. Where a cell says "Check the 
   .nap-shot { margin: 1.5rem 0; }
   .nap-shot-narrow { max-width: 28rem; }
   .nap-shot img { max-width: 100%; height: auto; border: 1px solid var(--color-line); border-radius: 8px; }
-  [data-todo-screenshot] { padding: 1rem; border: 2px dashed var(--color-accent); border-radius: 8px; margin: 1rem 0; }
+  .nap-shot-chat { max-width: 22.5rem; }
 `}</style>
