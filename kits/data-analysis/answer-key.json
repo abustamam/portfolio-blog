@@ -39,6 +39,7 @@
   },
   "totals": {
     "asInFile": 89754.86,
+    "outlierKept": 89559.89,
     "afterFixes": 71294.39
   },
   "byCategory": {

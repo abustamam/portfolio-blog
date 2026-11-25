@@ -13,6 +13,8 @@
 //   - one blank Amount
 //   - one outlier: 18450.00 where 184.50 was meant (a slipped decimal point)
 //   - one inconsistent category: 4 rows say "Supplies", the rest "Office Supplies"
+// totals.outlierKept removes the duplicate and merges names but leaves the
+// outlier as written (what the prompts tell the AI to do).
 // "True" totals (afterFixes) remove the duplicate, merge the category name,
 // correct the outlier to 184.50, and count the blank as nothing.
 
@@ -101,6 +103,9 @@ const sum = (rs) => rs.reduce((t, r) => t + (r.cents ?? 0), 0);
 const fixed = rows
   .filter((r) => r.odd !== 'duplicate-copy')
   .map((r) => (r.odd === 'outlier' ? { ...r, cents: 18450 } : r));
+// What an AI gets by following the prompts exactly: duplicate removed, names
+// merged, outlier kept (the prompts say to list it and ask, not to change it).
+const outlierKept = rows.filter((r) => r.odd !== 'duplicate-copy');
 const byCategory = {};
 const byMonth = {};
 for (const r of fixed) {
@@ -122,7 +127,7 @@ const facts = {
     outlier: { row: rowOf((r) => r.odd === 'outlier')[0], amount: 18450, likelyAmount: 184.5 },
     category: { canonical: 'Office Supplies', variant: 'Supplies', rows: rowOf((r) => r.odd === 'variant') },
   },
-  totals: { asInFile: sum(rows) / 100, afterFixes: sum(fixed) / 100 },
+  totals: { asInFile: sum(rows) / 100, outlierKept: sum(outlierKept) / 100, afterFixes: sum(fixed) / 100 },
   byCategory: toDollars(byCategory),
   byMonth: toDollars(byMonth),
   question: {

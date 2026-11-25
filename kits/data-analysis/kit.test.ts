@@ -24,7 +24,7 @@ const dollars = (c: number) => c / 100;
 
 // The same fixes the key describes: drop the exact duplicate, merge the
 // category name, put the outlier back to 184.50, leave the blank at nothing.
-function fixed(): Row[] {
+function fixed(keepOutlier = false): Row[] {
   const seen = new Set<string>();
   const out: Row[] = [];
   for (const r of rows) {
@@ -33,7 +33,7 @@ function fixed(): Row[] {
     out.push({
       ...r,
       category: r.category === 'Supplies' ? 'Office Supplies' : r.category,
-      amount: r.n === facts.oddities.outlier.row ? 18450 : r.amount,
+      amount: r.n === facts.oddities.outlier.row && !keepOutlier ? 18450 : r.amount,
     });
   }
   return out;
@@ -73,6 +73,8 @@ describe('answer key matches the CSV', () => {
   test('totals', () => {
     expect(dollars(cents(rows))).toBe(facts.totals.asInFile);
     expect(dollars(cents(fixed()))).toBe(facts.totals.afterFixes);
+    // Following the prompts exactly: duplicate out, names merged, outlier left as written.
+    expect(dollars(cents(fixed(true)))).toBe(facts.totals.outlierKept);
     expect(fixed().length).toBe(facts.rowsAfterRemovingDuplicate);
   });
 

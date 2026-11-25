@@ -21,6 +21,13 @@ const lines = csv.trimEnd().split('\n');
 const rowText = (n: number) => lines[n - 1];
 const o = facts.oddities;
 const biggest = Object.entries(facts.byCategory).sort((a, b) => b[1] - a[1])[0];
+// If the AI follows the prompts and keeps the outlier, its row (Office Supplies,
+// in the month that row is dated) is higher than the tables by this much.
+const keptGap = Math.round((facts.totals.outlierKept - facts.totals.afterFixes) * 100) / 100;
+const outlierMonth = monthName(rowText(o.outlier.row).slice(0, 7));
+const equipment = facts.byCategory.Equipment;
+// Checked from the data: Equipment still wins when the outlier is kept.
+const sameBiggest = biggest[0] === 'Equipment' && Object.entries(facts.byCategory).every(([k, v]) => k === 'Equipment' || (k === o.category.canonical ? v + keptGap : v) < equipment);
 
 const prompts = [...promptsMd.matchAll(/^## (.+)\n\n```text\n([\s\S]*?)\n```/gm)].map((m) => ({
   title: m[1].replace(/^\d+\.\s*/, ''),
@@ -161,13 +168,13 @@ const checks = [
           <p><strong>The true answer.</strong> A good answer finds all four: the duplicate (rows {o.duplicate.rows.join(' and ')}), the blank (row {o.blank.row}), the outlier (row {o.outlier.row}, {money(o.outlier.amount)}) and the two category names ("{o.category.canonical}" and "{o.category.variant}"). Missing one is normal. Inventing a fifth is the warning sign.</p>
         )}
         {i === 1 && (
-          <p><strong>The true answer.</strong> Grand total {money(facts.totals.afterFixes)}. If the AI used the file as it stands, it will say {money(facts.totals.asInFile)}, which is the outlier and the duplicate counted in. The category table is above, and Office Supplies should be one line, not two.</p>
+          <p><strong>The true answer.</strong> It depends on what the AI did with row <span data-fact="oddities.outlier.row">{o.outlier.row}</span> ({money(o.outlier.amount)}). My prompt says to list that amount and ask me, not to change it. So a good answer <strong>keeps it, flags row {o.outlier.row}, and asks</strong>, and its grand total is <strong data-fact="totals.outlierKept">{money(facts.totals.outlierKept)}</strong> (duplicate counted once, category names merged). Once you fix the outlier to {money(o.outlier.likelyAmount)}, the total is {money(facts.totals.afterFixes)}. If the AI used the file as it stands, with the duplicate and the two names, it will say {money(facts.totals.asInFile)}. Silently changing the amount without telling me is the thing to catch. The tables above show the totals after every fix, so if the AI kept the outlier, Office Supplies and {outlierMonth} will each be {money(keptGap)} higher than the tables. Office Supplies should be one line, not two.</p>
         )}
         {i === 2 && (
           <p><strong>The true answer.</strong> {money(facts.question.answer)}, from {facts.question.rows} rows. This one the planted mistakes do not touch, so a wrong answer here means the AI mis-added or picked the wrong rows.</p>
         )}
         {i === 3 && (
-          <p><strong>The true answer.</strong> Total spend {money(facts.totals.afterFixes)}. The biggest category is {biggest[0]} at {money(biggest[1])}. If a sentence quotes a total of {money(facts.totals.asInFile)}, the AI trusted the mistakes.</p>
+          <p><strong>The true answer.</strong> Total spend: {money(facts.totals.outlierKept)} if the AI followed the prompt and kept the outlier, {money(facts.totals.afterFixes)} once you fix row {o.outlier.row} to {money(o.outlier.likelyAmount)}, and {money(facts.totals.asInFile)} if it used the file as it stands. The biggest category is {biggest[0]} at {money(biggest[1])}{sameBiggest ? ', and it is the same whether or not the outlier is fixed' : ''}. A good answer says which of these it used. If a sentence quotes {money(facts.totals.asInFile)} without saying so, the AI trusted the mistakes. Remember the tables show the totals after every fix, so Office Supplies and {outlierMonth} will be {money(keptGap)} higher if the outlier was kept.</p>
         )}
       </div>
     </>

@@ -14,7 +14,7 @@ function fromCsv() {
     return { n: i + 2, text, date, category, cents: amount === '' ? null : Math.round(Number(amount) * 100) };
   });
   const seen = new Set<string>();
-  const total = { asInFile: 0, afterFixes: 0 };
+  const total = { asInFile: 0, outlierKept: 0, afterFixes: 0 };
   const byCategory: Record<string, number> = {};
   const byMonth: Record<string, number> = {};
   let travelMarch = 0;
@@ -26,6 +26,7 @@ function fromCsv() {
     seen.add(r.text);
     const cents = (r.cents ?? 0) > 90000 ? 18450 : (r.cents ?? 0);
     const cat = r.category === 'Supplies' ? 'Office Supplies' : r.category;
+    total.outlierKept += r.cents ?? 0;
     total.afterFixes += cents;
     byCategory[cat] = (byCategory[cat] ?? 0) + cents;
     byMonth[r.date.slice(0, 7)] = (byMonth[r.date.slice(0, 7)] ?? 0) + cents;
@@ -58,6 +59,7 @@ test.describe('data analysis kit page', () => {
     expect(await fact('rowsInFile')).toBe(want.rows);
     expect(await fact('totals.asInFile')).toBeCloseTo(want.total.asInFile / 100, 2);
     expect(await fact('totals.afterFixes')).toBeCloseTo(want.total.afterFixes / 100, 2);
+    expect(await fact('totals.outlierKept')).toBeCloseTo(want.total.outlierKept / 100, 2);
     expect(await fact('question.answer')).toBeCloseTo(want.travelMarch / 100, 2);
     expect(await fact('oddities.outlier.row')).toBe(want.outlierRow);
     expect(await fact('oddities.blank.row')).toBe(want.blankRow);
