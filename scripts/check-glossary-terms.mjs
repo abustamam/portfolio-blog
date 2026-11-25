@@ -15,7 +15,11 @@
 // counts as marking the term when it is exactly the term, or when the same item
 // marks the term with <Term> (#141).
 //
-// Usage: node scripts/check-glossary-terms.mjs [--dir <guidesDir>] [--allow <file>] [--list-excludes]
+// The shared partials in src/content/ai-partials/ are checked as well (PARTIALS
+// below). Allowlist entries for a partial use "guide": "ai-partials/<name>".
+//
+// Usage: node scripts/check-glossary-terms.mjs [--dir <guidesDir>] [--partials-dir <dir>] [--allow <file>] [--list-excludes]
+// Without --dir the partials are checked too; --partials-dir points them elsewhere.
 // Exit 0 when clean, 1 on findings, 2 on a bad allowlist or setup.
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -29,8 +33,14 @@ export const EXCLUDES = [
   { file: 'term-fixture.mdx', reason: 'draft test fixture for tests/ai-guide-term.spec.ts, never built' },
   { file: 'glossary.mdx', reason: 'the glossary page itself, where every term is defined' },
 ];
-// src/content/ai-partials/*.md is not listed: the check only reads
-// src/content/guides/*.mdx, so a partial is never scanned (#137 owns those).
+
+/** Shared partials, checked as one document per host guide, parts in render order. */
+export const PARTIALS = [
+  { id: 'ai-partials/never-paste', host: 'never-paste', parts: ['never-paste-before.mdx', 'never-paste-after.mdx'] },
+  { id: 'ai-partials/prompt', host: 'prompt', parts: ['prompt.md'] },
+];
+// Partials are not in EXCLUDES: they are checked through PARTIALS, each group
+// as one document, so a term marked in an earlier part counts for a later one.
 
 // ---------------------------------------------------------------- glossary
 export function loadGlossary(path = join(ROOT, 'src/consts/guides/glossary.ts')) {
@@ -183,7 +193,7 @@ function markLeadIns(text, occ) {
 }
 
 /** Check one guide. Returns { findings, used } where used = allowlist entries that matched. */
-export function checkGuide(id, source, glossary, allow) {
+export function checkGuide(id, source, glossary, allow, home = id) {
   const { text, terms } = extract(source, glossary);
   const used = new Set();
   const findings = [];
@@ -199,7 +209,7 @@ export function checkGuide(id, source, glossary, allow) {
   markLeadIns(text, occ);
 
   for (const entry of glossary) {
-    if (entry.guide === id) continue; // the home guide explains it itself
+    if (entry.guide === home) continue; // the home guide explains it itself
     for (const o of occ.filter((x) => x.entry === entry)) {
       if (o.marked) break; // first real use is marked: done with this term
       const hit = allow.findIndex((a) => {
@@ -225,7 +235,7 @@ export function checkGuide(id, source, glossary, allow) {
 }
 
 // ------------------------------------------------------------------- main
-export function run({ dir, allowPath, glossaryPath } = {}) {
+export function run({ dir, allowPath, glossaryPath, partialsDir } = {}) {
   const guidesDir = dir ?? join(ROOT, 'src/content/guides');
   const glossary = loadGlossary(glossaryPath);
   const { entries: allow, problems } = loadAllow(allowPath ?? join(ROOT, 'scripts/glossary-terms-allow.json'));
@@ -240,12 +250,42 @@ export function run({ dir, allowPath, glossaryPath } = {}) {
     res.used.forEach((i) => used.add(i));
     for (const x of res.findings) lines.push(`${f}:${x.line}: ${x.msg}`);
   }
+  // Partials are checked with the real guides; --dir alone (a test sample) skips them.
+  const checkPartials = !dir || partialsDir;
+  const pDir = partialsDir ?? join(ROOT, 'src/content/ai-partials');
+  let partials = 0;
+  const setupErrors = [];
+  if (checkPartials) {
+    for (const p of PARTIALS) {
+      const missing = p.parts.filter((f) => !existsSync(join(pDir, f)));
+      if (missing.length) {
+        for (const f of missing) setupErrors.push(`${join(pDir, f)}: partial file not found (PARTIALS lists it)`);
+        continue;
+      }
+      // Join the parts in render order; map a joined line back to <part>:<line in part>.
+      const sources = p.parts.map((f) => readFileSync(join(pDir, f), 'utf8'));
+      const starts = [];
+      let at = 1;
+      for (const src of sources) {
+        starts.push(at);
+        at += src.split('\n').length;
+      }
+      const res = checkGuide(p.id, sources.join('\n'), glossary, allow, p.host);
+      res.used.forEach((i) => used.add(i));
+      for (const x of res.findings) {
+        let k = starts.length - 1;
+        while (starts[k] > x.line) k--;
+        lines.push(`${p.parts[k]}:${x.line - starts[k] + 1}: ${x.msg}`);
+      }
+      partials++;
+    }
+  }
   allow.forEach((a, i) => {
     if (!used.has(i) && guidesDir === join(ROOT, 'src/content/guides')) {
       lines.push(`allowlist entry ${i + 1} (${a.guide}, "${a.term}") matches nothing: remove it or fix its sentence`);
     }
   });
-  return { files, lines };
+  return { files, lines, partials, setupErrors };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -262,11 +302,20 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     console.error(`check-glossary-terms: ${dir} does not exist`);
     process.exit(2);
   }
-  const { files, lines } = run({ dir, allowPath: arg('--allow') });
+  const partialsDir = arg('--partials-dir');
+  if (partialsDir && !existsSync(partialsDir)) {
+    console.error(`check-glossary-terms: ${partialsDir} does not exist`);
+    process.exit(2);
+  }
+  const { files, lines, partials, setupErrors } = run({ dir, allowPath: arg('--allow'), partialsDir });
+  if (setupErrors.length) {
+    for (const e of setupErrors) console.error(`check-glossary-terms: ${e}`);
+    process.exit(2);
+  }
   if (lines.length) {
-    console.error(`check-glossary-terms: ${lines.length} problem(s) in ${files.length} guides\n`);
+    console.error(`check-glossary-terms: ${lines.length} problem(s) in ${files.length} guides and ${partials} partials\n`);
     for (const l of lines) console.error(l);
     process.exit(1);
   }
-  console.log(`check-glossary-terms: ${files.length} guides clean`);
+  console.log(`check-glossary-terms: ${files.length} guides${partials ? ` and ${partials} partials` : ''} clean`);
 }

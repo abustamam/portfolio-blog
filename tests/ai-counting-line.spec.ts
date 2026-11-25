@@ -1,12 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-// #109: the site says in one line what it counts, and that it uses no trackers.
-const LINE = "No trackers and no cookies. I count page requests from the server's own logs, as weekly totals.";
+// #109: the site says it uses no cookies or trackers.
+// It lives in the shared footer, so it shows on both the letterhead and terminal layouts.
+const LINE = 'no cookies or trackers';
 
-for (const path of ['/ai-guides/', '/colophon/']) {
-  test(`${path} states what is counted`, async ({ page }) => {
+for (const path of ['/ai-guides/', '/colophon/', '/']) {
+  test(`${path} footer says no cookies or trackers`, async ({ page }) => {
     await page.goto(path);
-    await expect(page.locator('[data-counting-line]')).toHaveText(LINE);
+    const line = page.locator('[data-counting-line]');
+    await expect(line).toHaveCount(1);
+    await expect(line).toHaveText(LINE);
+    await expect(page.locator('footer [data-counting-line]')).toBeVisible();
   });
 }
 

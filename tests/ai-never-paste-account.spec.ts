@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // The shared never-paste text starts with the account decision: which account
 // you are using decides what you may paste, so it comes before the table.
-// Both pages render src/content/ai-partials/never-paste.md. Run after `bun run build`.
+// Both pages render src/content/ai-partials/never-paste-before.mdx and never-paste-after.mdx. Run after `bun run build`.
 
 const PAGES = ['/ai-guides/never-paste/', '/ai-cohort/never-paste/'];
 
