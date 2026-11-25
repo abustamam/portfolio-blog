@@ -269,9 +269,12 @@ function split(m: ChatMessage) {
   .cw__btn--ghost, .cw__btn[data-cw-summary] { color: var(--color-ink); background: var(--color-bg); border-color: var(--color-line); }
   .cw__btn:hover:not(:disabled) { filter: brightness(1.08); }
   .cw__btn[data-cw-summary]:hover { border-color: var(--color-accent); color: var(--color-accent-ink); filter: none; }
-  .cw__btn:disabled { opacity: .6; cursor: default; }
+  .cw__btn:disabled, .cw__btn:disabled:hover {
+    cursor: default; filter: none; color: var(--color-mute); background: transparent; border-color: var(--color-line-soft); border-style: dashed; opacity: .8;
+  }
   .cw__btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-  .cw__status { min-height: 1.5em; margin: .75rem 0 0 !important; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; color: var(--color-mute); }
+  /* Read aloud by screen readers; the visible caption says the same. */
+  .cw__status { position: absolute !important; width: 1px; height: 1px; margin: -1px !important; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
   @media screen and (prefers-reduced-motion: no-preference) {
     .cw__msg--fade { animation: cw-dim .6s ease-out; }

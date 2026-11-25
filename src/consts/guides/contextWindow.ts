@@ -2,8 +2,12 @@
 // /ai-guides/does-it-remember/. Pure data and two pure functions: the
 // component and the tests both read them, so the page and the spec agree.
 //
-// The frame holds eight messages. Nothing here is a vendor fact: the chat is
-// made up and the eight-message frame is a scaled-down picture.
+// The frame holds eight messages. Nothing in the chat is a vendor fact: the chat
+// is made up and the eight-message frame is a scaled-down picture. The two
+// vendor facts about long chats (COMPACTION_FACTS, below) each cite the
+// vendor's own help page.
+
+import type { Fact } from './aiTools';
 
 export const FRAME_SIZE = 8;
 
@@ -90,3 +94,29 @@ export function statusLine(count: number): string {
 
 export const RESET_STATUS =
   'New chat started with a summary. It holds two messages, and the AI can see both. The answer is nut-free.';
+
+export interface CompactionFact extends Fact {
+  /** The app's name, as the page prints it. */
+  app: string;
+}
+
+/** What two apps say they do when a chat gets long. Read on each vendor's own help page. */
+export const COMPACTION_FACTS: CompactionFact[] = [
+  {
+    app: 'Claude',
+    text: 'When a long chat gets close to the limit, Claude summarizes the earlier messages and keeps going. This needs the code execution setting turned on, and it uses more of your usage limit. The full chat is still kept.',
+    source: 'https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work',
+    checked: '2026-11-25',
+    confirmed: true,
+  },
+  {
+    app: 'ChatGPT',
+    text: 'On the free plan, when a chat fills up, ChatGPT says "Context window full" and may offer to start a new chat with a summary. OpenAI\'s own page warns that a summary may leave out details. You can reopen the original chat from your history and copy over what you still need.',
+    source: 'https://help.openai.com/en/articles/20001639-why-does-chatgpt-say-context-window-full-or-chat-memory-full',
+    checked: '2026-11-25',
+    confirmed: true,
+  },
+];
+
+/** The page's "checked" date for those facts: the oldest one. */
+export const COMPACTION_CHECKED = COMPACTION_FACTS.map((f) => f.checked).sort()[0];

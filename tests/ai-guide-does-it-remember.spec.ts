@@ -5,6 +5,8 @@ import {
   MESSAGES,
   RESET_MESSAGES,
   CAPTION,
+  COMPACTION_FACTS,
+  COMPACTION_CHECKED,
   windowFor,
   isVisible,
   showCaption,
@@ -200,7 +202,55 @@ test.describe('does-it-remember: the boxes figure and the page', () => {
     const text = await page.locator('[data-guide] > header, [data-guide] > article').evaluateAll((els) => els.map((e) => (e as HTMLElement).innerText).join('\n'));
     expect(text).not.toContain('!');
     expect(text).not.toMatch(/personalis|summaris|colour|behaviour|neighbour/i);
-    expect(text).not.toMatch(/ChatGPT|Gemini|Copilot|Claude|OpenAI|Anthropic/);
+    // Vendor names appear only in the one sourced section.
+    const rest = await page.locator('[data-guide] > header, [data-guide] > article').evaluateAll((els) =>
+      els.map((e) => {
+        const c = e.cloneNode(true) as HTMLElement;
+        c.querySelectorAll('[data-shortened]').forEach((n) => n.remove());
+        return c.textContent ?? '';
+      }).join('\n'),
+    );
+    expect(rest).not.toMatch(/ChatGPT|Gemini|Copilot|Claude|OpenAI|Anthropic/);
+  });
+
+  test('the shortened-chat section names both apps with their sources and shows the checked date', async ({ page }) => {
+    await page.goto(PAGE);
+    await expect(page.getByRole('heading', { level: 2, name: 'Apps that shorten a long chat for you' })).toHaveCount(1);
+    const sec = page.locator('[data-shortened]');
+    await expect(sec).toContainText('summarize');
+    await expect(sec).toContainText('a summary is shorter than what it replaces');
+    for (const f of COMPACTION_FACTS) {
+      const row = sec.locator(`[data-shortened-app="${f.app}"]`);
+      await expect(row).toContainText(f.text);
+      await expect(row.locator(`a[href="${f.source}"]`)).toHaveCount(1);
+      expect(f.confirmed).toBe(true);
+      expect(f.checked).toBe('2026-11-25');
+    }
+    await expect(sec.locator('a[href="https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work"]')).toHaveCount(1);
+    await expect(sec.locator('a[href="https://help.openai.com/en/articles/20001639-why-does-chatgpt-say-context-window-full-or-chat-memory-full"]')).toHaveCount(1);
+    const checked = sec.locator('[data-shortened-checked] time');
+    await expect(checked).toHaveAttribute('datetime', COMPACTION_CHECKED);
+    await expect(checked).toHaveText('November 25, 2026');
+    // The word is explained where it is used, and is not a glossary term.
+    await expect(sec.locator('.term, [data-term]')).toHaveCount(0);
+  });
+
+  test('the status line is visually hidden but still in the page, and the disabled button looks disabled', async ({ page }) => {
+    await page.goto(PAGE);
+    const live = page.locator('[data-cw-live]');
+    const status = live.locator('[data-cw-status]');
+    for (let i = 1; i < LAST; i++) await live.locator('[data-cw-next]').click();
+    await expect(status).toContainText('Message 12 added');
+    const box = await status.boundingBox();
+    expect(box && box.width <= 1 && box.height <= 1, JSON.stringify(box)).toBe(true);
+    const btn = live.locator('[data-cw-next]');
+    await expect(btn).toBeDisabled();
+    const css = await btn.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { bg: s.backgroundColor, cursor: s.cursor, accent: getComputedStyle(document.documentElement).getPropertyValue('--color-accent') };
+    });
+    expect(css.cursor).toBe('default');
+    expect(css.bg).toBe('rgba(0, 0, 0, 0)');
   });
 
   for (const scheme of ['light', 'dark'] as const) {

@@ -10,6 +10,8 @@ ctaLine: "In the hands-on training you set up one task so the AI has what it nee
 ---
 import ContextWindow from '../../components/guides/ContextWindow.astro';
 import Term from '../../components/guides/Term.astro';
+import { COMPACTION_FACTS, COMPACTION_CHECKED } from '../../consts/guides/contextWindow';
+import { formatChecked } from '../../utils/modelMenu';
 
 ## Three things people call memory
 
@@ -42,6 +44,26 @@ Below is a made-up chat about a family road trip. In the first message, you say 
 Real apps keep far more than eight messages in view, often hundreds of pages' worth, and they tend to blur early details before losing them outright. The picture is scaled down to show the idea.
 
 The same rereading is why long chats use up your <Term>usage limit</Term> faster: every new message makes the app send the whole chat again. [Why long chats use more](/ai-guides/usage-limits/) has the detail.
+
+## Apps that shorten a long chat for you
+
+<div data-shortened>
+
+Some apps now handle a long chat for you. When it gets close to the limit, they summarize its early part and carry on, or they offer to start a new chat with a summary. Some people call this compaction. It keeps the chat going, but a summary is shorter than what it replaces, and it can leave out a detail. That is what happened to the allergy in the road-trip chat.
+
+Two apps say so on their own help pages.
+
+<ul>
+{COMPACTION_FACTS.map((f) => (
+  <li data-shortened-app={f.app}><strong>{f.app}.</strong> {f.text} <a href={f.source} rel="noopener">The company's own page</a>.</li>
+))}
+</ul>
+
+<p class="ai-label" data-shortened-checked={COMPACTION_CHECKED}>Last checked <time datetime={COMPACTION_CHECKED}>{formatChecked(COMPACTION_CHECKED)}</time>. Apps change, so check yours.</p>
+
+So treat a summary like one you wrote yourself. Read it and check the thing you care about is in it. If it is missing, put it back in your next message.
+
+</div>
 
 ## New chat or keep going
 
