@@ -1,0 +1,350 @@
+---
+/*
+ * PromptBuilder: the five-part prompt (Situation, Task, Input, Format, Check) as
+ * five labelled boxes, with the assembled prompt updating live and one Copy button.
+ * Reused by several guides (#74 prompt, #77 job search, #78 examples). Pages
+ * embed it as is; they do not edit it. Everything runs in the browser: nothing
+ * typed is sent anywhere or put in a URL.
+ *
+ * PROPS (all optional)
+ *   presets      PromptPreset[]  Example chips. { id, label, situation, task, input, format, check }
+ *                                (type in src/utils/promptBuilder.ts). Clicking a chip fills all five
+ *                                boxes. Default: PROMPT_EXAMPLES (weekly report, difficult email,
+ *                                meeting summary). Pass [] for no chips.
+ *   storageKey   string          Where this builder's draft is kept, through guideStore
+ *                                (setDraft/getDraft/clearDraft). Give every embed on the site its own,
+ *                                so two pages never share a draft. Default "prompt".
+ *   id           string          DOM id of the builder, and the name a host uses to target it.
+ *                                Unique per page. Default "prompt-builder".
+ *   checkLines   string[]        Tap-to-add Check lines. Default CHECK_LINES. Pass [] for none.
+ *   chipsLabel   string          Text above the chips. Default "Start from an example".
+ *   chipsNote    string          Small note under the chips. Default says the examples are illustrations.
+ *   neverPasteHref string        Link in the reminder under Input. Default /ai-guides/never-paste/.
+ *   part         "builder" | "sentence"
+ *                                "sentence" renders instead the one-line "Your task in one sentence"
+ *                                fill-in (a different tool, kept here so it shares the script and the
+ *                                storage rules). It uses storageKey and id too; give it its own.
+ *
+ * HOST FILL (how a page fills the builder from a click, then scrolls to it)
+ *   1. Declarative, no script needed. Any element on the page:
+ *        <button data-prompt-fill="<preset id>" data-prompt-target="<builder id>">Try this prompt</button>
+ *      fills the builder whose id matches data-prompt-target (the first builder on the page when
+ *      omitted) from the preset with that id, scrolls it into view and focuses its first box.
+ *      The preset must be in that builder's `presets` prop.
+ *   2. Scripted. Dispatch on document:
+ *        document.dispatchEvent(new CustomEvent('prompt-builder:fill', {
+ *          detail: { target: '<builder id>', preset: '<preset id>' }  // or parts: {situation, task, input, format, check}
+ *        }));
+ *      Optional detail.scroll = false to fill without scrolling.
+ *   Filling replaces what is in the boxes and saves the new draft.
+ *   The builder dispatches 'prompt-builder:changed' (bubbles) on its root after any change.
+ *
+ * Draft: saved on every keystroke under `storageKey`, restored on load, emptied by Clear.
+ * Markup hooks for tests: [data-prompt-builder], [data-pb-field=<field>], [data-pb-chip],
+ * [data-pb-check], [data-pb-output], [data-pb-copy], [data-pb-clear].
+ */
+import { PROMPT_EXAMPLES, CHECK_LINES } from '../../consts/guides/promptExamples';
+import { FIELD_LABELS, PROMPT_FIELDS, type PromptPreset } from '../../utils/promptBuilder';
+
+interface Props {
+  presets?: PromptPreset[];
+  storageKey?: string;
+  id?: string;
+  checkLines?: string[];
+  chipsLabel?: string;
+  chipsNote?: string;
+  neverPasteHref?: string;
+  part?: 'builder' | 'sentence';
+}
+
+const {
+  presets = PROMPT_EXAMPLES,
+  storageKey = 'prompt',
+  id = 'prompt-builder',
+  checkLines = CHECK_LINES,
+  chipsLabel = 'Start from an example',
+  chipsNote = 'These examples are illustrations, not real messages. Tap one, then change it to fit your task.',
+  neverPasteHref = '/ai-guides/never-paste/',
+  part = 'builder',
+} = Astro.props;
+
+const HINTS: Record<(typeof PROMPT_FIELDS)[number], string> = {
+  situation: 'Who you are, what is going on, who it is for.',
+  task: 'The one thing you want done.',
+  input: 'Paste it here, made safe: PERSON-1, EMAIL-1, no account numbers.',
+  format: 'Length, tone, layout.',
+  check: 'What it should flag, verify or admit it had to guess.',
+};
+const ROWS = { situation: 3, task: 2, input: 4, format: 2, check: 3 } as const;
+const presetJson = JSON.stringify(presets).replace(/</g, '\\u003c');
+---
+
+{part === 'builder' ? (
+  <section class="pb" id={id} data-prompt-builder data-storage-key={storageKey} aria-label="Prompt builder">
+    {presets.length > 0 && (
+      <div class="pb-chips">
+        <p class="pb-label" id={`${id}-chips`}>{chipsLabel}</p>
+        <div class="pb-chiprow" role="group" aria-labelledby={`${id}-chips`}>
+          {presets.map((p) => (
+            <button type="button" class="pb-chip" data-pb-chip={p.id}>{p.label}</button>
+          ))}
+        </div>
+        {chipsNote && <p class="pb-note">{chipsNote}</p>}
+      </div>
+    )}
+
+    {PROMPT_FIELDS.map((f) => (
+      <div class="pb-field">
+        <label for={`${id}-${f}`}>{FIELD_LABELS[f]} <span class="pb-hint">{HINTS[f]}</span></label>
+        <textarea id={`${id}-${f}`} data-pb-field={f} rows={ROWS[f]} autocomplete="off" spellcheck="true"></textarea>
+        {f === 'input' && (
+          <p class="pb-note">Made it safe first? <a href={neverPasteHref}>What never to paste</a>.</p>
+        )}
+        {f === 'check' && checkLines.length > 0 && (
+          <div class="pb-checks">
+            <p class="pb-note" id={`${id}-checks`}>Tap to add a Check line:</p>
+            <div class="pb-chiprow" role="group" aria-labelledby={`${id}-checks`}>
+              {checkLines.map((l) => (
+                <button type="button" class="pb-chip pb-chip--check" data-pb-check={l} aria-pressed="false">{l}</button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    ))}
+
+    <div class="pb-result">
+      <p class="pb-label" id={`${id}-out-label`}>Your prompt</p>
+      <div class="pb-output" data-pb-output role="region" aria-labelledby={`${id}-out-label`} tabindex="0"></div>
+      <div class="pb-actions">
+        <button type="button" class="pb-btn pb-btn--primary" data-pb-copy>Copy prompt</button>
+        <button type="button" class="pb-btn" data-pb-clear>Clear</button>
+        <span class="pb-status" data-pb-status role="status" aria-live="polite"></span>
+      </div>
+      <p class="pb-note">Saved in this browser only, so it is still here if you reload. Nothing you type is sent anywhere.</p>
+    </div>
+
+    <script type="application/json" data-pb-presets set:html={presetJson} />
+  </section>
+) : (
+  <section class="pb pb--sentence" id={id} data-prompt-sentence data-storage-key={storageKey} aria-label="Your task in one sentence">
+    <div class="pb-field">
+      <label for={`${id}-what`}>Every week I do <span class="pb-hint">your task</span></label>
+      <input id={`${id}-what`} data-pb-s="what" type="text" autocomplete="off" />
+    </div>
+    <div class="pb-field">
+      <label for={`${id}-using`}>using <span class="pb-hint">the file, tool or inbox</span></label>
+      <input id={`${id}-using`} data-pb-s="using" type="text" autocomplete="off" />
+    </div>
+    <div class="pb-field">
+      <label for={`${id}-time`}>it takes <span class="pb-hint">roughly how long</span></label>
+      <input id={`${id}-time`} data-pb-s="time" type="text" autocomplete="off" />
+    </div>
+    <div class="pb-field">
+      <label for={`${id}-done`}>and done means <span class="pb-hint">what you could point to</span></label>
+      <input id={`${id}-done`} data-pb-s="done" type="text" autocomplete="off" />
+    </div>
+    <div class="pb-result">
+      <div class="pb-output" data-pb-output role="region" aria-label="Your sentence" tabindex="0"></div>
+      <div class="pb-actions">
+        <button type="button" class="pb-btn pb-btn--primary" data-pb-copy>Copy sentence</button>
+        <button type="button" class="pb-btn" data-pb-clear>Clear</button>
+        <span class="pb-status" data-pb-status role="status" aria-live="polite"></span>
+      </div>
+      <p class="pb-note">Saved in this browser only. Nothing you type is sent anywhere.</p>
+    </div>
+  </section>
+)}
+
+<style>
+  .pb { margin: 2rem 0; padding: 1.25rem 1rem; border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-surface); min-width: 0; }
+  @media (min-width: 640px) { .pb { padding: 1.5rem; } }
+  .pb-label { font-family: var(--font-mono); font-size: var(--text-12, 12px); font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--color-faint); margin: 0 0 .5rem; }
+  .pb-note { font-size: .9rem; line-height: 1.5; color: var(--color-mute); margin: .5rem 0 0; }
+  .pb-chips { margin-bottom: 1.25rem; }
+  .pb-chiprow { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .pb-chip {
+    font: inherit; font-size: .95rem; line-height: 1.35; text-align: left; color: var(--color-ink);
+    background: var(--color-bg); border: 1px solid var(--color-line); border-radius: 999px;
+    padding: .55rem .95rem; min-height: 44px; cursor: pointer; max-width: 100%; overflow-wrap: anywhere;
+  }
+  .pb-chip--check { border-radius: 6px; font-size: .9rem; }
+  .pb-chip:hover { border-color: var(--color-accent); }
+  .pb-chip[aria-pressed='true'] { background: var(--color-accent-bg); border-color: var(--color-accent); color: var(--color-accent-ink); }
+  .pb-field { margin: 0 0 1rem; }
+  .pb-field label { display: block; font-weight: 600; margin: 0 0 .35rem; color: var(--color-ink); }
+  .pb-hint { display: block; font-weight: 400; font-size: .9rem; color: var(--color-mute); }
+  .pb-field textarea, .pb-field input {
+    display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; line-height: 1.5;
+    color: var(--color-ink); background: var(--color-bg); border: 1px solid var(--color-line);
+    border-radius: 4px; padding: .6rem .75rem; resize: vertical; min-height: 44px;
+  }
+  .pb-field textarea:focus-visible, .pb-field input:focus-visible, .pb-output:focus-visible, .pb-chip:focus-visible, .pb-btn:focus-visible {
+    outline: 2px solid var(--color-accent); outline-offset: 2px;
+  }
+  .pb-checks { margin-top: .5rem; }
+  .pb-result { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-line-soft); }
+  .pb-output {
+    white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 13px; line-height: 1.65;
+    background: var(--color-code); border: 1px solid var(--color-line); border-radius: 4px; padding: .9rem 1rem; min-height: 4rem;
+  }
+  .pb-output[data-empty] { color: var(--color-faint); }
+  .pb-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: .9rem; }
+  .pb-btn {
+    font-family: var(--font-mono); font-size: 14px; letter-spacing: .02em; min-height: 48px; padding: 0 1.25rem;
+    border-radius: 4px; border: 1px solid var(--color-line); background: transparent; color: var(--color-ink); cursor: pointer;
+  }
+  .pb-btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
+  .pb-btn:disabled { opacity: .5; cursor: default; }
+  .pb-status { font-size: .9rem; color: var(--color-mute); }
+</style>
+
+<script>
+  import { guideStore } from '../../utils/guideStore';
+  import {
+    PROMPT_FIELDS, SENTENCE_KEYS, addCheckLine, assemblePrompt, assembleSentence, emptyParts,
+    emptySentence, hasCheckLine, normalizeParts, parseDraft, parseSentence,
+    type PromptField, type PromptParts, type PromptPreset, type TaskSentence,
+  } from '../../utils/promptBuilder';
+
+  const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  async function copyText(text: string, status: HTMLElement) {
+    const say = (m: string) => {
+      status.textContent = m;
+      setTimeout(() => { if (status.textContent === m) status.textContent = ''; }, 2500);
+    };
+    try {
+      await navigator.clipboard.writeText(text);
+      say('Copied');
+    } catch {
+      say('Could not copy. Select the text above and copy it.');
+    }
+  }
+
+  function initBuilder(root: HTMLElement) {
+    const key = root.dataset.storageKey || 'prompt';
+    const presets: PromptPreset[] = (() => {
+      try { return JSON.parse(root.querySelector('[data-pb-presets]')?.textContent || '[]'); } catch { return []; }
+    })();
+    const fields = {} as Record<PromptField, HTMLTextAreaElement>;
+    for (const f of PROMPT_FIELDS) fields[f] = root.querySelector<HTMLTextAreaElement>(`[data-pb-field="${f}"]`)!;
+    const out = root.querySelector<HTMLElement>('[data-pb-output]')!;
+    const copy = root.querySelector<HTMLButtonElement>('[data-pb-copy]')!;
+    const status = root.querySelector<HTMLElement>('[data-pb-status]')!;
+    const checkBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-pb-check]')];
+
+    const read = (): PromptParts => {
+      const p = emptyParts();
+      for (const f of PROMPT_FIELDS) p[f] = fields[f].value;
+      return p;
+    };
+    const render = () => {
+      const text = assemblePrompt(read());
+      out.textContent = text || 'Fill in the boxes above and your prompt appears here.';
+      out.toggleAttribute('data-empty', !text);
+      copy.disabled = !text;
+      for (const b of checkBtns) b.setAttribute('aria-pressed', String(hasCheckLine(fields.check.value, b.dataset.pbCheck || '')));
+    };
+    const update = (save = true) => {
+      render();
+      if (save) {
+        const p = read();
+        if (PROMPT_FIELDS.some((f) => p[f].trim())) guideStore.setDraft(key, p);
+        else guideStore.clearDraft(key);
+      }
+      root.dispatchEvent(new CustomEvent('prompt-builder:changed', { bubbles: true }));
+    };
+    const fill = (parts: Partial<PromptParts>, scroll = false) => {
+      const p = normalizeParts(parts);
+      for (const f of PROMPT_FIELDS) fields[f].value = p[f];
+      update();
+      if (scroll) {
+        root.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
+        fields.situation.focus({ preventScroll: true });
+      }
+    };
+
+    for (const f of PROMPT_FIELDS) fields[f].addEventListener('input', () => update());
+    root.querySelectorAll<HTMLButtonElement>('[data-pb-chip]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const p = presets.find((x) => x.id === b.dataset.pbChip);
+        if (p) fill(p);
+      }),
+    );
+    checkBtns.forEach((b) =>
+      b.addEventListener('click', () => {
+        fields.check.value = addCheckLine(fields.check.value, b.dataset.pbCheck || '');
+        update();
+      }),
+    );
+    copy.addEventListener('click', () => copyText(assemblePrompt(read()), status));
+    root.querySelector('[data-pb-clear]')!.addEventListener('click', () => {
+      for (const f of PROMPT_FIELDS) fields[f].value = '';
+      guideStore.clearDraft(key);
+      update(false);
+      status.textContent = 'Cleared';
+      fields.situation.focus();
+    });
+
+    // Host fill: a page fills this builder by preset id or by parts.
+    root.addEventListener('prompt-builder:fill-request', ((e: CustomEvent) => {
+      const { preset, parts, scroll } = e.detail || {};
+      const p: Partial<PromptParts> | undefined = parts ?? presets.find((x) => x.id === preset);
+      if (p) fill(p, scroll !== false);
+    }) as EventListener);
+
+    const saved = parseDraft(guideStore.getDraft(key));
+    if (saved) for (const f of PROMPT_FIELDS) fields[f].value = saved[f];
+    render();
+  }
+
+  function initSentence(root: HTMLElement) {
+    const key = root.dataset.storageKey || 'prompt-sentence';
+    const inputs = {} as Record<keyof TaskSentence, HTMLInputElement>;
+    for (const k of SENTENCE_KEYS) inputs[k] = root.querySelector<HTMLInputElement>(`[data-pb-s="${k}"]`)!;
+    const out = root.querySelector<HTMLElement>('[data-pb-output]')!;
+    const status = root.querySelector<HTMLElement>('[data-pb-status]')!;
+    const read = (): TaskSentence => {
+      const s = emptySentence();
+      for (const k of SENTENCE_KEYS) s[k] = inputs[k].value;
+      return s;
+    };
+    const render = () => { out.textContent = assembleSentence(read()); };
+    for (const k of SENTENCE_KEYS) {
+      inputs[k].addEventListener('input', () => {
+        render();
+        const s = read();
+        if (SENTENCE_KEYS.some((x) => s[x].trim())) guideStore.setDraft(key, s);
+        else guideStore.clearDraft(key);
+      });
+    }
+    root.querySelector('[data-pb-copy]')!.addEventListener('click', () => copyText(assembleSentence(read()), status));
+    root.querySelector('[data-pb-clear]')!.addEventListener('click', () => {
+      for (const k of SENTENCE_KEYS) inputs[k].value = '';
+      guideStore.clearDraft(key);
+      render();
+      status.textContent = 'Cleared';
+    });
+    const saved = parseSentence(guideStore.getDraft(key));
+    if (saved) for (const k of SENTENCE_KEYS) inputs[k].value = saved[k];
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-prompt-builder]').forEach(initBuilder);
+  document.querySelectorAll<HTMLElement>('[data-prompt-sentence]').forEach(initSentence);
+
+  // Route host fills to the right builder (by id or storage key; the first builder when none is named).
+  function requestFill(detail: { target?: string; preset?: string; parts?: Partial<PromptParts>; scroll?: boolean }) {
+    const all = [...document.querySelectorAll<HTMLElement>('[data-prompt-builder]')];
+    const root = detail.target ? all.find((r) => r.id === detail.target || r.dataset.storageKey === detail.target) : all[0];
+    root?.dispatchEvent(new CustomEvent('prompt-builder:fill-request', { detail }));
+  }
+  document.addEventListener('prompt-builder:fill', ((e: CustomEvent) => requestFill(e.detail || {})) as EventListener);
+  document.addEventListener('click', (e) => {
+    const el = (e.target as Element | null)?.closest<HTMLElement>('[data-prompt-fill]');
+    if (!el) return;
+    e.preventDefault();
+    requestFill({ target: el.dataset.promptTarget, preset: el.dataset.promptFill });
+  });
+</script>
