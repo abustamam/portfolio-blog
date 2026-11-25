@@ -1,0 +1,129 @@
+---
+// "Tool picker" for /ai-guides/which-tool/: up to four taps give one
+// recommendation, the reason and a first step. The rules are the pure
+// functions in src/utils/toolPicker.ts. Nothing is typed, stored or sent:
+// the answers live in this page's memory and are gone on reload.
+---
+
+<section class="ai-card tool-picker" data-tool-picker aria-labelledby="tool-picker-title">
+  <p class="ai-label" id="tool-picker-title">Tool picker · up to four taps</p>
+
+  <div data-tp-ask hidden>
+    <p class="tool-picker__count" data-tp-count aria-live="polite"></p>
+    <h3 class="tool-picker__q" data-tp-question></h3>
+    <div class="quiz-options" data-tp-options></div>
+    <button type="button" class="tool-picker__back ai-link" data-tp-back hidden>← Back</button>
+  </div>
+
+  <div data-tp-result hidden aria-live="polite">
+    <p class="tool-picker__first" data-tp-first></p>
+    <p class="tool-picker__pick" data-tp-pick></p>
+    <p><strong>Why:</strong> <span data-tp-reason></span></p>
+    <p><strong>First step:</strong> <span data-tp-step></span></p>
+    <p data-tp-link-wrap hidden><a class="ai-link" data-tp-link href="/ai-training/"></a></p>
+    <button type="button" class="tool-picker__restart ai-link" data-tp-restart>Start again</button>
+  </div>
+
+  <noscript><p>The picker needs JavaScript. The recommendations by situation below say the same thing.</p></noscript>
+</section>
+
+<script>
+  import { nextQuestion, questionsFor, recommend, type Answers } from '../../utils/toolPicker';
+  import { toolById } from '../../consts/guides/aiTools';
+
+  const root = document.querySelector<HTMLElement>('[data-tool-picker]');
+  if (root) {
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const ask = $('[data-tp-ask]');
+    const result = $('[data-tp-result]');
+    const count = $('[data-tp-count]');
+    const question = $('[data-tp-question]');
+    const options = $('[data-tp-options]');
+    const back = $<HTMLButtonElement>('[data-tp-back]');
+    const linkWrap = $('[data-tp-link-wrap]');
+    const link = $<HTMLAnchorElement>('[data-tp-link]');
+
+    // Answers in order, so Back can undo the last one.
+    let answers: Partial<Answers> = {};
+    let order: (keyof Answers)[] = [];
+
+    const render = () => {
+      const q = nextQuestion(answers);
+      if (q) {
+        result.hidden = true;
+        ask.hidden = false;
+        const total = questionsFor(answers).length;
+        count.textContent = `Question ${order.length + 1} of ${total}`;
+        question.textContent = q.text;
+        options.replaceChildren(
+          ...q.options.map((o) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'quiz-option tool-picker__option';
+            b.dataset.tpValue = o.value;
+            b.textContent = o.label;
+            b.addEventListener('click', () => {
+              answers = { ...answers, [q.id]: o.value };
+              order = [...order, q.id];
+              render();
+              (nextQuestion(answers) ? options.querySelector('button') : result.querySelector('button'))?.focus();
+            });
+            return b;
+          }),
+        );
+        back.hidden = order.length === 0;
+        return;
+      }
+      const r = recommend(answers as Answers);
+      ask.hidden = true;
+      result.hidden = false;
+      $('[data-tp-first]').textContent = r.first;
+      $('[data-tp-pick]').textContent = r.tool
+        ? r.workAccount
+          ? `Most likely: ${toolById(r.tool).name}, with your work account.`
+          : `${toolById(r.tool).name}.`
+        : 'Ask before you pick an app.';
+      $('[data-tp-pick]').hidden = r.first.startsWith('Start with');
+      $('[data-tp-reason]').textContent = r.reason;
+      $('[data-tp-step]').textContent = r.firstStep;
+      linkWrap.hidden = !r.link;
+      if (r.link) {
+        link.href = r.link.href;
+        link.textContent = `${r.link.label} →`;
+      }
+      result.dataset.tool = r.tool ?? 'employer';
+    };
+
+    back.addEventListener('click', () => {
+      const last = order[order.length - 1];
+      if (!last) return;
+      order = order.slice(0, -1);
+      const { [last]: _drop, ...rest } = answers;
+      answers = rest;
+      render();
+    });
+
+    $('[data-tp-restart]').addEventListener('click', () => {
+      answers = {};
+      order = [];
+      render();
+      options.querySelector('button')?.focus();
+    });
+
+    render();
+  }
+</script>
+
+<style>
+  .tool-picker { padding: clamp(1.25rem, 4vw, 1.75rem); margin: 1.5rem 0 2.5rem; }
+  .tool-picker > .ai-label { margin: 0 0 1rem; }
+  .tool-picker__count { font-family: var(--font-mono); font-size: 13px; color: var(--color-faint); margin: 0 0 .35rem; }
+  .tool-picker__q { margin: 0 0 1rem; }
+  .tool-picker :global(.tool-picker__option) { width: 100%; text-align: left; }
+  .tool-picker__back, .tool-picker__restart {
+    margin-top: 1rem; border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0;
+  }
+  .tool-picker__first { font-family: var(--font-serif); font-size: 1.35rem; color: var(--color-ink); margin: 0 0 .5rem; }
+  .tool-picker__pick { font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-ink); margin: 0 0 .75rem; }
+  [data-tp-result] p { overflow-wrap: anywhere; }
+</style>

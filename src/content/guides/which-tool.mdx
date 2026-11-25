@@ -1,0 +1,100 @@
+---
+title: Which AI app should I use?
+description: Gemini, ChatGPT, Copilot or Claude for everyday work. What is free, what your employer may already pay for, what each can see, and a plain pick for your situation.
+lead: The first question everyone asks. For everyday work, the right app is decided mostly by three things you already know, your account, your email and your employer, not by which one is "best".
+step: 4
+minutes: 5
+tool: Tool picker
+ctaLine: Picking the app is the easy part. The hands-on training sets it up on a task from your own week, and shows you how to check what it gives back.
+---
+import ToolPicker from '../../components/guides/ToolPicker.astro';
+import { AI_TOOLS, FACT_LABELS, FACT_ORDER, lastChecked } from '../../consts/guides/aiTools';
+import { fmtLongDate } from '../../utils/date';
+
+{/* Facts live in src/consts/guides/aiTools.ts, each with its vendor source and checked date. Re-check every quarter. */}
+
+<p class="ai-label which-tool-checked">Last checked <time data-last-checked datetime={lastChecked()}>{fmtLongDate(new Date(lastChecked()))}</time>. Prices and plans change; each fact links the vendor's own page.</p>
+
+## The short answer
+
+- **Using it for work?** Use what your employer allows, signed in with your work account.
+- **Using it for yourself?** Start with the free app that matches your email: Gemini if you use Gmail, Copilot if you use Outlook. Otherwise, ChatGPT or Claude.
+- **Start free.** Pay only when you hit the free limits every week, or want the AI inside Gmail, Word or Outlook.
+
+## Pick in four taps
+
+<ToolPicker />
+
+## The four apps side by side
+
+Every cell links the vendor page it came from. Where a vendor page did not say, the cell says so and links the page to check.
+
+<div class="which-tool-table">
+<table data-tools-table>
+  <thead>
+    <tr>
+      <th scope="col">App</th>
+      {FACT_ORDER.map((key) => <th scope="col">{FACT_LABELS[key]}</th>)}
+    </tr>
+  </thead>
+  <tbody>
+    {AI_TOOLS.map((tool) => (
+      <tr data-tool={tool.id}>
+        <th scope="row">{tool.name}<span class="which-tool-vendor">{tool.vendor}</span></th>
+        {FACT_ORDER.map((key) => {
+          const fact = tool.facts[key];
+          return (
+            <td data-fact={key} data-label={FACT_LABELS[key]} data-confirmed={String(fact.confirmed)}>
+              {fact.confirmed ? <>{fact.text}{' '}<a href={fact.source} data-source rel="noopener">Source</a></> : <a href={fact.source} data-source rel="noopener">{fact.text}</a>}
+              {(fact.more ?? []).map((url, i) => <>{' · '}<a href={url} data-source rel="noopener">Source {i + 2}</a></>)}
+            </td>
+          );
+        })}
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+
+"Connect" means you sign in and give the app permission yourself, and you can disconnect it again in the app's settings. Connecting your email is a bigger step than chatting: read the training column first.
+
+## What we'd pick, by situation
+
+**You sign in to work with a Microsoft account.** Use what your employer allows. That is most likely Copilot Chat, signed in with your work account, not a personal one. Don't copy work files into a personal AI account, even a paid one.
+
+**You sign in to work with a Google account.** The same rule: ask what is allowed, then use Gemini with your work account if your company has it turned on.
+
+**Your household runs on Gmail.** Start with Gemini on your personal Google Account. It is free with your Google Account, and it can connect to your Gmail, Calendar and Drive once you turn that on in Connected Apps. If you want the AI to work across your email and calendar for you, that is what the [Connect track](/ai-training/#connect) sets up.
+
+**You are looking for a job.** Use a personal account, never your current employer's. Any of the four free plans can help you rewrite a CV or practise interview answers. Read the training setting in the table first, and leave out other people's details (see [Never paste these](/ai-guides/never-paste/)).
+
+**You want to write code.** You can ask any of them about code in an ordinary chat. If you have no account yet, ChatGPT's free plan includes limited access to its coding tool. Going from snippets to building something that runs is what the [Build track](/ai-training/#build) covers.
+
+## Free or paid?
+
+For learning the habit, the free plan of any of these is enough. Paying (about $20 a month for the usual personal plan; exact prices are in the table) matters when:
+
+- **you hit the limit** most weeks and have to wait or stop;
+- **you want it inside the apps you already use**: Gemini inside Gmail and Docs, or Copilot inside Word, Excel and Outlook, come with the paid personal plans;
+- **you need longer files or more uploads** than the free plan allows.
+
+Paying does not fix a vague request, and it does not remove the need to check the answer. If the free plan gives you a poor answer, a clearer request usually helps more than a bigger plan.
+
+<style>{`
+  .which-tool-checked { margin: 0 0 2rem; }
+  .which-tool-vendor { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 400; color: var(--color-faint); letter-spacing: .04em; }
+  .which-tool-table table { display: table; width: 100%; font-size: 15px; }
+  .which-tool-table td { overflow-wrap: anywhere; }
+  .which-tool-table tbody th { font-family: var(--font-serif); font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--color-ink); }
+  @media (max-width: 47.99rem) {
+    .which-tool-table table, .which-tool-table tbody, .which-tool-table tr, .which-tool-table th, .which-tool-table td { display: block; width: 100%; }
+    .which-tool-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .which-tool-table tr { margin: 0 0 1.5rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+    .which-tool-table th, .which-tool-table td { border: 0; border-top: 1px solid var(--color-line-soft); }
+    .which-tool-table tbody th { border-top: 0; }
+    .which-tool-table td::before {
+      content: attr(data-label); display: block; margin-bottom: .25rem;
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute);
+    }
+  }
+`}</style>
