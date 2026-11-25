@@ -5,7 +5,7 @@ lead: AI answers sound sure of themselves whether they are right or not. You can
 step: 3
 minutes: 8
 tool: Spot the mistake
-ctaLine: A general checklist catches general mistakes. In the hands-on training you build the check for your own file.
+ctaLine: In the hands-on training you build the check for your own file.
 updatedDate: '2026-11-25'
 ---
 import Term from '../../components/guides/Term.astro';
@@ -15,7 +15,7 @@ import SpotTheMistake from '../../components/guides/SpotTheMistake.astro';
 
 When an answer looks off, most of us ask again, or ask "are you sure?", until it looks right. That isn't checking. The <Term id="chat-app">tool</Term> will happily agree with itself, or swap one confident answer for another, and it knows no more about what's true the second time. Asking again tells you how the answer *sounds*. Only the source tells you whether it's *right*.
 
-Checking every answer by hand against the source does work, but it doesn't scale: the more you use <Term>AI</Term>, the more answers there are to check. The better move is to build the check into how you work. Below are the five mistakes that check is looking for, each with a quick check, about 30 seconds for each claim you rely on, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
+Checking every answer by hand against the source does work, but it doesn't scale: the more you use <Term>AI</Term>, the more answers there are to check. So build the check into how you work. These are the five mistakes to check for, at about 30 seconds a claim, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
 
 ## Five mistakes and the check for each
 
@@ -73,16 +73,14 @@ Five rounds, one for each mistake above. Each answer has one part that's wrong. 
 
 ## Build the check in
 
-I don't hunt for mistakes after the fact. I set things up so they get caught by default, as part of the work.
-
 I don't check every answer by hand any more. Over time I've set things up so the AI has to show where each claim came from, does its sums somewhere I can see them, and gets checked by a second pass before I trust it. None of that is magic, and you can start with the habits below today. Getting it to run on your own work takes some setting up, and that's what we do in the hands-on training.
 
 Habits you can start today, with no setup:
 
-- **Ask for the line behind each claim.** Ask the AI to quote the line in your source behind every number or claim, and to say what it couldn't find.
+- **Ask for the line behind each claim.** Have the AI quote the line in your source behind every number, and say what it couldn't find.
 - **Do the sums in a spreadsheet,** not in the chat.
 - **Get a second pass.** Open [a fresh chat](/ai-guides/does-it-remember/), or a second tool, give it the source, and ask it to check the first answer against it. That isn't the same as asking the first chat if it's sure: the second pass has the source in front of it. A second pass can miss things too, so for anything that matters, look at the source yourself. The same rules apply to what you paste into a second tool.
-- **Keep a check you paste in.** For a task you do often, keep a short check and paste it in with every task of that kind. For example: "Quote the line behind each number. List anything you couldn't find."
+- **Keep a check you paste in.** For a task you do often, write one short check and paste it in every time. For example: "Quote the line behind each number. List anything you couldn't find."
 
 ## The checklist
 

@@ -190,7 +190,7 @@ export const MISTAKE_ROUNDS: MistakeRound[] = [
       { text: 'PERSON-3 gave the most time: 8 hours.' },
       { text: 'Together that comes to 31 hours.', wrong: true },
     ],
-    explanation: '6 + 4 + 8 + 3 + 5 + 7 is 33, not 31. A total that is close to right looks right, so nobody adds it up again.',
+    explanation: '6 + 4 + 8 + 3 + 5 + 7 is 33, not 31. A total that is close to right looks right, so it is easy to skip adding it up again.',
     check: 'Redo any total that matters with a calculator or the sheet\'s own SUM. Asking the same chat "are you sure?" is not a check.',
   },
 ];

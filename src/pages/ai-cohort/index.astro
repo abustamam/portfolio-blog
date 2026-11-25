@@ -158,7 +158,7 @@ const firstDay = Number(monthDay(first).split(' ')[1]);
   .cohort-confirmed { margin: 0 0 2.5rem; }
   .cohort-confirmed h2 { margin: 0 0 .35rem; }
   .cohort-facts {
-    grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 1rem 1.5rem;
+    grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.5rem;
     margin: 0; padding-top: 1.25rem; border-top: 1px solid var(--color-line);
   }
   .cohort-facts dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-faint); }
@@ -188,5 +188,6 @@ const firstDay = Number(monthDay(first).split(' ')[1]);
   .session-date { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); }
   .session-next { margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: var(--color-accent); color: var(--color-bg); letter-spacing: .06em; }
   .session-links { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; }
+  .session-links a { text-decoration: underline; text-underline-offset: 3px; }
   .session-pending { color: var(--color-faint); }
 </style>

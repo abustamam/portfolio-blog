@@ -138,7 +138,7 @@ test.describe('cohort intake', () => {
     await pick(page, 'track', 'connect');
     await page.locator('#intake-submit').click();
     await expect(page.locator('#intake-error')).toHaveText(
-      'Please add which email and calendar you use, whether it is a work or personal account.',
+      'Please add which email and calendar you use and whether it is a work or personal account.',
     );
     expect(body).toBeNull();
     await pick(page, 'platform', 'microsoft');
@@ -155,7 +155,7 @@ test.describe('cohort intake', () => {
     await pick(page, 'track', 'build');
     await page.locator('#intake-submit').click();
     await expect(page.locator('#intake-error')).toHaveText(
-      'Please add which computer you will use, how much code you have written.',
+      'Please add which computer you will use and how much code you have written.',
     );
     await pick(page, 'os', 'mac');
     await pick(page, 'coding', 'none');

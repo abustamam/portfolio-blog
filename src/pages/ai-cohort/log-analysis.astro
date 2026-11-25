@@ -59,7 +59,7 @@ const RULES = [
   <h2 id="the-idea">The idea</h2>
   <p>
     <strong>Scrub first, then analyze.</strong> Before any AI sees a log, a small script on your own computer swaps
-    every private detail (emails, IP addresses, user IDs, login tokens, card numbers) for a label like
+    the private details it recognizes (emails, IP addresses, user IDs, login tokens, card numbers) for a label like
     <code>&lt;EMAIL&gt;</code>. A person checks the result. Only that cleaned copy goes into your company's Copilot,
     which then groups the errors, ranks them and spots what changed. The AI never sees the raw log.
   </p>
@@ -99,9 +99,9 @@ const RULES = [
     </tbody>
   </table>
   <p>
-    On Windows, open PowerShell in the kit folder and run:
+    To try it on the sample log on Windows, open PowerShell in the kit folder and run:
   </p>
-  <div class="log-lines"><code>powershell -ExecutionPolicy Bypass -File .\scrub\scrub.ps1 -InputPath .\app.log -OutputPath .\app.scrubbed.log</code></div>
+  <div class="log-lines"><code>powershell -ExecutionPolicy Bypass -File .\scrub\scrub.ps1 -InputPath .\sample-logs\app.log -OutputPath .\my-scrubbed.log</code></div>
   <p>
     There is a Python version with the same rules for Mac and Linux. <strong>The script is a first pass, not a
     guarantee.</strong> It does not catch names or addresses typed into messages, phone numbers, or IDs in other

@@ -214,6 +214,8 @@
 .quiz-option:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-bg); box-shadow: inset 0 0 0 1px var(--color-accent); }
 .quiz-option:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 .quiz-option input { accent-color: var(--color-accent); width: 1.125rem; height: 1.125rem; margin-top: .2rem; flex-shrink: 0; }
+/* Native radios and checkboxes follow the OS scheme unless told otherwise; the site theme is a class. */
+.dark .quiz-option input { color-scheme: dark; }
 .quiz-group { margin-bottom: 1.5rem; }
 .quiz-sublabel { font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-ink); margin-bottom: .5rem; }
 .quiz-input {
@@ -228,6 +230,11 @@
 .quiz-nav {
   display: flex; gap: .75rem; position: sticky; bottom: 0;
   padding: .75rem 0 calc(.75rem + env(safe-area-inset-bottom)); background: var(--color-bg);
+}
+/* A short fade above the sticky bar, so an option scrolling under it reads as "more below", not as cut off. */
+.quiz-nav::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 1.5rem; pointer-events: none;
+  background: linear-gradient(to top, var(--color-bg), transparent);
 }
 .quiz-btn {
   flex: 1; min-height: 52px; padding: 0 1.25rem; border: 1px solid var(--color-accent); border-radius: 8px;

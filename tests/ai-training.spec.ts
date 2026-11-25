@@ -34,7 +34,7 @@ test.describe('AI training page', () => {
   test('says what every track includes, how launch works, and links the quiz', async ({ page }) => {
     await page.goto(PAGE);
     await expect(page.locator('.training-included')).toContainText('private WhatsApp group');
-    await expect(page.locator('body')).toContainText('Tracks run back to back');
+    await expect(page.locator('body')).toContainText('Tracks run one at a time');
     await expect(page.locator('.training-slots > li')).toHaveCount(3);
     await expect(page.locator('.training-slots')).toContainText('After Ramadan');
     await expect(page.locator('a[href="/ai-quiz/"]').first()).toBeVisible();

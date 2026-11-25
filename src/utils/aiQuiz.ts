@@ -153,7 +153,7 @@ const BUILD: ResultCopy = {
   summary:
     "You want AI to do things, not just answer questions. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. Coding experience helps but isn't required. You do need to be comfortable installing software.",
   covers: [
-    'Coding with AI, and the habits that stop AI-written code from quietly being wrong',
+    'Coding with AI, and the habits that catch AI-written code when it is quietly wrong',
     'AI reading and acting on your email, Sheets, calendar or files, with limits on what it can touch',
     'An agent that gathers, decides and acts, and stops for your approval before anything goes out',
   ],

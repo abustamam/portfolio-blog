@@ -16,6 +16,9 @@ import '../styles/ai.css';
 const messageMe = WHATSAPP_HREF
   ? { href: WHATSAPP_HREF, target: '_blank', rel: 'noopener nofollow' }
   : { href: `mailto:${CONTACT_EMAIL}` };
+
+// The lowest track price, for the line under the hero ("From $79 a track").
+const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g, ''))));
 ---
 
 <BaseLayout
@@ -41,6 +44,7 @@ const messageMe = WHATSAPP_HREF
             <a class="ai-link" href="/ai-guides/">Free guides →</a>
           </p>
           <ul class="training-assure" data-rise style="--i:4">
+            <li>From ${fromPrice} a track</li>
             <li>{TRAINING.deposit} deposit, fully refundable</li>
             <li>4 live sessions on Google Meet</li>
             <li>Your own task, every session</li>
@@ -154,7 +158,7 @@ const messageMe = WHATSAPP_HREF
         <li>
           <span class="training-steps__n" aria-hidden="true">3</span>
           <h3>Dates</h3>
-          <p>The first track to launch takes the next open slot. Tracks run back to back, never at the same time.</p>
+          <p>The first track to launch takes the next open slot. Tracks run one at a time, never side by side.</p>
         </li>
         <li>
           <span class="training-steps__n" aria-hidden="true">4</span>
@@ -197,7 +201,7 @@ const messageMe = WHATSAPP_HREF
         </details>
         <details>
           <summary>What if I miss a session?</summary>
-          <p>Watch the recording, then bring your questions to office hours. Recordings go only to your cohort.</p>
+          <p>Watch the recording of the teaching part, then bring your questions to office hours. Recordings go only to your cohort.</p>
         </details>
         <details>
           <summary>I'm job hunting. Is this for me?</summary>

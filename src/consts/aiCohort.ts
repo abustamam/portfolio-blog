@@ -173,13 +173,13 @@ export const TRACKS: Track[] = [
     sessions: [
       {
         title: 'Code with AI',
-        outcome: 'Something you built that runs, and the habits that stop AI-written code from quietly being wrong.',
+        outcome: 'Something you built that runs, and the habits that catch AI-written code when it is quietly wrong.',
       },
       { title: 'Connect AI to your tools', outcome: 'AI reading and acting on your email, Sheets, calendar or files, with limits on what it can touch.' },
       { title: 'Agents: multi-step work', outcome: 'An agent that gathers, decides and acts, and stops for your approval before anything goes out.' },
       {
         title: 'Run it for real, then demo',
-        outcome: 'Your project running on a schedule or at a button press, with keys and costs kept safe.',
+        outcome: 'Your project running on a schedule or at a button press, with keys and costs kept under control.',
       },
     ],
     end: 'One working tool or agent you built yourself, and the judgment to know when to trust it.',
