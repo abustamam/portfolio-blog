@@ -55,7 +55,6 @@ async function complete(page: Page, p: Path) {
   await next(page);
   for (const v of p.neverPaste) await pick(page, 'neverPaste', v);
   await next(page);
-  await pick(page, 'format', 'either');
   await pick(page, 'start', 'within-month');
   await pick(page, 'payer', 'organization');
   await pick(page, 'followUp', 'team-workshop');
@@ -111,11 +110,20 @@ test.describe('AI quiz', () => {
       track: 'builder',
       weeklyTask: builder.weeklyTask,
       tools: builder.tools,
-      format: 'either',
       start: 'within-month',
       payer: 'organization',
       followUp: ['team-workshop', 'done-for-you'],
     });
+  });
+
+  test('is online only: no Roseville or in-person option, no format question', async ({ page }) => {
+    await page.goto('/ai-quiz');
+    await expect(page.locator('input[name="format"]')).toHaveCount(0);
+    // Scoped to the quiz and its description: the page also embeds the
+    // /writing/hands-on-ai-cohort post text, which is not this file's to fix.
+    const text = await page.locator('#ai-quiz').innerText();
+    expect(text).not.toMatch(/roseville|in-person|in person|onsite/i);
+    await expect(page.locator('meta[name="description"]')).not.toHaveAttribute('content', /roseville|in.person/i);
   });
 
   test('a failed send shows an error and a retry button', async ({ page }) => {
