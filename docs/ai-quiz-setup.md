@@ -84,6 +84,28 @@ are logged as `waitlist insert failed` and `waitlist notify failed`. Rules live
 in `services/ai-quiz-intake/src/waitlist.ts`; browser tests in
 `tests/ai-cohort-waitlist.spec.ts`.
 
+## Quiz result: "Not ready to reserve?"
+
+The quiz itself no longer asks for name or contact, so every quiz row is
+anonymous. The ask sits on the result screen instead, under the reserve button,
+once people have seen their track: optional name, plus email or WhatsApp
+number. It POSTs to `POST /api/ai-quiz/waitlist` with `source: quiz:<track>`
+(`foundations`, `applied` or `builder`), so the row lands in `cohort_waitlist`
+next to the guides sign-ups. It is not linked to the quiz row. Browser test:
+`tests/ai-quiz.spec.ts`.
+
+The card also has a "Message me on WhatsApp" link, opened in a new tab. Every
+"message me" link on `/ai-training/` and `/ai-training/reserved/` uses the same
+link (`WHATSAPP_HREF` in `src/consts/aiQuiz.ts`; dev builds fall back to email). It
+points at `GET /api/ai-quiz/whatsapp`, which answers with a 302 to
+`https://wa.me/<WHATSAPP_NUMBER>`, so the number is in the server's env and
+never in the site's HTML or JS. A browser test fails if any built file carries
+a `wa.me/<number>` link. The redirect has its own per-IP limit (30 an hour),
+sends `X-Robots-Tag: noindex`, and is a 404 until `WHATSAPP_NUMBER` is set in
+`/srv/.env`. Anyone who clicks still sees the number in WhatsApp; this only
+keeps it out of the page source and away from scrapers that don't follow
+redirects.
+
 ## Guides: "tell me when the next cohort opens"
 
 The guides hub (`/ai-guides/`, under "When you want more") and the call to
@@ -368,6 +390,9 @@ SQL
       # Optional: deposit counts for /ai-training/ (see "Training page deposit counts").
       STRIPE_TRACKS: ${STRIPE_TRACKS}
       STRIPE_API_KEY: ${STRIPE_API_KEY}
+      # Optional: /api/ai-quiz/whatsapp redirects to this chat. Digits only, country
+      # code first, no + or spaces (15551234567). Unset = the path is a 404.
+      WHATSAPP_NUMBER: ${WHATSAPP_NUMBER}
     depends_on:
       postgres:
         condition: service_healthy

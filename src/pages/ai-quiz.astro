@@ -3,7 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Rosette from '../components/ai/Rosette.astro';
 import TrackGlyph from '../components/ai/TrackGlyph.astro';
 import '../styles/ai.css';
-import { AI_QUIZ_ENDPOINT } from '../consts/aiQuiz';
+import { AI_QUIZ_ENDPOINT, WHATSAPP_HREF } from '../consts/aiQuiz';
+import { WAITLIST_LIMITS } from '../../services/ai-quiz-intake/src/waitlist';
+
+// Same service and Caddy route as the quiz. Empty in dev builds.
+const api = AI_QUIZ_ENDPOINT.replace(/\/$/, '');
+const notifyEndpoint = api ? `${api}/waitlist` : '';
+const whatsappHref = WHATSAPP_HREF;
 
 type Opt = { value: string; label: string };
 type Q = {
@@ -264,13 +270,6 @@ const steps = 9; // 6 skill + free text + privacy + logistics
           </div>
         </div>
 
-        <div class="quiz-group">
-          <div class="quiz-sublabel">Name and contact <span class="text-faint">(optional)</span></div>
-          <p class="quiz-hint mt-0">Only if you'd like me to tell you when the cohort opens.</p>
-          <input type="text" name="name" autocomplete="name" placeholder="Name" class="quiz-input mb-2" maxlength="120" />
-          <input type="text" name="contact" autocomplete="email" placeholder="Email or phone" class="quiz-input" maxlength="160" />
-        </div>
-
         <!-- Spam trap: hidden from people, filled by bots. -->
         <input type="text" name="website" tabindex="-1" autocomplete="off" class="quiz-trap" aria-hidden="true" />
       </fieldset>
@@ -314,6 +313,30 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       <p class="m-0 mb-8">
         <a id="result-reserve" href="/ai-training/#tracks" class="cohort-cta">See the tracks and reserve your seat →</a>
       </p>
+
+      <!-- Asked here, after the result, not inside the quiz: by now people know what they'd be signing up for. -->
+      <form id="result-notify" class="ai-card p-5 sm:p-6 mb-8 grid gap-3" novalidate data-endpoint={notifyEndpoint} aria-labelledby="result-notify-title">
+        <h2 id="result-notify-title" class="font-serif text-xl font-medium text-ink m-0">Not ready to reserve?</h2>
+        <p class="font-serif text-base leading-[1.6] text-mute m-0" data-notify-promise>
+          Leave your email or WhatsApp number and I'll message you once when <span id="result-notify-track">this track</span>
+          opens, with the dates. Nothing else.
+        </p>
+        <div class="grid gap-2 [&[hidden]]:hidden" data-notify-fields>
+          <label class="sr-only" for="result-notify-name">Your name (optional)</label>
+          <input id="result-notify-name" type="text" name="name" autocomplete="name" placeholder="Name (optional)" class="quiz-input" maxlength={WAITLIST_LIMITS.name} />
+          <label class="sr-only" for="result-notify-contact">Your email or WhatsApp number</label>
+          <input id="result-notify-contact" type="text" name="contact" autocomplete="email" inputmode="email" placeholder="Email or WhatsApp number" class="quiz-input" maxlength={WAITLIST_LIMITS.contact} />
+          <button type="submit" class="quiz-btn justify-self-start">Tell me</button>
+        </div>
+        {whatsappHref && (
+          <p class="font-serif text-base leading-[1.6] text-mute m-0">
+            Rather just ask me something? <a id="result-whatsapp" href={whatsappHref} target="_blank" rel="noopener nofollow" class="text-accent">Message me on WhatsApp</a>.
+          </p>
+        )}
+        <!-- Spam trap: hidden from people, filled by bots. -->
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="quiz-trap" aria-hidden="true" />
+        <p id="result-notify-status" class="quiz-status m-0" role="status"></p>
+      </form>
 
       <p class="m-0 mb-8">
         <a id="result-guides" href="/ai-guides/" class="ai-link">Or start with the free guides →</a>
@@ -392,8 +415,6 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       start: one('start'),
       payer: one('payer'),
       followUp: many('followUp'),
-      name: one('name').trim(),
-      contact: one('contact').trim(),
       website: one('website'),
     };
   }
@@ -482,6 +503,8 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     const anchor = result.track === 'builder' ? 'tracks' : 'everyday';
     (document.getElementById('result-reserve') as HTMLAnchorElement).href = `/ai-training/#${anchor}`;
     document.getElementById('result-privacy')!.hidden = !(result.privacyGap && result.track !== 'foundations');
+    document.getElementById('result-notify-track')!.textContent = t.name;
+    notify.dataset.source = `quiz:${result.track}`;
 
     form.hidden = true;
     document.getElementById('quiz-intro')!.hidden = true;
@@ -510,6 +533,51 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     if (requireStep()) showResult();
   });
   retry.addEventListener('click', () => lastPayload && send(lastPayload));
+
+  // Contact is asked on the result screen and stored on the waitlist, tagged quiz:<track>.
+  const notify = document.getElementById('result-notify') as HTMLFormElement;
+  const notifyStatus = document.getElementById('result-notify-status')!;
+  const notifyFields = notify.querySelector<HTMLElement>('[data-notify-fields]')!;
+  const notifyButton = notify.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const say = (text: string, state: string) => {
+    notifyStatus.textContent = text;
+    notifyStatus.dataset.state = state;
+  };
+  notify.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(notify);
+    const field = (k: string) => ((fd.get(k) as string | null) ?? '').trim();
+    const contact = field('contact');
+    if (!contact) {
+      say('Please add your email or WhatsApp number.', 'error');
+      notify.querySelector<HTMLInputElement>('input[name="contact"]')!.focus();
+      return;
+    }
+    const endpoint = (notify.dataset.endpoint ?? '').trim();
+    if (!endpoint) {
+      say("Heads up: this form isn't collecting sign-ups here, so nothing was sent.", 'warn');
+      return;
+    }
+    notifyButton.disabled = true;
+    say('Sending…', 'pending');
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: field('name'), contact, source: notify.dataset.source, website: fd.get('website') ?? '' }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
+      notifyFields.hidden = true;
+      say("Thank you. I'll message you once when it opens.", 'ok');
+    } catch (err) {
+      console.error('quiz notify sign-up failed', err);
+      say("That didn't send. Check your connection and try again.", 'error');
+      notifyButton.textContent = 'Try again';
+    } finally {
+      notifyButton.disabled = false;
+    }
+  });
 
   // "None yet" is exclusive with the other tools.
   form.addEventListener('change', (e) => {

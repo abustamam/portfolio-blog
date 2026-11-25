@@ -1,21 +1,22 @@
-// Turns an untrusted /api/ai-quiz/waitlist POST body into a row to store. Two
-// forms post here: the cohort waitlist at /ai-cohort/waitlist (where the
-// sold-out Stripe link sends people: name and contact), and the "tell me when
-// the next cohort opens" form on the free guides (contact only, plus a
-// `source` naming the page). No imports: the page and the service both load
-// this file.
+// Turns an untrusted /api/ai-quiz/waitlist POST body into a row to store.
+// Three forms post here: the cohort waitlist at /ai-cohort/waitlist (where the
+// sold-out Stripe link sends people: name and contact), the "tell me when the
+// next cohort opens" form on the free guides (contact only, plus a `source`
+// naming the page), and the same ask on the /ai-quiz result screen (optional
+// name, contact, and `quiz:<track>`). No imports: the page and the service
+// both load this file.
 
 export const WAITLIST_LIMITS = { name: 120, contact: 160, note: 400, source: 60 } as const;
 
-/** Where a guides sign-up came from: the hub, or one guide by its id. */
-export const SOURCE = /^(guides-hub|guide:[a-z0-9-]{1,50})$/;
+/** Where a sign-up came from: the guides hub, one guide by its id, or the quiz result for a track. */
+export const SOURCE = /^(guides-hub|guide:[a-z0-9-]{1,50}|quiz:(foundations|applied|builder))$/;
 
 export interface WaitlistRow {
   /** Required on the cohort waitlist; the guides form has no name field. */
   name: string | null;
   contact: string;
   note: string | null;
-  /** Null on the cohort waitlist; `guides-hub` or `guide:<id>` from the guides. */
+  /** Null on the cohort waitlist; `guides-hub` or `guide:<id>` from the guides; `quiz:<track>` from the quiz. */
   source: string | null;
 }
 

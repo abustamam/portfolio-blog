@@ -8,9 +8,14 @@ import Rosette from '../components/ai/Rosette.astro';
 import WorkedExample from '../components/ai/WorkedExample.astro';
 import profilePic from '../assets/profile-pic.jpeg';
 import { COHORT, COHORT_LINKS, CONTACT_EMAIL, INCLUDED, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../consts/aiCohort';
+import { WHATSAPP_HREF } from '../consts/aiQuiz';
 import '../styles/ai.css';
 
-const mailto = `mailto:${CONTACT_EMAIL}`;
+// The contact links open WhatsApp through the intake service's redirect (number in the
+// server's env, not here). Dev builds have no backend, so it falls back to email.
+const messageMe = WHATSAPP_HREF
+  ? { href: WHATSAPP_HREF, target: '_blank', rel: 'noopener nofollow' }
+  : { href: `mailto:${CONTACT_EMAIL}` };
 ---
 
 <BaseLayout
@@ -172,7 +177,7 @@ const mailto = `mailto:${CONTACT_EMAIL}`;
           <h3>No risk to reserve</h3>
           <p>
             If your track doesn't launch, or the dates don't work for you, <strong>your {TRAINING.deposit} comes back in
-            full</strong>. Just <a href={mailto}>message me</a>.
+            full</strong>. Just <a {...messageMe}>message me</a>.
           </p>
         </div>
       </div>
@@ -183,7 +188,7 @@ const mailto = `mailto:${CONTACT_EMAIL}`;
       <div>
         <p class="ai-kicker">Before you decide</p>
         <h2 class="ai-h2" id="faq">Questions</h2>
-        <p class="ai-sub">Something else? <a href={mailto}>Message me</a>. I answer every one myself.</p>
+        <p class="ai-sub">Something else? <a {...messageMe}>Message me</a>. I answer every one myself.</p>
       </div>
       <div class="training-faq">
         <details>
@@ -216,7 +221,7 @@ const mailto = `mailto:${CONTACT_EMAIL}`;
           <summary>Which track is right for me?</summary>
           <p>
             <a href="/ai-quiz/">Take the 4-minute quiz.</a> It looks at what you do with AI now, not how confident you
-            feel about it. Still unsure? <a href={mailto}>Message me</a>.
+            feel about it. Still unsure? <a {...messageMe}>Message me</a>.
           </p>
         </details>
       </div>
