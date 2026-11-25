@@ -1,0 +1,174 @@
+---
+// The never-paste Scrubber. Everything runs in this page: no fetch, no
+// storage (it does not use guideStore), nothing typed goes in a URL.
+---
+
+<section class="scrubber" data-scrubber aria-labelledby="scrubber-title">
+  <h2 id="scrubber-title">Try it: scrub some text</h2>
+  <p class="scrubber__privacy"><strong>Nothing you type here leaves this page.</strong> It is not sent, not saved, and it is gone when you reload.</p>
+  <p>Paste any text below. Email addresses, phone numbers and long digit runs (card and account numbers) are swapped for placeholders. Use a made-up example if you just want to see how it works.</p>
+
+  <label class="scrubber__label" for="scrub-in">Your text</label>
+  <textarea id="scrub-in" class="scrubber__box" rows="6" autocomplete="off" spellcheck="false" data-scrub-in
+    placeholder="e.g. Please email Dana at dana.lee@example.com or call 555-123-4567 about card 4111 1111 1111 1111."></textarea>
+
+  <div class="scrubber__names">
+    <label class="scrubber__label" for="scrub-name">Names to replace</label>
+    <p class="scrubber__hint"><strong>Check names yourself.</strong> The tool cannot tell a name from any other word, so add each name here and it becomes PERSON-1, PERSON-2 and so on.</p>
+    <div class="scrubber__row">
+      <input id="scrub-name" type="text" autocomplete="off" spellcheck="false" data-scrub-name placeholder="A name, e.g. Dana" />
+      <button type="button" class="scrubber__btn" data-scrub-add>Add name</button>
+    </div>
+    <ul class="scrubber__chips" data-scrub-chips aria-label="Names being replaced"></ul>
+  </div>
+
+  <label class="scrubber__label" for="scrub-out">Safe version</label>
+  <textarea id="scrub-out" class="scrubber__box" rows="6" readonly data-scrub-out></textarea>
+  <button type="button" class="scrubber__btn" data-copy-safe>Copy safe text</button>
+
+  <h3>Your key</h3>
+  <p class="scrubber__hint">Keep this in your own file. Never paste it into the chat.</p>
+  <div class="scrubber__keywrap">
+    <table class="scrubber__key" data-scrub-key hidden>
+      <thead><tr><th>Placeholder</th><th>Original</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="scrubber__empty" data-scrub-empty>Nothing replaced yet.</p>
+  <button type="button" class="scrubber__btn" data-copy-key>Copy key</button>
+  <p class="scrubber__status" role="status" aria-live="polite" data-scrub-status></p>
+</section>
+
+<script>
+  import { scrub, keyToText } from '../../utils/scrub';
+
+  // The "check before you press Enter" list is shared markup rendered with
+  // disabled boxes. Make it tickable here; the ticks are not saved anywhere.
+  document.querySelectorAll<HTMLInputElement>('article .task-list-item input[type="checkbox"]').forEach((box) => {
+    box.disabled = false;
+  });
+
+  const root = document.querySelector<HTMLElement>('[data-scrubber]');
+  if (root) {
+    const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const input = $<HTMLTextAreaElement>('[data-scrub-in]');
+    const output = $<HTMLTextAreaElement>('[data-scrub-out]');
+    const nameInput = $<HTMLInputElement>('[data-scrub-name]');
+    const chips = $<HTMLUListElement>('[data-scrub-chips]');
+    const table = $<HTMLTableElement>('[data-scrub-key]');
+    const empty = $<HTMLElement>('[data-scrub-empty]');
+    const status = $<HTMLElement>('[data-scrub-status]');
+    const names: string[] = [];
+    let keyText = '';
+
+    // A reload can restore a typed value from the browser's form memory; the
+    // spec is an empty box after a reload.
+    input.value = '';
+    nameInput.value = '';
+
+    function render() {
+      const { text, key } = scrub(input.value, names);
+      output.value = text;
+      keyText = keyToText(key);
+      const body = table.tBodies[0];
+      body.replaceChildren(
+        ...key.map((k) => {
+          const tr = document.createElement('tr');
+          for (const v of [k.placeholder, k.original]) {
+            const td = document.createElement('td');
+            td.textContent = v;
+            tr.append(td);
+          }
+          return tr;
+        }),
+      );
+      table.hidden = key.length === 0;
+      empty.hidden = key.length > 0;
+    }
+
+    function renderChips() {
+      chips.replaceChildren(
+        ...names.map((n, i) => {
+          const li = document.createElement('li');
+          const label = document.createElement('span');
+          label.textContent = `${n} → PERSON-${i + 1}`;
+          const rm = document.createElement('button');
+          rm.type = 'button';
+          rm.textContent = '×';
+          rm.setAttribute('aria-label', `Remove ${n}`);
+          rm.addEventListener('click', () => {
+            names.splice(i, 1);
+            renderChips();
+            render();
+          });
+          li.append(label, rm);
+          return li;
+        }),
+      );
+    }
+
+    function addName() {
+      const n = nameInput.value.trim();
+      if (n && !names.some((x) => x.toLowerCase() === n.toLowerCase())) {
+        names.push(n);
+        renderChips();
+        render();
+      }
+      nameInput.value = '';
+      nameInput.focus();
+    }
+
+    async function copy(text: string, what: string) {
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = `${what} copied.`;
+      } catch {
+        status.textContent = `Could not copy. Select the ${what.toLowerCase()} and copy it by hand.`;
+      }
+    }
+
+    input.addEventListener('input', render);
+    $('[data-scrub-add]').addEventListener('click', addName);
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addName();
+      }
+    });
+    $('[data-copy-safe]').addEventListener('click', () => copy(output.value, 'Safe text'));
+    $('[data-copy-key]').addEventListener('click', () => copy(keyText, 'Key'));
+    render();
+  }
+</script>
+
+<style is:global>
+  .ba-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem 1.5rem; margin: 1rem 0 1.5rem; }
+  .ba-grid table { margin: 0; }
+  .ba-label { margin: 0 0 .4rem !important; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  .scrubber { margin: 2.5rem 0; padding: 1.5rem; border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-surface); }
+  .scrubber h2 { margin-top: 0 !important; }
+  .scrubber__privacy { margin-bottom: .75rem; }
+  .scrubber__label { display: block; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); margin: 1.25rem 0 .4rem; }
+  .scrubber__hint { font-size: 16px; margin: 0 0 .75rem; }
+  .scrubber__box, .scrubber input[type='text'] {
+    display: block; width: 100%; box-sizing: border-box; font-family: var(--font-mono); font-size: 14px; line-height: 1.5;
+    color: var(--color-ink); background: var(--color-bg); border: 1px solid var(--color-line); border-radius: 4px; padding: 10px 12px;
+  }
+  .scrubber__box { resize: vertical; margin-bottom: .75rem; }
+  .scrubber__row { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .scrubber__row input { flex: 1 1 12rem; width: auto !important; min-width: 0; }
+  .scrubber__btn {
+    font-family: var(--font-mono); font-size: 13px; min-height: 44px; padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    color: var(--color-ink); background: var(--color-bg); border: 1px solid var(--color-line);
+  }
+  .scrubber__btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .scrubber__chips { list-style: none !important; padding: 0 !important; margin: .75rem 0 0 !important; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .scrubber__chips li { display: inline-flex; align-items: center; gap: .5rem; margin: 0 !important; padding: 2px 4px 2px 10px; font-family: var(--font-mono); font-size: 13px; border: 1px solid var(--color-line); border-radius: 999px; }
+  .scrubber__chips button { min-width: 32px; min-height: 32px; border: 0; background: none; color: var(--color-mute); font-size: 18px; cursor: pointer; }
+  .scrubber h3 { margin-top: 1.5rem !important; }
+  .scrubber__keywrap { overflow-x: auto; max-width: 100%; }
+  .scrubber__key { border-collapse: collapse; font-size: 15px; margin: 0 0 .75rem; }
+  .scrubber__key th, .scrubber__key td { border: 1px solid var(--color-line); padding: 6px 12px; text-align: left; overflow-wrap: anywhere; }
+  .scrubber__empty { font-size: 15px; color: var(--color-mute); }
+  .scrubber__status { min-height: 1.5em; margin: .75rem 0 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-accent); }
+</style>

@@ -5,8 +5,50 @@ lead: Whatever you paste into an AI chat leaves your computer. Depending on your
 step: 1
 minutes: 2
 ---
-import { Content as NeverPaste } from '../ai-partials/never-paste.md';
+import { compiledContent } from '../ai-partials/never-paste.md';
+import Scrubber from '../../components/guides/Scrubber.astro';
 
-{/* The body is shared with the cohort handout /ai-cohort/never-paste/ so the two cannot drift. Edit it in src/content/ai-partials/never-paste.md. */}
+{/* The body is shared with the cohort handout /ai-cohort/never-paste/ so the two cannot drift. Edit it in src/content/ai-partials/never-paste.md. This page renders the same HTML, split before "Check before you press Enter" so the Scrubber sits after the three-step section. The split is asserted at build time. */}
 
-<NeverPaste />
+export const shared = await compiledContent();
+export const splitAt = shared.indexOf('<h2 id="check-before-you-press-enter"');
+export const splitOk = (() => { if (splitAt < 1) throw new Error('never-paste.mdx: heading "Check before you press Enter" not found in the shared partial'); return true; })();
+export const beforeChecklist = shared.slice(0, splitAt);
+export const fromChecklist = shared.slice(splitAt);
+
+<Fragment set:html={beforeChecklist} />
+
+### Before and after: a spreadsheet made safe
+
+An illustration with made-up people, not real data. The left sheet is what you might be tempted to upload. The right is the copy that is safe to upload. The key (who is PERSON-1) stays in your own file.
+
+<div class="ba-grid">
+<div>
+<p class="ba-label">Before</p>
+<table>
+<thead><tr><th>Name</th><th>Email</th><th>Gift</th></tr></thead>
+<tbody>
+<tr><td>Dana Lee</td><td>dana.lee@example.com</td><td>$50</td></tr>
+<tr><td>Sam Ortiz</td><td>sam@example.org</td><td>$25</td></tr>
+<tr><td>Dana Lee</td><td>dana.lee@example.com</td><td>$100</td></tr>
+</tbody>
+</table>
+</div>
+<div>
+<p class="ba-label">After</p>
+<table>
+<thead><tr><th>ID</th><th>Gift</th></tr></thead>
+<tbody>
+<tr><td>PERSON-1</td><td>$50</td></tr>
+<tr><td>PERSON-2</td><td>$25</td></tr>
+<tr><td>PERSON-1</td><td>$100</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+The pattern survives (PERSON-1 gave twice) and the identities do not.
+
+<Scrubber />
+
+<Fragment set:html={fromChecklist} />
