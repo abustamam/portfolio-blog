@@ -181,4 +181,18 @@ test.describe('which-model: voice', () => {
     const answer = q.locator('xpath=following-sibling::p[1]');
     await expect(answer.locator('a[href="/ai-guides/when-ai-is-wrong/"]')).toHaveCount(1);
   });
+
+  test('links the sister guide, and the thinking section has the medium-or-default line and the Opus paragraph', async ({ page }) => {
+    await page.goto(PAGE);
+    await expect(page.locator('article a[href="/ai-guides/which-tool/"]')).toHaveCount(1);
+    const h = page.locator('article h2', { hasText: /thinking/i });
+    await expect(h).toHaveCount(1);
+    const text = await h.evaluate((el) => {
+      const out: string[] = [];
+      for (let n = el.nextElementSibling; n && n.tagName !== 'H2'; n = n.nextElementSibling) out.push(n.textContent ?? '');
+      return out.join('\n');
+    });
+    expect(text).toContain('medium or the default');
+    expect(text).toContain('largest model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet');
+  });
 });
