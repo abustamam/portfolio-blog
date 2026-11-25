@@ -74,7 +74,7 @@ test.describe('AI training page', () => {
     expect(conf).toMatch(/\^\/ai-cohort-2\/\?\$ \{\s*return 301 \/ai-training\/#connect;/);
   });
 
-  test('every "message me" is a mailto link', async ({ page }) => {
+  test('every "message me" opens WhatsApp through the redirect, in a new tab', async ({ page }) => {
     const src = readFileSync(fileURLToPath(new URL('../src/pages/ai-training.astro', import.meta.url)), 'utf8');
     const inSource = src.match(/message me/gi) ?? [];
     expect(inSource.length).toBe(3);
@@ -82,7 +82,7 @@ test.describe('AI training page', () => {
     const text = await page.locator('main').textContent() ?? '';
     const total = (text.match(/message me/gi) ?? []).length;
     expect(total).toBe(3);
-    const links = page.locator('main a[href="mailto:admin@bustamam.tech"]', { hasText: /message me/i });
+    const links = page.locator('main a[href="/api/ai-quiz/whatsapp"][target="_blank"]', { hasText: /message me/i });
     await expect(links).toHaveCount(3);
   });
 

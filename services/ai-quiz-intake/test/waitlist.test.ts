@@ -159,6 +159,16 @@ describe('guides sign-up (source)', () => {
     expect(parseWaitlist({ ...guides, source: 'guides-hub' }).kind).toBe('ok');
   });
 
+  test('accepts the quiz result screen, tagged with a real track', () => {
+    expect(parseWaitlist({ ...guides, name: 'Q', source: 'quiz:builder' })).toEqual({
+      kind: 'ok',
+      row: { name: 'Q', contact: 'reader@example.com', note: null, source: 'quiz:builder' },
+    });
+    for (const t of ['foundations', 'applied']) expect(parseWaitlist({ ...guides, source: `quiz:${t}` }).kind).toBe('ok');
+    expect(parseWaitlist({ ...guides, source: 'quiz:wizard' })).toEqual({ kind: 'invalid', error: 'bad source' });
+    expect(parseWaitlist({ ...guides, source: 'quiz' })).toEqual({ kind: 'invalid', error: 'bad source' });
+  });
+
   test('without a source, the name is still required', () => {
     expect(parseWaitlist({ contact: 'reader@example.com' })).toEqual({ kind: 'invalid', error: 'missing name' });
     expect(parseWaitlist({ ...guides, source: '' })).toEqual({ kind: 'invalid', error: 'missing name' });

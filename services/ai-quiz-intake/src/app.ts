@@ -13,6 +13,10 @@ export const WAITLIST_PATH = `${PATH}/waitlist`;
 export const TRACKS_PATH = `${PATH}/tracks`;
 /** Stripe's webhook for the cohort payment link. Same Caddy route. */
 export const STRIPE_PATH = `${PATH}/stripe-webhook`;
+/** Redirects to a WhatsApp chat, so the number lives in the server's env, not the site's HTML or JS. */
+export const WHATSAPP_PATH = `${PATH}/whatsapp`;
+/** International format, digits only (country code first, no +), as wa.me expects. */
+export const WHATSAPP_NUMBER = /^\d{8,15}$/;
 const MAX_BODY = 16 * 1024;
 /** Stripe events are bigger than form posts. */
 const MAX_STRIPE_BODY = 256 * 1024;
@@ -45,6 +49,10 @@ export interface Deps {
   countTracks?: () => Promise<Record<string, number>>;
   /** Awaited: a failure returns 500 so Stripe retries the event. */
   notifyPayment?: (p: Payment) => Promise<void>;
+  /** Digits only, e.g. 15551234567. Without a valid one, the WhatsApp path is a 404. */
+  whatsappNumber?: string;
+  /** WhatsApp redirects per IP per window. Higher than forms: people click twice, and it saves nothing. */
+  whatsappLimit?: number;
 }
 
 type Parse<T> = (raw: unknown) => { kind: 'ok'; row: T } | { kind: 'spam' } | { kind: 'invalid'; error: string };
@@ -66,6 +74,10 @@ const json = (status: number, body: unknown) =>
 export function createHandler(deps: Deps) {
   const allow = createRateLimiter(deps.limit ?? 10, deps.windowMs ?? 60 * 60 * 1000);
   const log = deps.log ?? ((m, e) => console.log(JSON.stringify({ msg: m, ...e })));
+  const whatsapp = deps.whatsappNumber?.trim();
+  const whatsappOk = !!whatsapp && WHATSAPP_NUMBER.test(whatsapp);
+  if (whatsapp && !whatsappOk) log('whatsapp number ignored: expected 8-15 digits, no + or spaces');
+  const allowWhatsapp = createRateLimiter(deps.whatsappLimit ?? 30, deps.windowMs ?? 60 * 60 * 1000);
 
   // Each form exists only when the service was given somewhere to save it.
   const forms = new Map<string, Form<any>>();
@@ -97,6 +109,23 @@ export function createHandler(deps: Deps) {
         log('tracks count failed', { error: String(err) });
         return json(503, { ok: false, error: 'counts unavailable' });
       }
+    }
+
+    // Its own limiter: a link people click, not a form, and the number never appears in a response body.
+    if (url.pathname === WHATSAPP_PATH && whatsappOk) {
+      if (req.method !== 'GET' && req.method !== 'HEAD') return json(405, { ok: false, error: 'method not allowed' });
+      if (!allowWhatsapp(req.headers.get('x-real-ip') ?? 'unknown')) {
+        return json(429, { ok: false, error: 'too many requests, try again later' });
+      }
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `https://wa.me/${whatsapp}`,
+          'Cache-Control': 'no-store',
+          'X-Robots-Tag': 'noindex, nofollow',
+          'Referrer-Policy': 'no-referrer',
+        },
+      });
     }
 
     // Before the rate limiter: Stripe sends from a few shared IPs, and the signature is the gate.

@@ -72,11 +72,11 @@ test.describe('post-deposit page', () => {
     await expect(page.locator('a[href^="/ai-cohort"]:not([href="/ai-cohort/waitlist/"])')).toHaveCount(0);
   });
 
-  test('every "message me" on the page is a mailto link', async ({ page }) => {
+  test('every "message me" on the page opens WhatsApp through the redirect', async ({ page }) => {
     await page.goto(PAGE);
     const text = await page.locator('main').innerText();
     const mentions = (text.match(/message me/gi) ?? []).length;
-    const links = await page.locator('main a[href^="mailto:"]').evaluateAll(
+    const links = await page.locator('main a[href="/api/ai-quiz/whatsapp"][target="_blank"]').evaluateAll(
       (as) => as.filter((a) => /message me/i.test(a.textContent ?? '')).length,
     );
     expect(mentions).toBeGreaterThanOrEqual(1);
