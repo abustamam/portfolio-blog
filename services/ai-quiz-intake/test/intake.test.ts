@@ -12,11 +12,49 @@ const valid = {
   inputs: ['spreadsheet', 'email'],
   tools: ['gemini-free', 'chatgpt-paid'],
   workRestricts: 'not-sure',
-  track: 'applied',
+  track: 'everyday',
   privateConcerns: 'Volunteer phone numbers',
   recordingConsent: true,
   website: '',
 };
+
+const connectAnswers = { platform: 'microsoft', account: 'work' };
+const buildAnswers = { os: 'mac', coding: 'some', buildIdea: 'A bot that sorts my inbox' };
+
+describe('track-specific questions', () => {
+  test('Connect requires platform and account, and keeps them', () => {
+    expect(parseIntake({ ...valid, track: 'connect' })).toEqual({ kind: 'invalid', error: 'missing platform' });
+    expect(parseIntake({ ...valid, track: 'connect', platform: 'google' })).toEqual({ kind: 'invalid', error: 'missing account' });
+    const p = parseIntake({ ...valid, track: 'connect', ...connectAnswers });
+    expect(p.kind === 'ok' && p.row.extras).toEqual(connectAnswers);
+  });
+
+  test('Build requires OS and coding experience; the idea is optional and capped', () => {
+    expect(parseIntake({ ...valid, track: 'build', os: 'mac' })).toEqual({ kind: 'invalid', error: 'missing coding' });
+    const p = parseIntake({ ...valid, track: 'build', ...buildAnswers });
+    expect(p.kind === 'ok' && p.row.extras).toEqual(buildAnswers);
+    const { buildIdea, ...noIdea } = buildAnswers;
+    const q = parseIntake({ ...valid, track: 'build', ...noIdea });
+    expect(q.kind === 'ok' && q.row.extras).toEqual(noIdea);
+    expect(parseIntake({ ...valid, track: 'build', ...buildAnswers, buildIdea: 'x'.repeat(401) })).toEqual({
+      kind: 'invalid',
+      error: 'buildIdea longer than 400',
+    });
+  });
+
+  test("rejects unknown values, and drops another track's answers", () => {
+    expect(parseIntake({ ...valid, track: 'connect', ...connectAnswers, platform: 'yahoo' })).toEqual({
+      kind: 'invalid',
+      error: 'bad value for platform',
+    });
+    const p = parseIntake({ ...valid, ...connectAnswers, ...buildAnswers });
+    expect(p.kind === 'ok' && p.row.extras).toEqual({});
+  });
+
+  test('rejects the old quiz track names', () => {
+    expect(parseIntake({ ...valid, track: 'applied' })).toEqual({ kind: 'invalid', error: 'bad value for track' });
+  });
+});
 
 function setup(limit = 10) {
   const rows: IntakeRow[] = [];
@@ -54,9 +92,10 @@ describe('parseIntake', () => {
       inputs: ['spreadsheet', 'email'],
       tools: ['gemini-free', 'chatgpt-paid'],
       workRestricts: 'not-sure',
-      track: 'applied',
+      track: 'everyday',
       privateConcerns: 'Volunteer phone numbers',
       recordingConsent: true,
+      extras: {},
     });
   });
 
@@ -108,7 +147,12 @@ describe('parseIntake', () => {
 
   test('every option the page renders is accepted', () => {
     for (const o of INTAKE_OPTIONS.timeTaken) expect(parseIntake({ ...valid, timeTaken: o.value }).kind).toBe('ok');
-    for (const o of INTAKE_OPTIONS.track) expect(parseIntake({ ...valid, track: o.value }).kind).toBe('ok');
+    const extrasFor = { everyday: {}, connect: connectAnswers, build: buildAnswers };
+    for (const o of INTAKE_OPTIONS.track) expect(parseIntake({ ...valid, track: o.value, ...extrasFor[o.value] }).kind).toBe('ok');
+    for (const k of ['platform', 'account'] as const)
+      for (const o of INTAKE_OPTIONS[k]) expect(parseIntake({ ...valid, ...connectAnswers, track: 'connect', [k]: o.value }).kind).toBe('ok');
+    for (const k of ['os', 'coding'] as const)
+      for (const o of INTAKE_OPTIONS[k]) expect(parseIntake({ ...valid, ...buildAnswers, track: 'build', [k]: o.value }).kind).toBe('ok');
     for (const o of INTAKE_OPTIONS.workRestricts) expect(parseIntake({ ...valid, workRestricts: o.value }).kind).toBe('ok');
     expect(parseIntake({ ...valid, inputs: INTAKE_OPTIONS.inputs.map((o) => o.value) }).kind).toBe('ok');
     const tools = INTAKE_OPTIONS.tools.map((o) => o.value).filter((v) => v !== 'none');
@@ -204,10 +248,21 @@ describe('intake notifications', () => {
   test('names the person, track, time taken and task, and leaves contact and private notes out', () => {
     const text = formatIntakeNotification(row);
     expect(text).toBe(
-      ['New cohort intake: Test Person', 'Track: Applied', 'Time now: 1–2 hours', `Task: ${valid.weeklyTask}`].join('\n'),
+      ['New cohort intake: Test Person', 'Track: Everyday AI', 'Time now: 1–2 hours', `Task: ${valid.weeklyTask}`].join('\n'),
     );
     expect(text).not.toContain('555');
     expect(text).not.toContain('Volunteer phone numbers');
+  });
+
+  test('adds the setup and build idea for the technical tracks', () => {
+    const p = parseIntake({ ...valid, track: 'build', ...buildAnswers });
+    if (p.kind !== 'ok') throw new Error('fixture invalid');
+    expect(formatIntakeNotification(p.row)).toContain('Track: Build');
+    expect(formatIntakeNotification(p.row)).toContain("Setup: Mac · I've written a little, or used to");
+    expect(formatIntakeNotification(p.row)).toContain('Wants to build: A bot that sorts my inbox');
+    const c = parseIntake({ ...valid, track: 'connect', ...connectAnswers });
+    if (c.kind !== 'ok') throw new Error('fixture invalid');
+    expect(formatIntakeNotification(c.row)).toContain('Setup: Microsoft 365 (Outlook, Teams) · A work account');
   });
 
   test('posts plain text to the chat', async () => {

@@ -57,8 +57,14 @@ rules as the quiz:
   Text is length-capped (name 120, contact 160, task 600, private-files note
   400). Name, contact, task, time taken, track, and recording consent
   (`recordingConsent: true`) are required.
+- People pick the track they reserved on `/ai-training/` (Everyday AI, Connect,
+  Build). Connect also asks which email/calendar (Google, Microsoft) and whether
+  it's a work account; Build asks which computer, how much code they've written,
+  and (optionally) what they want to build. Those answers go in the `extras`
+  jsonb column; answers for another track are dropped. Rows from before this
+  change keep the quiz's track names.
 - Each saved row goes in `cohort_intake` and triggers a Telegram message with
-  name, track, time taken and task. Contact details and the private-files note
+  name, track, time taken, task, and the Connect/Build setup. Contact details and the private-files note
   are never sent. A failure is logged as `intake notify failed`.
 
 ## Cohort waitlist
