@@ -118,4 +118,23 @@ const work = defineCollection({
 		}),
 });
 
-export const collections = { writing, series, work };
+// Free AI guides at /ai-guides/<id>/. One MDX file per guide: the hub, the
+// "more free guides" list, the sitemap and the social cards all come from
+// this collection, so adding a guide needs no other edit.
+const guides = defineCollection({
+	loader: glob({ base: './src/content/guides', pattern: '**/*.mdx' }),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(), // meta description and the one line on the hub card
+		lead: z.string(), // the paragraph under the page title
+		step: z.number(), // order on the hub; non-integers slot between guides (4.5)
+		minutes: z.number().positive(), // reading time shown on the hub and the page
+		tool: z.string().optional(), // name of the interactive tool on the page, e.g. "Scrubber"
+		cardSubtitle: z.string().optional(), // social card subtitle; defaults to minutes and tool
+		ctaLine: z.string().optional(), // the line above the call to action
+		updatedDate: z.coerce.date().optional(),
+		draft: z.boolean().optional(),
+	}),
+});
+
+export const collections = { writing, series, work, guides };

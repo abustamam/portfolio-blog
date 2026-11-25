@@ -1,0 +1,73 @@
+---
+// Hub for the free AI guides. Lists every published guide in `step` order
+// (from the collection, so a new guide appears with no edit here), then the
+// quiz and the training page. Works without JavaScript.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getGuides, guidePath } from './_guides';
+import '../../styles/ai.css';
+
+const guides = await getGuides();
+---
+
+<BaseLayout
+  title="Free AI guides"
+  description="Short, free guides to using AI safely and well, written for people who don't code. Read them on your phone."
+  chromePath="/ai-guides/"
+  chrome="letterhead"
+>
+  <div class="ai-shell">
+    <header class="mb-10">
+      <div class="ai-kicker" data-rise style="--i:0">Free · no sign-up</div>
+      <h1 class="ai-title ai-title--page" data-rise style="--i:1">Free AI guides</h1>
+      <p class="ai-lead" data-rise style="--i:2">
+        Short guides to using AI safely and well, for people who don't code. Each one teaches one habit you can use today.
+      </p>
+    </header>
+
+    <ol class="hub-list" data-rise style="--i:3" aria-label="Guides">
+      {guides.map((g) => (
+        <li>
+          <a class="ai-card hub-card" href={guidePath(g.id)} data-guide-card={g.id}>
+            <span class="hub-card__title">{g.data.title}</span>
+            <span class="hub-card__line">{g.data.description}</span>
+            <span class="ai-label hub-card__meta">
+              {g.data.minutes} min read{g.data.tool && <> · <span data-guide-tool>{g.data.tool}</span></>}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ol>
+
+    <h2 class="ai-label hub-next">When you want more</h2>
+    <ul class="hub-list">
+      <li>
+        <a class="ai-card hub-card" href="/ai-quiz/" data-hub-link="quiz">
+          <span class="hub-card__title">Which AI track fits you?</span>
+          <span class="hub-card__line">Nine questions about how you use AI now. You get a suggested track at the end.</span>
+          <span class="ai-label hub-card__meta">Quiz</span>
+        </a>
+      </li>
+      <li>
+        <a class="ai-card hub-card" href="/ai-training/" data-hub-link="training">
+          <span class="hub-card__title">Hands-on AI training</span>
+          <span class="hub-card__line">Small online groups that set AI up on a task from your own week.</span>
+          <span class="ai-label hub-card__meta">Paid training</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .hub-list { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; gap: .875rem; }
+  .hub-card {
+    display: grid; gap: .4rem; padding: 1.25rem 1.375rem; text-decoration: none; color: var(--color-ink);
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  .hub-card:hover { border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line)); transform: translateY(-1px); }
+  .hub-card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .hub-card__title { font-family: var(--font-serif); font-weight: 500; font-size: 1.375rem; line-height: 1.2; letter-spacing: -.015em; }
+  .hub-card__line { font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.5; color: var(--color-mute); }
+  .hub-card__meta { margin-top: .25rem; }
+  .hub-next { margin: 0 0 1rem; }
+</style>
