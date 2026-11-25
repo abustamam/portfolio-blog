@@ -12,12 +12,18 @@ export interface GuideRef {
   step: number;
 }
 
-/** "What do you do?" Values are stored through guideStore.setField. */
+/**
+ * "What do you do?" Values are stored through guideStore.setField.
+ * This is the single shared vocabulary: #78's examples page saves the field
+ * it filters by with these same values, so the hub can reuse it. Keep the two
+ * in step (the first five are #78's five cards, `other` is the hub's extra).
+ */
 export const FIELDS = [
-  { value: 'office', label: 'Office or admin work' },
-  { value: 'teaching', label: 'Teaching or training' },
-  { value: 'business', label: 'My own business' },
-  { value: 'job-search', label: 'Looking for a job' },
+  { value: 'teacher', label: 'Teaching' },
+  { value: 'bookkeeper', label: 'Bookkeeping or accounts' },
+  { value: 'office-admin', label: 'Office or admin work' },
+  { value: 'volunteer-coordinator', label: 'Running volunteers or a nonprofit' },
+  { value: 'job-seeker', label: 'Looking for a job' },
   { value: 'other', label: 'Something else' },
 ] as const;
 
@@ -47,10 +53,11 @@ const BY_EXPERIENCE: Record<Experience, string[]> = {
 };
 
 const BY_FIELD: Record<Field, string[]> = {
-  'job-search': ['job-search', 'examples'],
-  office: ['examples', 'prompt'],
-  teaching: ['examples', 'prompt'],
-  business: ['examples', 'which-tool'],
+  'job-seeker': ['job-search', 'examples'],
+  teacher: ['examples', 'prompt'],
+  bookkeeper: ['examples', 'prompt'],
+  'office-admin': ['examples', 'prompt'],
+  'volunteer-coordinator': ['examples', 'prompt'],
   other: [],
 };
 

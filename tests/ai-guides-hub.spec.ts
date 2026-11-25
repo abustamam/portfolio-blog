@@ -53,12 +53,19 @@ test.describe('start here: pure ordering', () => {
 
   test('it recommends sensibly when the guide exists, and falls back when it does not', () => {
     expect(recommend({ experience: 'never' }, FULL)!.id).toBe('never-paste');
-    expect(recommend({ field: 'job-search', experience: 'some' }, FULL)!.id).toBe('job-search');
-    expect(recommend({ field: 'job-search', experience: 'never' }, FULL)!.id).toBe('never-paste'); // safety first
+    expect(recommend({ field: 'job-seeker', experience: 'some' }, FULL)!.id).toBe('job-search');
+    expect(recommend({ field: 'job-seeker', experience: 'never' }, FULL)!.id).toBe('never-paste'); // safety first
     expect(recommend({ experience: 'often' }, FULL)!.id).toBe('when-ai-is-wrong');
-    // job-search is not published yet: fall back to the next preference, then to step order
-    expect(recommend({ field: 'job-search', experience: 'some' }, ONLY_FIRST)!.id).toBe('never-paste');
+    // the job-search guide is not published yet: fall back to the next preference, then to step order
+    expect(recommend({ field: 'job-seeker', experience: 'some' }, ONLY_FIRST)!.id).toBe('never-paste');
     expect(recommend({ experience: 'never' }, NO_FIRST)!.id).toBe('prompt');
+  });
+
+  test('the field values are the vocabulary the examples page (#78) saves', () => {
+    expect(FIELDS.map((f) => f.value)).toEqual(['teacher', 'bookkeeper', 'office-admin', 'volunteer-coordinator', 'job-seeker', 'other']);
+    expect(recommend({ field: 'teacher' }, FULL)!.id).toBe('examples');
+    expect(recommend({ field: 'volunteer-coordinator' }, FULL)!.id).toBe('examples');
+    expect(recommend({ field: 'other' }, FULL)!.id).toBe('never-paste'); // no field guide: step order
   });
 
   test('unknown answers are ignored rather than trusted', () => {
@@ -119,24 +126,46 @@ test.describe('hub in the page', () => {
     await expect(cards.first().locator('[data-start-badge]')).toBeVisible();
     await expect(cards).toHaveCount(REAL.length); // reorder, never drop
 
-    await page.locator('[data-start-here] [data-field="job-search"]').click();
+    await page.locator('[data-start-here] [data-field="job-seeker"]').click();
     await page.reload();
-    await expect(page.locator('[data-start-here] [data-field="job-search"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-start-here] [data-field="job-seeker"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('[data-start-here] [data-experience="never"]')).toHaveAttribute('aria-pressed', 'true');
-    expect(await cards.first().evaluate((e) => (e as HTMLElement).dataset.guideId)).toBe(recommend({ field: 'job-search', experience: 'never' }, REAL)!.id);
+    expect(await cards.first().evaluate((e) => (e as HTMLElement).dataset.guideId)).toBe(recommend({ field: 'job-seeker', experience: 'never' }, REAL)!.id);
 
     // tapping an answer again clears it, and with none the hub is back in step order
-    await page.locator('[data-start-here] [data-field="job-search"]').click();
+    await page.locator('[data-start-here] [data-field="job-seeker"]').click();
     await page.locator('[data-start-here] [data-experience="never"]').click();
     expect(await cards.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.guideId))).toEqual(stepOrder);
   });
 
+  test('with several guides published, the recommended one moves to the top and back', async ({ page }) => {
+    // Only some guides are on this branch, so serve the hub with extra cards to see the reorder.
+    const extra = (id: string, step: number) =>
+      `<li data-guide-id="${id}" data-step="${step}"><a class="hub-card" href="/ai-guides/${id}/" data-guide-card="${id}"><span data-start-badge hidden>Start here</span><span data-visited-tick hidden>Read</span><span class="hub-card__title">${id}</span></a></li>`;
+    await page.route('**/ai-guides/', async (route) => {
+      const res = await route.fetch();
+      const html = (await res.text()).replace(/(data-guide-list[^>]*>[\s\S]*?)<\/ol>/, `$1${extra('prompt', 50)}${extra('when-ai-is-wrong', 51)}${extra('which-tool', 52)}</ol>`);
+      await route.fulfill({ response: res, body: html });
+    });
+    await page.goto('/ai-guides/');
+    const ids = () => page.locator('[data-guide-list] > li').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.guideId));
+    const before = await ids();
+    expect(before.slice(-3)).toEqual(['prompt', 'when-ai-is-wrong', 'which-tool']);
+    await page.locator('[data-start-here] [data-experience="often"]').click();
+    const after = await ids();
+    expect(after[0]).toBe('when-ai-is-wrong');
+    expect([...after].sort()).toEqual([...before].sort());
+    await expect(page.locator('[data-guide-id="when-ai-is-wrong"] [data-start-badge]')).toBeVisible();
+    await page.locator('[data-start-here] [data-experience="often"]').click();
+    expect(await ids()).toEqual(before);
+  });
+
   test('a saved field from guideStore is used when there is one', async ({ page }) => {
     await page.addInitScript((key) => {
-      if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ v: 1, drafts: {}, visited: [], field: 'job-search' }));
+      if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ v: 1, drafts: {}, visited: [], field: 'job-seeker' }));
     }, GUIDE_STORE_KEY);
     await page.goto('/ai-guides/');
-    await expect(page.locator('[data-start-here] [data-field="job-search"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-start-here] [data-field="job-seeker"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('[data-recommended]')).toHaveCount(1);
   });
 
@@ -183,7 +212,7 @@ test.describe('hub in the page', () => {
     await page.waitForLoadState('networkidle');
     const requests: string[] = [];
     page.on('request', (r) => requests.push(r.url()));
-    await page.locator('[data-start-here] [data-field="office"]').click();
+    await page.locator('[data-start-here] [data-field="office-admin"]').click();
     await page.locator('[data-start-here] [data-experience="some"]').click();
     await page.locator('[data-reset-progress]').click();
     await expect(page.locator('[data-visited-tick]:visible')).toHaveCount(0);
@@ -219,6 +248,8 @@ test.describe('share', () => {
     expect(copied[0]).toBe(`${title} — ${line} — ${canonical}`);
     expect(copied[0]).not.toContain('?');
     expect(copied[0]).not.toContain('utm_source');
+    expect(copied[0]).not.toContain('who=me');
+    expect(copied[0].endsWith(`/ai-guides/${id}/`)).toBe(true);
     await expect(page.locator('[data-share-status]')).toContainText('Copied');
     expect(requests).toEqual([]);
   });
