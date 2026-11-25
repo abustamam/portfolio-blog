@@ -43,13 +43,36 @@ test.describe('cohort pages', () => {
     await expect(nav.locator('a[aria-current="page"]')).toHaveAttribute('href', '/ai-cohort/never-paste/');
   });
 
-  test('home lists the four sessions with their dates', async ({ page }) => {
+  // These run against COHORT.datesConfirmed: false. Once the dates are
+  // announced and the flag flips, replace them with dated assertions.
+  test('home lists the four sessions without dates while dates are provisional', async ({ page }) => {
     await page.goto('/ai-cohort/');
     const sessions = page.locator('.cohort-sessions > li');
     await expect(sessions).toHaveCount(4);
-    await expect(sessions.nth(0)).toContainText('Monday, January 11');
-    await expect(sessions.nth(3)).toContainText('Monday, February 1');
+    for (let i = 0; i < 4; i++) {
+      await expect(sessions.nth(i).locator('.session-date')).toHaveText(`Session ${i + 1}`);
+    }
     await expect(page.locator('a[href="/ai-cohort/intake/"]').first()).toBeVisible();
+  });
+
+  test('home shows no cohort dates while they are provisional', async ({ page }) => {
+    await page.goto('/ai-cohort/');
+    const text = await page.locator('body').innerText();
+    for (const date of ['January 11', 'January 4', 'jan 11', 'the 11th', 'February 1']) {
+      expect(text.toLowerCase(), date).not.toContain(date.toLowerCase());
+    }
+    expect(text.toLowerCase()).toContain('dates to be confirmed');
+  });
+
+  test('no session is marked next or done while dates are provisional', async ({ page }) => {
+    await page.goto('/ai-cohort/');
+    await expect(page.locator('.session-next:visible')).toHaveCount(0);
+    await expect(page.locator('.cohort-sessions > li[data-state]')).toHaveCount(0);
+  });
+
+  test('the old #before-jan-4 anchor still exists', async ({ page }) => {
+    await page.goto('/ai-cohort/');
+    await expect(page.locator('#before-jan-4')).toHaveCount(1);
   });
 
   test('prose lists show markers (the site reset strips them)', async ({ page }) => {
