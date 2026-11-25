@@ -4,7 +4,7 @@
 // JavaScript off (generic content); the script below fits it to ?track=everyday|connect|build.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Rosette from '../../components/ai/Rosette.astro';
-import { TRACKS, TRACKS_ENDPOINT, TRAINING } from '../../consts/aiCohort';
+import { COHORT_LINKS, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../../consts/aiCohort';
 import { GENERIC_GUIDES, RESERVED_CONTACT, SHARE_URL, TRACK_GUIDES } from '../../consts/aiReserved';
 import '../../styles/ai.css';
 
@@ -21,7 +21,7 @@ const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   noindex
   chrome="letterhead"
 >
-  <main class="ai-shell reserved" id="reserved" data-endpoint={TRACKS_ENDPOINT} data-launch-at={TRAINING.launchAt} data-max={TRAINING.maxSeats}>
+  <main class="ai-shell reserved" id="reserved" data-endpoint={TRACKS_ENDPOINT} data-launch-at={TRAINING.launchAt} data-max={TRAINING.maxSeats} data-waitlist={COHORT_LINKS.waitlist}>
     <header class="mb-8">
       <div class="ai-kicker" data-rise style="--i:0">hands-on AI cohort · deposit received</div>
       <h1 class="ai-title ai-title--page" data-rise style="--i:1">
@@ -51,7 +51,7 @@ const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
           <strong>Your deposit is refundable.</strong>
           <span>
             If your track doesn't launch, or the dates don't work for you, your {TRAINING.deposit} comes back in full.
-            Just message me.
+            Just <a href={RESERVED_CONTACT.mailto}>message me</a>.
           </span>
         </li>
       </ol>
@@ -108,12 +108,15 @@ const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         .then((body: { counts?: Record<string, number> }) => {
           const n = body.counts?.[id];
           if (typeof n !== 'number') return;
-          line.textContent =
-            n >= max
-              ? 'This track is full. Join the waitlist.'
-              : n >= launchAt
-                ? `Launching · ${n} of ${max} seats taken`
-                : `${n} of ${launchAt} reserved to launch`;
+          if (n >= max) {
+            const a = document.createElement('a');
+            a.href = root.dataset.waitlist ?? '/ai-cohort/waitlist/';
+            a.textContent = 'Join the waitlist.';
+            line.replaceChildren('This track is full. ', a);
+          } else {
+            line.textContent =
+              n >= launchAt ? `Launching · ${n} of ${max} seats taken` : `${n} of ${launchAt} reserved to launch`;
+          }
           line.hidden = false;
         })
         .catch(() => {});

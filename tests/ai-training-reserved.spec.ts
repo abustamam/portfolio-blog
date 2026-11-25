@@ -38,7 +38,8 @@ test.describe('post-deposit page', () => {
     await expect(steps.nth(1)).toContainText('WhatsApp');
     await expect(steps.nth(2)).toContainText('refundable');
     await expect(steps.nth(2)).toContainText('$25 comes back in full');
-    await expect(page.locator('a[href^="/ai-cohort"]')).toHaveCount(0);
+    await expect(page.locator('a[href^="/ai-cohort"]:not([href="/ai-cohort/waitlist/"])')).toHaveCount(0);
+    await expect(page.locator('a[href="/ai-cohort/waitlist/"]')).toHaveCount(0);
   });
 
   test('no query: generic content naming all three tracks, no count', async ({ page }) => {
@@ -60,6 +61,27 @@ test.describe('post-deposit page', () => {
       await expect(page.locator('#reserved-count')).toHaveText(expected);
     });
   }
+
+  test('a full track links the waitlist from the count line', async ({ page }) => {
+    await mockCounts(page);
+    await page.goto(`${PAGE}?track=build`);
+    const link = page.locator('#reserved-count a');
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAttribute('href', '/ai-cohort/waitlist/');
+    await expect(link).toHaveText('Join the waitlist.');
+    await expect(page.locator('a[href^="/ai-cohort"]:not([href="/ai-cohort/waitlist/"])')).toHaveCount(0);
+  });
+
+  test('every "message me" on the page is a mailto link', async ({ page }) => {
+    await page.goto(PAGE);
+    const text = await page.locator('main').innerText();
+    const mentions = (text.match(/message me/gi) ?? []).length;
+    const links = await page.locator('main a[href^="mailto:"]').evaluateAll(
+      (as) => as.filter((a) => /message me/i.test(a.textContent ?? '')).length,
+    );
+    expect(mentions).toBeGreaterThanOrEqual(1);
+    expect(links).toBe(mentions);
+  });
 
   test('unknown track falls back to generic', async ({ page }) => {
     await mockCounts(page);
@@ -89,13 +111,13 @@ test.describe('post-deposit page', () => {
     await expect(page.locator('.reserved-steps > li')).toHaveCount(3);
     expect(await visibleGuides(page)).toHaveLength(3);
     await expect(page.locator('#reserved-count')).toBeHidden();
-    await expect(page.locator('a[href="mailto:admin@bustamam.tech"]')).toBeVisible();
+    await expect(page.locator('a[href="mailto:admin@bustamam.tech"]').first()).toBeVisible();
     await context.close();
   });
 
   test('has the contact mailto and a share link', async ({ page }) => {
     await page.goto(PAGE);
-    await expect(page.locator('a[href="mailto:admin@bustamam.tech"]')).toBeVisible();
+    await expect(page.locator('a[href="mailto:admin@bustamam.tech"]').first()).toBeVisible();
     await expect(page.locator('#share')).toBeVisible();
     await expect(page.locator('a[href^="https://wa.me/?text="]')).toHaveAttribute('href', /ai-training/);
   });
