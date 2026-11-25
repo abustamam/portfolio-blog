@@ -230,7 +230,7 @@ grant insert on cohort_waitlist to ai_quiz;
 SQL
 ```
 
-### 1d. Guides sign-ups on the waitlist table
+### 1d. Guides sign-ups on the waitlist table (done 2026-11-25)
 
 The only server step the guides form needs. Idempotent, and also at the bottom
 of `schema.sql`. It adds the nullable `source` column, lets `name` be empty,
