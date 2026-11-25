@@ -1,0 +1,100 @@
+---
+// "Start here" on the hub: two taps move one guide to the top and mark it.
+// Hidden until the script runs, so without JavaScript the hub is just the list
+// in step order. Answers are kept only through guideStore (this browser).
+import { FIELDS, EXPERIENCE } from '../../utils/startHere';
+---
+
+<section class="start-here" data-start-here hidden aria-labelledby="start-here-title">
+  <h2 id="start-here-title" class="ai-label">Start here</h2>
+  <p class="start-here__hint">Two taps and we'll put the best first guide on top.</p>
+
+  <fieldset class="start-here__group">
+    <legend>What do you do?</legend>
+    <div class="start-here__opts">
+      {FIELDS.map((f) => (
+        <button type="button" class="start-here__opt" data-field={f.value} aria-pressed="false">{f.label}</button>
+      ))}
+    </div>
+  </fieldset>
+
+  <fieldset class="start-here__group">
+    <legend>Have you used AI before?</legend>
+    <div class="start-here__opts">
+      {EXPERIENCE.map((e) => (
+        <button type="button" class="start-here__opt" data-experience={e.value} aria-pressed="false">{e.label}</button>
+      ))}
+    </div>
+  </fieldset>
+
+  <p class="start-here__status" data-start-status role="status"></p>
+</section>
+
+<style>
+  .start-here { margin: 0 0 2rem; padding: 1.25rem 1.375rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); }
+  .start-here[hidden] { display: none; }
+  .start-here h2 { margin: 0 0 .25rem; }
+  .start-here__hint { margin: 0 0 1rem; font-family: var(--font-serif); color: var(--color-mute); font-size: 1.0625rem; }
+  .start-here__group { border: 0; margin: 0 0 1rem; padding: 0; min-width: 0; }
+  .start-here__group legend { font-family: var(--font-serif); font-size: 1.125rem; margin-bottom: .5rem; padding: 0; }
+  .start-here__opts { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .start-here__opt {
+    font-family: var(--font-serif); font-size: 1rem; color: var(--color-ink); background: var(--color-bg);
+    border: 1px solid var(--color-line); border-radius: 999px; padding: .5rem .9rem; min-height: 44px; cursor: pointer;
+  }
+  .start-here__opt:hover { border-color: var(--color-accent); }
+  .start-here__opt[aria-pressed="true"] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
+  .start-here__opt:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .start-here__status { margin: 0; font-family: var(--font-serif); color: var(--color-mute); min-height: 1.5em; }
+</style>
+
+<script>
+  import { guideStore } from '../../utils/guideStore';
+  import { orderGuides, isField, isExperience, type StartAnswers } from '../../utils/startHere';
+
+  const root = document.querySelector<HTMLElement>('[data-start-here]');
+  const list = document.querySelector<HTMLElement>('[data-guide-list]');
+  if (root && list) {
+    root.hidden = false;
+    const status = root.querySelector<HTMLElement>('[data-start-status]')!;
+    const items = () => Array.from(list.querySelectorAll<HTMLLIElement>(':scope > li[data-guide-id]'));
+    const guides = items().map((li) => ({ id: li.dataset.guideId!, step: Number(li.dataset.step), li }));
+
+    const saved = guideStore.getDraft<{ experience?: unknown }>('start-here');
+    const answers: StartAnswers = {
+      field: isField(guideStore.getField()) ? guideStore.getField() : null,
+      experience: isExperience(saved?.experience) ? (saved!.experience as string) : null,
+    };
+
+    const render = () => {
+      root.querySelectorAll<HTMLButtonElement>('[data-field]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.field === answers.field)));
+      root.querySelectorAll<HTMLButtonElement>('[data-experience]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.experience === answers.experience)));
+      const ordered = orderGuides(answers, guides);
+      const hasAnswer = answers.field || answers.experience;
+      ordered.forEach((g, i) => {
+        list.appendChild(g.li);
+        const mark = i === 0 && !!hasAnswer;
+        g.li.toggleAttribute('data-recommended', mark);
+        const badge = g.li.querySelector<HTMLElement>('[data-start-badge]');
+        if (badge) badge.hidden = !mark;
+      });
+      const top = ordered[0] && hasAnswer ? g(ordered[0].li) : '';
+      status.textContent = top ? `Start with: ${top}` : '';
+    };
+    const g = (li: HTMLElement) => li.querySelector('.hub-card__title')?.textContent ?? '';
+
+    root.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+      if (!btn) return;
+      if (btn.dataset.field) {
+        answers.field = answers.field === btn.dataset.field ? null : btn.dataset.field;
+        guideStore.setField(answers.field ?? null);
+      } else if (btn.dataset.experience) {
+        answers.experience = answers.experience === btn.dataset.experience ? null : btn.dataset.experience;
+        guideStore.setDraft('start-here', { experience: answers.experience });
+      }
+      render();
+    });
+    render();
+  }
+</script>
