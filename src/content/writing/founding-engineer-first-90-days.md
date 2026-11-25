@@ -30,7 +30,7 @@ The first engineer at a startup makes a small number of decisions that everyone 
 
 This post is about those decisions: which ones matter in the first 90 days, which ones can wait, and how to tell the difference.
 
-[TODO(author): framing anecdote — the moment you realised a "small" early choice had become permanent. From Edvo or another zero-to-one role; name the choice, not just the feeling.]
+[TODO(author): framing anecdote — the moment you realized a "small" early choice had become permanent. From Edvo or another zero-to-one role; name the choice, not just the feeling.]
 
 ---
 
@@ -124,7 +124,7 @@ Generic framing: early on, the right infrastructure is usually the one the team 
 
 Generic framing: a founding engineer is often the only person in the room who can say what something will cost to build. That makes "no" and "not yet" part of the job.
 
-[TODO(author): a real disagreement with a founder or stakeholder (anonymise if needed), what you said, and how it resolved. Skip this section if you don't have one you're willing to share.]
+[TODO(author): a real disagreement with a founder or stakeholder (anonymize if needed), what you said, and how it resolved. Skip this section if you don't have one you're willing to share.]
 
 ---
 

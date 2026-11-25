@@ -4,11 +4,25 @@
 import CohortPage from '../../layouts/CohortPage.astro';
 import Rosette from '../../components/ai/Rosette.astro';
 import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
+
+// Every date on this page comes from aiCohort.ts. Until COHORT.datesConfirmed
+// is true, the page shows none of them.
+const confirmed = COHORT.datesConfirmed;
+const year = COHORT.intakeDue.match(/\d{4}$/)![0];
+/** 'Monday, January 11' or 'Monday, January 4, 2027' -> 'January 11' */
+const monthDay = (d: string) => d.replace(/^\w+, /, '').replace(/, \d{4}$/, '');
+/** 'January 11' -> 'jan 11' */
+const short = (d: string) => { const [m, day] = monthDay(d).split(' '); return `${m.slice(0, 3).toLowerCase()} ${day}`; };
+const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th'}`;
+const first = SESSIONS[0].date;
+const last = SESSIONS[SESSIONS.length - 1].date;
+const weekday = first.split(',')[0];
+const firstDay = Number(monthDay(first).split(' ')[1]);
 ---
 
 <CohortPage
   title="Welcome to the cohort"
-  kicker="cohort 1 · jan 11 – feb 1, 2027"
+  kicker={confirmed ? `cohort 1 · ${short(first)} – ${short(last)}, ${year}` : 'cohort 1 · dates to be confirmed'}
   lead="Assalamu alaikum, and welcome. Everything you need is on this page, and it's where each week's recording and next step will go."
 >
   <div class="ai-seal cohort-confirmed">
@@ -16,16 +30,17 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
     <div>
       <h2>Your seat is confirmed</h2>
       <p>I'm glad you're here. There are two small things to do before we start.</p>
+      {!confirmed && <p>I'll message you the dates as soon as they're settled. Your seat is held either way.</p>}
     </div>
     <dl class="cohort-facts">
-      <div><dt>When</dt><dd>4 Mondays, from January 11</dd></div>
+      <div><dt>When</dt><dd>{SESSIONS.length} {weekday}s, {confirmed ? `from ${monthDay(first)}` : 'dates to be confirmed'}</dd></div>
       <div><dt>Time</dt><dd>{COHORT.time}</dd></div>
       <div><dt>Where</dt><dd>{COHORT.platform}</dd></div>
       <div><dt>Group</dt><dd>Up to 8 people</dd></div>
     </dl>
   </div>
 
-  <h2 id="before-jan-4">Before January 4</h2>
+  <h2 id="before-jan-4">{confirmed ? `Before ${monthDay(COHORT.intakeDue)}` : 'Before we start'}</h2>
   <ol class="cohort-checklist" id="cohort-checklist">
     <li>
       <label>
@@ -51,7 +66,7 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
   <p class="cohort-checknote font-mono">Tick these off as you go. The ticks are saved on this device only.</p>
 
 
-  <h2 id="what-to-have-ready">What to have ready on January 11</h2>
+  <h2 id="what-to-have-ready">{confirmed ? `What to have ready on ${monthDay(first)}` : 'What to have ready for session 1'}</h2>
   <ul>
     <li>A laptop or desktop, not a phone. You'll be working in the tool while we talk.</li>
     <li>
@@ -61,7 +76,9 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
     <li>The task you described in the intake form.</li>
   </ul>
   <p>
-    The Meet link is the same every week. It's in your calendar invite and pinned in the participants' WhatsApp group.
+    {confirmed
+      ? "The Meet link is the same every week. It's in your calendar invite and pinned in the participants' WhatsApp group."
+      : "The Meet link will be the same every week. I'll send it with the calendar invite once the dates are set."}
   </p>
 
   <h2 id="sessions">The four sessions</h2>
@@ -72,8 +89,8 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
 
   <ol class="cohort-sessions">
     {SESSIONS.map((s) => (
-      <li id={`session-${s.n}`} data-date={`${s.date.replace(/^\w+, /, '')}, 2027`}>
-        <div class="font-mono session-date">Session {s.n} · {s.date} <span class="session-next" hidden>Next</span></div>
+      <li id={`session-${s.n}`} data-date={confirmed ? `${monthDay(s.date)}, ${year}` : undefined}>
+        <div class="font-mono session-date">Session {s.n}{confirmed && <> · {s.date}{' '}<span class="session-next" hidden>Next</span></>}</div>
         <h3>{s.title}</h3>
         <p><strong>You leave with:</strong> {s.outcome}</p>
         <p><strong>Try this week:</strong> {s.tryThis}</p>
@@ -106,7 +123,7 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
   <p>
     Full refund up to {COHORT.refundUntil} if the cohort isn't for you; just message me. No refunds after that.
   </p>
-  <p>JazakAllahu khair, and see you on the 11th.<br />Rasheed</p>
+  <p>JazakAllahu khair, and {confirmed ? `see you on the ${ordinal(firstDay)}.` : 'see you soon.'}<br />Rasheed</p>
 </CohortPage>
 
 <script>
@@ -123,6 +140,7 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
   }
 
   // Mark the next session: the first whose evening hasn't passed yet.
+  // Sessions carry data-date only once the dates are confirmed.
   const now = Date.now();
   const sessions = Array.from(document.querySelectorAll<HTMLElement>('.cohort-sessions > li[data-date]'));
   const next = sessions.find((li) => new Date(`${li.dataset.date} 23:59:00`).getTime() >= now);

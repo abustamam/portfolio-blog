@@ -89,8 +89,8 @@
       const brightness = localStorage.getItem('theme') || 'light';
       const color      = localStorage.getItem('terminal:theme') || 'inherit';
       const icon = brightness === 'dark' ? '☾' : '☀';
-      // The colour name is dropped below `sm`: the full label made the chrome bar
-      // overflow narrow phones (320px). The menu still shows the colour.
+      // The color name is dropped below `sm`: the full label made the chrome bar
+      // overflow narrow phones (320px). The menu still shows the color.
       const suffix = document.createElement('span');
       suffix.className = 'hidden sm:inline';
       suffix.textContent = ` · ${color}`;

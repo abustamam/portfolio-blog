@@ -28,7 +28,7 @@ function normalise(kind: Kind, value: string): string {
  * placeholders, plus the names in `names` with PERSON-n (whole words only).
  * A one-word entry matches in any case. An entry of several words ("Dana Lee")
  * matches the full phrase and each word on its own, but only where every
- * matched word is capitalised, so "Rose May" does not catch "may" or "rose".
+ * matched word is capitalized, so "Rose May" does not catch "may" or "rose".
  * The same value always gets the same placeholder; numbering follows first appearance (names: list order).
  * The key lists every placeholder used and the first original it replaced.
  */
@@ -49,7 +49,7 @@ export function scrub(input: string, names: string[] = []): ScrubResult {
     for (const part of p.split(/\s+/)) if (!tokenOwner.has(fold(part))) tokenOwner.set(fold(part), i);
   });
   // A one-word entry matches in any case. Every other token (a phrase of
-  // several words, or one word of it) must be capitalised: each word starts
+  // several words, or one word of it) must be capitalized: each word starts
   // with its upper-case letter, the rest may be any case.
   const anyCase = new Set(people.filter((p) => !p.includes(' ')).map(fold));
   const word = (w: string, cap: boolean) =>

@@ -75,11 +75,12 @@ test('at 375px the model table fits the column instead of scrolling sideways', a
   expect(scroll).toBeLessThanOrEqual(client);
 });
 
-test('the hub offers a way past the questions to the first guide list', async ({ page }) => {
+test('the hub offers a way past the questions to all the guides', async ({ page }) => {
   await page.goto('/ai-guides/');
-  const link = page.locator('[data-start-here] a[href^="#"]');
+  const link = page.locator('[data-start-here] .start-here__hint a[href^="#"]');
   await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute('href', `#${LIST_IDS[FIRST_LIST]}`);
+  await expect(link).toHaveAttribute('href', '#all-guides');
+  await expect(page.locator('#all-guides')).toHaveText('All guides');
   // the target exists, is the first rendered list, and is the list for that group
   const target = page.locator(`ol#${LIST_IDS[FIRST_LIST]}[data-hub-list="${FIRST_LIST}"]`);
   await expect(target).toHaveCount(1);

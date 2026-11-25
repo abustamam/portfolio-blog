@@ -4,6 +4,8 @@
 // only with participants (the link below is useless to anyone else).
 
 export const COHORT = {
+  /** Flip to `true` once the dates are announced to participants. Until then the welcome page shows no dates. */
+  datesConfirmed: false,
   time: '6:30–8:00pm Pacific',
   platform: 'Google Meet',
   intakeDue: 'Monday, January 4, 2027',

@@ -1,0 +1,12 @@
+[
+  {
+    "file": "src/consts/guides/glossary.ts",
+    "word": "personalisation",
+    "reason": "synonym lookup data, hidden on the glossary page"
+  },
+  {
+    "file": "src/components/guides/Glossary.astro",
+    "word": "personalisation",
+    "reason": "comment explaining the synonym rule"
+  }
+]
