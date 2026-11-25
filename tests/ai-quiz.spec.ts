@@ -93,6 +93,8 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#result-build')).toContainText(beginner.weeklyTask);
     await expect(page.locator('#result-status')).toContainText("aren't being collected yet");
     await expect(page.locator('.track-glyph[data-glyph="everyday"]')).toBeVisible();
+    await expect(page.locator('.track-glyph[data-glyph="build"], .track-glyph[data-glyph="connect"]')).toHaveCount(2);
+    await expect(page.locator('.track-glyph[data-glyph="connect"]')).toBeHidden();
     await expect(page.locator('.track-glyph[data-glyph="build"]')).toBeHidden();
     expect(await skillRows(page)).toEqual(['0', '0', '0', '0', '0']);
   });
@@ -114,6 +116,8 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#result-track')).toHaveText('Connect or Build');
     await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#tracks');
     await expect(page.locator('#result-status')).toContainText('answers were sent');
+    // "Connect or Build" names two tracks, so both marks show.
+    await expect(page.locator('.track-glyph[data-glyph="connect"]')).toBeVisible();
     await expect(page.locator('.track-glyph[data-glyph="build"]')).toBeVisible();
     await expect(page.locator('.track-glyph[data-glyph="everyday"]')).toBeHidden();
     expect(await skillRows(page)).toEqual(['3', '3', '3', '3', '3']);

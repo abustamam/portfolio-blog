@@ -307,14 +307,16 @@ a.term-card__more:focus-visible { outline: 2px solid var(--color-accent); outlin
 .quiz-seal__ghost { color: var(--color-line); }
 
 /* ── Quiz result: the track's mark and the skill reading ── */
-.result-glyph { margin: 0 0 1.5rem; }
+.result-glyph { display: flex; align-items: center; gap: 1.25rem; margin: 0 0 1.5rem; }
 .result-glyph .track-glyph { margin: 0; display: none; }
 .quiz-result:not([data-track='builder']) .track-glyph[data-glyph='everyday'],
-.quiz-result[data-track='builder'] .track-glyph[data-glyph='build'] { display: block; }
+.quiz-result[data-track='builder'] .track-glyph:not([data-glyph='everyday']) { display: block; }
 @keyframes glyph-tap { 0%, 100% { transform: none; } 45% { transform: rotate(-16deg); } 62% { transform: rotate(9deg); } 78% { transform: rotate(-2deg); } }
 .track-glyph__swing { transform-box: view-box; transform-origin: 46% 90%; }
+@keyframes glyph-join { from { transform: translateX(var(--from)); } }
 @media screen and (prefers-reduced-motion: no-preference) {
-  /* Once its lines are drawn, the hammer taps once and the page gets its check. */
+  /* Once their lines are drawn, the plugs meet, the hammer taps once and the page gets its check. */
+  .track-glyph__plug { animation: glyph-join .5s cubic-bezier(.3, 0, .2, 1) 1.9s both; }
   .track-glyph__swing { animation: glyph-tap .9s cubic-bezier(.3, 0, .3, 1) 2.1s both; }
   .ai-rosette[data-draw] .track-glyph__check { animation-duration: .5s; animation-delay: 1.9s; }
 }
