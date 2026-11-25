@@ -84,6 +84,31 @@ are logged as `waitlist insert failed` and `waitlist notify failed`. Rules live
 in `services/ai-quiz-intake/src/waitlist.ts`; browser tests in
 `tests/ai-cohort-waitlist.spec.ts`.
 
+## Guides: "tell me when the next cohort opens"
+
+The guides hub (`/ai-guides/`, under "When you want more") and the call to
+action under every guide (`src/components/guides/GuideCta.astro`) carry one
+optional field: email or WhatsApp number. The form is
+`src/components/guides/NotifyForm.astro`. It says what the contact is for (one
+message when a track opens, nothing else), and the guides read the same without
+it, so "Free · no sign-up" stays true.
+
+It POSTs `{ contact, source, website }` to the cohort waitlist endpoint
+(`POST /api/ai-quiz/waitlist`), with the same honeypot, body limit and per-IP
+rate limit. `source` is `guides-hub` or `guide:<id>` (capped at 60 characters
+and checked against that pattern in `services/ai-quiz-intake/src/waitlist.ts`).
+With a source the name is optional; without one (the `/ai-cohort/waitlist`
+form) it is still required. Each row goes in `cohort_waitlist` with its
+`source`, and the Telegram message names the source, never the contact. The
+service log line `waitlist saved` carries the source too.
+
+Without JavaScript the form says it needs JavaScript and gives the email
+address. Dev builds have no backend, so it says nothing was sent. Until step 1d
+below runs on the server, a guides sign-up gets a 500 (logged as
+`waitlist insert failed`) and the form says it didn't send; the cohort waitlist
+keeps working, because its insert names no `source`. Browser tests in
+`tests/ai-guides-notify.spec.ts`.
+
 ## Payment alerts (Stripe webhook)
 
 Each paid checkout on the cohort payment link sends a Telegram message with the
@@ -308,6 +333,22 @@ grant insert on cohort_waitlist to ai_quiz;
 SQL
 ```
 
+### 1d. Guides sign-ups on the waitlist table (done 2026-11-25)
+
+The only server step the guides form needs. Idempotent, and also at the bottom
+of `schema.sql`. It adds the nullable `source` column, lets `name` be empty,
+and requires every row to have a name or a source.
+
+```bash
+docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 <<'SQL'
+alter table cohort_waitlist add column if not exists source text;
+alter table cohort_waitlist alter column name drop not null;
+alter table cohort_waitlist drop constraint if exists cohort_waitlist_name_or_source;
+alter table cohort_waitlist add constraint cohort_waitlist_name_or_source
+  check (name is not null or source is not null);
+SQL
+```
+
 ### 2. Compose service
 
 ```yaml
@@ -404,9 +445,20 @@ from cohort_intake order by submitted_at desc;
 Cohort waitlist, oldest first (that's the order to offer seats in):
 
 ```sql
-select submitted_at, name, contact, note from cohort_waitlist order by submitted_at;
+select submitted_at, name, contact, note from cohort_waitlist where source is null order by submitted_at;
+```
+
+"Tell me when the next cohort opens" sign-ups from the guides, and where they
+came from (message each one once when a track opens):
+
+```sql
+select submitted_at, contact, source from cohort_waitlist where source is not null order by submitted_at;
+
+-- which pages people sign up from
+select source, count(*) from cohort_waitlist where source is not null group by 1 order by 2 desc;
 ```
 
 Quiz responses hold name and contact only when the person gave them; every
-intake and waitlist row has both. Keep the table
+intake row has both, and every waitlist row has a contact (guides sign-ups have
+no name). Keep the table
 private to whoever runs the cohort.

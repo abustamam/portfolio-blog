@@ -1,8 +1,13 @@
 ---
 // The one call to action under every free guide: the quiz first, the
 // training page second. The line above the links is the guide's `ctaLine`.
+// Under the links, the optional "tell me when the next cohort opens" form.
+import NotifyForm from './NotifyForm.astro';
+
 interface Props {
   line?: string;
+  /** The guide's id, so a sign-up says which guide it came from. */
+  guideId: string;
 }
 
 const DEFAULT_LINE =
@@ -17,6 +22,9 @@ const line = Astro.props.line ?? DEFAULT_LINE;
       <a class="cohort-cta" href="/ai-quiz/">Find your track: take the quiz</a>
       <a class="ai-link" href="/ai-training/">See the hands-on training →</a>
     </div>
+    <div class="guide-cta__notify">
+      <NotifyForm source={`guide:${Astro.props.guideId}`} />
+    </div>
   </div>
 </section>
 
@@ -24,4 +32,6 @@ const line = Astro.props.line ?? DEFAULT_LINE;
   .guide-cta { grid-template-columns: 1fr; margin-top: 3.5rem; }
   .guide-cta__line { margin: 0 0 1.25rem; }
   .guide-cta__links { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+  .guide-cta > div { min-width: 0; }
+  .guide-cta__notify { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-line-soft); }
 </style>

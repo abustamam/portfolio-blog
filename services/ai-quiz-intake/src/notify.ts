@@ -46,9 +46,15 @@ function setupLine(x: IntakeRow['extras'] | undefined): string[] {
   return shown.length ? [`Setup: ${shown.join(' · ')}`] : [];
 }
 
-/** Same rules: plain text, and no contact details. The note is the person's own words, so it stays in. */
+/**
+ * Same rules: plain text, and no contact details. The note is the person's own
+ * words, so it stays in. A guides sign-up names the page it came from.
+ */
 export function formatWaitlistNotification(row: WaitlistRow): string {
-  return [`New cohort waitlist signup: ${row.name}`, ...(row.note ? [`Note: ${row.note}`] : [])].join('\n');
+  const head = row.source
+    ? `New "tell me when the next cohort opens" signup from ${row.source}${row.name ? `: ${row.name}` : ''}`
+    : `New cohort waitlist signup: ${row.name}`;
+  return [head, ...(row.note ? [`Note: ${row.note}`] : [])].join('\n');
 }
 
 interface TelegramOpts {
