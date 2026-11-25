@@ -22,5 +22,11 @@
     "term": "conversation",
     "sentence": "Copilot calls these \"conversation modes\", and some only appear when you're signed in.",
     "reason": "A quotation of the name Copilot's own menu uses for its modes."
+  },
+  {
+    "guide": "which-model",
+    "term": "project",
+    "sentence": "planning a schedule, a budget or a project",
+    "reason": "A piece of work being planned, not the app feature."
   }
 ]
