@@ -51,7 +51,7 @@ export const ATTACH_APPS: AttachApp[] = [
     name: 'Gemini',
     domains: ['google.com', 'gemini.google'],
     accepts: {
-      photo: yes('Yes', GEMINI_HELP),
+      photo: yes('Yes, signed in', GEMINI_HELP),
       file: yes('Yes, signed in', GEMINI_HELP),
       voice: yes('Yes (Gemini Live)', 'https://gemini.google/subscriptions/'),
     },

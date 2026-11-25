@@ -54,7 +54,7 @@ export const PROJECT_APPS: ProjectApp[] = [
       free: fact('Yes, on every qualifying ChatGPT plan. Free gets 5 files per project, Go and Plus 25, Pro 40.', OPENAI, true),
       where: fact('Sidebar, then New project. On the phone: the + icon, or Explore, then Projects.', OPENAI, true),
       memory: fact(
-        'By default a project’s chats can use your saved memory and each other. “Project-only” memory keeps it to that project’s own chats.',
+        'With default memory, a project’s chats can use your saved memories and your other chats, inside the project and outside it. “Project-only” memory keeps it to that project’s own chats.',
         OPENAI,
         true,
       ),
@@ -112,9 +112,9 @@ export const PROJECT_APPS: ProjectApp[] = [
   },
 ];
 
-/** The Gems-to-skills notice, shown as one sentence under the table. */
+/** The Gems-to-skills notice, shown under the table. Gems were never notebooks: Google documents them as separate features. */
 export const GEMS_NOTICE: Fact = fact(
-  'Gemini used to call these Gems. They became read-only on November 17, 2026 and are removed from Gemini on December 17, 2026. Skills, reusable instructions, replace them.',
+  'Gemini also had Gems: saved custom instructions, a separate feature from notebooks. On personal accounts (age 18 and over) Gems became read-only on November 17, 2026 and are removed on December 17, 2026. Work accounts follow in March 2027 and school accounts in June 2027. Skills, reusable instructions, replace them.',
   GEMINI_GEMS,
   true,
 );

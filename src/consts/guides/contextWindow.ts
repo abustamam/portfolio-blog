@@ -120,3 +120,43 @@ export const COMPACTION_FACTS: CompactionFact[] = [
 
 /** The page's "checked" date for those facts: the oldest one. */
 export const COMPACTION_CHECKED = COMPACTION_FACTS.map((f) => f.checked).sort()[0];
+
+/**
+ * What each company's own help page says about saved memory in its app: what
+ * it keeps, whether it starts on, and where the switch is. Where the page does
+ * not say whether a new account starts with it on, the text says so.
+ */
+export const MEMORY_FACTS: CompactionFact[] = [
+  {
+    app: 'ChatGPT',
+    text: 'Has Memory, and on accounts that show it, a "Reference chat history" setting that lets it use your past conversations in new ones. OpenAI says the controls vary by plan and region, and its page does not say what a new account starts with. A temporary chat does not create memories.',
+    source: 'https://help.openai.com/en/articles/8590148-memory-in-chatgpt',
+    checked: '2026-11-25',
+    confirmed: true,
+  },
+  {
+    app: 'Gemini',
+    text: 'Has a Memory setting (Settings, then Personal Intelligence) that lets it learn from your past chats. It needs a personal Google account, age 18 or over, and Keep Activity turned on. The page does not say whether it starts on.',
+    source: 'https://support.google.com/gemini/answer/16598469?hl=en',
+    checked: '2026-11-25',
+    confirmed: true,
+  },
+  {
+    app: 'Copilot',
+    text: 'Remembers details and preferences from your chats and uses them later. Microsoft says saving memories is on by default. Turn it off in Settings, then Personalization, with the Saved memories switch; that does not delete what is already saved.',
+    source: 'https://support.microsoft.com/en-us/privacy/microsoft-copilot/privacy-controls',
+    checked: '2026-11-25',
+    confirmed: true,
+    more: ['https://support.microsoft.com/en-us/microsoft-365-copilot/manage-copilot-memory-in-microsoft-365-copilot'],
+  },
+  {
+    app: 'Claude',
+    text: 'Memory is on by default on the Free, Pro, Max and Ultra plans: it saves things as you chat and your next chat already knows them. Searching your past chats is for paid plans. Turn memory off in Settings, under Your Claude, or use an incognito chat, which is not saved to memory or history.',
+    source: 'https://support.claude.com/en/articles/11817273-use-claude-s-chat-search-and-memory-to-build-on-previous-context',
+    checked: '2026-11-25',
+    confirmed: true,
+  },
+];
+
+/** The page's "checked" date for the memory facts: the oldest one. */
+export const MEMORY_CHECKED = MEMORY_FACTS.map((f) => f.checked).sort()[0];

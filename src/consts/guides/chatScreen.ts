@@ -23,9 +23,9 @@ export interface ScreenPart {
 
 export const SCREEN_PARTS: ScreenPart[] = [
   { id: 1, name: 'Message box', line: 'Where you type. Enter sends on a computer; use Shift+Enter for a new line.' },
-  { id: 2, name: 'Send', line: 'The arrow button. Nothing is sent until you press it.' },
+  { id: 2, name: 'Send', line: 'The arrow button. Nothing is sent until you press it, or press Enter.' },
   { id: 3, name: 'The answer', line: 'It appears a few words at a time. You can stop it part-way.' },
-  { id: 4, name: 'New chat', line: "Starts fresh: it can't see your last chat. Use it when you change topic." },
+  { id: 4, name: 'New chat', line: 'Starts an empty conversation, without your last chat in front of it. Use it when you change topic.' },
   { id: 5, name: 'Past chats', line: 'Your earlier conversations, in a side list. Tap one to carry on.' },
   { id: 6, name: 'Model menu', line: 'A choice of which model answers. Leave it alone for now.' },
 ];

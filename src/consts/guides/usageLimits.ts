@@ -50,7 +50,7 @@ export const USAGE_LIMITS: UsageLimitApp[] = [
         OPENAI,
         true,
       ),
-      reset: fact('It shows when the limit resets inside the app. OpenAI does not publish a fixed time.', OPENAI, true),
+      reset: fact('It shows when the limit resets inside the app. The help page gives no fixed time.', OPENAI, true),
       seeUsage: fact('(not stated)', OPENAI, false),
     },
   },
@@ -59,7 +59,7 @@ export const USAGE_LIMITS: UsageLimitApp[] = [
     name: 'Gemini',
     facts: {
       freeLimit: fact(
-        '"Standard limits". Usage depends on how complex the request is, the features you use and how long the chat is; video, Deep Research and the Pro model use more.',
+        '"Standard limits". Usage depends on how complex the request is, the models and features you use and how long the chat is; video and Deep Research use more.',
         GEMINI,
         true,
       ),
@@ -77,7 +77,7 @@ export const USAGE_LIMITS: UsageLimitApp[] = [
         true,
       ),
       reset: fact('(not stated)', COPILOT, false),
-      seeUsage: fact('(not stated)', COPILOT_CREDITS, false),
+      seeUsage: fact('On a paid plan: your Microsoft account, under Services & subscriptions. The page does not cover the free version.', COPILOT_CREDITS, true),
     },
   },
   {

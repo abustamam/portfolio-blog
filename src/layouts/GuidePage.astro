@@ -20,7 +20,8 @@ const { guide, guides } = Astro.props;
 const { title, description, lead, minutes, updatedDate, ctaLine } = guide.data;
 const others = guides.filter((g) => g.id !== guide.id);
 const next = nextGuide(guides.map((g) => ({ id: g.id, step: g.data.step, group: g.data.group, g })), guide.id)?.g;
-const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const updated = updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const updatedIso = updatedDate.toISOString().slice(0, 10);
 ---
 
 <BaseLayout title={`${title} — Free AI guides`} description={description} chromePath={guidePath(guide.id)} chrome="letterhead">
@@ -31,7 +32,7 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
       </div>
       <h1 class="ai-title ai-title--page" data-rise style="--i:1">{title}</h1>
       <p class="ai-lead" data-rise style="--i:2">{lead}</p>
-      {updated && <p class="ai-label mt-4" data-rise style="--i:2">Updated <time datetime={updatedDate!.toISOString().slice(0, 10)}>{updated}</time></p>}
+      <p class="ai-label mt-4" data-rise style="--i:2" data-guide-updated={updatedIso}>Last updated <time datetime={updatedIso}>{updated}</time></p>
     </header>
 
     <article class="post-prose cohort-prose" data-rise style="--i:3">

@@ -91,6 +91,36 @@ test.describe('free AI guides: pages', () => {
       const links = await more.locator('ol a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
       expect(links).toEqual(others);
     });
+
+    test(`${path} shows when it was last updated, and that date is not older than any "Last checked" date on it`, async ({ page }) => {
+      await page.goto(path);
+      const fm = readFileSync(`${SRC}${path.split('/')[2]}.mdx`, 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
+      const iso = fm.match(/^updatedDate:\s*['"]?(\d{4}-\d{2}-\d{2})/m)?.[1];
+      expect(iso, 'frontmatter updatedDate').toBeTruthy();
+
+      const stamp = page.locator('[data-guide] > header [data-guide-updated]');
+      await expect(stamp).toHaveCount(1);
+      await expect(stamp).toBeVisible();
+      await expect(stamp).toHaveAttribute('data-guide-updated', iso!);
+      await expect(stamp.locator('time')).toHaveAttribute('datetime', iso!);
+      const long = new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+      await expect(stamp).toHaveText(`Last updated ${long}`);
+      // Not a date in the future (one day of slack for time zones).
+      expect(Date.parse(iso!)).toBeLessThanOrEqual(Date.now() + 86_400_000);
+
+      // Re-checking a guide's facts without bumping its date would leave "Last
+      // updated" older than the facts under it. Every "Last checked" line is a
+      // .ai-label paragraph in the article with a <time>.
+      const checked = await page
+        .locator('[data-guide] > article p.ai-label')
+        .filter({ hasText: /^Last checked/ })
+        .locator('time')
+        .evaluateAll((ts) => ts.map((t) => t.getAttribute('datetime') ?? ''));
+      for (const c of checked) {
+        expect(c).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(c <= iso!, `"Last checked ${c}" is newer than "Last updated ${iso}"`).toBe(true);
+      }
+    });
   }
 
   test('the hub lists every published guide in step order, grouped (start, guides, reference), then the quiz and the training page', async ({ page }) => {

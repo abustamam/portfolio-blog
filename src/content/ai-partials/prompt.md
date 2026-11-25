@@ -30,3 +30,5 @@ Check:     Before you answer, ________________________________.
 - Don't do the arithmetic yourself. Give me the spreadsheet formula instead.
 - Ask me up to three questions first if anything is unclear.
 - Point out anything in my input that looks wrong or inconsistent.
+
+A Check line asks the AI to flag problems. It doesn't prove it found them all, so you still read the answer.

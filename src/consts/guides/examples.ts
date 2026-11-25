@@ -69,7 +69,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     before:
       'Each unmatched line becomes its own back-and-forth message, worded differently every week, and the answers trickle in.',
     after:
-      'One list goes out at once, with the amounts already checked against the statement, and the owner answers all of it in one reply.',
+      'One list goes out at once, with the amounts already checked against the statement, and the owner can answer all of it in one reply.',
   },
   {
     id: 'office-admin-inbox',
@@ -77,7 +77,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     label: 'Office admin',
     summary: 'Drafting replies to the routine questions that land in the shared inbox every week.',
     situation:
-      'I run the front office at a community center. The shared inbox gets the same few questions every week: opening hours, booking a room, parking, cancelling a class.',
+      'I run the front office at a community center. The shared inbox gets the same few questions every week: opening hours, booking a room, parking, canceling a class.',
     task: 'Draft a reply to each question below. Only use the facts in my office info.',
     input:
       'Office info: open Monday to Friday, 9 to 5, and Saturday mornings for classes only. Rooms are booked at the front desk and need a deposit. Free parking in the lot behind the building. Questions: PERSON-1 wants to know if they can book the hall on a Sunday. PERSON-2 is asking where to park for the Saturday class.',
@@ -105,7 +105,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     before:
       'The reminder gets written from scratch each week, and finding the gaps means scanning the sign-up sheet by eye.',
     after:
-      'The reminder and the list of gaps come back together. You check the counts against the sheet and post the message.',
+      'The reminder and the list of gaps come back together. You check the counts against the sheet, put the real names back if the message needs them, and post it.',
   },
   {
     id: 'job-seeker-cover-letter',

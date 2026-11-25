@@ -190,10 +190,11 @@ test.describe('job-search copy and the free/paid line', () => {
     const warn = a.match(/<p data-search-warning[^>]*>([\s\S]*?)<\/p>/)!;
     expect(warn, 'warning paragraph').toBeTruthy();
     const w = plain(warn[1]);
-    expect(w).toMatch(/ask an AI tool to find or list open jobs/);
+    expect(w).toMatch(/Be careful asking an AI tool to find or list open jobs/);
+    expect(w).toMatch(/Treat anything it finds as a lead/);
     expect(w).toMatch(/invent postings/);
     expect(w).toMatch(/ones that have already closed/);
-    expect(w).toMatch(/find the actual posting on the employer's own site or on a job board/);
+    expect(w).toMatch(/open the actual posting on the employer's own site or on a job board/);
     expect(warn[1]).toContain(`<a href="${WRONG_PAGE}">When AI gets it wrong</a>`);
     // It sits inside the search section, before tailoring.
     expect(a.indexOf('data-search-warning')).toBeLessThan(a.indexOf('1. Tailor your résumé'));

@@ -119,7 +119,7 @@ export const MISTAKE_ROUNDS: MistakeRound[] = [
     id: 'committee-notes',
     kind: 'illustration',
     type: 'unread',
-    ask: 'Summarise these committee meeting notes in a few lines.',
+    ask: 'Summarize these committee meeting notes in a few lines.',
     source: {
       kind: 'passage',
       caption: 'Committee meeting notes',
@@ -159,12 +159,12 @@ export const MISTAKE_ROUNDS: MistakeRound[] = [
       ],
     },
     parts: [
-      { text: 'Anyone working with children needs a background check before their first shift.' },
+      { text: 'The handbook covers background checks under "Working with children".' },
       { text: 'It is in section 4.1, "Background checks", on page 8.' },
       { text: "It is also required by the city's Volunteer Safety Act of 2019.", wrong: true },
     ],
     explanation:
-      'The handbook names no law, and nothing in the question gave one. The "Volunteer Safety Act of 2019" has the shape of a real source, a name and a year, but nothing shows it exists.',
+      'The contents page names no law, and nothing in the question gave one. The "Volunteer Safety Act of 2019" has the shape of a real source, a name and a year, but nothing shows it exists.',
     check: 'Open every source an answer names. If you can\'t find it in the document or with a search, treat it as made up, and take it out before you pass the answer on.',
   },
   {

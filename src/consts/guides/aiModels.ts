@@ -47,11 +47,11 @@ export const VENDOR_DOMAINS: Record<Vendor, readonly string[]> = {
   Copilot: ['microsoft.com'],
 };
 
-const CHECKED = '2026-11-24';
+const CHECKED = '2026-11-25';
 
-const OPENAI = 'https://help.openai.com/en/articles/11909943-gpt-6-models-and-usage';
+const OPENAI = 'https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt';
 const GEMINI = 'https://support.google.com/gemini/answer/18648722?hl=en';
-const COPILOT = 'https://support.microsoft.com/en-us/microsoft-copilot/conversation-modes-in-microsoft-copilot';
+const COPILOT = 'https://support.microsoft.com/en-us/microsoft-365-copilot/conversation-modes-in-microsoft-copilot';
 
 export const AI_MODELS: readonly AiModel[] = [
   // ChatGPT: the menu is a thinking slider (Instant, Medium, High, Extra High,
@@ -96,14 +96,17 @@ export const AI_MODELS: readonly AiModel[] = [
   },
 
   // Gemini: Auto, then three models. Thinking level (Low, Medium, High) is a
-  // separate choice once you pick a model yourself.
+  // separate choice once you pick a model yourself. Picking a model yourself
+  // needs a paid Google AI plan: without one the menu is Auto only (the plan
+  // page lists "Auto model selection"), so the three models are `no` on free
+  // even though Auto may answer with Hydrogen.
   {
     vendor: 'Gemini', name: 'Auto', size: 'other', freePlan: 'yes', paidPlan: 'yes',
-    pickWhen: 'Leave it here unless the answer is wrong or shallow; it picks for you.',
+    pickWhen: 'Leave it here unless the answer is wrong or shallow; it picks for you. Without a paid plan it is the only choice.',
     source: GEMINI, checked: CHECKED,
   },
   {
-    vendor: 'Gemini', name: 'Hydrogen', size: 'everyday', freePlan: 'limited', paidPlan: 'yes',
+    vendor: 'Gemini', name: 'Hydrogen', size: 'everyday', freePlan: 'no', paidPlan: 'yes',
     pickWhen: 'Everyday questions, writing and summaries.',
     source: GEMINI, checked: CHECKED,
   },
@@ -146,7 +149,7 @@ export const AI_MODELS: readonly AiModel[] = [
   },
 
   // Claude: four current models. Effort is a setting in the same menu. Thinking
-  // cannot be turned off on these four; only older models show the switch. "More models" holds older versions, not listed here.
+  // cannot be turned off on these four; only other models show the switch. "More models" opens further options, not listed here.
   {
     vendor: 'Claude', name: 'Haiku 5.5', size: 'small', freePlan: 'yes', paidPlan: 'yes',
     pickWhen: 'Quick, simple jobs: a short answer, a summary, a tidy-up.',
