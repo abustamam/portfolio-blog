@@ -95,6 +95,31 @@ export const USAGE_LIMITS: UsageLimitApp[] = [
   },
 ];
 
+/**
+ * What each company's own help pages say about caching in the app. Only Claude's
+ * says anything; for the rest `confirmed` is false and `text` records what the
+ * page does and does not cover. Developer documentation (which does give
+ * cache lifetimes) is about the developer product, not the app, so it is not used.
+ */
+export const CACHING: Record<ToolId, Fact> = {
+  chatgpt: fact('Not documented for the app.', 'https://help.openai.com/en/articles/20001639-why-does-chatgpt-say-context-window-full-or-chat-memory-full', false),
+  gemini: fact(
+    'Not documented for the app. The page covers only the rereading cost ("re-read the previous conversation history") and "Start a new chat when you move to a new topic".',
+    GEMINI,
+    false,
+  ),
+  copilot: fact(
+    'Not documented for the app. The page only says "Limits may vary based on the feature, entry point, and system conditions."',
+    COPILOT_CREDITS,
+    false,
+  ),
+  claude: fact(
+    '"Content in projects is cached and counts less against your limits when reused." "Caches expire after a period of inactivity." After a long break, "your first message counts that content in full again". No duration given.',
+    'https://support.claude.com/en/articles/9797557-usage-limit-best-practices',
+    true,
+  ),
+};
+
 /** The paid personal plan fact for an app, straight from aiTools.ts. */
 export const paidFact = (id: ToolId): Fact => AI_TOOLS.find((t) => t.id === id)!.facts.paid;
 
@@ -102,6 +127,7 @@ export const paidFact = (id: ToolId): Fact => AI_TOOLS.find((t) => t.id === id)!
 export const allUsageFacts = (): Fact[] => [
   ...USAGE_LIMITS.flatMap((a) => LIMIT_ORDER.map((k) => a.facts[k])),
   ...USAGE_LIMITS.map((a) => paidFact(a.id)),
+  ...Object.values(CACHING),
 ];
 
 /** The page's "last checked" date: the oldest `checked` of any fact it shows. */

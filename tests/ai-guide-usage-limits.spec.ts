@@ -10,6 +10,7 @@ import {
 } from '../src/utils/allowance';
 import { AI_TOOLS } from '../src/consts/guides/aiTools';
 import {
+  CACHING,
   LIMIT_ORDER,
   UNCONFIRMED,
   USAGE_LIMITS,
@@ -84,8 +85,22 @@ test.describe('usage-limits: data', () => {
         expect(f.text.trim().length, where).toBeGreaterThan(0);
       }
     }
-    // ChatGPT's usage page, and Copilot's refill and usage page, are not stated by the vendor.
-    expect(allUsageFacts().filter((f) => !f.confirmed).length).toBe(3);
+    // ChatGPT's usage page, and Copilot's refill and usage page, are not stated by the vendor,
+    // and neither is caching for ChatGPT, Gemini or Copilot.
+    expect(allUsageFacts().filter((f) => !f.confirmed).length).toBe(6);
+  });
+
+  test('CACHING has one fact per app, each on that company\'s own domain with a checked date; only Claude\'s is confirmed', () => {
+    expect(Object.keys(CACHING).sort()).toEqual(['chatgpt', 'claude', 'copilot', 'gemini']);
+    for (const app of USAGE_LIMITS) {
+      const tool = AI_TOOLS.find((t) => t.id === app.id)!;
+      const f = CACHING[app.id];
+      expect(onDomain(f.source, tool.domains), `${app.id} ${f.source}`).toBe(true);
+      expect(f.checked, app.id).toBe('2026-11-25');
+      expect(f.text.trim().length, app.id).toBeGreaterThan(0);
+      expect(f.confirmed, app.id).toBe(app.id === 'claude');
+    }
+    expect(oldestChecked() <= Object.values(CACHING).map((f) => f.checked).sort()[0]).toBe(true);
   });
 
   test('the paid price is imported from aiTools.ts, not copied', () => {
@@ -283,6 +298,40 @@ test.describe('usage-limits: page, with JavaScript', () => {
     const later = page.locator('article h2', { hasText: 'To make it last longer' });
     await expect(later).toHaveCount(1);
     await expect(page.locator('article li', { hasText: 'Start a fresh chat' })).toHaveCount(1);
+  });
+
+  test('"Why coming back later can cost more" sits between "What uses it up faster" and "When it comes back", links the Claude source and gives no duration', async ({ page }) => {
+    await page.goto(PAGE);
+    const heads = await page.locator('article h2').allTextContents();
+    const i = heads.indexOf('Why coming back later can cost more');
+    expect(i, heads.join(' | ')).toBeGreaterThan(-1);
+    expect(heads[i - 1]).toBe('What uses it up faster');
+    expect(heads[i + 1]).toBe('When it comes back');
+    const h = page.locator('article h2', { hasText: 'Why coming back later can cost more' });
+    const section = await h.evaluate((el) => {
+      let text = '';
+      const hrefs: string[] = [];
+      for (let n = el.nextElementSibling; n && n.tagName !== 'H2'; n = n.nextElementSibling) {
+        text += ` ${n.textContent}`;
+        n.querySelectorAll('a').forEach((a) => hrefs.push(a.getAttribute('href') ?? ''));
+      }
+      return { text, hrefs };
+    });
+    expect(section.hrefs).toContain(CACHING.claude.source);
+    expect(section.text).not.toMatch(/minutes?|hours?/i);
+    expect(section.text).not.toMatch(/vendor/i);
+  });
+
+  test('"Finish a job in one sitting" is a bullet under "To make it last longer"', async ({ page }) => {
+    await page.goto(PAGE);
+    const items = await page.locator('article h2', { hasText: 'To make it last longer' }).evaluate((h) => {
+      const out: string[] = [];
+      for (let el = h.nextElementSibling; el && el.tagName !== 'H2'; el = el.nextElementSibling) {
+        el.querySelectorAll('li').forEach((li) => out.push(li.textContent ?? ''));
+      }
+      return out;
+    });
+    expect(items.filter((t) => t.startsWith('Finish a job in one sitting'))).toHaveLength(1);
   });
 
   test('no reader-visible "vendor" in the five start-from-zero posts', async ({ page }) => {

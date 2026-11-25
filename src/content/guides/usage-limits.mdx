@@ -4,13 +4,13 @@ description: "Why an AI app stops answering and asks you to wait or pay. Free an
 lead: "Sooner or later an AI app tells you that you've reached your limit. Every account has an allowance, some things use it faster than others, and it refills by itself."
 group: start
 step: 0.3
-minutes: 6
+minutes: 7
 tool: Allowance meter
 ctaLine: "In the hands-on training we get a real task done on a free plan, so you know whether paying is worth it."
 ---
 import Term from '../../components/guides/Term.astro';
 import AllowanceMeter from '../../components/guides/AllowanceMeter.astro';
-import { USAGE_LIMITS, LIMIT_LABELS, LIMIT_ORDER, UNCONFIRMED, paidFact, oldestChecked } from '../../consts/guides/usageLimits';
+import { CACHING, USAGE_LIMITS, LIMIT_LABELS, LIMIT_ORDER, UNCONFIRMED, paidFact, oldestChecked } from '../../consts/guides/usageLimits';
 import { fmtLongDate } from '../../utils/date';
 
 {/* Vendor facts live in src/consts/guides/usageLimits.ts (and the paid prices in aiTools.ts), each with its source and checked date. Re-check every quarter. */}
@@ -51,6 +51,14 @@ What the bars show:
 
 For a quick question in a new chat, none of that matters much. In the meter above, that's the cheapest thing you can do.
 
+## Why coming back later can cost more
+
+I said the app rereads the whole chat each time you send a message. Some apps have a shortcut: they keep what they've just read ready for a little while, so reading it again soon costs less. That shortcut is called a **cache**. If you go quiet for long enough, the app lets it go, and your next message reads everything in full again.
+
+Claude is the only one of the four apps that says this in its help pages: content in a project "is cached and counts less against your limits when reused", and caches "expire after a period of inactivity" (<a href={CACHING.claude.source} rel="noopener">Anthropic</a>). It doesn't say how long that period is. ChatGPT, Gemini and Copilot don't mention caching for their apps at all, so I can't tell you whether they do it or how much it saves.
+
+It's still worth keeping in mind. A cache makes rereading cheaper, not free: a long chat still costs more per message than a new one, as the meter above shows. If you're working through a long chat or a big file, ask your follow-up questions in one sitting rather than spreading them over the day.
+
 ## When it comes back
 
 Most apps' limits refill by themselves. When depends on the app, and the table further down says what each one states. Gemini and Claude refill every five hours and add a weekly limit on top. ChatGPT shows you the time inside the app.
@@ -69,6 +77,7 @@ The limit is on your account, not on the chat you're in. Once you're cut off, a 
 These help before you hit the limit, not after:
 
 - **Start a fresh chat for each new topic.** A long chat costs more per message. Paste in the two or three lines the new one needs to know. [Does it remember me?](/ai-guides/does-it-remember/) explains what carries over and what doesn't.
+- **Finish a job in one sitting.** Some apps charge less to reread a chat you were in a few minutes ago than one you left hours ago.
 - **Use the smaller model for easy parts.** If you had the large model or the thinking setting on, turn it off for a quick question.
 
 ## Free or paid?
