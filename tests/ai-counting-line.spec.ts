@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // #109: the site says in one line what it counts, and that it uses no trackers.
-const LINE = "No trackers and no cookies. I count page requests from the server's own logs, as weekly totals.";
+const LINE = "This site has no cookies or tracking scripts. Once a week I get a count of how often each page was opened, taken from the server log.";
 
 for (const path of ['/ai-guides/', '/colophon/']) {
   test(`${path} states what is counted`, async ({ page }) => {
