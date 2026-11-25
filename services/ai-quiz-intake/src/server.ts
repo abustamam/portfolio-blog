@@ -1,5 +1,6 @@
 import { SQL } from 'bun';
 import { createHandler } from './app';
+import { createTrackCounter, linkToTrack, parseTrackLinks } from './tracks';
 import { createIntakeNotifier, createPaymentNotifier, createTelegramNotifier, createWaitlistNotifier } from './notify';
 
 const url = process.env.DATABASE_URL;
@@ -12,7 +13,21 @@ const notifyIntake = token && chatId ? createIntakeNotifier({ token, chatId }) :
 const notifyWaitlist = token && chatId ? createWaitlistNotifier({ token, chatId }) : undefined;
 const notifyPayment = token && chatId ? createPaymentNotifier({ token, chatId }) : undefined;
 const { STRIPE_WEBHOOK_SECRET: stripeWebhookSecret, STRIPE_PAYMENT_LINK: stripePaymentLink } = process.env;
-console.log(JSON.stringify({ msg: 'notifications', telegram: Boolean(notify), stripe: Boolean(stripeWebhookSecret) }));
+// STRIPE_TRACKS maps tracks to payment links (`everyday=plink_a,plink_b;connect=plink_c`).
+// Set, it widens the webhook to every track link and names the track in the message.
+const tracks = parseTrackLinks(process.env.STRIPE_TRACKS);
+const trackLinks = Object.keys(tracks).length ? linkToTrack(tracks) : undefined;
+const stripeApiKey = process.env.STRIPE_API_KEY;
+const countTracks = stripeApiKey && trackLinks ? createTrackCounter({ apiKey: stripeApiKey, tracks }) : undefined;
+console.log(
+  JSON.stringify({
+    msg: 'notifications',
+    telegram: Boolean(notify),
+    stripe: Boolean(stripeWebhookSecret),
+    tracks: Object.keys(tracks),
+    counts: Boolean(countTracks),
+  }),
+);
 
 const handle = createHandler({
   notify,
@@ -39,7 +54,8 @@ const handle = createHandler({
       values (${row.name}, ${row.contact}, ${row.note}, ${userAgent})`;
   },
   stripeWebhookSecret: stripeWebhookSecret || undefined,
-  stripePaymentLink: stripePaymentLink || undefined,
+  stripePaymentLink: trackLinks ?? (stripePaymentLink || undefined),
+  countTracks,
   notifyPayment,
   ping: async () => {
     await sql`select 1`;
