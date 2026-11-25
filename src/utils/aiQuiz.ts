@@ -113,3 +113,43 @@ export const TRACKS: Record<Track, { name: string; summary: string; covers: stri
     build: 'an automation that runs that task end to end, with a human check where it matters',
   },
 };
+
+// Free guides the result screen suggests, picked from the answers that show a
+// gap. Ids are guide file names in src/content/guides/; the quiz page fails the
+// build if one is missing, so a rename can't leave a dead card.
+export const MAX_SUGGESTED_GUIDES = 3;
+
+/** Every id suggestGuides can return, so the page can render and check each one. */
+export const SUGGESTABLE_GUIDES = [
+  'what-is-ai',
+  'first-ten-minutes',
+  'never-paste',
+  'when-ai-is-wrong',
+  'prompt',
+  'photos-files-voice',
+  'which-model',
+  'examples',
+] as const;
+export type SuggestedGuide = (typeof SUGGESTABLE_GUIDES)[number];
+
+// Filled in after the gaps, in this order, so everyone gets the same number of cards.
+const FALLBACK_GUIDES: SuggestedGuide[] = ['which-model', 'examples'];
+
+export function suggestGuides(a: QuizAnswers): SuggestedGuide[] {
+  const out: SuggestedGuide[] = [];
+  const add = (g: SuggestedGuide) => !out.includes(g) && out.push(g);
+  const pts = (k: (typeof SKILL_KEYS)[number]) => POINTS[k][a[k] ?? ''] ?? 0;
+  const tools = a.tools ?? [];
+
+  if (a.frequency === 'never' || tools.length === 0 || tools.includes('none')) {
+    add('what-is-ai');
+    add('first-ten-minutes');
+  }
+  if (scoreQuiz(a).privacyGap) add('never-paste');
+  if (pts('wrongAnswer') <= 1) add('when-ai-is-wrong');
+  if (pts('prompt') <= 1) add('prompt');
+  if (a.files === 'never' || a.files === 'went-badly') add('photos-files-voice');
+  FALLBACK_GUIDES.forEach(add);
+
+  return out.slice(0, MAX_SUGGESTED_GUIDES);
+}

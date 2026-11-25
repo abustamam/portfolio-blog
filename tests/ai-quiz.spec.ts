@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
-import { TRACKS, scoreQuiz, skillScores } from '../src/utils/aiQuiz';
+import { TRACKS, scoreQuiz, skillScores, suggestGuides, SUGGESTABLE_GUIDES, MAX_SUGGESTED_GUIDES } from '../src/utils/aiQuiz';
 
 type Path = {
   frequency: string;
@@ -248,5 +248,33 @@ test.describe('AI quiz', () => {
     for (const [key, t] of Object.entries(TRACKS)) {
       for (const name of t.name.split(' or ')) expect(offered, `${key}: ${name}`).toContain(name);
     }
+  });
+
+  test('suggests free guides for the gaps the answers show', () => {
+    expect(suggestGuides(beginner)).toEqual(['what-is-ai', 'first-ten-minutes', 'never-paste']);
+    // No gaps: the fallbacks fill in.
+    expect(suggestGuides(builder)).toEqual(['which-model', 'examples']);
+    // A regular user who misses wrong answers and writes short prompts.
+    expect(
+      suggestGuides({ ...builder, wrongAnswer: 'asked-again', prompt: 'short', neverPaste: ['nothing'] }),
+    ).toEqual(['never-paste', 'when-ai-is-wrong', 'prompt']);
+    expect(suggestGuides({ ...builder, files: 'went-badly' })).toEqual(['photos-files-voice', 'which-model', 'examples']);
+    for (const p of [beginner, builder]) expect(suggestGuides(p).length).toBeLessThanOrEqual(MAX_SUGGESTED_GUIDES);
+  });
+
+  test('result screen shows the suggested guides, in order, linking to real guide pages', async ({ page }) => {
+    await page.goto('/ai-quiz');
+    await expect(page.locator('[data-quiz-guide]')).toHaveCount(SUGGESTABLE_GUIDES.length);
+    await complete(page, beginner);
+    const shown = page.locator('#result-guide-list [data-quiz-guide]:visible');
+    await expect(shown).toHaveCount(3);
+    expect(await shown.evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset.quizGuide))).toEqual(
+      suggestGuides(beginner),
+    );
+    const href = await shown.first().locator('a').getAttribute('href');
+    expect(href).toBe('/ai-guides/what-is-ai/');
+    const res = await page.request.get(href!);
+    expect(res.status()).toBe(200);
+    await expect(page.locator('#result-guides')).toHaveAttribute('href', '/ai-guides/');
   });
 });
