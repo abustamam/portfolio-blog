@@ -1,0 +1,151 @@
+---
+// Three worked examples for /ai-guides/photos-files-voice/: a photographed letter,
+// a PDF, a spoken question. Each card shows what was handed over, the question,
+// a trimmed answer, and the line to double-check. Static by nature: no script.
+//
+// Every document is made up and typeset here in HTML and CSS. No real person,
+// organization or document. The phone number is a 555 number.
+import { ATTACH_EXAMPLES, WAVEFORM, type AttachExample } from '../../consts/guides/attachExamples';
+
+interface Props {
+  examples?: AttachExample[];
+}
+const { examples = ATTACH_EXAMPLES } = Astro.props;
+---
+
+<section class="ax" data-attach-examples aria-label="Three worked examples">
+  <p class="ax-note">These documents are made up for this page. The district, the address and the phone number are not real.</p>
+  <ol class="ax-cards" role="list">
+    {examples.map((ex, i) => (
+      <li class="ax-card" data-ax-card={ex.id}>
+        <p class="ai-label ax-card__kind">Example {i + 1} · {ex.kind}</p>
+
+        <div class="ax-handed" role="img" aria-label={ex.handed}>
+          {ex.id === 'letter' && (
+            <div class="ax-phone" aria-hidden="true">
+              <div class="ax-paper">
+                <p class="ax-paper__org">Riverbend Water District</p>
+                <p class="ax-paper__to">Resident<br />14 Alder Court</p>
+                <p class="ax-paper__title">PAST-DUE NOTICE</p>
+                <p class="ax-paper__line">Your water account has an unpaid balance.</p>
+                <p class="ax-paper__amt"><span>Amount due</span> $84.17</p>
+                <p class="ax-paper__line">Please pay by December 12 online or by phone. Service may be interrupted after that date.</p>
+                <p class="ax-paper__line ax-paper__small">Questions: (555) 010-0142</p>
+              </div>
+            </div>
+          )}
+          {ex.id === 'manual' && (
+            <div class="ax-chip" aria-hidden="true">
+              <span class="ax-chip__icon">PDF</span>
+              <span class="ax-chip__text">
+                <span class="ax-chip__name">Halden-HD-40-manual.pdf</span>
+                <span class="ax-chip__meta">12 pages</span>
+              </span>
+            </div>
+          )}
+          {ex.id === 'voice' && (
+            <div class="ax-voice" aria-hidden="true">
+              <div class="ax-wave">
+                {WAVEFORM.map((h) => <span style={`height:${h}%`} />)}
+              </div>
+              <p class="ax-voice__text" data-ax-question>&ldquo;{ex.question}&rdquo;</p>
+            </div>
+          )}
+        </div>
+
+        {ex.id !== 'voice' && (
+          <div class="ax-block">
+            <p class="ax-head">What I asked</p>
+            <p class="ax-line" data-ax-question>{ex.question}</p>
+          </div>
+        )}
+        <div class="ax-block">
+          <p class="ax-head">The answer, trimmed</p>
+          <p class="ax-line" data-ax-answer>{ex.answer}</p>
+        </div>
+
+        {ex.check !== null ? (
+          <div class="ax-check" data-ax-check="yes">
+            <p class="ax-head ax-head--check">Check this</p>
+            <p class="ax-line">{ex.check}</p>
+          </div>
+        ) : (
+          <div class="ax-check ax-check--none" data-ax-check="none">
+            <p class="ax-head">Nothing to check</p>
+            <p class="ax-line">{ex.noCheck}</p>
+          </div>
+        )}
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .ax { margin: 1.5rem 0 2rem; min-width: 0; }
+  .ax-note {
+    margin: 0 0 1.25rem; padding: .85rem 1rem; border-left: 3px solid var(--color-accent);
+    background: var(--color-accent-bg); color: var(--color-ink); font-size: 1rem; line-height: 1.5; border-radius: 0 4px 4px 0;
+  }
+  .ax-cards { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 1rem; }
+  .ax-cards > li { margin: 0; padding: 0; }
+  .ax-card { border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-surface); padding: 1.1rem 1rem 1.25rem !important; min-width: 0; }
+  @media (min-width: 640px) { .ax-card { padding: 1.35rem 1.5rem 1.5rem !important; } }
+  .ax-card__kind { margin: 0 0 .75rem; }
+  .ax-head {
+    margin: 0 0 .25rem; font-family: var(--font-mono); font-size: var(--text-12, 12px); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--color-faint);
+  }
+  .ax-card .ax-line { margin: 0 0 .35rem; font-size: 1rem; line-height: 1.55; overflow-wrap: anywhere; }
+  .ax-block { margin: 0 0 .9rem; }
+
+  .ax-handed { margin: 0 0 1rem; min-width: 0; }
+
+  /* A phone-camera frame with a typeset letter, slightly rotated. The paper is a photo of paper, so it stays light in dark mode. */
+  .ax-phone {
+    background: #1b1e24; border-radius: 18px; padding: 14px 12px 32px; max-width: 20rem; border: 1px solid #3a3f48; margin: 0 auto; position: relative;
+    overflow: hidden;
+  }
+  .ax-phone::after {
+    content: ''; position: absolute; left: 50%; bottom: 5px; width: 28px; height: 28px; margin-left: -14px;
+    border: 2px solid #d8d8d8; border-radius: 50%; box-sizing: border-box; transform: scale(.5); transform-origin: center;
+  }
+  .ax-paper {
+    background: #fbfaf5; color: #1d2024; padding: 14px 14px 12px; transform: rotate(-1.8deg); box-shadow: 0 2px 10px rgba(0,0,0,.35);
+    font-family: var(--font-serif); font-size: 13px; line-height: 1.4;
+  }
+  .ax-paper p { margin: 0 0 .5rem; color: inherit; font-size: inherit; line-height: inherit; }
+  .ax-paper__org { font-weight: 700; letter-spacing: .02em; border-bottom: 1px solid #b8b6ac; padding-bottom: .3rem; }
+  .ax-paper__to { font-size: 12px !important; }
+  .ax-paper__title { font-family: var(--font-mono); font-size: 11px !important; letter-spacing: .1em; color: #8a2f1a !important; }
+  .ax-paper__amt { font-size: 18px !important; font-weight: 700; }
+  .ax-paper__amt span { display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: #5a5d63; }
+  .ax-paper__small { font-size: 11px !important; color: #5a5d63 !important; margin-bottom: 0 !important; }
+
+  /* A PDF as a file chip. */
+  .ax-chip {
+    display: flex; align-items: center; gap: .85rem; max-width: 22rem; padding: .85rem 1rem;
+    border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-bg);
+  }
+  .ax-chip__icon {
+    flex: none; font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .06em;
+    color: var(--color-bg); background: var(--color-danger); border-radius: 4px; padding: .5rem .45rem;
+  }
+  .ax-chip__text { display: flex; flex-direction: column; min-width: 0; }
+  .ax-chip__name { font-size: 15px; color: var(--color-ink); overflow-wrap: anywhere; }
+  .ax-chip__meta { font-family: var(--font-mono); font-size: 12px; color: var(--color-mute); }
+
+  /* A plain waveform strip with the transcript beneath. */
+  .ax-voice { border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-bg); padding: .85rem 1rem 1rem; }
+  .ax-wave { display: flex; align-items: center; gap: 2px; height: 56px; }
+  .ax-wave span { flex: 1 1 0; min-width: 1px; background: var(--color-accent); border-radius: 2px; opacity: .85; }
+  .ax-card .ax-voice__text { margin: .75rem 0 0; font-style: italic; font-size: 1rem; line-height: 1.5; color: var(--color-ink); overflow-wrap: anywhere; }
+
+  /* The marked line. A heavier left rule and a label, so it is found at a glance. */
+  .ax-check {
+    margin: 1rem 0 0; padding: .75rem 1rem; border-left: 4px solid var(--color-accent); background: var(--color-accent-bg);
+    border-radius: 0 4px 4px 0;
+  }
+  .ax-check .ax-head--check { color: var(--color-accent-ink); font-weight: 600; }
+  .ax-check .ax-line { margin-bottom: 0; color: var(--color-ink); }
+  .ax-check--none { border-left-color: var(--color-line); background: var(--color-bg); }
+</style>

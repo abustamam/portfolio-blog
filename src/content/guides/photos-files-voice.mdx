@@ -1,0 +1,132 @@
+---
+title: Photos, files, voice and your phone
+description: "You can show an AI app a photo of a letter, hand it a PDF, or just talk to it. Three worked examples, and what to double-check in each."
+lead: "You do not have to type everything. You can take a photo of a letter and ask what it wants from you, hand over a PDF, or talk to the app. Here are three examples, with the part to check in each."
+group: start
+step: 0.5
+minutes: 5
+tool: Worked examples
+ctaLine: "The hands-on training does this with a document of your own, after making it safe to share."
+---
+import Term from '../../components/guides/Term.astro';
+import AttachExamples from '../../components/guides/AttachExamples.astro';
+import { ATTACH_APPS, ACCEPT_LABELS, ACCEPT_ORDER, lastChecked } from '../../consts/guides/attachExamples';
+import { fmtLongDate } from '../../utils/date';
+
+{/* Facts live in src/consts/guides/attachExamples.ts, each with its vendor source and checked date. Re-check every quarter. */}
+
+## You can hand it things, not only words
+
+Next to the box where you type, most <Term id="chat-app">chat apps</Term> have a button for adding things: a paperclip, a plus sign or a camera. To **attach** something means to hand the app a photo or a document along with your message. Some apps call the same thing **upload**. The app reads what you attached and answers using it.
+
+Many also have a microphone, so you can talk instead of typing.
+
+That matters because a lot of what we need help with isn't already text. It's a letter on the kitchen table, a manual in a drawer, a question you'd rather say out loud. Here are three examples. Each one shows what I handed over, what I asked, a trimmed version of the answer, and the one line I'd check.
+
+<AttachExamples />
+
+## A photo: the letter, the form, the bill
+
+A photo is the quickest way to ask about something on paper. You take a picture of the letter, attach it, and ask what it wants from you. The question in the first example is the one I use most: "What is this asking me to do, and by when?"
+
+It works for a form with boxes you don't understand, a bill, a notice from your landlord, or an error message on a screen you can't copy from. Take the photo in good light, flat on the table, with all four corners in view.
+
+The part to check is the numbers. Reading digits off a photo is where things go wrong. A smudge or a shadow can turn an 8 into a 3 or a date into a different date. In the first example, I'd look at the letter and confirm $84.17 and December 12 myself before I paid anything.
+
+## A file: the PDF or the spreadsheet
+
+A **file** is one document saved on your computer or phone: a manual, a lease, a spreadsheet, a statement. A **PDF** is a document saved so it looks the same on every device, like a printed page. Most manuals and forms you download come as PDFs.
+
+You attach a file the same way as a photo. The app reads it for this <Term id="conversation">chat</Term> and answers from it. Start a new chat and you attach it again.
+
+A file is better than a photo when you have one, because the app reads the actual words. It doesn't have to guess at them from a picture. It's also long, and long things are where mistakes hide. The app may skim, skip a page, or answer from the wrong part. So in the second example, I ask it for the page number every time, and then I open that page and read it.
+
+## Talking instead of typing
+
+There are two things here, and apps use the names loosely.
+
+**Dictation** turns your speech into typed words. You talk, the words appear in the box, you read them and press send. It's the same chat with a faster way of typing.
+
+**Voice mode** is a spoken conversation. You talk, and the app talks back, out loud, and you go back and forth without touching the screen. It's handy when your hands are busy, like the third example, where I'm standing at the stove.
+
+Both can mishear you. Names and numbers are the usual casualties. If it matters, read the typed version of what you said before you rely on the answer.
+
+## On your phone
+
+The phone is where this gets easy. The camera is already in your hand, so photographing a letter and asking about it takes under a minute. Look for a camera or plus button near the place you type. The exact icon varies from app to app.
+
+A phone is also the natural place for voice. If you've used dictation to send a text message, you've already done the hard part.
+
+## What it gets wrong with pictures and long files
+
+Everything in [When AI gets it wrong](/ai-guides/when-ai-is-wrong/) still applies, and a few mistakes are more likely here:
+
+- **Misread numbers.** Amounts, dates, phone numbers and account numbers are the things to double-check against the original.
+- **Skipped pages.** A long file gets read unevenly. The answer may leave out the page that matters, and nothing in the answer tells you it did.
+- **Made-up details.** If the answer isn't in the file, the app may state something plausible anyway, which people call <Term>hallucination</Term>. Asking for the page number is how you catch that.
+
+Files and photos also use up more of your <Term>usage limit</Term> than a short typed question does, which is [why you can hit the limit sooner](/ai-guides/usage-limits/) when you attach things.
+
+## How much to check depends on what goes wrong
+
+Look at the three check lines again. The first two ask me to go back to the source. The third says there's nothing to verify.
+
+The difference is what happens if the answer is off. If I misread the water bill, I could pay the wrong amount or miss a date. If the dishwasher answer is wrong, I could spend an hour on the wrong fix. If the chicken and rice is a little bland, I add salt. I check hard when a wrong answer costs money, time or trouble, and I just use the answer when it doesn't.
+
+## Before you attach anything
+
+Anything you attach goes to the company that runs the app. A photo of a letter has a name and an address on it. A bank statement has account numbers. Before you attach a document, cover or remove the names, account numbers and addresses that the question doesn't need. A thumb over the corner of a photo is enough for a quick question. For a file, blank them out first.
+
+How much you may share also depends on which account you use. I go through that, and a three-step way to make a file safe, in [What's safe to paste into AI](/ai-guides/never-paste/).
+
+## What each free plan accepts
+
+This is what each app's <Term>free plan</Term> says it accepts, taken from each company's own pages. Where a page doesn't say, the cell says "Check the vendor's page" and links it. It doesn't mean the app can't do it.
+
+<p class="ai-label pfv-checked">Last checked <time data-last-checked datetime={lastChecked()}>{fmtLongDate(new Date(lastChecked()))}</time>. Plans change, and each cell links the page it came from.</p>
+
+<div class="pfv-table">
+<table data-attach-table>
+  <thead>
+    <tr>
+      <th scope="col">App</th>
+      {ACCEPT_ORDER.map((key) => <th scope="col">{ACCEPT_LABELS[key]}</th>)}
+    </tr>
+  </thead>
+  <tbody>
+    {ATTACH_APPS.map((app) => (
+      <tr data-app={app.id}>
+        <th scope="row">{app.name}</th>
+        {ACCEPT_ORDER.map((key) => {
+          const fact = app.accepts[key];
+          return (
+            <td data-accept={key} data-label={ACCEPT_LABELS[key]} data-confirmed={String(fact.confirmed)}>
+              {fact.confirmed ? <>{fact.text}{' '}<a href={fact.source} data-source rel="noopener">Source</a></> : <a href={fact.source} data-source rel="noopener">{fact.text}</a>}
+            </td>
+          );
+        })}
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+
+"Limited" means the free plan includes it with tighter limits. If a word in this guide was new to you, [the glossary](/ai-guides/glossary/) has it in plain language.
+
+<style>{`
+  .pfv-checked { margin: 0 0 1rem; }
+  .pfv-table table { display: table; width: 100%; font-size: 15px; }
+  .pfv-table td { overflow-wrap: anywhere; }
+  .pfv-table tbody th { font-family: var(--font-serif); font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--color-ink); }
+  @media (max-width: 47.99rem) {
+    .pfv-table table, .pfv-table tbody, .pfv-table tr, .pfv-table th, .pfv-table td { display: block; width: 100%; }
+    .pfv-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .pfv-table tr { margin: 0 0 1.25rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+    .pfv-table th, .pfv-table td { border: 0; border-top: 1px solid var(--color-line-soft); }
+    .pfv-table tbody th { border-top: 0; }
+    .pfv-table td::before {
+      content: attr(data-label); display: block; margin-bottom: .25rem;
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute);
+    }
+  }
+`}</style>
