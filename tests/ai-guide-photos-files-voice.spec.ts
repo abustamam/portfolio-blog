@@ -105,6 +105,12 @@ test.describe('photos-files-voice: page', () => {
     expect(html).not.toMatch(/data-term="(attach|voice-mode)"/);
   });
 
+  test('first use of the glossary terms it does not define itself is wrapped: chat and free plan', async ({ page }) => {
+    await page.goto(PATH);
+    await expect(page.locator('a.term[data-term="conversation"]').first()).toBeAttached();
+    await expect(page.locator('a.term[data-term="plan"]').first()).toBeAttached();
+  });
+
   test('American spelling and no exclamation marks', async ({ page }) => {
     await page.goto(PATH);
     const text = await page.locator('article').first().innerText();
