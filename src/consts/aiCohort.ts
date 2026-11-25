@@ -153,7 +153,7 @@ export const TRACKS: Track[] = [
       { title: 'Calendar and meetings', outcome: 'Meeting requests, scheduling and follow-up notes handled by rules you set.' },
       {
         title: 'Chain it together, then demo',
-        outcome: 'One no-code automation that runs your task end to end, with a human check where it matters.',
+        outcome: 'One no-code automation that runs your task end to end, and stops for your approval before anything is sent.',
       },
     ],
     end: 'Your inbox and calendar doing more of the routine work, and a write-up of how it runs.',

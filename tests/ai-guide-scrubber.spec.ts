@@ -230,7 +230,8 @@ test.describe('Scrubber on the page', () => {
 
   test('the page has the account-first title, lead and description, and opens with the account question', async ({ page }) => {
     await page.goto(PAGE);
-    await expect(page.locator('h1')).toHaveText("What's safe to paste into AI");
+    // The title is typed with a straight apostrophe; the page curls it.
+    await expect(page.locator('h1')).toHaveText('What’s safe to paste into AI');
     await expect(page.locator('.ai-lead')).toHaveText(
       'Whatever you paste into an AI chat leaves your computer. What you may paste depends on which account you use, so start there.',
     );

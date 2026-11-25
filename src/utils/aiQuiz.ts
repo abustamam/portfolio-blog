@@ -115,7 +115,7 @@ const EVERYDAY_BUILD =
 const EVERYDAY_EARLY: ResultCopy = {
   name: OFFER_NAMES.everyday,
   summary:
-    "You're early, and that's the best place to start. Everyday AI takes one task you already do every week and builds the few habits that matter most: giving AI enough context, checking what it tells you, and knowing what to keep out of it. No code.",
+    "You're new to AI, which is a fine place to start. Everyday AI takes one task you already do every week and practices three habits on it: giving AI enough context, checking what it tells you, and knowing what to keep out of it. No code.",
   covers: [
     'Writing your task down, and a prompt that works on it',
     'Running it on your own file, with a check you trust',
@@ -127,10 +127,10 @@ const EVERYDAY_EARLY: ResultCopy = {
 const EVERYDAY_USING: ResultCopy = {
   name: OFFER_NAMES.everyday,
   summary:
-    'You already use AI and get value from it. Everyday AI points it at one real task from your week, on your own spreadsheet, document or emails, and turns it into something you can rerun without starting over. No code.',
+    'You already use AI. Everyday AI takes one task from your week, on your own spreadsheet, document or emails, and sets it up so you can rerun it without starting over. No code.',
   covers: [
     'Running your task on your own file, with a check you trust',
-    'Making it repeatable, so next week starts where this one ended',
+    'Making it repeatable, so you can run it again next week',
     'What never to paste into an AI tool, and how to make a file safe first',
   ],
   build: EVERYDAY_BUILD,
@@ -139,19 +139,19 @@ const EVERYDAY_USING: ResultCopy = {
 const CONNECT: ResultCopy = {
   name: OFFER_NAMES.connect,
   summary:
-    "Your inbox and calendar are where your week goes, so that's where we put AI. Connect turns on Gemini or Copilot in your own account, with clear limits on what it can see and do, and uses it for drafted replies, thread summaries and scheduling. You approve what goes out. No code.",
+    "Connect puts AI in your inbox and calendar. It turns on Gemini or Copilot in your own account, with clear limits on what it can see and do, and uses it for drafted replies, thread summaries and scheduling. You approve what goes out. No code.",
   covers: [
     'Gemini or Copilot turned on in your own account, with clear limits on what it can see and do',
     'Drafted replies and thread summaries that you approve before anything is sent',
     'Meeting requests, scheduling and follow-up notes handled by rules you set',
   ],
-  build: 'one no-code automation that runs that task end to end, with a human check where it matters',
+  build: 'one no-code automation that runs that task end to end, and stops for your approval before anything is sent',
 };
 
 const BUILD: ResultCopy = {
   name: OFFER_NAMES.build,
   summary:
-    "You want AI to do things, not just answer questions. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. Coding experience helps but isn't required. You do need to be comfortable installing software.",
+    "You want AI to do work for you, such as reading your email or updating a sheet. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. Coding experience helps but isn't required. You do need to be comfortable installing software.",
   covers: [
     'Coding with AI, and the habits that catch AI-written code when it is quietly wrong',
     'AI reading and acting on your email, Sheets, calendar or files, with limits on what it can touch',
@@ -163,9 +163,9 @@ const BUILD: ResultCopy = {
 // For someone early with AI whose goal still points at Connect or Build: the
 // same track, with a summary that says starting here is fine.
 const CONNECT_EARLY =
-  "Your inbox and calendar are where your week goes, so that's where we put AI. You don't need to have used AI much: Connect starts by turning on Gemini or Copilot in your own account, with clear limits on what it can see and do, then uses it for drafted replies, thread summaries and scheduling. You approve what goes out. No code.";
+  "Connect puts AI in your inbox and calendar. You don't need to have used AI much: it starts by turning on Gemini or Copilot in your own account, with clear limits on what it can see and do, then uses it for drafted replies, thread summaries and scheduling. You approve what goes out. No code.";
 const BUILD_EARLY =
-  "You want AI to do things, not just answer questions. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. You're early with AI, and that's fine: the first session starts with the habits that stop AI-written code from quietly being wrong. You do need to be comfortable installing software.";
+  "You want AI to do work for you, such as reading your email or updating a sheet. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. You're new to AI, and that's fine: the first session starts with the habits that catch AI-written code when it is quietly wrong. You do need to be comfortable installing software.";
 
 export function resultCopy(r: Pick<QuizResult, 'track' | 'recommend'>): ResultCopy {
   const early = r.track === 'foundations';

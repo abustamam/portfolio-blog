@@ -179,7 +179,19 @@
 }
 .cohort-prose td:empty::after { content: '\00a0'; }
 .cohort-prose ul.contains-task-list { list-style: none; padding-left: 0; }
-.cohort-prose .task-list-item input { margin: 0 10px 0 0; accent-color: var(--color-accent); }
+/* The box hangs in the margin so a second line of text lines up under the first. */
+.cohort-prose li.task-list-item { position: relative; padding-left: 1.9rem; }
+.cohort-prose .task-list-item input {
+  position: absolute; left: 0; top: .32em; width: 1.125rem; height: 1.125rem; margin: 0; accent-color: var(--color-accent);
+}
+.cohort-prose .task-list-item label { cursor: pointer; }
+/* Native boxes follow the OS scheme unless told otherwise; the site theme is a class. */
+.dark .ai-shell input[type='checkbox'], .dark .ai-shell input[type='radio'] { color-scheme: dark; }
+/* Comparison tables are wider than the reading column on a desktop, so cells keep whole words. */
+@media (min-width: 72rem) {
+  .guide-wide { --wide: min(62rem, calc(100vw - 6rem)); width: var(--wide); margin-inline: calc((100% - var(--wide)) / 2); }
+  .cohort-prose .guide-wide table { display: table; width: 100%; }
+}
 .cohort-prose hr { border: 0; border-top: 1px solid var(--color-line-soft); margin: 40px 0; }
 
 @media (max-width: 767px) {
