@@ -368,7 +368,10 @@ test.describe('share', () => {
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical).toContain(`/ai-guides/${id}/`);
     expect(copied[0]).toBe(`${title} — ${line} — ${canonical}`);
-    expect(copied[0]).not.toContain('?');
+    const copiedLink = copied[0].slice(copied[0].lastIndexOf(' — ') + 3);
+    expect(copiedLink).toBe(canonical);
+    expect(new URL(copiedLink).search).toBe('');
+    expect(copiedLink).not.toContain('?');
     expect(copied[0]).not.toContain('utm_source');
     expect(copied[0]).not.toContain('who=me');
     expect(copied[0].endsWith(`/ai-guides/${id}/`)).toBe(true);
