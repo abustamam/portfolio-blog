@@ -9,6 +9,8 @@ export const PATH = '/api/ai-quiz';
 export const INTAKE_PATH = `${PATH}/intake`;
 /** The cohort waitlist, where the sold-out payment link points. Same Caddy route. */
 export const WAITLIST_PATH = `${PATH}/waitlist`;
+/** Live deposit counts per track, for /ai-training/. Same Caddy route. */
+export const TRACKS_PATH = `${PATH}/tracks`;
 /** Stripe's webhook for the cohort payment link. Same Caddy route. */
 export const STRIPE_PATH = `${PATH}/stripe-webhook`;
 const MAX_BODY = 16 * 1024;
@@ -34,8 +36,13 @@ export interface Deps {
   notifyWaitlist?: (row: WaitlistRow) => Promise<void>;
   /** The webhook endpoint's signing secret (whsec_...). Without it, the Stripe path is a 404. */
   stripeWebhookSecret?: string;
-  /** Only payments through this payment link notify (plink_...). Unset = any paid checkout. */
-  stripePaymentLink?: string;
+  /**
+   * Which payments notify: one payment link id, or a map of payment link id →
+   * track name (the message then names the track). Unset = any paid checkout.
+   */
+  stripePaymentLink?: string | Record<string, string>;
+  /** Deposit counts per track. Without it, the tracks path is a 404. */
+  countTracks?: () => Promise<Record<string, number>>;
   /** Awaited: a failure returns 500 so Stripe retries the event. */
   notifyPayment?: (p: Payment) => Promise<void>;
 }
@@ -78,6 +85,17 @@ export function createHandler(deps: Deps) {
         return json(200, { ok: true, service: 'ai-quiz-intake' });
       } catch {
         return json(503, { ok: false, error: 'database unavailable' });
+      }
+    }
+
+    // Read-only and cached by countTracks, so it skips the form rate limiter.
+    if (url.pathname === TRACKS_PATH && deps.countTracks) {
+      if (req.method !== 'GET') return json(405, { ok: false, error: 'method not allowed' });
+      try {
+        return json(200, { ok: true, counts: await deps.countTracks() });
+      } catch (err) {
+        log('tracks count failed', { error: String(err) });
+        return json(503, { ok: false, error: 'counts unavailable' });
       }
     }
 

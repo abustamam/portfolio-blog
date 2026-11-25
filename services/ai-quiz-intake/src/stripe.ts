@@ -54,6 +54,8 @@ export interface Payment {
   /** Smallest currency unit, as Stripe sends it. */
   amount: number;
   currency: string;
+  /** Which track the payment link belongs to, when links are mapped to tracks. */
+  track?: string;
 }
 
 /** Events that mean money arrived. Cash App and similar can settle later, via the async event. */
@@ -61,16 +63,21 @@ const PAID_EVENTS = new Set(['checkout.session.completed', 'checkout.session.asy
 
 /**
  * The payment in a verified event, or null for anything else: other event
- * types, unpaid sessions, and (when `paymentLink` is set) other payment links.
+ * types, unpaid sessions, and payment links outside `links`. `links` is one
+ * payment link id, or a map of payment link id → track name (the payment then
+ * carries its track). Unset = any paid checkout.
  */
-export function paymentFromEvent(event: unknown, paymentLink?: string): Payment | null {
+export function paymentFromEvent(event: unknown, links?: string | Record<string, string>): Payment | null {
   const e = event as { type?: string; data?: { object?: Record<string, any> } };
   if (!e?.type || !PAID_EVENTS.has(e.type)) return null;
   const s = e.data?.object;
   if (!s || s.object !== 'checkout.session' || s.payment_status !== 'paid') return null;
-  if (paymentLink && s.payment_link !== paymentLink) return null;
+  if (typeof links === 'string' && s.payment_link !== links) return null;
+  if (links && typeof links === 'object' && !Object.hasOwn(links, s.payment_link)) return null;
   const name = s.collected_information?.individual_name ?? s.customer_details?.name ?? '(no name)';
-  return { name: String(name), amount: Number(s.amount_total ?? 0), currency: String(s.currency ?? 'usd') };
+  const p: Payment = { name: String(name), amount: Number(s.amount_total ?? 0), currency: String(s.currency ?? 'usd') };
+  if (links && typeof links === 'object') p.track = links[s.payment_link];
+  return p;
 }
 
 /** Plain text like the other notifications. The email and address stay in Stripe. */
@@ -78,5 +85,5 @@ export function formatPaymentNotification(p: Payment): string {
   const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: p.currency.toUpperCase() }).format(
     p.amount / 100,
   );
-  return [`New cohort payment: ${p.name}`, `Paid: ${money}`].join('\n');
+  return [`New cohort payment: ${p.name}`, `Paid: ${money}`, ...(p.track ? [`Track: ${p.track}`] : [])].join('\n');
 }

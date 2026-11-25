@@ -300,6 +300,10 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         short session and it'll save you trouble.
       </p>
 
+      <p class="font-serif text-lg m-0 mb-6">
+        <a id="result-reserve" href="/ai-training/#tracks" class="text-accent">See the tracks and reserve your seat →</a>
+      </p>
+
       <p id="result-status" class="quiz-status" role="status"></p>
       <button type="button" id="result-retry" class="quiz-btn mb-6" hidden>Try sending again</button>
 
@@ -432,6 +436,9 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         return li;
       }),
     );
+    // Quiz track -> the training page's track. Builders could fit Connect or Build, so they see both.
+    const anchor = result.track === 'builder' ? 'tracks' : 'everyday';
+    (document.getElementById('result-reserve') as HTMLAnchorElement).href = `/ai-training/#${anchor}`;
     document.getElementById('result-privacy')!.hidden = !(result.privacyGap && result.track !== 'foundations');
 
     form.hidden = true;

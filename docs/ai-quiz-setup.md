@@ -103,6 +103,30 @@ id), and recreate the container. Use "Send test event" in the dashboard to check
 the test event's session is not on the cohort link, so expect a 200 and no
 message; a real payment sends one.
 
+## Training page deposit counts
+
+`/ai-training/` shows each track's deposits ("2 of 5 reserved to launch"). The
+page fetches `GET /api/ai-quiz/tracks`, which returns
+`{ ok: true, counts: { everyday, connect, build } }`. Same service, same Caddy
+route, no rate limit (the counts are cached for 60 seconds, and a Stripe failure
+serves the last good counts). If the endpoint fails, the page simply hides the
+counters.
+
+A track's count is its paid checkouts on its payment links, minus fully refunded
+ones (`src/tracks.ts`). Two env vars turn it on:
+
+- `STRIPE_TRACKS`: tracks and their payment link ids, e.g.
+  `everyday=plink_full,plink_deposit;connect=plink_c;build=plink_b`. Everyday
+  AI lists both the original $79 link and its $25 deposit link, so seats paid in
+  full count too. Setting it also widens the payment webhook to every listed
+  link (instead of `STRIPE_PAYMENT_LINK`), and the Telegram message names the
+  track.
+- `STRIPE_API_KEY`: a **restricted** key (Developers → API keys → Create
+  restricted key) with **Read** on Checkout Sessions, PaymentIntents and
+  Charges, and nothing else. Without it, the tracks path is a 404.
+
+The startup log line `notifications` shows `tracks` and `counts`.
+
 ## Server setup (one time)
 
 All of this is on the Hetzner box, in `/srv`.
@@ -191,6 +215,9 @@ SQL
       # Optional: payment alerts from the Stripe webhook. Unset = the path is a 404.
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       STRIPE_PAYMENT_LINK: ${STRIPE_PAYMENT_LINK}
+      # Optional: deposit counts for /ai-training/ (see "Training page deposit counts").
+      STRIPE_TRACKS: ${STRIPE_TRACKS}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy

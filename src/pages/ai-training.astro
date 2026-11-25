@@ -1,0 +1,174 @@
+---
+// Public sign-up page for every track. Each track is reserved with a $25 deposit
+// and launches at TRAINING.launchAt deposits; the first to launch takes the next
+// slot. Counters come from TRACKS_ENDPOINT and stay hidden if it doesn't answer.
+import CohortPage from '../layouts/CohortPage.astro';
+import { COHORT, COHORT_LINKS, INCLUDED, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../consts/aiCohort';
+---
+
+<CohortPage
+  listed
+  title="Get AI doing real work for you"
+  kicker="hands-on ai training · online · small groups"
+  lead="Small, live cohorts where you bring a task from your own week and leave with AI doing it, checked and repeatable. Taught by a software engineer who uses AI every day."
+  description="Hands-on AI training in small online cohorts: Everyday AI, Connect (AI in your email and calendar) and Build (coding with AI and agents). Reserve with a refundable $25 deposit."
+>
+  <p class="training-actions">
+    <a class="cohort-cta" href="#tracks">See the tracks</a>
+    <a class="training-quiz" href="/ai-quiz/">Not sure? Take the 4-minute quiz →</a>
+  </p>
+
+  <h2 id="included">Every track includes</h2>
+  <ul class="training-included">
+    {INCLUDED.map((item) => <li>{item}</li>)}
+  </ul>
+
+  <h2 id="tracks">Pick your track</h2>
+  <div class="training-tracks" id="training-tracks" data-endpoint={TRACKS_ENDPOINT} data-launch-at={TRAINING.launchAt} data-max={TRAINING.maxSeats}>
+    {TRACKS.map((t) => (
+      <section class="training-track" id={t.id}>
+        <div class="font-mono track-kicker">{t.price} · 4 sessions</div>
+        <h3 class="track-name">{t.name}</h3>
+        <p class="track-tagline">{t.tagline}</p>
+        <p class="font-mono track-count" data-track={t.id} hidden></p>
+
+        <h4>It's for you if</h4>
+        <ul>{t.forYou.map((f) => <li>{f}</li>)}</ul>
+
+        <h4>What you'll learn</h4>
+        <ol class="track-sessions">
+          {t.sessions.map((s, i) => (
+            <li>
+              <span class="font-mono track-n">Session {i + 1}</span>
+              <strong>{s.title}.</strong> {s.outcome}
+            </li>
+          ))}
+        </ol>
+
+        <p><strong>You leave with:</strong> {t.end}</p>
+        <p><strong>You'll need:</strong> {t.needs}</p>
+        <p>
+          <a class="cohort-cta" href={t.depositUrl} data-track={t.id}>Reserve {t.name} · {TRAINING.deposit}</a>
+        </p>
+        <p class="track-small">
+          {TRAINING.deposit} now, counted toward the {t.price} price. Fully refundable.
+        </p>
+      </section>
+    ))}
+  </div>
+
+  <h2 id="how">How a track launches</h2>
+  <ol>
+    <li>Reserve your track with a <strong>{TRAINING.deposit} deposit</strong>. It counts toward the price.</li>
+    <li>A track launches once <strong>{TRAINING.launchAt} people</strong> reserve it. Each is capped at {TRAINING.maxSeats}.</li>
+    <li>
+      The first track to launch takes the next open slot. Tracks run back to back, never at the same time:
+      <ul class="training-slots">
+        {TRAINING.slots.map((s, i) => (
+          <li><strong>Slot {i + 1}: {s.when}</strong>, {s.note}.</li>
+        ))}
+      </ul>
+    </li>
+    <li>When your track launches, I message you with the dates and a link for the rest of the price.</li>
+  </ol>
+  <blockquote>
+    <p>
+      <strong>No risk to reserve.</strong> If your track doesn't launch, or the dates don't work for you, your
+      {TRAINING.deposit} comes back in full. Just message me.
+    </p>
+  </blockquote>
+
+  <h2 id="who-teaches">Who teaches it</h2>
+  <p>
+    I'm Rasheed. I build software for a living and run AI tools every day, so I know where they help and where they
+    confidently make things up. Every session is built around your work, not a textbook example.
+    <a href="/writing/hands-on-ai-cohort/">Why I'm running this.</a>
+  </p>
+
+  <h2 id="faq">Questions</h2>
+  <h3>Is it in person?</h3>
+  <p>Online, on Google Meet, in the evening ({COHORT.time}). You need a laptop or desktop, not a phone.</p>
+  <h3>What if I miss a session?</h3>
+  <p>Watch the recording, then bring your questions to office hours. Recordings go only to your cohort.</p>
+  <h3>I'm job hunting. Is this for me?</h3>
+  <p>
+    Yes: take <a href="#everyday">Everyday AI</a>. Your job search becomes your weekly task: tailoring your résumé to a
+    posting, cover letters, tracking applications and interview practice.
+  </p>
+  <h3>What about privacy?</h3>
+  <p>
+    Every track starts with what never to paste into an AI tool. We work on files with private details removed, and I
+    never record the part where we work on your files.
+  </p>
+  <h3>How do I pay the rest?</h3>
+  <p>When your track launches, I send you a link for the balance. Nothing else is charged until then.</p>
+  <h3>Which track is right for me?</h3>
+  <p>
+    <a href="/ai-quiz/">Take the 4-minute quiz.</a> It looks at what you do with AI now, not how confident you feel
+    about it. Still unsure? Message me.
+  </p>
+
+  <p class="training-actions training-end">
+    <a class="cohort-cta" href="#tracks">Pick your track</a>
+  </p>
+</CohortPage>
+
+<script>
+  // Fills each "N of 5 reserved" line from the live counts. Any failure leaves them hidden.
+  const box = document.getElementById('training-tracks');
+  const endpoint = box?.dataset.endpoint;
+  const launchAt = Number(box?.dataset.launchAt ?? 5);
+  const max = Number(box?.dataset.max ?? 8);
+  if (box && endpoint) {
+    fetch(endpoint)
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((body: { counts?: Record<string, number> }) => {
+        for (const el of box.querySelectorAll<HTMLElement>('.track-count')) {
+          const n = body.counts?.[el.dataset.track ?? ''];
+          if (typeof n !== 'number') continue;
+          el.textContent =
+            n >= max
+              ? 'Full. Join the waitlist.'
+              : n >= launchAt
+                ? `Launching · ${n} of ${max} seats taken`
+                : `${n} of ${launchAt} reserved to launch`;
+          el.hidden = false;
+          el.style.setProperty('--fill', `${Math.min(100, (n / launchAt) * 100)}%`);
+        }
+      })
+      .catch(() => {});
+  }
+</script>
+
+<style>
+  .training-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 0 0 8px; }
+  .training-quiz { font-family: var(--font-mono); font-size: 14px; }
+  .training-end { margin-top: 36px; }
+  .training-included { columns: 2; column-gap: 32px; }
+  .training-included li { break-inside: avoid; }
+  .training-tracks { display: grid; gap: 20px; margin: 0 0 12px; }
+  .training-track {
+    border: 1px solid var(--color-line); border-radius: 6px; padding: 22px 22px 8px; background: var(--color-surface);
+  }
+  .track-kicker, .track-n { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); }
+  .track-name { font-size: 28px !important; margin: 4px 0 6px !important; }
+  .track-tagline { font-size: 19px; color: var(--color-mute); margin-bottom: 12px !important; }
+  .track-count {
+    font-size: 13px; margin: 0 0 16px !important; padding: 6px 10px; border-radius: 4px; color: var(--color-ink);
+    background: linear-gradient(to right, var(--color-line) var(--fill, 0%), transparent var(--fill, 0%));
+    border: 1px solid var(--color-line);
+  }
+  .training-track h4 {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--color-mute); margin: 18px 0 8px;
+  }
+  .track-sessions { list-style: none !important; padding: 0 !important; }
+  .track-sessions li { margin: 0 0 10px; font-size: 17px; }
+  .track-sessions .track-n { display: block; }
+  .track-small { font-size: 14px; color: var(--color-faint); margin-top: -10px !important; }
+  .training-slots { margin-top: 8px !important; }
+  @media (max-width: 640px) {
+    .training-included { columns: 1; }
+    .training-track { padding: 18px 16px 4px; }
+  }
+</style>
