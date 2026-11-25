@@ -15,8 +15,8 @@ const PLANNED = ['what-is-ai', 'first-ten-minutes', 'usage-limits', 'does-it-rem
 const words = (s: string) => s.trim().split(/\s+/).length;
 
 test.describe('glossary data', () => {
-  test('there are 18 entries and six are marked "first"', () => {
-    expect(GLOSSARY).toHaveLength(20);
+  test('there are 21 entries and six are marked "first"', () => {
+    expect(GLOSSARY).toHaveLength(21);
     expect(GLOSSARY.filter((t) => t.first).map((t) => t.id)).toEqual(['ai', 'chat-app', 'prompt', 'model', 'conversation', 'usage-limit']);
   });
 
