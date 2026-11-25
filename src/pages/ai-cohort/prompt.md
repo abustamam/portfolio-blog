@@ -42,9 +42,9 @@ Check:     Before you answer, ________________________________.
 > Every week I do **________** using **________**, it takes **________**, and done means **________**.
 
 **By track**
-- **Foundations:** fill in the template as it is.
-- **Applied:** in *Input*, describe the real shape of your file: the column names, the document type, how many rows.
-- **Builder:** under the template, list the steps an automation would take: where the input comes from, what the AI does, who checks it, where the result goes. You'll use that list in session 3.
+- **Everyday AI:** fill in the template as it is. If your task uses a file, describe its real shape in *Input*: the column names, the document type, how many rows.
+- **Connect:** pick a task that starts in your email or calendar. In *Input*, say which threads or meeting requests it starts from. In *Check*, say what you approve before anything is sent.
+- **Build:** under the template, list the steps an agent would take: where the input comes from, what the AI does, where it stops for your approval, and where the result goes. You'll use that list in session 3.
 
 ## Homework
 

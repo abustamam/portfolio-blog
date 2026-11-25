@@ -13,6 +13,18 @@ test.describe('cohort pages', () => {
     }
   });
 
+  test('pages use the current track names, not Foundations / Applied / Builder', async ({ page }) => {
+    for (const p of PAGES) {
+      await page.goto(p);
+      const text = await page.locator('body').innerText();
+      expect(text, p).not.toMatch(/\b(Foundations|Applied|Builder)\b/);
+    }
+    await page.goto('/ai-cohort/prompt/');
+    for (const name of ['Everyday AI', 'Connect', 'Build']) {
+      await expect(page.locator('.cohort-prose strong', { hasText: new RegExp(`^${name}:$`) })).toHaveCount(1);
+    }
+  });
+
   test('pages carry no Meet link, email address or phone number', async ({ page }) => {
     for (const p of PAGES) {
       await page.goto(p);

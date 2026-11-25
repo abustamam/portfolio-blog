@@ -7,7 +7,7 @@ lead: One page. Write it so that you, three months from now, or someone covering
 
 **Fill it in your own copy:** [make a copy in Google Docs](https://docs.google.com/document/d/15kLOVYA2NUcZx9cygiG1EEe0xXvSbxcXV-Xp257YW1c/copy), or copy the sections below into any document. You'll need the access you got with the cohort's Drive folder.
 
-**Name:** ________  **Date:** ________  **Track:** Foundations / Applied / Builder
+**Name:** ________  **Date:** ________  **Track:** Everyday AI / Connect / Build
 
 ## 1. The task
 Every week I ________ using ________. It used to take ________. **Done means:** ________.
