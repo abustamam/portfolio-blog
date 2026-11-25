@@ -45,9 +45,9 @@ export interface StartAnswers {
 export const isField = (x: unknown): x is Field => FIELDS.some((f) => f.value === x);
 export const isExperience = (x: unknown): x is Experience => EXPERIENCE.some((e) => e.value === x);
 
-// Guide ids as planned in #79: never-paste, prompt, when-ai-is-wrong, which-tool, job-search, examples.
+// Guide ids as planned in #79 (what-is-ai is the first of the "start from zero" set): never-paste, prompt, when-ai-is-wrong, which-tool, job-search, examples.
 const BY_EXPERIENCE: Record<Experience, string[]> = {
-  never: ['never-paste', 'prompt', 'which-tool'],
+  never: ['what-is-ai', 'never-paste', 'prompt', 'which-tool'],
   some: ['prompt', 'when-ai-is-wrong', 'never-paste'],
   often: ['when-ai-is-wrong', 'never-paste', 'examples'],
 };
@@ -60,6 +60,33 @@ const BY_FIELD: Record<Field, string[]> = {
   'volunteer-coordinator': ['examples', 'prompt'],
   other: [],
 };
+
+export type GuideGroup = 'start' | 'guides' | 'reference';
+
+export interface GroupedGuideRef extends GuideRef {
+  group: GuideGroup;
+}
+
+/** The three hub lists, each in step order (ties by id). */
+export function groupGuides<T extends GroupedGuideRef>(guides: readonly T[]): Record<GuideGroup, T[]> {
+  const sorted = byStep(guides);
+  return {
+    start: sorted.filter((g) => g.group === 'start'),
+    guides: sorted.filter((g) => g.group === 'guides'),
+    reference: sorted.filter((g) => g.group === 'reference'),
+  };
+}
+
+/**
+ * The guide offered as "next" after `id`: the following guide in step order,
+ * skipping `reference` guides (you look those up; you do not read on into them).
+ */
+export function nextGuide<T extends GroupedGuideRef>(guides: readonly T[], id: string): T | undefined {
+  const sorted = byStep(guides);
+  const at = sorted.findIndex((g) => g.id === id);
+  if (at < 0) return undefined;
+  return sorted.slice(at + 1).find((g) => g.group !== 'reference');
+}
 
 /** Guides in hub order: by step, ties by id. */
 export function byStep<T extends GuideRef>(guides: readonly T[]): T[] {

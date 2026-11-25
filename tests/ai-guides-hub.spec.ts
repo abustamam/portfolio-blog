@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
 import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
-import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUrl, byStep } from '../src/utils/startHere';
+import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUrl, byStep, groupGuides } from '../src/utils/startHere';
 
 // The hub as the front door (#79). Run after `bun run build`: the page tests
 // read dist/ through the preview server.
@@ -22,6 +22,12 @@ const REAL = readdirSync(SRC)
     };
   })
   .filter((g) => !g.draft);
+
+const REAL_GROUPS = readdirSync(SRC)
+  .filter((f) => f.endsWith('.mdx'))
+  .map((f) => readFileSync(SRC + f, 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '')
+  .filter((fm) => !/^draft:\s*true\s*$/m.test(fm))
+  .map((fm) => fm.match(/^group:\s*['"]?(\w+)/m)?.[1] ?? 'guides');
 
 const ALL_IDS = ['never-paste', 'prompt', 'when-ai-is-wrong', 'which-tool', 'job-search', 'examples'];
 const FULL = ALL_IDS.map((id, i) => ({ id, step: i + 1 }));
@@ -59,6 +65,30 @@ test.describe('start here: pure ordering', () => {
     // the job-search guide is not published yet: fall back to the next preference, then to step order
     expect(recommend({ field: 'job-seeker', experience: 'some' }, ONLY_FIRST)!.id).toBe('never-paste');
     expect(recommend({ experience: 'never' }, NO_FIRST)!.id).toBe('prompt');
+  });
+
+  test('never resolves to what-is-ai when it is published, and to never-paste when it is not', () => {
+    const withStart = [{ id: 'what-is-ai', step: 0.1 }, ...FULL];
+    expect(recommend({ experience: 'never' }, withStart)!.id).toBe('what-is-ai');
+    expect(recommend({ field: 'job-seeker', experience: 'never' }, withStart)!.id).toBe('what-is-ai');
+    expect(recommend({ experience: 'never' }, FULL)!.id).toBe('never-paste');
+    expect(recommend({ experience: 'some' }, withStart)!.id).toBe('prompt'); // only "never" is sent to the start set
+  });
+
+  test('the hub groups guides: start, guides, reference, each in step order', () => {
+    const list = [
+      { id: 'r2', step: 8, group: 'reference' as const },
+      { id: 'g2', step: 2, group: 'guides' as const },
+      { id: 's2', step: 0.5, group: 'start' as const },
+      { id: 'g1', step: 1, group: 'guides' as const },
+      { id: 's1', step: 0.1, group: 'start' as const },
+      { id: 'r1', step: 3, group: 'reference' as const },
+    ];
+    const g = groupGuides(list);
+    expect(g.start.map((x) => x.id)).toEqual(['s1', 's2']);
+    expect(g.guides.map((x) => x.id)).toEqual(['g1', 'g2']);
+    expect(g.reference.map((x) => x.id)).toEqual(['r1', 'r2']);
+    expect(groupGuides([{ id: 'a', step: 1, group: 'guides' as const }]).start).toEqual([]);
   });
 
   test('the field values are the vocabulary the examples page (#78) saves', () => {
@@ -112,6 +142,14 @@ test.describe('links in', () => {
 });
 
 test.describe('hub in the page', () => {
+  test('with no start or reference guide published, the hub has only the guides list', async ({ page }) => {
+    test.skip(REAL_GROUPS.some((g) => g !== 'guides'), 'a start or reference guide is published');
+    await page.goto('/ai-guides/');
+    await expect(page.locator('ol.hub-list#guides[data-guide-list]')).toHaveCount(1);
+    await expect(page.locator('#start-from-zero, #look-something-up')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Start from zero|Look something up/ })).toHaveCount(0);
+  });
+
   test('answering the two questions moves the recommended guide to the top, and the answer survives a reload', async ({ page }) => {
     await page.goto('/ai-guides/');
     const cards = page.locator('[data-guide-list] > li');

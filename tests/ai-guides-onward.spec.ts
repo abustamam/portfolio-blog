@@ -2,6 +2,29 @@
 // with a next step, the Scrubber does not call its output safe, and the
 // model table stacks on a phone.
 import { test, expect } from '@playwright/test';
+import { nextGuide } from '../src/utils/startHere';
+
+test.describe('"next guide" in step order, never a reference guide (pure)', () => {
+  const L = [
+    { id: 'what-is-ai', step: 0.1, group: 'start' as const },
+    { id: 'never-paste', step: 1, group: 'guides' as const },
+    { id: 'glossary', step: 1.5, group: 'reference' as const },
+    { id: 'prompt', step: 2, group: 'guides' as const },
+    { id: 'cheat-sheet', step: 9, group: 'reference' as const },
+  ];
+  test('it walks 0.1 then 1 then 2 and skips the reference guides between', () => {
+    expect(nextGuide(L, 'what-is-ai')!.id).toBe('never-paste');
+    expect(nextGuide(L, 'never-paste')!.id).toBe('prompt');
+  });
+  test('a reference guide is never offered, and the last real guide has no next', () => {
+    expect(L.map((g) => nextGuide(L, g.id)?.id).filter((id) => id === 'glossary' || id === 'cheat-sheet')).toEqual([]);
+    expect(nextGuide(L, 'prompt')).toBeUndefined();
+    expect(nextGuide(L, 'missing')).toBeUndefined();
+  });
+  test('input order does not matter', () => {
+    expect(nextGuide([...L].reverse(), 'never-paste')!.id).toBe('prompt');
+  });
+});
 
 test('the Scrubber says what it does not catch, and does not call the result safe', async ({ page }) => {
   await page.goto('/ai-guides/never-paste/');
