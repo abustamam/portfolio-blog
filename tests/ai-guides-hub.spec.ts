@@ -192,10 +192,10 @@ test.describe('hub in the page', () => {
     expect(await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).v, GUIDE_STORE_KEY)).toBe(1);
   });
 
-  test('the hub still lists and links every published guide with JavaScript off', async ({ browser }) => {
-    const ctx = await browser.newContext({ javaScriptEnabled: false });
+  test('the hub still lists and links every published guide with JavaScript off', async ({ browser, baseURL }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled: false, baseURL });
     const page = await ctx.newPage();
-    await page.goto('http://localhost:4321/ai-guides/');
+    await page.goto('/ai-guides/');
     const hrefs = await page.locator('[data-guide-list] a[data-guide-card]').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
     expect(hrefs).toEqual(byStep(REAL).map((g) => `/ai-guides/${g.id}/`));
     await expect(page.locator('[data-start-here]')).toBeHidden(); // needs JS, so it stays out of the way
