@@ -1,0 +1,62 @@
+---
+// The glossary page body: the six first, then every entry A to Z. All wording
+// comes from src/consts/guides/glossary.ts; this file only lays it out.
+// A guide link renders only when that guide is published (decided at build time).
+import { GLOSSARY } from '../../consts/guides/glossary';
+import { getGuides, guidePath } from '../../pages/ai-guides/_guides';
+
+const published = new Map((await getGuides()).map((g) => [g.id, g.data.title]));
+
+const byTerm = [...GLOSSARY].sort((a, b) => a.term.toLowerCase().localeCompare(b.term.toLowerCase()));
+const first = GLOSSARY.filter((t) => t.first);
+
+// An entry can list the British and US spelling of one word (personalisation,
+// personalization). Showing both reads oddly, so keep one per word: fold "iz"
+// to "is" to spot the pair and keep the "z" (US) spelling.
+const spellingKey = (s: string) => s.toLowerCase().replace(/iz/g, 'is');
+function shownSynonyms(also: string[] = []) {
+  return also.filter((s) => !also.some((o) => o !== s && spellingKey(o) === spellingKey(s) && o.includes('z') && !s.includes('z')));
+}
+---
+
+<nav class="gl-first" aria-labelledby="gl-first-title" data-gl-first>
+  <h2 id="gl-first-title" class="gl-first__title">The six you need first</h2>
+  <ol>
+    {first.map((t) => <li><a href={`#${t.id}`}>{t.term}</a></li>)}
+  </ol>
+</nav>
+
+<dl class="gl-list" data-gl-list>
+  {byTerm.map((t) => {
+    const also = shownSynonyms(t.also);
+    const title = t.guide ? published.get(t.guide) : undefined;
+    return (
+      <div class="gl-entry" id={t.id} data-gl-entry={t.id}>
+        <dt>{t.term}</dt>
+        <dd>
+          {also.length > 0 && <span class="gl-also" data-gl-also>also called {also.join(', ')}</span>}
+          <p>{t.short}</p>
+          <p class="gl-why">{t.why}</p>
+          {title && <a class="gl-guide" data-gl-guide={t.guide} href={guidePath(t.guide!)}>Read more: {title}</a>}
+        </dd>
+      </div>
+    );
+  })}
+</dl>
+
+<style>
+  .gl-first { margin: 0 0 2.5rem; padding: 1.25rem 1.25rem 1.5rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); }
+  .gl-first__title { font-family: var(--font-mono); font-size: var(--text-12); font-weight: 500; letter-spacing: var(--tracking-loose); text-transform: uppercase; color: var(--color-faint); margin: 0 0 .75rem; }
+  .gl-first ol { margin: 0; padding-left: 1.5rem; display: grid; gap: .25rem 2rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+  .gl-first li { margin: 0; padding: 0; }
+  .gl-first a { display: inline-block; padding: .25rem 0; }
+  .gl-list { margin: 0; padding: 0; }
+  .gl-entry { margin: 0; padding: 1.5rem 0; border-top: 1px solid var(--color-line); scroll-margin-top: 1.5rem; }
+  .gl-entry:target dt { color: var(--color-accent-ink); }
+  .gl-entry dt { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 500; letter-spacing: -.015em; line-height: 1.15; color: var(--color-ink); margin: 0 0 .5rem; }
+  .gl-entry dd { margin: 0; }
+  .gl-entry p { margin: 0 0 .5rem; }
+  .gl-also { display: block; font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-loose); color: var(--color-faint); margin: 0 0 .5rem; }
+  .gl-why { color: var(--color-mute); }
+  .gl-guide { display: inline-block; font-family: var(--font-mono); font-size: 14px; padding: .25rem 0; }
+</style>
