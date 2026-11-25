@@ -48,7 +48,7 @@ export const AI_CARDS: AiCard[] = [
     id: 'waitlist',
     path: '/ai-cohort/waitlist/',
     eyebrow: 'AI training · waitlist',
-    title: 'This cohort is full',
+    title: 'This track is full',
     subtitle: 'Join the waitlist for the next one',
     motif: 'seats',
   },
