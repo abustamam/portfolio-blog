@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { TRACKS } from '../src/utils/aiQuiz';
+import { TRACKS, scoreQuiz, skillScores } from '../src/utils/aiQuiz';
 
 type Path = {
   frequency: string;
@@ -37,6 +37,9 @@ const builder: Path = {
 const pick = (page: Page, name: string, value: string) =>
   page.locator(`input[name="${name}"][value="${value}"]`).check();
 const next = (page: Page) => page.locator('#quiz-next').click();
+
+const skillRows = (page: Page) =>
+  page.locator('#result-skills li').evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset.points));
 
 async function complete(page: Page, p: Path) {
   await pick(page, 'frequency', p.frequency);
@@ -87,6 +90,9 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#everyday');
     await expect(page.locator('#result-build')).toContainText(beginner.weeklyTask);
     await expect(page.locator('#result-status')).toContainText("aren't being collected yet");
+    await expect(page.locator('.track-glyph[data-glyph="everyday"]')).toBeVisible();
+    await expect(page.locator('.track-glyph[data-glyph="build"]')).toBeHidden();
+    expect(await skillRows(page)).toEqual(['0', '0', '0', '0', '0']);
   });
 
   test('advanced user lands on Connect or Build and the response is POSTed', async ({ page }) => {
@@ -106,6 +112,10 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#result-track')).toHaveText('Connect or Build');
     await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#tracks');
     await expect(page.locator('#result-status')).toContainText('answers were sent');
+    await expect(page.locator('.track-glyph[data-glyph="build"]')).toBeVisible();
+    await expect(page.locator('.track-glyph[data-glyph="everyday"]')).toBeHidden();
+    expect(await skillRows(page)).toEqual(['3', '3', '3', '3', '3']);
+    await expect(page.locator('#result-skills li').first().locator('.skill-pip[data-on]')).toHaveCount(3);
     expect(body).toMatchObject({
       track: 'builder',
       weeklyTask: builder.weeklyTask,
@@ -114,6 +124,32 @@ test.describe('AI quiz', () => {
       payer: 'organization',
       followUp: ['team-workshop', 'done-for-you'],
     });
+  });
+
+  test('the seal beside the progress bar draws further with each question', async ({ page }) => {
+    await page.goto('/ai-quiz');
+    const drawn = () =>
+      page.locator('#quiz-seal').evaluate((el) => Number(getComputedStyle(el).getPropertyValue('--p')));
+    expect(await drawn()).toBeCloseTo(1 / 9, 5);
+    await pick(page, 'frequency', 'daily');
+    await next(page);
+    expect(await drawn()).toBeCloseTo(2 / 9, 5);
+    await page.locator('#quiz-back').click();
+    expect(await drawn()).toBeCloseTo(1 / 9, 5);
+    // The first stroke is partly drawn and the last one not at all. Chromium
+    // reports the computed offset as "calc(0.333333px)".
+    const offsets = await page
+      .locator('#quiz-seal .ai-rosette[data-progress] > *')
+      .evaluateAll((els) => els.map((el) => Number(getComputedStyle(el).strokeDashoffset.match(/[\d.]+/)?.[0])));
+    expect(offsets).toHaveLength(6);
+    expect(offsets[0]).toBeCloseTo(1 - 6 / 9, 2);
+    expect(offsets[5]).toBe(1);
+  });
+
+  test('the per-skill points add up to the score', () => {
+    const mixed = { frequency: 'weekly', wrongAnswer: 'checked-source', prompt: 'medium', files: 'never', connected: 'agents' };
+    expect(skillScores(mixed).map((s) => s.points)).toEqual([2, 2, 1, 0, 3]);
+    expect(scoreQuiz(mixed).score).toBe(8);
   });
 
   test('is online only: no Roseville or in-person option, no format question', async ({ page }) => {
