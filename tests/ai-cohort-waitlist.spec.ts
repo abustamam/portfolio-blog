@@ -12,9 +12,12 @@ test.describe('cohort waitlist', () => {
     expect(html).toContain('<meta name="robots" content="noindex">');
   });
 
-  test('says the cohort is full and shows no email address or phone number', async ({ page }) => {
+  test('says the track is full, points to the other tracks, and shows no email address or phone number', async ({ page }) => {
     await page.goto(PATH);
-    await expect(page.locator('h1')).toHaveText('This cohort is full');
+    // A full track sends people here while the other tracks may still have seats.
+    await expect(page.locator('h1')).toHaveText('This track is full');
+    await expect(page.locator('#waitlist-intro')).not.toContainText('All 8 seats are taken');
+    await expect(page.locator('#waitlist-intro a')).toHaveAttribute('href', '/ai-training/#tracks');
     const text = await page.locator('body').innerText();
     expect(text).not.toMatch(/[\w.+-]+@[\w-]+\.\w+/);
     expect(text).not.toMatch(/\+?\d[\d\s().-]{7,}\d/);

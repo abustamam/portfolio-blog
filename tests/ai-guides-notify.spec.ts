@@ -30,7 +30,12 @@ test.describe('guides: tell me when the next cohort opens', () => {
       await expect(form(page)).toHaveCount(1);
       await expect(form(page)).toHaveAttribute('data-source', source);
       await expect(form(page)).toHaveAttribute('data-endpoint', '/api/ai-quiz/waitlist');
-      await expect(form(page).locator('[data-notify-promise]')).toContainText('one message when a track opens');
+      // Reserving is open now, so the form must not read as if nothing is on sale yet.
+      await expect(form(page).locator('.notify__title')).toHaveText('Not ready to reserve?');
+      await expect(form(page).locator('[data-notify-open]')).toContainText('Reserving is open now');
+      await expect(form(page).locator('[data-notify-open] a')).toHaveAttribute('href', '/ai-training/#tracks');
+      await expect(form(page)).not.toContainText('next cohort opens');
+      await expect(form(page).locator('[data-notify-promise]')).toContainText('one message when the next cohort has dates');
       // One field: no name, no track.
       await expect(form(page).locator('input:not([name="website"]), textarea, select')).toHaveCount(1);
     });
@@ -58,7 +63,7 @@ test.describe('guides: tell me when the next cohort opens', () => {
     await form(page).locator('input[name="contact"]').fill('  reader@example.com ');
     await form(page).getByRole('button', { name: 'Tell me' }).click();
     await expect(form(page).locator('[data-notify-status]')).toHaveText(
-      "Thank you. I'll message you once when the next cohort opens.",
+      "Thank you. I'll message you once when the next cohort has dates.",
     );
     await expect(form(page).locator('input[name="contact"]')).toBeHidden();
     expect(body).toEqual({ contact: 'reader@example.com', source: 'guide:prompt', website: '' });

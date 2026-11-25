@@ -1,10 +1,12 @@
 ---
-// "Tell me when the next cohort opens": one optional field (email or WhatsApp
-// number) on the guides hub and under every guide (#108). It posts to the
-// cohort waitlist endpoint with a `source` naming the page, so the guides stay
-// readable without it and "Free · no sign-up" stays true.
+// "Not ready to reserve?": one optional field (email or WhatsApp number) on
+// the guides hub and under every guide (#108). It posts to the cohort waitlist
+// endpoint with a `source` naming the page, so the guides stay readable
+// without it and "Free · no sign-up" stays true. Reserving is open while a
+// slot is listed, so the form says so first: the old "tell me when the next
+// cohort opens" read as if nothing was on sale yet.
 import { AI_QUIZ_ENDPOINT } from '../../consts/aiQuiz';
-import { CONTACT_EMAIL } from '../../consts/aiCohort';
+import { CONTACT_EMAIL, TRAINING } from '../../consts/aiCohort';
 import { WAITLIST_LIMITS } from '../../../services/ai-quiz-intake/src/waitlist';
 
 interface Props {
@@ -16,12 +18,19 @@ const { source } = Astro.props;
 // Same service and Caddy route as the quiz: POST /api/ai-quiz/waitlist. Empty in dev builds.
 const endpoint = AI_QUIZ_ENDPOINT ? `${AI_QUIZ_ENDPOINT.replace(/\/$/, '')}/waitlist` : '';
 const id = `notify-${source.replace(/[^a-z0-9-]/g, '-')}`;
+// The same slot the training page lists first, so the two cannot disagree.
+const slot = TRAINING.slots[0];
 ---
 
 <form class="notify" data-notify-form data-endpoint={endpoint} data-source={source} novalidate aria-labelledby={`${id}-title`}>
-  <h2 id={`${id}-title`} class="notify__title">Tell me when the next cohort opens</h2>
+  <h2 id={`${id}-title`} class="notify__title">Not ready to reserve?</h2>
+  <p class="notify__line" data-notify-open>
+    Reserving is open now. The first slot is {slot.when}, {slot.note}.
+    <a class="notify__link" href="/ai-training/#tracks">See the tracks →</a>
+  </p>
   <p class="notify__line" data-notify-promise>
-    Optional. I'll send you one message when a track opens, and nothing else.
+    Optional. Leave your email or WhatsApp number and I'll send you one message when the next cohort has dates, and
+    nothing else.
   </p>
   <noscript>
     <p class="quiz-status" data-state="warn">
@@ -83,7 +92,7 @@ const id = `notify-${source.replace(/[^a-z0-9-]/g, '-')}`;
         const body = await res.json().catch(() => null);
         if (!res.ok || !body?.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
         fields.hidden = true;
-        say("Thank you. I'll message you once when the next cohort opens.", 'ok');
+        say("Thank you. I'll message you once when the next cohort has dates.", 'ok');
       } catch (err) {
         console.error('notify sign-up failed', err);
         say("That didn't send. Check your connection and try again.", 'error');
@@ -99,6 +108,7 @@ const id = `notify-${source.replace(/[^a-z0-9-]/g, '-')}`;
   .notify { display: grid; gap: .6rem; margin: 0; min-width: 0; }
   .notify__title { font-family: var(--font-serif); font-weight: 500; font-size: 1.25rem; line-height: 1.25; margin: 0; }
   .notify__line { font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.5; color: var(--color-mute); margin: 0; }
+  .notify__link { color: var(--color-accent); text-underline-offset: 3px; white-space: nowrap; }
   .notify__row { display: flex; flex-wrap: wrap; gap: .6rem; min-width: 0; }
   .notify__row[hidden] { display: none; }
   .notify__input { flex: 1 1 14rem; min-width: 0; width: auto; }

@@ -2,7 +2,7 @@
 title: "I'm Running a Small, Hands-On AI Cohort"
 description: "Bring one real task, leave with AI handling it and a way to check its work. A small online AI cohort, up to 8 people per track. Take the quiz to find your track."
 pubDate: '2026-11-22'
-updatedDate: '2026-11-24'
+updatedDate: '2026-11-25'
 dek: "Not a course about AI. A few sessions where you point AI at your actual work and leave with something that runs."
 tag: "AI"
 audience: "general"
@@ -16,6 +16,8 @@ Not "explain what a large language model is." They've read those articles. They 
 So I'm running a small, hands-on AI cohort. The [quiz](/ai-quiz) tells me who's coming and what they need, and points you to the track that fits.
 
 **[Take the quiz →](/ai-quiz)** It's nine questions and takes about four minutes.
+
+Already know which track you want? **[Reserve a seat →](/ai-training/)** Reserving is open now: a $25 deposit, fully refundable, holds your place, and the first slot starts Monday, January 11, 2027.
 
 ---
 
@@ -61,7 +63,7 @@ Everyday AI is $79, Connect is $99 and Build is $149. You hold a seat with a $25
 
 ## Take the quiz
 
-It takes about four minutes, and you get a result at the end: your track, what it covers, and what you'd build, based on the task you tell me you want back. Your name and contact details are optional. Leave them if you want me to tell you when it opens.
+It takes about four minutes, and you get a result at the end: your track, what it covers, and what you'd build, based on the task you tell me you want back. The quiz doesn't ask for your name or contact details. On the result screen you can reserve a seat, or leave an email or WhatsApp number if you'd rather hear from me later.
 
 Not ready for a quiz? The [free guides](/ai-guides/) cover the same habits in a few minutes each, starting with [what's safe to paste](/ai-guides/never-paste/) and [the five-part prompt](/ai-guides/prompt/).
 
