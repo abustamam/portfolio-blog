@@ -1,0 +1,138 @@
+---
+title: "\"You've reached your limit\""
+description: "Why an AI app stops answering and asks you to wait or pay. Free and paid plans, what uses your allowance faster, when it refills, and what to do meanwhile."
+lead: "Sooner or later an AI app tells you that you have reached your limit. Nothing is broken. Every account has an allowance, some things use it faster than others, and it refills by itself."
+group: start
+step: 0.3
+minutes: 6
+tool: Allowance meter
+ctaLine: "The hands-on training covers getting a real task done inside a free plan before deciding whether to pay."
+---
+import Term from '../../components/guides/Term.astro';
+import AllowanceMeter from '../../components/guides/AllowanceMeter.astro';
+import { USAGE_LIMITS, LIMIT_LABELS, LIMIT_ORDER, UNCONFIRMED, paidFact, oldestChecked } from '../../consts/guides/usageLimits';
+import { fmtLongDate } from '../../utils/date';
+
+{/* Vendor facts live in src/consts/guides/usageLimits.ts (and the paid prices in aiTools.ts), each with its source and checked date. Re-check every quarter. */}
+
+<p class="ai-label" data-last-checked={oldestChecked()}>Last checked <time datetime={oldestChecked()}>{fmtLongDate(new Date(oldestChecked()))}</time>. Limits change often; each fact links the vendor's own page.</p>
+
+## What the message means
+
+You are typing to a <Term>chat app</Term>, and it stops. It says you have reached your limit and offers to let you wait, or pay. Nothing has broken, and nobody has caught you doing something wrong.
+
+Every account gets an allowance. You used it up, for now. I'll call it an allowance, but you will see the same idea under other names: a **usage limit**, a **quota**, a **cap**. They all mean how much you can use the app before it asks you to wait or pay.
+
+Two more words come up on the way:
+
+- A **plan** is what your account includes. The **free plan** (also called the free tier) costs nothing and has the smaller allowance. A **paid plan** is a **subscription**: a monthly charge for a bigger one.
+- A **reset** is the moment the allowance refills. Some apps refill after a few hours, some after a week, and some do both.
+
+## Why there is a limit at all
+
+Every answer is written fresh, by a very large program running on computers the company pays for. A longer, harder request takes more of that computing time than a short one. A limit is how the company stops a free account from using a lot of it for nothing. I think of it like a prepaid card for a photocopier at the library: a few pages free, then wait or pay.
+
+Apps count your use in **tokens**. A token is a short word or a piece of a longer one, and it is the unit your allowance is measured in. You never need to count them. There is [a plain-words entry in the glossary](/ai-guides/glossary/#token) if you want one.
+
+## What uses it up faster
+
+Not every action costs the same. Four things use it up faster, and I find it helps to see them side by side. The first block below is the same job done three ways. The second lets you spend an allowance yourself.
+
+<AllowanceMeter />
+
+What the bars show:
+
+- **A long chat.** Each time you send a message, the app rereads the whole conversation before it answers. The longer the chat, the more it rereads, so the same question costs more at the end of a long chat than at the start of a new one. Gemini says it directly: "Start a new chat when you move to a new topic. This will help save usage because Gemini won't have to re-read a long conversation history" ([Google](https://support.google.com/gemini/answer/16275805?hl=en)).
+- **Big files and images.** When you <Term id="attach">attach</Term> a 40-page PDF, the app has to read all of it, and it rereads it with every question you ask about it.
+- **The large model.** A <Term>model</Term> is the part that writes the answers, and the large one is slower and uses more. I explain the sizes in [Which model to pick in the menu](/ai-guides/which-model/).
+- **A thinking setting.** The <Term id="thinking">thinking setting</Term> makes the model work a problem through before it answers. It is useful for hard problems and costs more of your allowance each time.
+
+For a quick question in a new chat, none of that matters much. In the meter above, that is the cheapest thing you can do.
+
+## When it comes back
+
+Most apps' limits refill by themselves. When depends on the app, and the table further down says what each one states. Gemini and Claude refill every five hours and add a weekly limit on top. ChatGPT shows you the time inside the app.
+
+Where an app's page doesn't say, I haven't guessed. Look for a message that names a time, as in "try again at 4:00 pm".
+
+## What to do when you are cut off
+
+In the order I would try:
+
+1. **Wait.** If the message names a time, close the tab and do something else until then.
+2. **Start a fresh chat.** If you were deep in a long one, a new chat costs less per message. Paste in the two or three lines it needs to know. [Does it remember me?](/ai-guides/does-it-remember/) explains what carries over and what doesn't.
+3. **Switch to the smaller model.** If you had the large model or the thinking setting on, turn it off for the easy parts.
+4. **Use a different app for the afternoon.** The four apps count separately. If you don't have a second one yet, [Which AI app should I use?](/ai-guides/which-tool/) will help you pick.
+
+## Free or paid?
+
+The free plan is enough for learning the habit. A paid plan gives you more allowance and usually the larger models, and some come with the app inside your email or documents. [Which AI app should I use?](/ai-guides/which-tool/#free-or-paid) has the full list of reasons to pay.
+
+My rule is to pay when you hit the limit most weeks and it is costing you time. It isn't a reason to pay if you hit it once while learning.
+
+Before you pay anything, check two other places:
+
+- **Work or school.** Your employer or school may already pay for an app, and it may be the better account to use. Ask before you start paying out of your own pocket.
+- **The free plan of another app.** If one app keeps cutting you off, the others may not.
+
+## The four apps side by side
+
+What each app says about its free plan, the refill and where to see your usage. The paid price comes from [the which-app table](/ai-guides/which-tool/#the-four-apps-side-by-side), so there is one copy of it. Every cell links the page it came from. Where the vendor's page did not say, the cell says so and links the page to check.
+
+<div class="limits-table">
+<table data-limits-table>
+  <thead>
+    <tr>
+      <th scope="col">App</th>
+      {LIMIT_ORDER.slice(0, 2).map((key) => <th scope="col">{LIMIT_LABELS[key]}</th>)}
+      <th scope="col">Paid personal plan</th>
+      <th scope="col">{LIMIT_LABELS.seeUsage}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {USAGE_LIMITS.map((app) => {
+      const cells = [
+        { key: 'freeLimit', label: LIMIT_LABELS.freeLimit, fact: app.facts.freeLimit },
+        { key: 'reset', label: LIMIT_LABELS.reset, fact: app.facts.reset },
+        { key: 'paid', label: 'Paid personal plan', fact: paidFact(app.id) },
+        { key: 'seeUsage', label: LIMIT_LABELS.seeUsage, fact: app.facts.seeUsage },
+      ];
+      return (
+        <tr data-app={app.id}>
+          <th scope="row">{app.name}</th>
+          {cells.map(({ key, label, fact }) => (
+            <td data-fact={key} data-label={label} data-confirmed={String(fact.confirmed)}>
+              {fact.confirmed ? <>{fact.text}{' '}<a href={fact.source} data-source rel="noopener">Source</a></> : <a href={fact.source} data-source rel="noopener">{UNCONFIRMED}</a>}
+            </td>
+          ))}
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+</div>
+
+<style>{`
+  .limits-table table { display: table; width: 100%; font-size: 15px; }
+  .limits-table td { overflow-wrap: anywhere; }
+  .limits-table tbody th { font-family: var(--font-serif); font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--color-ink); }
+  @media (max-width: 47.99rem) {
+    .limits-table table, .limits-table tbody, .limits-table tr, .limits-table th, .limits-table td { display: block; width: 100%; }
+    .limits-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .limits-table tr { margin: 0 0 1.5rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+    .limits-table th, .limits-table td { border: 0; border-top: 1px solid var(--color-line-soft); }
+    .limits-table tbody th { border-top: 0; }
+    .limits-table td::before {
+      content: attr(data-label); display: block; margin-bottom: .25rem;
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute);
+    }
+  }
+`}</style>
+
+## What this page cannot tell you
+
+How big your allowance is. None of these apps publishes a number you can plan around, and the meter above is made up to show proportions, not to predict anything. The vendors describe their caps in vague terms, and they change them often.
+
+It also cannot tell you how fast you will use yours. That depends on your chats, your files and your settings. The way to find out is to use the app and watch for the message, or to open the place the table names for your app and look.
+
+The date at the top says when I last checked each cell against the vendor's own page.
