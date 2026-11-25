@@ -1,0 +1,97 @@
+---
+// Public sign-up page for cohort 1. Indexed; the participant hub stays at /ai-cohort/.
+import CohortPage from '../layouts/CohortPage.astro';
+import { COHORT, COHORT_LINKS, SESSIONS } from '../consts/aiCohort';
+---
+
+<CohortPage
+  listed
+  title="Hands-on AI for your real work"
+  kicker="cohort 1 · jan 11 – feb 1, 2027"
+  lead="Four evenings where you point AI at one task you actually do each week, and leave with it working. No coding, no textbook examples."
+  description="A small, hands-on AI cohort: four Monday evenings, online, up to 8 people. Bring one weekly task and leave with AI doing it, checked and repeatable."
+>
+  <p class="cohort-facts font-mono">
+    4 Mondays · {COHORT.time} · {COHORT.platform} · up to {COHORT.seats} people · {COHORT.price}
+  </p>
+
+  <p><a class="cohort-cta" href={COHORT.payUrl}>Reserve your seat · {COHORT.price}</a></p>
+
+  <h2 id="who">Who it's for</h2>
+  <p>
+    People who use AI a little, or not at all yet, and want it doing real work. You bring one task you do every week.
+    That might be:
+  </p>
+  <ul>
+    <li><strong>Work:</strong> a weekly report, a spreadsheet you clean up, emails you write over and over.</li>
+    <li>
+      <strong>Community and nonprofit work:</strong> volunteer schedules, donor lists, board updates, event logistics.
+    </li>
+    <li>
+      <strong>A job search:</strong> tailoring your résumé to each posting, cover letters, tracking applications, and
+      practising for interviews. If you're returning to work, this is a skill you can name to employers.
+    </li>
+  </ul>
+  <p>No file of your own? I'll bring realistic sample files for your field to work on.</p>
+
+  <h2 id="sessions">The four sessions</h2>
+  <p>
+    Each session: 25 minutes of teaching, 40 minutes of hands-on work on <strong>your own task</strong> while I go
+    round the group, and 15 minutes to share what worked.
+  </p>
+  <ol class="cohort-sessions">
+    {SESSIONS.map((s) => (
+      <li>
+        <div class="font-mono session-date">Session {s.n} · {s.date}</div>
+        <h3>{s.title}</h3>
+        <p><strong>You leave with:</strong> {s.outcome}</p>
+      </li>
+    ))}
+  </ol>
+  <p>
+    <strong>By the end:</strong> one real weekly task that AI handles, a way to check its work, and a one-page write-up
+    so you, or someone covering for you, can keep it running.
+  </p>
+
+  <h2 id="what-you-need">What you need</h2>
+  <ul>
+    <li>A laptop or desktop, not a phone.</li>
+    <li>One AI tool you can log in to: Gemini, ChatGPT, Copilot or Claude. A free account is enough.</li>
+    <li>About 10 minutes before the start, for a short intake form.</li>
+  </ul>
+
+  <h2 id="privacy">Privacy comes first</h2>
+  <p>
+    Session 1 covers what never to paste into an AI tool, and every exercise uses files with private details removed.
+    I record only the teaching part of each session, never your files, and recordings go only to the group.
+  </p>
+
+  <h2 id="who-teaches">Who teaches it</h2>
+  <p>
+    I'm Rasheed. I build software for a living and use AI tools every day, so I know where they help and where they
+    confidently make things up. <a href="/writing/hands-on-ai-cohort/">Why I'm running this.</a>
+  </p>
+
+  <h2 id="price">Price and refunds</h2>
+  <p>
+    {COHORT.price} for all four sessions, plus the weekly office hours. Full refund until {COHORT.refundUntil}
+    (January 11): just message me. The link stops taking payments once the {COHORT.seats} seats are gone, and sends
+    you to the <a href={COHORT_LINKS.waitlist}>waitlist</a>.
+  </p>
+  <p><a class="cohort-cta" href={COHORT.payUrl}>Reserve your seat · {COHORT.price}</a></p>
+
+  <h2 id="next">Want something more advanced?</h2>
+  <p>
+    Cohort 2 is for connecting AI to your email and calendar, or for coding and agents.
+    <a href={COHORT_LINKS.next}>See cohort 2 →</a>
+  </p>
+</CohortPage>
+
+<style>
+  .cohort-facts { font-size: 13px; color: var(--color-faint); margin: -8px 0 20px; letter-spacing: .02em; }
+  .cohort-sessions { list-style: none !important; padding: 0 !important; margin: 0 0 20px; }
+  .cohort-sessions > li { border-top: 1px solid var(--color-line-soft); padding: 22px 0 6px; margin: 0; }
+  .cohort-sessions h3 { margin: 4px 0 10px; }
+  .cohort-sessions p { margin: 0 0 10px; font-size: 17px; }
+  .session-date { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); }
+</style>

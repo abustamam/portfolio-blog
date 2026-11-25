@@ -2,6 +2,8 @@
 // Layout for the unlisted /ai-cohort/ pages (noindex; astro.config.mjs keeps
 // /ai-cohort/ out of the sitemap). Used directly by .astro pages and as the
 // `layout:` of the Markdown handouts, which pass their frontmatter.
+// `listed` pages (the public sign-up pages) drop the participant nav and the
+// noindex, and take their own description.
 import BaseLayout from './BaseLayout.astro';
 import CopyButton from '../components/CopyButton.astro';
 import { COHORT_LINKS } from '../consts/aiCohort';
@@ -10,6 +12,9 @@ interface Props {
   title?: string;
   kicker?: string;
   lead?: string;
+  /** Public sign-up page: indexed, no participant nav. */
+  listed?: boolean;
+  description?: string;
   frontmatter?: { title: string; kicker?: string; lead?: string };
 }
 
@@ -17,6 +22,8 @@ const fm = Astro.props.frontmatter ?? Astro.props;
 const title = fm.title ?? 'Hands-on AI cohort';
 const kicker = fm.kicker ?? 'cohort 1';
 const lead = fm.lead;
+const listed = Astro.props.listed ?? false;
+const description = Astro.props.description ?? 'For participants in the hands-on AI cohort.';
 
 const here = Astro.url.pathname.replace(/\/?$/, '/');
 const nav = [
@@ -30,16 +37,16 @@ const nav = [
 
 <BaseLayout
   title={`${title} — Hands-on AI cohort`}
-  description="For participants in the hands-on AI cohort."
+  description={description}
   chromePath={here}
-  noindex
+  noindex={!listed}
 >
   <div class="page-shell pt-10 pb-20 max-w-2xl">
-    <nav class="cohort-nav font-mono text-12 tracking-[.04em] mb-8" aria-label="Cohort pages">
+    {!listed && <nav class="cohort-nav font-mono text-12 tracking-[.04em] mb-8" aria-label="Cohort pages">
       {nav.map((l) => (
         <a href={l.href} aria-current={here === l.href ? 'page' : undefined}>{l.label}</a>
       ))}
-    </nav>
+    </nav>}
 
     <header class="mb-8">
       <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ {kicker}</div>
@@ -102,6 +109,12 @@ const nav = [
   .cohort-prose td:empty::after { content: '\00a0'; }
   .cohort-prose ul.contains-task-list { list-style: none; padding-left: 0; }
   .cohort-prose .task-list-item input { margin: 0 10px 0 0; accent-color: var(--color-accent); }
+  .cohort-prose a.cohort-cta {
+    display: inline-block; font-family: var(--font-mono); font-size: 14px; letter-spacing: .02em;
+    background: var(--color-accent); color: var(--color-bg); text-decoration: none;
+    padding: 12px 20px; border-radius: 4px;
+  }
+  .cohort-prose a.cohort-cta:hover { filter: brightness(1.08); }
   .cohort-prose hr { border: 0; border-top: 1px solid var(--color-line-soft); margin: 40px 0; }
 
   @media (max-width: 767px) {

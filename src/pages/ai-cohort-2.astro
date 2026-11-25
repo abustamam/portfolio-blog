@@ -1,0 +1,77 @@
+---
+// Public page for cohort 2. Two options; each runs only if it gets enough
+// refundable deposits by the deadline (see COHORT2 in consts/aiCohort.ts).
+import CohortPage from '../layouts/CohortPage.astro';
+import { COHORT2, COHORT2_OPTIONS, COHORT_LINKS } from '../consts/aiCohort';
+---
+
+<CohortPage
+  listed
+  title="Cohort 2: connect or build"
+  kicker={`cohort 2 · starts ${COHORT2.starts}`}
+  lead="For people who want AI to do more than answer questions. Pick the option that fits, and put down a refundable deposit so I know it's worth running."
+  description="Cohort 2 of the hands-on AI cohort: Connect (AI in your email and calendar, no code) or Build (coding with AI and agents). Refundable $25 deposit."
+>
+  <p class="cohort-facts font-mono">{COHORT2.format}</p>
+
+  <h2 id="how">How it works</h2>
+  <ol>
+    <li>Pick an option below and put down a <strong>{COHORT2.deposit} deposit</strong>. It counts toward the price.</li>
+    <li>
+      An option runs if <strong>{COHORT2.minDeposits} people</strong> put down a deposit by
+      <strong>{COHORT2.deadline}</strong>. If both get there, both run.
+    </li>
+    <li>
+      I'll message you by that date. If your option isn't running, your deposit is refunded in full. Changed your mind
+      before then? Message me for a full refund.
+    </li>
+  </ol>
+
+  <div class="cohort2-options">
+    {COHORT2_OPTIONS.map((o) => (
+      <section class="cohort2-option" id={o.id}>
+        <div class="font-mono option-kicker">Option · {o.price}</div>
+        <h2>{o.name}</h2>
+        <p>{o.forWho}</p>
+        <ol class="option-sessions">
+          {o.sessions.map((s, i) => (
+            <li>
+              <div class="font-mono option-n">Session {i + 1}</div>
+              <h3>{s.title}</h3>
+              <p><strong>You leave with:</strong> {s.outcome}</p>
+            </li>
+          ))}
+        </ol>
+        <p><strong>By the end:</strong> {o.end}</p>
+        <p><strong>You'll need:</strong> {o.needs}</p>
+        <p>
+          <a class="cohort-cta" href={o.depositUrl} data-option={o.id}>
+            Put down {COHORT2.deposit} for {o.name}
+          </a>
+        </p>
+      </section>
+    ))}
+  </div>
+
+  <h2 id="which">Not sure which?</h2>
+  <p>
+    If you want Copilot or Gemini to draft your replies and handle meeting requests, that's <strong>Connect</strong>.
+    If you want to write code with AI or build an agent of your own, that's <strong>Build</strong>.
+  </p>
+  <p>
+    New to AI? Start with <a href={COHORT_LINKS.signup}>cohort 1</a>: four evenings on one task you do every week, no
+    code.
+  </p>
+</CohortPage>
+
+<style>
+  .cohort-facts { font-size: 13px; color: var(--color-faint); margin: -8px 0 20px; letter-spacing: .02em; }
+  .cohort2-options { display: grid; gap: 0; }
+  .cohort2-option { border-top: 1px solid var(--color-line); padding-top: 8px; margin-top: 28px; }
+  .cohort2-option > h2 { margin-top: 6px; }
+  .option-kicker, .option-n { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); }
+  .option-sessions { list-style: none !important; padding: 0 !important; margin: 0 0 20px; }
+  .option-sessions > li { border-top: 1px solid var(--color-line-soft); padding: 16px 0 4px; margin: 0; }
+  .option-sessions h3 { margin: 4px 0 8px; }
+  .option-sessions p { margin: 0 0 8px; font-size: 17px; }
+</style>
