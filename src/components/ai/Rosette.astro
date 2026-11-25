@@ -1,0 +1,23 @@
+---
+// An eight-fold rosette drawn with hairlines: the mark for the AI training
+// pages. With `draw`, the lines draw themselves once when it appears.
+interface Props { draw?: boolean | 'scroll'; class?: string; size?: number }
+const { draw = false, class: cls = '', size = 64 } = Astro.props;
+const pt = (r: number, k: number, off = 0) => {
+  const a = ((k * 45 + off - 90) * Math.PI) / 180;
+  return `${(r * Math.cos(a)).toFixed(2)},${(r * Math.sin(a)).toFixed(2)}`;
+};
+const poly = (r: number, step: number, start: number, off = 0) => {
+  const pts: string[] = [];
+  let k = start;
+  do { pts.push(pt(r, k, off)); k = (k + step) % 8; } while (k !== start);
+  return `M${pts.join('L')}Z`;
+};
+// {8/3} star, two interlocked squares, and an inner octagon.
+const paths = [poly(44, 3, 0), poly(44, 2, 0), poly(44, 2, 1), poly(19, 1, 0, 22.5)];
+---
+<svg class:list={['ai-rosette', cls]} data-draw={draw === 'scroll' ? 'scroll' : draw ? '' : undefined} viewBox="-50 -50 100 100" width={size} height={size} style={`--sw:${(115 / size).toFixed(2)}`} aria-hidden="true" focusable="false">
+  <circle r="48" pathLength="1" style="--i:0" />
+  {paths.map((d, i) => <path d={d} pathLength="1" style={`--i:${i + 1}`} />)}
+  <circle r="7" pathLength="1" style="--i:5" />
+</svg>

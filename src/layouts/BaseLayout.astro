@@ -5,6 +5,7 @@ import TerminalChrome from '../components/TerminalChrome.astro';
 import TerminalModeShell from '../components/terminal/TerminalModeShell.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import Letterhead from '../components/ai/Letterhead.astro';
 
 interface Props {
   title: string;
@@ -14,9 +15,11 @@ interface Props {
   image?: ImageMetadata;
   /** Unlisted page: adds a robots noindex meta. Off by default. */
   noindex?: boolean;
+  /** 'letterhead' is for the AI training pages: no terminal bar, a plainer footer. */
+  chrome?: 'terminal' | 'letterhead';
 }
 
-const { title, description, chromePath = '/writing', image, noindex = false } = Astro.props;
+const { title, description, chromePath = '/writing', image, noindex = false, chrome = 'terminal' } = Astro.props;
 ---
 
 <!doctype html>
@@ -25,11 +28,11 @@ const { title, description, chromePath = '/writing', image, noindex = false } = 
     <BaseHead title={title} description={description} image={image} noindex={noindex} />
   </head>
   <body>
-    <TerminalChrome path={chromePath} />
+    {chrome === 'letterhead' ? <Letterhead /> : <TerminalChrome path={chromePath} />}
     <div id="terminal-inert-siblings">
       <SiteHeader />
       <slot />
-      <SiteFooter />
+      <SiteFooter plain={chrome === 'letterhead'} />
     </div>
     <TerminalModeShell initialPath={chromePath} />
   </body>

@@ -2,31 +2,54 @@
 // Cohort home: the welcome pack and the week-by-week hub on one page.
 // Unlisted (noindex via CohortPage, out of the sitemap via astro.config.mjs).
 import CohortPage from '../../layouts/CohortPage.astro';
+import Rosette from '../../components/ai/Rosette.astro';
 import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
 ---
 
 <CohortPage
   title="Welcome to the cohort"
   kicker="cohort 1 · jan 11 – feb 1, 2027"
-  lead="Assalamu alaikum, and welcome. Your seat is confirmed. Everything you need is on this page, and it's where each week's recording and next step will go."
+  lead="Assalamu alaikum, and welcome. Everything you need is on this page, and it's where each week's recording and next step will go."
 >
-  <p class="cohort-facts font-mono">
-    4 Mondays · {COHORT.time} · {COHORT.platform} · up to 8 people
-  </p>
+  <div class="ai-seal cohort-confirmed">
+    <Rosette draw size={80} />
+    <div>
+      <h2>Your seat is confirmed</h2>
+      <p>I'm glad you're here. There are two small things to do before we start.</p>
+    </div>
+    <dl class="cohort-facts">
+      <div><dt>When</dt><dd>4 Mondays, from January 11</dd></div>
+      <div><dt>Time</dt><dd>{COHORT.time}</dd></div>
+      <div><dt>Where</dt><dd>{COHORT.platform}</dd></div>
+      <div><dt>Group</dt><dd>Up to 8 people</dd></div>
+    </dl>
+  </div>
 
   <h2 id="before-jan-4">Before January 4</h2>
-  <ol>
+  <ol class="cohort-checklist" id="cohort-checklist">
     <li>
+      <label>
+        <input type="checkbox" data-check="pre-1" />
+        <span>
       <strong>Fill in the <a href={COHORT_LINKS.intake}>intake form</a>.</strong> It takes about five minutes. Describe
       the weekly task you want to work on; I read every answer before session 1.
+        </span>
+      </label>
     </li>
     <li>
+      <label>
+        <input type="checkbox" data-check="pre-2" />
+        <span>
       <strong>Send me one sample file on WhatsApp</strong> that your task uses (a spreadsheet, document, email or log),
       <strong>with private details removed first</strong>: swap real names for PERSON-1, PERSON-2 and take out account
       numbers. Not sure how? Send a description of the file instead and we'll do it together in session 2. The
       <a href={COHORT_LINKS.neverPaste}>never-paste guide</a> shows the steps.
+        </span>
+      </label>
     </li>
   </ol>
+  <p class="cohort-checknote font-mono">Tick these off as you go. The ticks are saved on this device only.</p>
+
 
   <h2 id="what-to-have-ready">What to have ready on January 11</h2>
   <ul>
@@ -49,8 +72,8 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
 
   <ol class="cohort-sessions">
     {SESSIONS.map((s) => (
-      <li id={`session-${s.n}`}>
-        <div class="font-mono session-date">Session {s.n} · {s.date}</div>
+      <li id={`session-${s.n}`} data-date={`${s.date.replace(/^\w+, /, '')}, 2027`}>
+        <div class="font-mono session-date">Session {s.n} · {s.date} <span class="session-next" hidden>Next</span></div>
         <h3>{s.title}</h3>
         <p><strong>You leave with:</strong> {s.outcome}</p>
         <p><strong>Try this week:</strong> {s.tryThis}</p>
@@ -86,13 +109,66 @@ import { COHORT, COHORT_LINKS, SESSIONS } from '../../consts/aiCohort';
   <p>JazakAllahu khair, and see you on the 11th.<br />Rasheed</p>
 </CohortPage>
 
+<script>
+  // Pre-work ticks: remembered on this device only, never sent anywhere.
+  const KEY = 'cohort-1-prework';
+  let saved: Record<string, boolean> = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) ?? '{}'); } catch { /* private mode: ticks just don't persist */ }
+  for (const box of document.querySelectorAll<HTMLInputElement>('#cohort-checklist input[data-check]')) {
+    box.checked = !!saved[box.dataset.check!];
+    box.addEventListener('change', () => {
+      saved[box.dataset.check!] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch { /* ignore */ }
+    });
+  }
+
+  // Mark the next session: the first whose evening hasn't passed yet.
+  const now = Date.now();
+  const sessions = Array.from(document.querySelectorAll<HTMLElement>('.cohort-sessions > li[data-date]'));
+  const next = sessions.find((li) => new Date(`${li.dataset.date} 23:59:00`).getTime() >= now);
+  for (const li of sessions) {
+    if (li === next) break;
+    li.dataset.state = 'done';
+  }
+  if (next) {
+    next.dataset.state = 'next';
+    next.querySelector<HTMLElement>('.session-next')!.hidden = false;
+  }
+</script>
+
 <style>
-  .cohort-facts { font-size: 13px; color: var(--color-faint); margin: -8px 0 28px; letter-spacing: .02em; }
+  .cohort-confirmed { margin: 0 0 2.5rem; }
+  .cohort-confirmed h2 { margin: 0 0 .35rem; }
+  .cohort-facts {
+    grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 1rem 1.5rem;
+    margin: 0; padding-top: 1.25rem; border-top: 1px solid var(--color-line);
+  }
+  .cohort-facts dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-faint); }
+  .cohort-facts dd { margin: .25rem 0 0; font-size: 17px; line-height: 1.35; color: var(--color-ink); }
+
+  .cohort-checklist { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 10px; }
+  .cohort-checklist > li { margin: 0; }
+  .cohort-checklist label {
+    display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; padding: 16px 18px; cursor: pointer;
+    border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); font-size: 17px; line-height: 1.55;
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+  .cohort-checklist label:hover { border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line)); }
+  .cohort-checklist label:has(input:checked) { background: var(--color-accent-bg); border-color: var(--color-accent); }
+  .cohort-checklist input { width: 20px; height: 20px; margin: 4px 0 0; accent-color: var(--color-accent); }
+  .cohort-checknote { font-size: 12px; color: var(--color-faint); margin: 0 0 20px; }
+
   .cohort-sessions { list-style: none; padding: 0; margin: 0 0 20px; }
-  .cohort-sessions > li { border-top: 1px solid var(--color-line-soft); padding: 22px 0 6px; margin: 0; }
+  .cohort-sessions > li { border-top: 1px solid var(--color-line-soft); padding: 22px 0 6px; margin: 0; transition: opacity .2s ease; }
+  .cohort-sessions > li[data-state='done'] { opacity: .62; }
+  .cohort-sessions > li[data-state='next'] {
+    border: 1px solid var(--color-accent); border-radius: 8px; padding: 20px 20px 6px; margin: 8px 0 14px; background: var(--color-surface);
+  }
+  .cohort-sessions > li[data-state='next'] + li { border-top: 0; }
   .cohort-sessions h3 { margin: 4px 0 10px; }
   .cohort-sessions p { margin: 0 0 10px; font-size: 17px; }
   .session-date { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); }
+  .session-next { margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: var(--color-accent); color: var(--color-bg); letter-spacing: .06em; }
   .session-links { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; }
   .session-pending { color: var(--color-faint); }
 </style>

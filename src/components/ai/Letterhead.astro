@@ -1,0 +1,16 @@
+---
+// The slim bar at the top of the AI training pages, in place of the terminal
+// chrome the rest of the site uses.
+import ThemePicker from '../ThemePicker.astro';
+import Rosette from './Rosette.astro';
+---
+<div class="ai-letterhead">
+  <a class="ai-letterhead__mark" href="/ai-training/">
+    <Rosette size={18} />
+    <span>Hands-on AI training</span>
+  </a>
+  <div class="ai-letterhead__right">
+    <span class="ai-letterhead__note">Small cohorts · taught live by Rasheed Bustamam</span>
+    <ThemePicker />
+  </div>
+</div>
