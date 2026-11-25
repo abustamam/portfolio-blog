@@ -95,7 +95,7 @@ test.describe('example cards: data', () => {
 
 test.describe('example cards: built page', () => {
   test('the illustrations note is there, and the page holds no build how-to', () => {
-    expect(text).toContain('These are illustrations I built from practice cases. They are not results from real participants.');
+    expect(text).toContain("These are made-up examples. The people and tasks aren't real, and PERSON-1 stands in for a name. I also haven't put a number on how much time each one saves.");
     for (const banned of ['Homework', 'Connect:', 'Build:', 'step by step', 'step-by-step', 'every week automatically']) {
       expect(text, banned).not.toContain(banned);
     }
