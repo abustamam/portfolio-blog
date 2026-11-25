@@ -1,0 +1,61 @@
+---
+// A jargon word with a dotted underline and a small definition card.
+//
+//   <Term>usage limit</Term>             resolves the text through findTerm
+//   <Term id="usage-limit">cap</Term>    names the glossary entry outright
+//
+// Authors wrap the first use of a word by hand. The component enforces two
+// things itself: an unknown term fails the build, and a second <Term> for the
+// same entry on one page renders as plain text. It does not know where it
+// sits in the page, so headings, link text, buttons and code are left to the
+// author (and to the jargon check); the script demotes the ones it can see.
+//
+// Without JavaScript the word is a plain link to its target with the
+// definition in `title`. One shared script (src/utils/termPopover.ts) opens
+// the card; there is no per-term script.
+import { GLOSSARY, findTerm } from '../../consts/guides/glossary';
+import { getGuides, guidePath } from '../../pages/ai-guides/_guides';
+
+interface Props {
+  /** Glossary id, when the text is not a term or synonym itself. */
+  id?: string;
+}
+
+// Entries already marked on this page. Astro makes one Request per page
+// render, so keying on it gives "per page" and resets between pages.
+const SEEN = ((globalThis as any).__termSeen ??= new WeakMap<Request, Set<string>>()) as WeakMap<Request, Set<string>>;
+
+const { id } = Astro.props;
+const shown = (await Astro.slots.render('default')).trim();
+const word = shown.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+const entry = id ? GLOSSARY.find((t) => t.id === id) : findTerm(word);
+if (!entry) {
+  const slug = Astro.url.pathname.replace(/^\/ai-guides\/|\/$/g, '');
+  const file = Astro.url.pathname.startsWith('/ai-guides/') ? `src/content/guides/${slug}.mdx` : Astro.url.pathname;
+  throw new Error(
+    id
+      ? `<Term id="${id}"> in ${file}: no glossary entry has the id "${id}" (src/consts/guides/glossary.ts).`
+      : `<Term> in ${file}: unknown term "${word}". Add it to src/consts/guides/glossary.ts or name an entry with id="...".`,
+  );
+}
+
+const pathname = Astro.url.pathname;
+const published = new Set((await getGuides()).map((g) => g.id));
+const explainsItself = entry.guide !== undefined && guidePath(entry.guide) === pathname;
+const href = entry.guide && published.has(entry.guide) && !explainsItself ? guidePath(entry.guide) : `/ai-guides/glossary/#${entry.id}`;
+
+let seen = SEEN.get(Astro.request);
+if (!seen) SEEN.set(Astro.request, (seen = new Set()));
+// Plain text: a repeat on this page, or the page that is itself the explanation.
+const plain = seen.has(entry.id) || explainsItself;
+if (!plain) seen.add(entry.id);
+---
+
+{plain ? <Fragment set:html={shown} /> : (
+  <a class="term" href={href} title={entry.short} data-term={entry.id} data-term-name={entry.term} data-term-short={entry.short}><Fragment set:html={shown} /></a>
+)}
+
+<script>
+  import '../../utils/termPopover';
+</script>
