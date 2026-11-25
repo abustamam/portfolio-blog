@@ -43,7 +43,7 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
       <span class="guide-share__status" data-share-status role="status"></span>
     </div>
 
-    <GuideCta line={ctaLine} />
+    <GuideCta line={ctaLine} guideId={guide.id} />
 
     <nav class="guide-more" aria-labelledby="guide-more-title" data-more-guides>
       {next && (

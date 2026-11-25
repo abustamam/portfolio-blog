@@ -49,9 +49,18 @@ const handle = createHandler({
   },
   notifyWaitlist,
   insertWaitlist: async (row, userAgent) => {
+    // The cohort waitlist's insert names no `source`, so it keeps working on a
+    // database the migration in docs/ai-quiz-setup.md (step 1d) has not reached.
+    // A guides sign-up does name it, and fails with a 500 until then.
+    if (row.source === null) {
+      await sql`
+        insert into cohort_waitlist (name, contact, note, user_agent)
+        values (${row.name}, ${row.contact}, ${row.note}, ${userAgent})`;
+      return;
+    }
     await sql`
-      insert into cohort_waitlist (name, contact, note, user_agent)
-      values (${row.name}, ${row.contact}, ${row.note}, ${userAgent})`;
+      insert into cohort_waitlist (name, contact, note, source, user_agent)
+      values (${row.name}, ${row.contact}, ${row.note}, ${row.source}, ${userAgent})`;
   },
   stripeWebhookSecret: stripeWebhookSecret || undefined,
   stripePaymentLink: trackLinks ?? (stripePaymentLink || undefined),

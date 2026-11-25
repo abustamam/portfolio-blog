@@ -187,7 +187,8 @@ export function createHandler(deps: Deps) {
       log(`${form.label} insert failed`, { error: String(err) });
       return json(500, { ok: false, error: 'could not save' });
     }
-    log(`${form.label} saved`);
+    const source = (parsed.row as { source?: unknown }).source;
+    log(`${form.label} saved`, typeof source === 'string' ? { source } : undefined);
     if (form.notify) {
       form.notify(parsed.row).catch((err) => log(`${form.label} notify failed`, { error: String(err) }));
     }

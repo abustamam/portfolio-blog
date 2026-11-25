@@ -33,7 +33,10 @@ function setup(limit = 10) {
 describe('parseWaitlist', () => {
   test('keeps name, contact and note, trimmed', () => {
     const p = parseWaitlist({ ...valid, name: '  Test Person ' });
-    expect(p).toEqual({ kind: 'ok', row: { name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best' } });
+    expect(p).toEqual({
+      kind: 'ok',
+      row: { name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best', source: null },
+    });
   });
 
   test('the note is optional', () => {
@@ -63,7 +66,7 @@ describe('waitlist handler', () => {
     const res = await post(valid);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
-    expect(rows).toEqual([{ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best' }]);
+    expect(rows).toEqual([{ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights work best', source: null }]);
     expect(intakeRows).toHaveLength(0);
     expect(notified).toHaveLength(1);
   });
@@ -119,10 +122,10 @@ describe('waitlist handler', () => {
 
 describe('waitlist notifications', () => {
   test('names the person and their note, never the contact details', () => {
-    const text = formatWaitlistNotification({ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights' });
+    const text = formatWaitlistNotification({ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights', source: null });
     expect(text).toBe('New cohort waitlist signup: Test Person\nNote: Weeknights');
     expect(text).not.toContain('555');
-    expect(formatWaitlistNotification({ name: 'B', contact: 'b@example.com', note: null })).toBe(
+    expect(formatWaitlistNotification({ name: 'B', contact: 'b@example.com', note: null, source: null })).toBe(
       'New cohort waitlist signup: B',
     );
   });
@@ -137,8 +140,60 @@ describe('waitlist notifications', () => {
         return new Response('{}');
       }) as typeof fetch,
     });
-    await notify({ name: 'B', contact: 'b@example.com', note: null });
+    await notify({ name: 'B', contact: 'b@example.com', note: null, source: null });
     const sent = JSON.parse(String(calls[0].body));
     expect(sent).toEqual({ chat_id: '42', text: 'New cohort waitlist signup: B', disable_web_page_preview: true });
+  });
+});
+
+// The "tell me when the next cohort opens" form on the free guides (#108):
+// contact only, plus the page it came from.
+describe('guides sign-up (source)', () => {
+  const guides = { contact: 'reader@example.com', source: 'guide:prompt', website: '' };
+
+  test('accepts a contact with a valid source and no name', () => {
+    expect(parseWaitlist(guides)).toEqual({
+      kind: 'ok',
+      row: { name: null, contact: 'reader@example.com', note: null, source: 'guide:prompt' },
+    });
+    expect(parseWaitlist({ ...guides, source: 'guides-hub' }).kind).toBe('ok');
+  });
+
+  test('without a source, the name is still required', () => {
+    expect(parseWaitlist({ contact: 'reader@example.com' })).toEqual({ kind: 'invalid', error: 'missing name' });
+    expect(parseWaitlist({ ...guides, source: '' })).toEqual({ kind: 'invalid', error: 'missing name' });
+  });
+
+  test('still requires the contact', () => {
+    expect(parseWaitlist({ ...guides, contact: ' ' })).toEqual({ kind: 'invalid', error: 'missing contact' });
+  });
+
+  test('rejects a source that is too long, not text, or not a known page', () => {
+    expect(parseWaitlist({ ...guides, source: `guide:${'a'.repeat(60)}` })).toEqual({
+      kind: 'invalid',
+      error: 'source longer than 60',
+    });
+    expect(parseWaitlist({ ...guides, source: 42 }).kind).toBe('invalid');
+    for (const bad of ['guide:', 'guide:Prompt', 'guide:../x', 'hub', 'guide:a b', 'guides-hub2']) {
+      expect(parseWaitlist({ ...guides, source: bad }), bad).toEqual({ kind: 'invalid', error: 'bad source' });
+    }
+  });
+
+  test('the handler stores the source and notifies naming it, without the contact', async () => {
+    const { rows, notified, post } = setup();
+    const res = await post(guides);
+    expect(res.status).toBe(200);
+    expect(rows).toEqual([{ name: null, contact: 'reader@example.com', note: null, source: 'guide:prompt' }]);
+    const text = formatWaitlistNotification(notified[0]);
+    expect(text).toBe('New "tell me when the next cohort opens" signup from guide:prompt');
+    expect(text).not.toContain('reader@');
+  });
+
+  test('a bad source is a 400 and stores nothing', async () => {
+    const { rows, notified, post } = setup();
+    expect((await post({ ...guides, source: 'x'.repeat(61) })).status).toBe(400);
+    expect((await post({ ...guides, source: 'evil' })).status).toBe(400);
+    expect(rows).toHaveLength(0);
+    expect(notified).toHaveLength(0);
   });
 });
