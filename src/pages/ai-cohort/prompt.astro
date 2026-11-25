@@ -1,0 +1,32 @@
+---
+import CohortPage from '../../layouts/CohortPage.astro';
+// The template, worked example and Check lines are shared with the public guide
+// /ai-guides/prompt/ (src/content/guides/prompt.mdx). Edit them in
+// src/content/ai-partials/prompt.md. The by-track notes and the homework
+// below stay on this page only.
+import { Content as Shared } from '../../content/ai-partials/prompt.md';
+---
+<CohortPage
+  title="The five-part prompt"
+  kicker="handout · session 1"
+  lead="Copy the template, fill in the blanks, and paste it into any AI tool. The more specific each part is, the less the tool has to guess."
+>
+  <Shared />
+
+  <h2 id="your-task-in-one-sentence-session-1">Your task in one sentence (session 1)</h2>
+
+  <blockquote>
+    <p>Every week I do <strong>________</strong> using <strong>________</strong>, it takes <strong>________</strong>, and done means <strong>________</strong>.</p>
+  </blockquote>
+
+  <p><strong>By track</strong></p>
+  <ul>
+    <li><strong>Everyday AI:</strong> fill in the template as it is. If your task uses a file, describe its real shape in <em>Input</em>: the column names, the document type, how many rows.</li>
+    <li><strong>Connect:</strong> pick a task that starts in your email or calendar. In <em>Input</em>, say which threads or meeting requests it starts from. In <em>Check</em>, say what you approve before anything is sent.</li>
+    <li><strong>Build:</strong> under the template, list the steps an agent would take: where the input comes from, what the AI does, where it stops for your approval, and where the result goes. You'll use that list in session 3.</li>
+  </ul>
+
+  <h2 id="homework">Homework</h2>
+
+  <p>Run your prompt once on this week's real task, made safe first. Write down one place where it was wrong.</p>
+</CohortPage>
