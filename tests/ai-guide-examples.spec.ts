@@ -106,7 +106,7 @@ test.describe('example cards: built page', () => {
     expect(ctaAt).toBeGreaterThan(0);
     expect(html.slice(0, ctaAt)).not.toContain('/ai-quiz');
     expect(text).toContain("Your job isn't here? The same five parts work for any weekly task: the five-part prompt shows how.");
-    expect(html).toMatch(/<a href="\/ai-guides\/prompt\/" data-ex-missing>the five-part prompt<\/a> shows how/);
+    expect(html).toMatch(/<a href="\/ai-guides\/prompt\/" data-ex-missing[^>]*>the five-part prompt<\/a> shows how/);
   });
 
   test('the call-to-action line makes no promise about working without me', () => {
