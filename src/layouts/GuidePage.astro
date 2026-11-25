@@ -1,0 +1,82 @@
+---
+// Layout for one free AI guide (/ai-guides/<id>/). Indexed and in the sitemap.
+// It looks like the `listed` cohort pages: the same shell, header and prose
+// classes from src/styles/ai.css, composed here rather than copied.
+// Below the article: one call to action, then the other guides.
+import BaseLayout from './BaseLayout.astro';
+import CopyButton from '../components/CopyButton.astro';
+import GuideCta from '../components/guides/GuideCta.astro';
+import { guidePath, type Guide } from '../pages/ai-guides/_guides';
+import '../styles/ai.css';
+
+interface Props {
+  guide: Guide;
+  /** Every published guide in step order (this one included). */
+  guides: Guide[];
+}
+
+const { guide, guides } = Astro.props;
+const { title, description, lead, minutes, updatedDate, ctaLine } = guide.data;
+const others = guides.filter((g) => g.id !== guide.id);
+const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<BaseLayout title={`${title} — Free AI guides`} description={description} chromePath={guidePath(guide.id)} chrome="letterhead">
+  <div class="ai-shell" data-guide={guide.id}>
+    <header class="mb-10">
+      <div class="ai-kicker" data-rise style="--i:0">
+        <a href="/ai-guides/" class="guide-kicker-link">Free AI guides</a> · {minutes} min read
+      </div>
+      <h1 class="ai-title ai-title--page" data-rise style="--i:1">{title}</h1>
+      <p class="ai-lead" data-rise style="--i:2">{lead}</p>
+      {updated && <p class="ai-label mt-4" data-rise style="--i:2">Updated <time datetime={updatedDate!.toISOString().slice(0, 10)}>{updated}</time></p>}
+    </header>
+
+    <article class="post-prose cohort-prose" data-rise style="--i:3">
+      <slot />
+    </article>
+
+    <GuideCta line={ctaLine} />
+
+    <nav class="guide-more" aria-labelledby="guide-more-title" data-more-guides>
+      <h2 id="guide-more-title" class="ai-label">More free guides</h2>
+      {others.length > 0 && (
+        <ol>
+          {others.map((g) => (
+            <li>
+              <a href={guidePath(g.id)}>{g.data.title}</a>
+              <span class="ai-label">{g.data.minutes} min</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      <a class="ai-link" href="/ai-guides/">All free guides →</a>
+    </nav>
+  </div>
+  <CopyButton />
+</BaseLayout>
+
+<script>
+  import { guideStore } from '../utils/guideStore';
+
+  const id = document.querySelector<HTMLElement>('[data-guide]')?.dataset.guide;
+  if (id) guideStore.markVisited(id);
+</script>
+
+<style>
+  .guide-kicker-link { color: inherit; text-decoration: none; }
+  .guide-kicker-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .guide-more { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--color-line-soft); }
+  .guide-more h2 { margin: 0 0 1rem; }
+  .guide-more ol { list-style: none; margin: 0 0 1.25rem; padding: 0; }
+  .guide-more li {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    padding: .75rem 0; border-bottom: 1px solid var(--color-line-soft);
+  }
+  .guide-more li a {
+    font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-ink); text-decoration: none;
+    min-width: 0; overflow-wrap: anywhere;
+  }
+  .guide-more li a:hover { color: var(--color-accent); }
+  .guide-more li .ai-label { flex-shrink: 0; }
+</style>

@@ -1,0 +1,27 @@
+---
+// The one call to action under every free guide: the quiz first, the
+// training page second. The line above the links is the guide's `ctaLine`.
+interface Props {
+  line?: string;
+}
+
+const DEFAULT_LINE =
+  'This guide teaches the habit in general. The hands-on training sets it up on a task from your own week.';
+const line = Astro.props.line ?? DEFAULT_LINE;
+---
+
+<section class="ai-seal guide-cta" data-guide-cta aria-label="Next step">
+  <div>
+    <p class="guide-cta__line">{line}</p>
+    <div class="guide-cta__links">
+      <a class="cohort-cta" href="/ai-quiz/">Find your track: take the quiz</a>
+      <a class="ai-link" href="/ai-training/">See the hands-on training →</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .guide-cta { grid-template-columns: 1fr; margin-top: 3.5rem; }
+  .guide-cta__line { margin: 0 0 1.25rem; }
+  .guide-cta__links { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+</style>

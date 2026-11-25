@@ -196,7 +196,40 @@ function handOff() {
   return out.join('');
 }
 
-const MOTIFS: Record<AiCard['motif'], () => string> = {
+/** Shorten `s` with an ellipsis until it fits `max` px in `font` at `size`. */
+function clip(font: Parameters<typeof width>[0], s: string, size: number, max: number) {
+  if (width(font, s, size) <= max) return s;
+  let out = s;
+  while (out.length > 1 && width(font, `${out}…`, size) > max) out = out.slice(0, -1);
+  return `${out.trimEnd()}…`;
+}
+
+// Generic motif for every free guide and the guides hub: the numbered guide
+// list, with this card's guide highlighted (none on the hub).
+function guide(card: AiCard) {
+  const all = card.items ?? [];
+  const rows = 5;
+  const start = Math.max(0, Math.min((card.current ?? 0) - 2, all.length - rows));
+  const shown = all.slice(start, start + rows);
+  const out = [label('Free guides', IX, PY + 52, C.accent)];
+  shown.forEach((title, k) => {
+    const i = start + k;
+    const y = PY + 72 + k * 54;
+    const on = i === card.current;
+    out.push(rect(IX, y, IW, 44, on ? S.accentBg : C.bg, `rx="10"${on ? ` stroke="${C.accent}" stroke-width="2"` : ''}`));
+    const cx = IX + 22;
+    const cy = y + 22;
+    out.push(`<circle cx="${cx}" cy="${cy}" r="12" fill="${on ? C.accent : S.surface}" stroke="${on ? C.accent : C.line}" stroke-width="2"/>`);
+    const n = `${i + 1}`;
+    out.push(t(mono, n, cx - width(mono, n, 13) / 2, cy + 5, 13, on ? S.surface : C.mute));
+    out.push(t(mono, clip(mono, title, 16, IW - 64), IX + 46, y + 28, 16, on ? S.accentInk : C.ink));
+  });
+  out.push(rect(IX, PY + PH - 64, IW, 2, C.line));
+  out.push(t(mono, 'Free · no sign-up', IX, PY + PH - 30, 15, C.mute));
+  return out.join('');
+}
+
+const MOTIFS: Record<AiCard['motif'], (card: AiCard) => string> = {
   tracks,
   quiz,
   form,
@@ -205,6 +238,7 @@ const MOTIFS: Record<AiCard['motif'], () => string> = {
   prompt,
   'never-paste': neverPaste,
   'hand-off': handOff,
+  guide,
 };
 
 export function aiCardSvg(card: AiCard): string {
@@ -224,7 +258,7 @@ export function aiCardSvg(card: AiCard): string {
   let subSize = 24;
   while (subSize > 16 && width(mono, card.subtitle, subSize) > COL_W) subSize -= 1;
   parts.push(t(mono, card.subtitle, PAD, titleTop + block + 56, subSize, C.mute));
-  parts.push(panel(MOTIFS[card.motif]()));
+  parts.push(panel(MOTIFS[card.motif](card)));
   parts.push(footer());
   void black;
 

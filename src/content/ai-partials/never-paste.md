@@ -1,9 +1,3 @@
----
-layout: ../../layouts/CohortPage.astro
-title: Never paste these
-kicker: handout · sessions 1 and 2
-lead: Whatever you paste into an AI chat leaves your computer. Depending on your account and settings, it may be stored, reviewed or used for training. Treat the chat box like an email to a stranger.
----
 | Never paste | Do this instead |
 |---|---|
 | **Other people's personal details**: names, emails, phone numbers, addresses | Swap in placeholders: PERSON-1, EMAIL-1, PHONE-1. Keep the key (who is who) in your own file. |
