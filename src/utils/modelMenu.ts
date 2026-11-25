@@ -113,8 +113,19 @@ export function recommend(models: readonly AiModel[], vendor: Vendor, account: A
       ? best(menu.filter((m) => m !== pick), account, [...wants, 'everyday', 'other'], (a) => a === 0)
       : undefined;
 
+  // A plan whose menu has a single option (Gemini without a paid plan: Auto):
+  // there is nothing to step up to and no setting to raise, so say that instead.
+  const offered = menu.filter((m) => availability(m, account) !== null);
+  const onlyOption = offered.length === 1 && offered[0] === pick;
+
   const lines: string[] = [];
   if (account === 'work') lines.push(EMPLOYER_LINE);
+  if (onlyOption) {
+    lines.push(
+      `Pick ${pick.name}. It is the only option your plan includes${pick.size === 'other' ? ', and it picks the model for you' : ''}.`,
+    );
+    return { pick, fallback, lines };
+  }
   lines.push(`Pick ${pick.name}. ${reason(task, pick)}`);
   if (pickAvail === 1) lines.push(`Your plan may include ${pick.name} only some of the time.`);
   if (pickAvail === 2) lines.push(`Only some paid plans include ${pick.name}.`);

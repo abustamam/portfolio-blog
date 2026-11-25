@@ -3,10 +3,11 @@
 import BrandLogo from './BrandLogo.astro';
 
 // The section the current page belongs to, so the nav marks the right item.
-// The home page is the writing index; the quiz and the cohort pages belong to
-// AI training.
+// Series are groups of posts, so they belong to writing; the quiz and the
+// cohort pages belong to AI training. The home page and the colophon belong
+// to no section, so nothing is marked there.
 const NAV = [
-  { href: '/writing', label: 'writing', match: ['/writing'] },
+  { href: '/writing', label: 'writing', match: ['/writing', '/series'] },
   { href: '/work', label: 'work', match: ['/work'] },
   { href: '/about', label: 'about', match: ['/about'] },
   { href: '/ai-guides/', label: 'ai guides', match: ['/ai-guides'] },
@@ -14,8 +15,11 @@ const NAV = [
   { href: '/contact', label: 'contact', match: ['/contact'] },
 ];
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const isCurrent = (match: string[]) =>
-  (path === '/' && match.includes('/writing')) || match.some((m) => path === m || path.startsWith(`${m}/`));
+const isCurrent = (match: string[]) => match.some((m) => path === m || path.startsWith(`${m}/`));
+// aria-current="page" is for the link to this very page; a link to the section
+// a deeper page sits in gets "true".
+const ariaCurrent = (item: (typeof NAV)[number]) =>
+  isCurrent(item.match) ? (path === item.href.replace(/\/+$/, '') ? 'page' : 'true') : undefined;
 ---
 
 <header class="border-b border-line bg-bg">
@@ -44,7 +48,7 @@ const isCurrent = (match: string[]) =>
     <nav class="hidden lg:flex items-center gap-7 font-mono text-xs" aria-label="Primary">
       {NAV.map((item) => {
         const current = isCurrent(item.match);
-        return <a href={item.href} class:list={[current ? 'text-ink' : 'text-mute', 'no-underline']} aria-current={current ? 'page' : undefined}>{item.label}</a>;
+        return <a href={item.href} class:list={[current ? 'text-ink' : 'text-mute', 'no-underline']} aria-current={ariaCurrent(item)}>{item.label}</a>;
       })}
       <div class="flex items-center gap-1.5 py-1.25 px-2.5 border border-line rounded-sm text-faint text-13 cursor-default">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -77,7 +81,7 @@ const isCurrent = (match: string[]) =>
   </div>
   <nav class="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
     {NAV.map((item) => (
-      <a href={item.href} class="text-ink no-underline py-3 border-b border-line-soft" aria-current={isCurrent(item.match) ? 'page' : undefined}>{item.label}</a>
+      <a href={item.href} class="text-ink no-underline py-3 border-b border-line-soft" aria-current={ariaCurrent(item)}>{item.label}</a>
     ))}
   </nav>
   <div class="mt-5">

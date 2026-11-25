@@ -94,6 +94,17 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#quiz-step-label')).toHaveText('question 2 of 10');
   });
 
+  test('the echoed task drops its own closing punctuation, so the quote does not end with two marks', async ({ page }) => {
+    await page.goto('/ai-quiz');
+    await page.evaluate(() => {
+      document.getElementById('ai-quiz')!.dataset.endpoint = '';
+    });
+    await complete(page, { ...beginner, weeklyTask: `${beginner.weeklyTask}.  ` });
+    const build = page.locator('#result-build');
+    await expect(build).toContainText(`"${beginner.weeklyTask}". In the cohort`);
+    await expect(build).not.toContainText('."');
+  });
+
   test('beginner lands on Everyday AI and sees the no-endpoint notice', async ({ page }) => {
     await page.goto('/ai-quiz');
     await page.evaluate(() => {

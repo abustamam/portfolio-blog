@@ -49,6 +49,18 @@ test.describe('which-model: the rule', () => {
     }
   });
 
+  test('a plan whose menu has one option is told so, not told to step up or change a setting it does not have', () => {
+    // Gemini without a paid plan: the menu is Auto only, and Auto picks the thinking level.
+    for (const t of TASKS) {
+      const rec = recommend(AI_MODELS, 'Gemini', 'free', t.id);
+      expect(rec.pick.name, t.id).toBe('Auto');
+      expect(rec.fallback, t.id).toBeUndefined();
+      const text = rec.lines.join(' ');
+      expect(text, t.id).toContain('the only option your plan includes');
+      expect(text, t.id).not.toMatch(/step up|bigger one|thinking or effort setting|closest fit/);
+    }
+  });
+
   test('a work account always gets the employer line first, and only work accounts get it', () => {
     for (const v of VENDORS) {
       for (const t of TASKS) {

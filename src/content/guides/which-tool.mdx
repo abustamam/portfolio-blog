@@ -101,6 +101,9 @@ A bigger plan won't rescue a vague request. When the free plan gives you a poor 
   .which-tool-vendor { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 400; color: var(--color-faint); letter-spacing: .04em; }
   .which-tool-table table { display: table; width: 100%; font-size: 15px; }
   .which-tool-table td { overflow-wrap: break-word; }
+  /* Six columns do not fit the reading column with whole words until the table
+     breaks out at 72rem (.guide-wide), so let long words wrap in between. */
+  @media (min-width: 48rem) and (max-width: 71.99rem) { .which-tool-table td { overflow-wrap: anywhere; } }
   .which-tool-table tbody th { font-family: var(--font-serif); font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--color-ink); }
   @media (max-width: 47.99rem) {
     .which-tool-table table, .which-tool-table tbody, .which-tool-table tr, .which-tool-table th, .which-tool-table td { display: block; width: 100%; }

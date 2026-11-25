@@ -176,8 +176,8 @@ test.describe('does-it-remember: the boxes figure and the page', () => {
     const fig = page.locator('[data-cw-boxes]');
     for (const t of ['This chat', 'Past chats', 'Saved memory', 'A new chat']) await expect(fig).toContainText(t);
     await expect(fig.locator('[data-cwb="saved"]')).toContainText('Can read');
-    await expect(fig.locator('[data-cwb="this"]')).toContainText('Cannot read');
-    await expect(fig.locator('[data-cwb="past"]')).toContainText('Only in apps that offer it');
+    await expect(fig.locator('[data-cwb="this"]')).toContainText('Not carried over');
+    await expect(fig.locator('[data-cwb="past"]')).toContainText('Depends on app and settings');
   });
 
   test('links the three pages the issue names', async ({ page }) => {

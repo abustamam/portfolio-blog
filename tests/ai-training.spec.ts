@@ -29,6 +29,9 @@ test.describe('AI training page', () => {
       await expect(card.locator('.track-kicker')).toContainText(PRICES[id as keyof typeof PRICES]);
       await expect(card.locator('.track-sessions > li')).toHaveCount(4);
     }
+    // The hero states the lowest of those prices.
+    const lowest = Math.min(...Object.values(PRICES).map((p) => Number(p.slice(1))));
+    await expect(page.locator('.training-assure > li').first()).toHaveText(`From $${lowest} a track`);
   });
 
   test('says what every track includes, how launch works, and links the quiz', async ({ page }) => {

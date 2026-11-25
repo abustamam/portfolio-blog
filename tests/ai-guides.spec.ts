@@ -121,6 +121,41 @@ test.describe('free AI guides: pages', () => {
         expect(c <= iso!, `"Last checked ${c}" is newer than "Last updated ${iso}"`).toBe(true);
       }
     });
+
+    test(`${path}: no fact it renders was checked after its "Last updated" date`, async () => {
+      // The "Last checked" line on a page shows the OLDEST date among its facts, so
+      // re-checking one fact would not move it. Compare the newest date in the
+      // fact files the guide imports instead.
+      const src = readFileSync(`${SRC}${path.split('/')[2]}.mdx`, 'utf8');
+      const iso = src.match(/^updatedDate:\s*['"]?(\d{4}-\d{2}-\d{2})/m)?.[1];
+      expect(iso, 'frontmatter updatedDate').toBeTruthy();
+      const modules = [...src.matchAll(/from '\.\.\/\.\.\/consts\/guides\/(\w+)'/g)].map((m) => m[1]);
+      const dates: string[] = [];
+      const walk = (v: unknown) => {
+        if (Array.isArray(v)) v.forEach(walk);
+        else if (v && typeof v === 'object')
+          for (const [k, x] of Object.entries(v)) {
+            if (k === 'checked' && typeof x === 'string') dates.push(x);
+            else walk(x);
+          }
+      };
+      for (const name of modules) walk(Object.values(await import(`../src/consts/guides/${name}`)));
+      for (const d of dates) {
+        expect(d).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(d <= iso!, `a fact checked ${d} is newer than "Last updated ${iso}"`).toBe(true);
+      }
+    });
+
+    test(`${path}: every table fits its column between the phone and the wide desktop layouts`, async ({ page }) => {
+      for (const width of [768, 1024, 1151]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(path);
+        const over = await page.locator('[data-guide] > article table').evaluateAll((tables) =>
+          tables.map((t) => Math.round(t.getBoundingClientRect().width - (t.parentElement as HTMLElement).getBoundingClientRect().width)),
+        );
+        for (const px of over) expect(px, `${path} at ${width}px: a table is ${px}px wider than its column`).toBeLessThanOrEqual(1);
+      }
+    });
   }
 
   test('the hub lists every published guide in step order, grouped (start, guides, reference), then the quiz and the training page', async ({ page }) => {
