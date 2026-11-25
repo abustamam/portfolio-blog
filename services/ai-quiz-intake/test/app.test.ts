@@ -10,6 +10,7 @@ const valid = {
   prompt: 'rich',
   files: 'checked-output',
   connected: 'agents',
+  goal: 'inbox',
   weeklyTask: 'Pulling listing comps into a market report',
   neverPaste: ['personal-info', 'passwords'],
   format: 'either',
@@ -49,9 +50,21 @@ describe('parseSubmission', () => {
     if (p.kind !== 'ok') return;
     expect(p.row.track).toBe('builder');
     expect(p.row.score).toBe(15);
+    // The goal answer is stored, and it picks the track the result recommends.
+    expect(p.row.answers.goal).toBe('inbox');
+    expect(p.row.recommend).toBe('connect');
     expect(p.row.answers.followUp).toEqual(['team-workshop']);
     expect(p.row.name).toBeNull();
     expect('track' in p.row.answers).toBe(false);
+  });
+
+  test('a submission from before the goal question still parses, and falls back on what they do', () => {
+    const { goal: _goal, ...old } = valid;
+    const p = parseSubmission(old);
+    expect(p.kind).toBe('ok');
+    if (p.kind !== 'ok') return;
+    expect('goal' in p.row.answers).toBe(false);
+    expect(p.row.recommend).toBe('build');
   });
 
   test('flags the honeypot as spam', () => {

@@ -7,6 +7,9 @@ import { AI_QUIZ_ENDPOINT, WHATSAPP_HREF } from '../consts/aiQuiz';
 import { WAITLIST_LIMITS } from '../../services/ai-quiz-intake/src/waitlist';
 import { getGuides, guidePath } from './ai-guides/_guides';
 import { SUGGESTABLE_GUIDES } from '../utils/aiQuiz';
+// The result screen repeats each track's price, deposit and first slot from
+// the same constants /ai-training/ uses, so the two cannot disagree.
+import { TRACKS as OFFERS, TRAINING } from '../consts/aiCohort';
 
 // Every guide the result screen can suggest, rendered hidden; the script shows
 // the ones that fit. A suggested id with no published guide fails the build.
@@ -132,12 +135,28 @@ const privacyQuestion: Q = {
   ],
 };
 
-const steps = 9; // 6 skill + free text + privacy + logistics
+// What they want, asked after what they do. This answer picks the track the
+// result recommends (GOAL_OFFER in src/utils/aiQuiz.ts); the skill questions
+// above only set the level the summary is written for.
+const goalQuestion: Q = {
+  name: 'goal',
+  title: 'What do you most want AI to do for you?',
+  type: 'radio',
+  required: true,
+  options: [
+    { value: 'weekly-task', label: 'Handle a task I do every week: a report, a spreadsheet, the same documents' },
+    { value: 'inbox', label: 'Take work off my inbox and calendar: replies, summaries, scheduling' },
+    { value: 'build', label: 'Build something: a tool, an automation or an agent of my own' },
+    { value: 'unsure', label: "I'm not sure yet" },
+  ],
+};
+
+const steps = 10; // 6 skill + goal + free text + privacy + logistics
 ---
 
 <BaseLayout
   title="AI training quiz — Rasheed Bustamam"
-  description="Nine short questions to find the right track for a small, hands-on AI cohort, online."
+  description="Ten short questions to find the right track for a small, hands-on AI cohort, online."
   chromePath="/ai-quiz"
   chrome="letterhead"
 >
@@ -152,7 +171,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         Which AI track fits you?
       </h1>
       <p class="ai-lead" data-rise style="--i:2">
-        Nine short questions about what you actually do with AI. No right answers. It takes about four minutes, and
+        Ten short questions about what you actually do with AI. No right answers. It takes about four minutes, and
         you'll get a result at the end.
       </p>
     </header>
@@ -178,7 +197,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         </div>
       </div>
 
-      {skillQuestions.map((q) => (
+      {[...skillQuestions, goalQuestion].map((q) => (
         <fieldset class="quiz-step" data-required={q.required ? 'true' : undefined}>
           <legend class="quiz-legend">{q.title}</legend>
           {q.hint && <p class="quiz-hint">{q.hint}</p>}
@@ -221,7 +240,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
 
       <fieldset class="quiz-step">
         <legend class="quiz-legend">Last one: logistics</legend>
-        <p class="quiz-hint">This helps me plan sessions and set a fair price.</p>
+        <p class="quiz-hint">This helps me plan the sessions.</p>
 
         <div class="quiz-group">
           <div class="quiz-sublabel">When</div>
@@ -238,16 +257,6 @@ const steps = 9; // 6 skill + free text + privacy + logistics
             <label class="quiz-option"><input type="radio" name="start" value="1-3-months" /><span>In 1–3 months</span></label>
             <label class="quiz-option"><input type="radio" name="start" value="later" /><span>Later this year or after</span></label>
             <label class="quiz-option"><input type="radio" name="start" value="exploring" /><span>Just exploring for now</span></label>
-          </div>
-        </div>
-
-        <div class="quiz-group">
-          <div class="quiz-sublabel">What would you pay for a 4-session cohort?</div>
-          <div class="quiz-options">
-            <label class="quiz-option"><input type="radio" name="price" value="under-100" /><span>Under $100</span></label>
-            <label class="quiz-option"><input type="radio" name="price" value="100-200" /><span>$100–200</span></label>
-            <label class="quiz-option"><input type="radio" name="price" value="200-400" /><span>$200–400</span></label>
-            <label class="quiz-option"><input type="radio" name="price" value="400-plus" /><span>$400+</span></label>
           </div>
         </div>
 
@@ -322,6 +331,21 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         short session and it'll save you trouble.
       </p>
 
+      <!-- One per track, rendered hidden; the script shows the recommended track's. -->
+      {OFFERS.map((t) => (
+        <div class="result-offer mb-6" data-result-offer={t.id} hidden>
+          <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">price and dates</div>
+          <p class="font-serif text-base leading-[1.6] text-ink m-0 mb-2">
+            <strong>{t.price}</strong> for 4 sessions of {TRAINING.sessionLength}. A {TRAINING.deposit} deposit, fully
+            refundable, holds your seat and counts toward the price.
+          </p>
+          <p class="font-serif text-base leading-[1.6] text-ink m-0 mb-2">
+            The first slot is {TRAINING.slots[0].when}, {TRAINING.slots[0].note}.
+          </p>
+          <p class="font-serif text-base leading-[1.6] text-mute m-0"><strong>You'll need:</strong> {t.needs}</p>
+        </div>
+      ))}
+
       <p class="m-0 mb-8">
         <a id="result-reserve" href="/ai-training/#tracks" class="cohort-cta">See the tracks and reserve your seat →</a>
       </p>
@@ -330,8 +354,8 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       <form id="result-notify" class="ai-card p-5 sm:p-6 mb-8 grid gap-3" novalidate data-endpoint={notifyEndpoint} aria-labelledby="result-notify-title">
         <h2 id="result-notify-title" class="font-serif text-xl font-medium text-ink m-0">Not ready to reserve?</h2>
         <p class="font-serif text-base leading-[1.6] text-mute m-0" data-notify-promise>
-          Leave your email or WhatsApp number and I'll message you once when <span id="result-notify-track">this track</span>
-          opens, with the dates. Nothing else.
+          Leave your email or WhatsApp number and I'll send you one message when the next
+          <span id="result-notify-track">training</span> cohort has dates. Nothing else.
         </p>
         <div class="grid gap-2 [&[hidden]]:hidden" data-notify-fields>
           <label class="sr-only" for="result-notify-name">Your name (optional)</label>
@@ -390,7 +414,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
 </style>
 
 <script>
-  import { scoreQuiz, skillScores, suggestGuides, SKILL_LABELS, MAX_PER_SKILL, TRACKS, type QuizAnswers } from '../utils/aiQuiz';
+  import { scoreQuiz, skillScores, suggestGuides, resultCopy, SKILL_LABELS, MAX_PER_SKILL, type QuizAnswers } from '../utils/aiQuiz';
 
   const form = document.getElementById('ai-quiz') as HTMLFormElement;
   const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>('.quiz-step'));
@@ -444,10 +468,10 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       prompt: one('prompt'),
       files: one('files'),
       connected: one('connected'),
+      goal: one('goal'),
       weeklyTask: one('weeklyTask').trim(),
       neverPaste: many('neverPaste'),
       schedule: many('schedule'),
-      price: one('price'),
       context: one('context'),
       start: one('start'),
       payer: one('payer'),
@@ -491,7 +515,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
   function showResult() {
     const a = answers();
     const result = scoreQuiz(a);
-    const t = TRACKS[result.track];
+    const t = resultCopy(result);
 
     document.getElementById('result-track')!.textContent = t.name;
     document.getElementById('result-summary')!.textContent = t.summary;
@@ -536,12 +560,17 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       }),
     );
 
-    // Quiz track -> the training page's track. Builders could fit Connect or Build, so they see both.
-    const anchor = result.track === 'builder' ? 'tracks' : 'everyday';
-    (document.getElementById('result-reserve') as HTMLAnchorElement).href = `/ai-training/#${anchor}`;
+    // The result names one /ai-training/ track: link to it, and show its price and dates.
+    const reserve = document.getElementById('result-reserve') as HTMLAnchorElement;
+    reserve.href = `/ai-training/#${result.recommend}`;
+    reserve.textContent = `See ${t.name} and reserve your seat →`;
+    for (const el of document.querySelectorAll<HTMLElement>('[data-result-offer]')) {
+      el.hidden = el.dataset.resultOffer !== result.recommend;
+    }
     document.getElementById('result-privacy')!.hidden = !(result.privacyGap && result.track !== 'foundations');
     document.getElementById('result-notify-track')!.textContent = t.name;
-    notify.dataset.source = `quiz:${result.track}`;
+    // Tagged with the recommended track, so a sign-up says which cohort to message them about.
+    notify.dataset.source = `quiz:${result.recommend}`;
 
     // Show the suggested guides, in suggestion order.
     const guideList = document.getElementById('result-guide-list')!;
@@ -561,11 +590,13 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     const section = document.getElementById('quiz-result')!;
     section.hidden = false;
     section.dataset.track = result.track;
+    section.dataset.offer = result.recommend;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     lastPayload = {
       ...a,
       track: result.track,
+      recommend: result.recommend,
       score: result.score,
       privacyGap: result.privacyGap,
       submittedAt: new Date().toISOString(),

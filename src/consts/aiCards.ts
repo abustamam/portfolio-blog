@@ -33,7 +33,7 @@ export const AI_CARDS: AiCard[] = [
     path: '/ai-quiz/',
     eyebrow: 'AI training · quiz',
     title: 'Which AI track fits you?',
-    subtitle: '9 questions · about 4 minutes',
+    subtitle: '10 questions · about 4 minutes',
     motif: 'quiz',
   },
   {

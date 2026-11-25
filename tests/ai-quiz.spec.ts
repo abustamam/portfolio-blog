@@ -1,7 +1,17 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
-import { TRACKS, scoreQuiz, skillScores, suggestGuides, SUGGESTABLE_GUIDES, MAX_SUGGESTED_GUIDES } from '../src/utils/aiQuiz';
+import {
+  OFFER_NAMES,
+  resultCopy,
+  scoreQuiz,
+  skillScores,
+  suggestGuides,
+  SUGGESTABLE_GUIDES,
+  MAX_SUGGESTED_GUIDES,
+  type Offer,
+  type Track,
+} from '../src/utils/aiQuiz';
 
 type Path = {
   frequency: string;
@@ -10,6 +20,7 @@ type Path = {
   prompt: string;
   files: string;
   connected: string;
+  goal: string;
   weeklyTask: string;
   neverPaste: string[];
 };
@@ -21,6 +32,7 @@ const beginner: Path = {
   prompt: 'short',
   files: 'never',
   connected: 'no',
+  goal: 'weekly-task',
   weeklyTask: 'Writing the weekly volunteer reminder messages',
   neverPaste: ['unsure'],
 };
@@ -32,6 +44,7 @@ const builder: Path = {
   prompt: 'rich',
   files: 'checked-output',
   connected: 'agents',
+  goal: 'build',
   weeklyTask: 'Pulling listing comps into a market report',
   neverPaste: ['personal-info', 'passwords', 'financial'],
 };
@@ -56,6 +69,8 @@ async function complete(page: Page, p: Path) {
   await next(page);
   await pick(page, 'connected', p.connected);
   await next(page);
+  await pick(page, 'goal', p.goal);
+  await next(page);
   await page.locator('textarea[name="weeklyTask"]').fill(p.weeklyTask);
   await next(page);
   for (const v of p.neverPaste) await pick(page, 'neverPaste', v);
@@ -70,13 +85,13 @@ async function complete(page: Page, p: Path) {
 test.describe('AI quiz', () => {
   test('blocks Next until a required question is answered', async ({ page }) => {
     await page.goto('/ai-quiz');
-    await expect(page.locator('#quiz-step-label')).toHaveText('question 1 of 9');
+    await expect(page.locator('#quiz-step-label')).toHaveText('question 1 of 10');
     await next(page);
     await expect(page.locator('#quiz-error')).toBeVisible();
-    await expect(page.locator('#quiz-step-label')).toHaveText('question 1 of 9');
+    await expect(page.locator('#quiz-step-label')).toHaveText('question 1 of 10');
     await pick(page, 'frequency', 'weekly');
     await next(page);
-    await expect(page.locator('#quiz-step-label')).toHaveText('question 2 of 9');
+    await expect(page.locator('#quiz-step-label')).toHaveText('question 2 of 10');
   });
 
   test('beginner lands on Everyday AI and sees the no-endpoint notice', async ({ page }) => {
@@ -88,6 +103,7 @@ test.describe('AI quiz', () => {
     const result = page.locator('#quiz-result');
     await expect(result).toBeVisible();
     await expect(result).toHaveAttribute('data-track', 'foundations');
+    await expect(result).toHaveAttribute('data-offer', 'everyday');
     await expect(page.locator('#result-track')).toHaveText('Everyday AI');
     await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#everyday');
     await expect(page.locator('#result-build')).toContainText(beginner.weeklyTask);
@@ -99,7 +115,7 @@ test.describe('AI quiz', () => {
     expect(await skillRows(page)).toEqual(['0', '0', '0', '0', '0']);
   });
 
-  test('advanced user lands on Connect or Build and the response is POSTed', async ({ page }) => {
+  test('advanced user who wants to build lands on Build alone, and the response is POSTed', async ({ page }) => {
     let body: Record<string, unknown> | null = null;
     await page.route('**/api/ai-quiz', async (route) => {
       body = JSON.parse(route.request().postData() ?? '{}');
@@ -112,43 +128,106 @@ test.describe('AI quiz', () => {
     await page.goto('/ai-quiz');
     await expect(page.locator('#ai-quiz')).toHaveAttribute('data-endpoint', '/api/ai-quiz');
     await complete(page, builder);
+    // The stored track is still the skill level; the result names one track to reserve.
     await expect(page.locator('#quiz-result')).toHaveAttribute('data-track', 'builder');
-    await expect(page.locator('#result-track')).toHaveText('Connect or Build');
-    await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#tracks');
+    await expect(page.locator('#quiz-result')).toHaveAttribute('data-offer', 'build');
+    await expect(page.locator('#result-track')).toHaveText('Build');
+    await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#build');
     await expect(page.locator('#result-status')).toContainText('answers were sent');
-    // "Connect or Build" names two tracks, so both marks show.
-    await expect(page.locator('.track-glyph[data-glyph="connect"]')).toBeVisible();
+    // One track, one mark.
     await expect(page.locator('.track-glyph[data-glyph="build"]')).toBeVisible();
+    await expect(page.locator('.track-glyph[data-glyph="connect"]')).toBeHidden();
     await expect(page.locator('.track-glyph[data-glyph="everyday"]')).toBeHidden();
     expect(await skillRows(page)).toEqual(['3', '3', '3', '3', '3']);
     await expect(page.locator('#result-skills li').first().locator('.skill-pip[data-on]')).toHaveCount(3);
     expect(body).toMatchObject({
       track: 'builder',
+      recommend: 'build',
+      goal: 'build',
       weeklyTask: builder.weeklyTask,
       tools: builder.tools,
       start: 'within-month',
       payer: 'organization',
       followUp: ['team-workshop', 'done-for-you'],
     });
+    expect(body).not.toHaveProperty('price');
+  });
+
+  test('a beginner who wants help with email lands on Connect, with its price and the first slot', async ({ page }) => {
+    // What /ai-training/ says about Connect is what the result must repeat.
+    await page.goto('/ai-training/');
+    const price = (await page.locator('#connect .track-price').innerText()).trim();
+    const slot = (await page.locator('.training-slots li strong').first().innerText()).trim();
+    expect(price).toMatch(/^\$\d+$/);
+    expect(slot.length).toBeGreaterThan(5);
+
+    await page.goto('/ai-quiz');
+    await page.evaluate(() => {
+      document.getElementById('ai-quiz')!.dataset.endpoint = '';
+    });
+    await complete(page, { ...beginner, goal: 'inbox' });
+    const result = page.locator('#quiz-result');
+    await expect(result).toHaveAttribute('data-track', 'foundations');
+    await expect(result).toHaveAttribute('data-offer', 'connect');
+    await expect(page.locator('#result-track')).toHaveText('Connect');
+    await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#connect');
+    await expect(page.locator('#result-reserve')).toContainText('Connect');
+    await expect(page.locator('.track-glyph[data-glyph="connect"]')).toBeVisible();
+    await expect(page.locator('.track-glyph[data-glyph="everyday"]')).toBeHidden();
+    await expect(page.locator('.track-glyph[data-glyph="build"]')).toBeHidden();
+    // Price, deposit and dates for this track only.
+    const offer = page.locator('[data-result-offer]:visible');
+    await expect(offer).toHaveCount(1);
+    await expect(offer).toHaveAttribute('data-result-offer', 'connect');
+    await expect(offer).toContainText(price);
+    await expect(offer).toContainText('$25');
+    await expect(offer).toContainText(slot);
+  });
+
+  test('routes on what the person wants, and falls back on what they already do', () => {
+    const offer = (patch: Record<string, unknown>, base: Path = beginner) => scoreQuiz({ ...base, ...patch }).recommend;
+    // The goal decides, whatever the skill score.
+    expect(offer({ goal: 'weekly-task' })).toBe('everyday');
+    expect(offer({ goal: 'inbox' })).toBe('connect');
+    expect(offer({ goal: 'build' })).toBe('build');
+    expect(offer({ goal: 'weekly-task' }, builder)).toBe('everyday');
+    expect(offer({ goal: 'inbox' }, builder)).toBe('connect');
+    // Not sure (or an older page that never asked): beginners and regular users start with Everyday AI.
+    expect(offer({ goal: 'unsure' })).toBe('everyday');
+    expect(offer({ goal: undefined })).toBe('everyday');
+    // Not sure and advanced: Build for people already using an API, a local model or agents, else Connect.
+    expect(offer({ goal: 'unsure' }, builder)).toBe('build');
+    expect(offer({ goal: undefined }, builder)).toBe('build');
+    expect(offer({ goal: 'unsure', tools: ['chatgpt'], connected: 'automation' }, builder)).toBe('connect');
+    // The stored track stays the skill level, so old and new rows compare.
+    expect(scoreQuiz({ ...beginner, goal: 'build' }).track).toBe('foundations');
+    expect(scoreQuiz({ ...builder, goal: 'weekly-task' }).track).toBe('builder');
+  });
+
+  test('has no price question: the prices are fixed on /ai-training/', async ({ page }) => {
+    await page.goto('/ai-quiz');
+    await expect(page.locator('input[name="price"]')).toHaveCount(0);
+    await expect(page.locator('#ai-quiz')).not.toContainText('fair price');
+    await expect(page.locator('#ai-quiz input[name="goal"]')).toHaveCount(4);
   });
 
   test('the seal beside the progress bar draws further with each question', async ({ page }) => {
     await page.goto('/ai-quiz');
     const drawn = () =>
       page.locator('#quiz-seal').evaluate((el) => Number(getComputedStyle(el).getPropertyValue('--p')));
-    expect(await drawn()).toBeCloseTo(1 / 9, 5);
+    expect(await drawn()).toBeCloseTo(1 / 10, 5);
     await pick(page, 'frequency', 'daily');
     await next(page);
-    expect(await drawn()).toBeCloseTo(2 / 9, 5);
+    expect(await drawn()).toBeCloseTo(2 / 10, 5);
     await page.locator('#quiz-back').click();
-    expect(await drawn()).toBeCloseTo(1 / 9, 5);
+    expect(await drawn()).toBeCloseTo(1 / 10, 5);
     // The first stroke is partly drawn and the last one not at all. Chromium
     // reports the computed offset as "calc(0.333333px)".
     const offsets = await page
       .locator('#quiz-seal .ai-rosette[data-progress] > *')
       .evaluateAll((els) => els.map((el) => Number(getComputedStyle(el).strokeDashoffset.match(/[\d.]+/)?.[0])));
     expect(offsets).toHaveLength(6);
-    expect(offsets[0]).toBeCloseTo(1 - 6 / 9, 2);
+    expect(offsets[0]).toBeCloseTo(1 - 6 / 10, 2);
     expect(offsets[5]).toBe(1);
   });
 
@@ -178,7 +257,8 @@ test.describe('AI quiz', () => {
 
     const notify = page.locator('#result-notify');
     await expect(notify).toBeVisible();
-    await expect(notify).toContainText('Connect or Build');
+    await expect(notify).toContainText('Build');
+    await expect(notify).not.toContainText('opens');
     await expect(page.locator('#result-whatsapp')).toHaveAttribute('href', '/api/ai-quiz/whatsapp');
     await expect(page.locator('#result-whatsapp')).toHaveAttribute('target', '_blank');
     await notify.getByRole('button', { name: 'Tell me' }).click();
@@ -190,7 +270,7 @@ test.describe('AI quiz', () => {
     await notify.getByRole('button', { name: 'Tell me' }).click();
     await expect(page.locator('#result-notify-status')).toContainText('Thank you');
     await expect(page.locator('#result-notify-contact')).toBeHidden();
-    expect(notifyBody).toEqual({ name: 'Test Person', contact: 'test@example.com', source: 'quiz:builder', website: '' });
+    expect(notifyBody).toEqual({ name: 'Test Person', contact: 'test@example.com', source: 'quiz:build', website: '' });
   });
 
   test('no WhatsApp number in any built file', () => {
@@ -245,8 +325,15 @@ test.describe('AI quiz', () => {
     await page.goto('/ai-training/');
     const offered = await page.locator('.training-track .track-name').allInnerTexts();
     expect(offered.length).toBeGreaterThan(0);
-    for (const [key, t] of Object.entries(TRACKS)) {
-      for (const name of t.name.split(' or ')) expect(offered, `${key}: ${name}`).toContain(name);
+    // One track per result: no "Connect or Build".
+    for (const o of Object.keys(OFFER_NAMES) as Offer[]) {
+      expect(offered, o).toContain(OFFER_NAMES[o]);
+      for (const track of ['foundations', 'applied', 'builder'] as Track[]) {
+        const copy = resultCopy({ recommend: o, track });
+        expect(copy.name).toBe(OFFER_NAMES[o]);
+        expect(copy.summary.length, `${o}/${track} summary`).toBeGreaterThan(40);
+        expect(copy.covers.length, `${o}/${track} covers`).toBe(3);
+      }
     }
   });
 

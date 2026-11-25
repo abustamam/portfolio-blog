@@ -213,8 +213,10 @@ export async function fetchLokiLines(opts: LokiOpts, startMs: number, endMs: num
 
 // ── Quiz ──────────────────────────────────────────────────────────────────
 
-/** Quiz result names, as the quiz shows them (src/utils/aiQuiz.ts TRACKS). */
-export const QUIZ_RESULT = { foundations: 'Everyday AI', applied: 'Everyday AI', builder: 'Connect or Build' } as const;
+// The `track` column is the skill level (foundations, applied, builder). Since
+// the goal question, it no longer says which /ai-training/ track the result
+// named: that follows from each row's answers, which the digest's role cannot
+// read. So the digest reports levels and says so.
 
 // ── Stripe ────────────────────────────────────────────────────────────────
 
@@ -303,13 +305,12 @@ export function formatDigest(d: Digest): string {
     );
   } else lines.push(`Unavailable: ${d.views.error}`);
 
-  lines.push('', '2. Quiz finished, by result');
+  lines.push('', "2. Quiz finished, by skill level (the recommended track is in each row's answers)");
   if (d.quiz.ok) {
     const q = d.quiz.value;
     const total = Object.values(q).reduce((a, b) => a + b, 0);
-    const everyday = (q.foundations ?? 0) + (q.applied ?? 0);
     lines.push(
-      `${total} total · Everyday AI ${everyday} (foundations ${q.foundations ?? 0}, applied ${q.applied ?? 0}) · Connect or Build ${q.builder ?? 0}`,
+      `${total} total · foundations ${q.foundations ?? 0} · applied ${q.applied ?? 0} · builder ${q.builder ?? 0}`,
     );
   } else lines.push(`Unavailable: ${d.quiz.error}`);
 

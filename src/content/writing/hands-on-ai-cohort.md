@@ -15,7 +15,7 @@ Not "explain what a large language model is." They've read those articles. They 
 
 So I'm running a small, hands-on AI cohort. The [quiz](/ai-quiz) tells me who's coming and what they need, and points you to the track that fits.
 
-**[Take the quiz →](/ai-quiz)** It's nine questions and takes about four minutes.
+**[Take the quiz →](/ai-quiz)** It's ten questions and takes about four minutes.
 
 Already know which track you want? **[Reserve a seat →](/ai-training/)** Reserving is open now: a $25 deposit, fully refundable, holds your place, and the first slot starts Monday, January 11, 2027.
 

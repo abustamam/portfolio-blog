@@ -5,7 +5,7 @@ import { parseSubmission, type Row } from '../src/validate';
 
 const body = {
   frequency: 'daily', tools: ['claude', 'api'], wrongAnswer: 'reprompted-and-verified', prompt: 'rich',
-  files: 'checked-output', connected: 'automation', weeklyTask: 'Event *management* <b>', neverPaste: ['passwords'],
+  files: 'checked-output', connected: 'automation', goal: 'inbox', weeklyTask: 'Event *management* <b>', neverPaste: ['passwords'],
   format: 'online', start: 'exploring', payer: 'unsure', price: 'under-100',
   name: 'Test Person', contact: 'test@example.com', website: '',
 };
@@ -20,11 +20,15 @@ const post = (handle: (r: Request) => Promise<Response>, b: unknown = body) =>
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('formatNotification', () => {
-  test('names the person, track, score and task, and leaves contact details out', () => {
+  test('names the person, recommended track, goal, level, score and task, and leaves contact details out', () => {
     const text = formatNotification(row);
     expect(text).toContain('New AI quiz response: Test Person');
-    expect(text).toContain('Track: Builder (score 14/15), privacy gap');
-    expect(text).toContain('Payer: unsure · Start: exploring · Format: online · Price: under-100');
+    expect(text).toContain('Recommended: Connect · Goal: inbox');
+    expect(text).toContain('Level: Builder (score 14/15), privacy gap');
+    expect(text).toContain('Payer: unsure · Start: exploring');
+    // The quiz no longer asks for a format or a price.
+    expect(text).not.toContain('Format:');
+    expect(text).not.toContain('Price:');
     expect(text).toContain('Task: Event *management* <b>');
     expect(text).toContain('Left contact details: yes');
     expect(text).not.toContain('test@example.com');

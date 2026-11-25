@@ -8,8 +8,14 @@
 
 export const WAITLIST_LIMITS = { name: 120, contact: 160, note: 400, source: 60 } as const;
 
-/** Where a sign-up came from: the guides hub, one guide by its id, or the quiz result for a track. */
-export const SOURCE = /^(guides-hub|guide:[a-z0-9-]{1,50}|quiz:(foundations|applied|builder))$/;
+/**
+ * Where a sign-up came from: the guides hub, one guide by its id, or the quiz
+ * result. The quiz tags it with the /ai-training/ track it recommended
+ * (`everyday`, `connect`, `build`). Rows from before the goal question carry
+ * the skill level instead (`foundations`, `applied`, `builder`), and a cached
+ * page may still send those.
+ */
+export const SOURCE = /^(guides-hub|guide:[a-z0-9-]{1,50}|quiz:(everyday|connect|build|foundations|applied|builder))$/;
 
 export interface WaitlistRow {
   /** Required on the cohort waitlist; the guides form has no name field. */

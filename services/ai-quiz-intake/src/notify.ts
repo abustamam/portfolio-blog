@@ -1,5 +1,6 @@
 // Tells the cohort runner a new response arrived. Optional: the service runs
 // without it, and a failed notification never fails the submission.
+import { OFFER_NAMES } from '../../../src/utils/aiQuiz';
 import type { Row } from './validate';
 import { INTAKE_OPTIONS, type IntakeRow } from './intake';
 import type { WaitlistRow } from './waitlist';
@@ -16,8 +17,10 @@ export function formatNotification(row: Row): string {
   const one = (k: string) => (typeof a[k] === 'string' ? (a[k] as string) : '—');
   return [
     `New AI quiz response: ${row.name ?? '(no name)'}`,
-    `Track: ${TRACK_NAMES[row.track]} (score ${row.score}/15)${row.privacyGap ? ', privacy gap' : ''}`,
-    `Payer: ${one('payer')} · Start: ${one('start')} · Format: ${one('format')} · Price: ${one('price')}`,
+    // The track the result screen named, and the answer that picked it ("—" when they were not sure or not asked).
+    `Recommended: ${OFFER_NAMES[row.recommend]} · Goal: ${one('goal')}`,
+    `Level: ${TRACK_NAMES[row.track]} (score ${row.score}/15)${row.privacyGap ? ', privacy gap' : ''}`,
+    `Payer: ${one('payer')} · Start: ${one('start')}`,
     `Task: ${row.weeklyTask}`,
     row.contact ? 'Left contact details: yes' : 'Left contact details: no',
   ].join('\n');
