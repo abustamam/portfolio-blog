@@ -1,0 +1,105 @@
+---
+title: AI for your job search
+description: "Use AI on one job application: tailor your résumé, write a cover letter in your own words, practise the interview and track where you applied."
+lead: "Take one job posting and use an AI tool on it from start to finish: a résumé tailored to that posting, a cover letter that still sounds like you, interview practice with follow-up questions, and a simple sheet to track where you applied."
+step: 6
+minutes: 7
+tool: Prompt builder
+ctaLine: "This is one application. The hands-on training makes it your weekly routine."
+---
+import PromptBuilder from '../../components/guides/PromptBuilder.astro';
+import { assemblePrompt } from '../../utils/promptBuilder';
+import {
+  JOB_SEARCH_PRESETS, JOB_SEARCH_CHECK_LINES, TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE, TRACKER_COLUMNS,
+} from '../../consts/guides/jobSearchPresets';
+
+## Before you paste anything
+
+A résumé is mostly about you, and what you share about yourself is your call. Three things should come out before any of it goes into an AI chat:
+
+- **Your references.** Their names, phone numbers and emails. They agreed to take a call from an employer, not to be pasted into an AI tool. Leave them off completely.
+- **Your current employer's data.** Client names, internal figures, documents from work. Describe what you did ("kept the client list up to date") without pasting the list.
+- **Your full address, phone and email.** Delete the contact block at the top of your résumé before you paste it, and add it back at the end. The tool does not need it to do the work.
+
+The same rules apply to everything else you paste. See [what never to paste into an AI chat](/ai-guides/never-paste/).
+
+## The example on this page
+
+<p class="ai-label">Illustration</p>
+
+Every prompt on this page uses one invented person and one invented job. Nothing in them is real. The person is going back to work after five years at home with their children, and is applying to be a front desk coordinator at a community health clinic. Read each prompt to see the shape, then swap in your own résumé and your own posting.
+
+## 1. Tailor your résumé to one posting
+
+Paste the posting and your résumé, and ask the tool to reorder and reword what is already there. The important part is the last line: it asks the tool to list anything it added. AI tools sometimes add a skill or a number you never gave them, and it reads just as confidently as the true parts.
+
+<pre><code>{assemblePrompt(TAILOR_RESUME)}</code></pre>
+
+<p><button type="button" class="ai-link" data-prompt-fill="tailor-resume" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
+
+When the list comes back, check it, then read the new résumé side by side with your original anyway. The list can miss things. Anything you cannot back up in an interview comes out.
+
+## 2. A cover letter that doesn't read as AI
+
+A cover letter reads as AI when the tool writes the content. So give it the content: why you want this job, what you bring, and anything you want to explain, in your own rough words. The tool's job is only the order and the structure.
+
+<pre><code>{assemblePrompt(COVER_LETTER)}</code></pre>
+
+<p><button type="button" class="ai-link" data-prompt-fill="cover-letter" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
+
+Then cut:
+
+- Any sentence you would not say out loud to the person interviewing you.
+- Any claim that is not in your notes.
+- Stock openings and closings, and big words you never use.
+- Lines that repeat your résumé. The letter is for the why; the résumé already has the what.
+
+Read what is left out loud. If it does not sound like you, change the words until it does.
+
+## 3. Practise the interview
+
+One prompt turns the tool into an interviewer. It asks a question, waits for your answer, then asks a follow-up, the way a real interviewer digs into what you said. Answer the way you would in the room, not the way you would write it.
+
+<pre><code>{assemblePrompt(INTERVIEW_PRACTICE)}</code></pre>
+
+<p><button type="button" class="ai-link" data-prompt-fill="interview-practice" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
+
+The feedback is a starting point, not a verdict. The tool does not know the clinic or the person who will interview you.
+
+## Build your prompt
+
+Tap one of the three examples, then replace the invented details with your own: your situation, your posting, your résumé or notes. Your prompt appears underneath as you type. Copy it into whichever AI tool you use. New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one.
+
+<PromptBuilder
+  presets={JOB_SEARCH_PRESETS}
+  checkLines={JOB_SEARCH_CHECK_LINES}
+  storageKey="job-search"
+  id="job-search-builder"
+  chipsNote="These examples are an illustration: an invented person and an invented job. Tap one, then change it to fit your own application."
+/>
+
+## 4. Keep track of your applications
+
+A plain sheet with one row per application is enough. These are the columns:
+
+<table data-tracker-columns>
+  <thead><tr><th>Column</th><th>What goes in it</th></tr></thead>
+  <tbody>
+    {TRACKER_COLUMNS.map((c) => <tr><td>{c.name}</td><td>{c.note}</td></tr>)}
+  </tbody>
+</table>
+
+<p><a class="cohort-cta" href="/downloads/job-application-tracker.csv" download="job-application-tracker.csv">Download the tracker (CSV)</a></p>
+
+The file has the column names and nothing else. Open it in Google Sheets (File, then Import) or in Excel. The sheet is for you, not for the AI tool: keep it out of the chat.
+
+## Before you send
+
+Tick each one before you press Send on the application. The ticks are not saved anywhere; they clear when you leave the page.
+
+<ul class="contains-task-list" data-before-send>
+  <li class="task-list-item"><label><input type="checkbox" /> Every claim is true, and I could talk about it in an interview.</label></li>
+  <li class="task-list-item"><label><input type="checkbox" /> The dates and job titles match my original résumé.</label></li>
+  <li class="task-list-item"><label><input type="checkbox" /> Nothing was invented: no new skills, numbers or qualifications.</label></li>
+  <li class="task-list-item"><label><input type="checkbox" /> No reference names or contact details went into the AI tool.</label></li>
+</ul>
