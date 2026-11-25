@@ -120,10 +120,10 @@ test.describe('never-paste: one source for the guide and the cohort handout', ()
 
   test('both pages show the same table and three steps; the handout stays unlisted', async ({ page }) => {
     await page.goto('/ai-cohort/never-paste/');
-    const cohortTable = await page.locator('article table').innerHTML();
+    const cohortTable = await page.locator('article table').first().innerHTML();
     const cohortSteps = await steps(page);
     await page.goto('/ai-guides/never-paste/');
-    const guideTable = await page.locator('article table').innerHTML();
+    const guideTable = await page.locator('article table').first().innerHTML();
     const guideSteps = await steps(page);
 
     expect(cohortTable).toContain('Never paste');

@@ -16,3 +16,18 @@ test('header wordmark is outlined and TECHNOLOGY is justified to BUSTAMAM', asyn
   expect(Math.abs(box.topL - box.subL)).toBeLessThan(1);
   expect(Math.abs(box.topR - box.subR)).toBeLessThan(1);
 });
+
+test.describe('wordmark draw animation', () => {
+  test('plays on the first page of a session, not on the next', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.brand-logo-wrap')).toHaveClass(/is-drawing/);
+    await page.goto('/writing');
+    await expect(page.locator('.brand-logo-wrap')).not.toHaveClass(/is-drawing/);
+  });
+
+  test('never plays under prefers-reduced-motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await expect(page.locator('.brand-logo-wrap')).not.toHaveClass(/is-drawing/);
+  });
+});
