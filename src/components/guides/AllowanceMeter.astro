@@ -1,0 +1,274 @@
+---
+// "Allowance meter": the same job done three ways as static bars (always
+// rendered, so the point lands with JavaScript off), and below them a meter you
+// can drain yourself (shown only when the script runs).
+// All arithmetic is in src/utils/allowance.ts. The numbers are made up.
+import { ACTIONS, ALLOWANCE, JOB_FOLLOW_UPS, scenarioTotals } from '../../utils/allowance';
+
+const bars = scenarioTotals().map(({ scenario, result }) => {
+  // One segment per message. A message that would pass the allowance is drawn
+  // only as far as the allowance goes, and marked.
+  let used = 0;
+  const segments = result.steps
+    .map((cost, i) => {
+      const room = Math.max(0, ALLOWANCE - used);
+      const drawn = Math.min(cost, room);
+      const cut = cost > room;
+      used += cost;
+      return { cost, drawn, cut, first: i === 0 };
+    })
+    .filter((s) => s.drawn > 0);
+  return { scenario, result, segments };
+});
+---
+
+<section class="allowance" aria-label="Allowance meter">
+  <div class="allowance__static" data-al-static>
+    <p class="allowance__intro">
+      The same job three ways: attach a 40-page PDF and ask one question, then ask {JOB_FOLLOW_UPS} more about it. Each bar is a
+      day's allowance of {ALLOWANCE}.
+    </p>
+    {bars.map(({ scenario, result, segments }) => (
+      <figure class="allowance__row" data-scenario={scenario.id} data-total={result.total} data-spent={result.spent}>
+        <figcaption class="allowance__caption">
+          <span class="allowance__name">{scenario.label}</span>
+          <span class="allowance__num">
+            {result.cutOffAtMessage === null ? (
+              <>
+                <b data-al-total>{result.total}</b> of {ALLOWANCE}
+              </>
+            ) : (
+              <>
+                <b data-al-total>{result.total}</b> needed, cut off at {ALLOWANCE}
+              </>
+            )}
+          </span>
+        </figcaption>
+        <div class="allowance__track" role="img" aria-label={`${scenario.label}: ${result.total} of ${ALLOWANCE}${result.cutOffAtMessage === null ? '' : ', cut off at ' + ALLOWANCE}`}>
+          {segments.map((s) => (
+            <span
+              class:list={['allowance__seg', { 'allowance__seg--cut': s.cut, 'allowance__seg--pdf': s.first }]}
+              style={`flex: ${s.drawn} 0 0`}
+            />
+          ))}
+        </div>
+        <p class="allowance__note">
+          {scenario.note}
+          {result.cutOffAtMessage !== null && (
+            <>
+              {' '}
+              The limit arrives during further question {result.cutOffAtMessage - 1}, so only {result.followUpsDone} of {JOB_FOLLOW_UPS} get an answer.
+            </>
+          )}
+        </p>
+      </figure>
+    ))}
+  </div>
+
+  <div class="allowance__meter" data-allowance hidden>
+    <h3 class="allowance__title">Try it</h3>
+    <p class="allowance__hint">Add things to your day and watch the bar drain. The switches change what you add next.</p>
+
+    <p class="allowance__label" id="al-label">Your allowance until it refills</p>
+    <div
+      class="allowance__bar"
+      role="meter"
+      aria-labelledby="al-label"
+      aria-valuemin="0"
+      aria-valuemax={ALLOWANCE}
+      aria-valuenow={ALLOWANCE}
+      data-al-bar
+    >
+      <div class="allowance__fill" data-al-fill style="width:100%"></div>
+    </div>
+    <p class="allowance__left"><b data-al-left>{ALLOWANCE}</b> of {ALLOWANCE} left</p>
+
+    <div class="allowance__switches">
+      <label class="allowance__switch"><input type="checkbox" data-al-switch="large" /> Large model <span>x3</span></label>
+      <label class="allowance__switch"><input type="checkbox" data-al-switch="thinking" /> Thinking setting <span>x2</span></label>
+      <label class="allowance__switch"><input type="checkbox" data-al-switch="longChat" /> The chat is already long <span>+3 each message</span></label>
+    </div>
+
+    <div class="allowance__actions" data-al-actions>
+      {ACTIONS.map((a) => (
+        <button type="button" class="allowance__btn" data-al-action={a.id} data-units={a.units}>
+          <span>{a.label}</span>
+          <span class="allowance__cost" data-al-cost>{a.units}</span>
+        </button>
+      ))}
+    </div>
+
+    <p class="allowance__why">
+      Why a question in the PDF chat costs 6 and not 1: each time you send a message, the app rereads the file and the whole
+      conversation before it answers.
+    </p>
+
+    <p class="allowance__status" role="status" aria-live="polite" data-al-live></p>
+
+    <div class="allowance__limit" data-al-limit hidden>
+      <p class="allowance__msg">You've reached your limit. Try again at 4:00 pm.</p>
+      <div class="allowance__timeline" aria-hidden="true">
+        <span class="allowance__tl-line"></span>
+        <span class="allowance__tl-pt allowance__tl-pt--now">Now<br />0 left</span>
+        <span class="allowance__tl-pt allowance__tl-pt--then">4:00 pm<br />refilled</span>
+      </div>
+      <button type="button" class="allowance__btn allowance__btn--wait" data-al-wait>Wait for the refill</button>
+    </div>
+
+    <div class="allowance__spent">
+      <p class="allowance__label">What you spent</p>
+      <p class="allowance__empty" data-al-empty>Nothing yet.</p>
+      <ol class="allowance__log" data-al-log></ol>
+    </div>
+
+    <button type="button" class="allowance__btn allowance__btn--ghost" data-al-reset>Start over</button>
+  </div>
+
+  <p class="allowance__made-up">These numbers are made up to show the proportions. No app publishes its limits this way.</p>
+</section>
+
+<script>
+  import { ACTIONS, ALLOWANCE, costOf, spend, type ActionId, type Switches } from '../../utils/allowance';
+
+  const root = document.querySelector<HTMLElement>('[data-allowance]');
+  if (root) {
+    const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const fill = q('[data-al-fill]');
+    const bar = q('[data-al-bar]');
+    const left = q('[data-al-left]');
+    const live = q('[data-al-live]');
+    const limit = q('[data-al-limit]');
+    const log = q('[data-al-log]');
+    const empty = q('[data-al-empty]');
+    const wait = q<HTMLButtonElement>('[data-al-wait]');
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-al-action]')];
+    const boxes = [...root.querySelectorAll<HTMLInputElement>('[data-al-switch]')];
+
+    let remaining = ALLOWANCE;
+    let atLimit = false;
+
+    const switches = (): Switches => ({
+      large: root.querySelector<HTMLInputElement>('[data-al-switch="large"]')!.checked,
+      thinking: root.querySelector<HTMLInputElement>('[data-al-switch="thinking"]')!.checked,
+      longChat: root.querySelector<HTMLInputElement>('[data-al-switch="longChat"]')!.checked,
+    });
+
+    function render() {
+      const sw = switches();
+      fill.style.width = `${(remaining / ALLOWANCE) * 100}%`;
+      bar.setAttribute('aria-valuenow', String(remaining));
+      left.textContent = String(remaining);
+      limit.hidden = !atLimit;
+      empty.hidden = log.children.length > 0;
+      for (const b of buttons) {
+        b.disabled = atLimit;
+        b.querySelector('[data-al-cost]')!.textContent = String(costOf(Number(b.dataset.units), sw));
+      }
+    }
+
+    function add(id: ActionId) {
+      if (atLimit) return;
+      const action = ACTIONS.find((a) => a.id === id)!;
+      const sw = switches();
+      const res = spend(remaining, action.units, sw);
+      remaining = res.remaining;
+      const li = document.createElement('li');
+      li.textContent = res.hitLimit
+        ? `${action.label}: needed ${res.cost}, only ${res.charged} left`
+        : `${action.label}: ${res.cost}`;
+      log.append(li);
+      if (res.hitLimit || remaining === 0) {
+        atLimit = true;
+        live.textContent = `You've reached your limit. Try again at 4:00 pm. ${action.label} needed ${res.cost}.`;
+        render();
+        wait.focus();
+      } else {
+        live.textContent = `Spent ${res.cost}. ${remaining} of ${ALLOWANCE} left.`;
+        render();
+      }
+    }
+
+    function refill(message: string, focus: HTMLElement) {
+      remaining = ALLOWANCE;
+      atLimit = false;
+      log.replaceChildren();
+      live.textContent = message;
+      render();
+      focus.focus();
+    }
+
+    for (const b of buttons) b.addEventListener('click', () => add(b.dataset.alAction as ActionId));
+    for (const c of boxes) c.addEventListener('change', render);
+    wait.addEventListener('click', () => refill(`It is 4:00 pm. Your allowance is back: ${ALLOWANCE} of ${ALLOWANCE}.`, buttons[0]));
+    q('[data-al-reset]').addEventListener('click', () => refill(`Started over: ${ALLOWANCE} of ${ALLOWANCE} left.`, buttons[0]));
+
+    root.hidden = false;
+    render();
+  }
+</script>
+
+<style is:global>
+  .allowance { margin: 2rem 0 2.5rem; padding: 1.25rem; border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-surface); }
+  .allowance__intro { margin: 0 0 1rem; font-size: 1rem; }
+  .allowance__row { margin: 0 0 1.25rem; }
+  .allowance__caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1rem; margin: 0 0 .4rem; }
+  .allowance__name { font-family: var(--font-serif); font-size: 1.05rem; color: var(--color-ink); }
+  .allowance__num { font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); }
+  .allowance__num b { font-size: 1.1rem; color: var(--color-ink); }
+  .allowance__track {
+    display: flex; gap: 2px; height: 1.5rem; border: 1px solid var(--color-line); border-radius: 4px; overflow: hidden;
+    background: var(--color-bg);
+  }
+  .allowance__seg { display: block; min-width: 0; background: var(--color-accent); }
+  .allowance__seg--pdf { background: var(--color-accent-ink); }
+  .allowance__seg--cut {
+    background: repeating-linear-gradient(135deg, var(--color-danger) 0 5px, transparent 5px 9px);
+    outline: 1px solid var(--color-danger); outline-offset: -1px;
+  }
+  .allowance__note { margin: .4rem 0 0; font-size: 15px; color: var(--color-mute); }
+
+  .allowance__meter { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-line); }
+  .allowance__meter[hidden], .allowance__limit[hidden], .allowance__empty[hidden] { display: none; }
+  .allowance__title { margin: 0 0 .25rem !important; }
+  .allowance__hint { margin: 0 0 1rem; font-size: 1rem; }
+  .allowance__label { margin: 0 0 .4rem; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  .allowance__bar { height: 2rem; border: 1px solid var(--color-line); border-radius: 4px; overflow: hidden; background: var(--color-bg); }
+  .allowance__fill { height: 100%; background: var(--color-accent); }
+  @media (prefers-reduced-motion: no-preference) { .allowance__fill { transition: width .35s ease; } }
+  .allowance__left { margin: .4rem 0 1rem; font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); }
+  .allowance__left b { font-size: 1.1rem; color: var(--color-ink); }
+  .allowance__switches { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; }
+  .allowance__switch {
+    display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding: .25rem .875rem; cursor: pointer;
+    border: 1px solid var(--color-line); border-radius: 8px; font-size: 1rem; color: var(--color-ink); background: var(--color-bg);
+  }
+  .allowance__switch span { font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); }
+  .allowance__switch input { width: 1.125rem; height: 1.125rem; accent-color: var(--color-accent); }
+  .allowance__actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .5rem; margin: 0 0 1rem; }
+  .allowance__btn {
+    display: flex; justify-content: space-between; align-items: center; gap: .75rem; text-align: left; min-height: 44px; padding: .5rem .875rem;
+    font-family: inherit; font-size: 1rem; line-height: 1.35; color: var(--color-ink); background: var(--color-bg);
+    border: 1px solid var(--color-line); border-radius: 8px; cursor: pointer;
+  }
+  .allowance__btn:hover:not(:disabled) { border-color: var(--color-accent); }
+  .allowance__btn:disabled { opacity: .5; cursor: not-allowed; }
+  .allowance__cost { flex: none; font-family: var(--font-mono); font-size: 13px; color: var(--color-accent); }
+  .allowance__why { margin: 0 0 1rem; font-size: 1rem; }
+  .allowance__status { min-height: 1.5em; margin: 0 0 .75rem; font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); }
+  .allowance__limit { margin: 0 0 1rem; padding: 1rem; border-left: 2px solid var(--color-danger); background: var(--color-bg); border-radius: 0 6px 6px 0; }
+  .allowance__msg { margin: 0 0 1rem; font-weight: 600; color: var(--color-ink); }
+  .allowance__timeline { position: relative; height: 3.5rem; margin: 0 1.5rem 1rem; }
+  .allowance__tl-line { position: absolute; left: 0; right: 0; top: .5rem; height: 2px; background: var(--color-line); }
+  .allowance__tl-pt { position: absolute; top: 0; font-family: var(--font-mono); font-size: 12px; line-height: 1.3; color: var(--color-mute); }
+  .allowance__tl-pt::before { content: ''; display: block; width: .75rem; height: .75rem; margin: 0 0 .35rem; border-radius: 50%; background: var(--color-danger); }
+  .allowance__tl-pt--now { left: 0; }
+  .allowance__tl-pt--then { right: 0; text-align: right; }
+  .allowance__tl-pt--then::before { background: var(--color-accent); margin-left: auto; }
+  .allowance__btn--wait { display: inline-flex; background: var(--color-accent-bg); border-color: var(--color-accent); }
+  .allowance__btn--ghost { display: inline-flex; background: transparent; }
+  .allowance__spent { margin: 0 0 1rem; }
+  .allowance__empty { margin: 0; font-size: 15px; color: var(--color-mute); }
+  .allowance__log { margin: 0; padding-left: 1.25rem; font-size: 15px; }
+  .allowance__log li { margin: 0 0 .2rem; overflow-wrap: anywhere; }
+  .allowance__made-up { margin: 1.25rem 0 0; font-size: 15px; color: var(--color-mute); }
+</style>
