@@ -139,18 +139,26 @@ test.describe('hub in the page', () => {
   });
 
   test('with several guides published, the recommended one moves to the top and back', async ({ page }) => {
-    // Only some guides are on this branch, so serve the hub with extra cards to see the reorder.
+    // Only some guides are on this branch, so serve the hub with a fake card for each of the three
+    // that is not published yet. A guide that is really there is never injected, so ids stay unique
+    // and the test holds whether each of the three is real or fake.
     const extra = (id: string, step: number) =>
       `<li data-guide-id="${id}" data-step="${step}"><a class="hub-card" href="/ai-guides/${id}/" data-guide-card="${id}"><span data-start-badge hidden>Start here</span><span data-visited-tick hidden>Read</span><span class="hub-card__title">${id}</span></a></li>`;
+    const wanted = [['prompt', 50], ['when-ai-is-wrong', 51], ['which-tool', 52]] as const;
     await page.route('**/ai-guides/', async (route) => {
       const res = await route.fetch();
-      const html = (await res.text()).replace(/(data-guide-list[^>]*>[\s\S]*?)<\/ol>/, `$1${extra('prompt', 50)}${extra('when-ai-is-wrong', 51)}${extra('which-tool', 52)}</ol>`);
+      const served = await res.text();
+      const fakes = wanted.filter(([id]) => !served.includes(`data-guide-id="${id}"`)).map(([id, step]) => extra(id, step)).join('');
+      const html = served.replace(/(data-guide-list[^>]*>[\s\S]*?)<\/ol>/, `$1${fakes}</ol>`);
       await route.fulfill({ response: res, body: html });
     });
     await page.goto('/ai-guides/');
     const ids = () => page.locator('[data-guide-list] > li').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.guideId));
     const before = await ids();
-    expect(before.slice(-3)).toEqual(['prompt', 'when-ai-is-wrong', 'which-tool']);
+    expect(new Set(before).size).toBe(before.length); // no duplicate ids, real or fake
+    for (const [id] of wanted) expect(before).toContain(id);
+    expect(before[0]).not.toBe('when-ai-is-wrong'); // not first until the reader answers
+    await expect(page.locator('[data-recommended]')).toHaveCount(0);
     await page.locator('[data-start-here] [data-experience="often"]').click();
     const after = await ids();
     expect(after[0]).toBe('when-ai-is-wrong');
@@ -198,6 +206,9 @@ test.describe('hub in the page', () => {
     await page.goto('/ai-guides/');
     const hrefs = await page.locator('[data-guide-list] a[data-guide-card]').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
     expect(hrefs).toEqual(byStep(REAL).map((g) => `/ai-guides/${g.id}/`));
+    const cardLinks = page.locator('[data-guide-list] a[data-guide-card]');
+    expect(await cardLinks.count()).toBe(REAL.length);
+    for (const link of await cardLinks.all()) await expect(link).toBeVisible(); // listed and actually shown, not just in the markup
     await expect(page.locator('[data-start-here]')).toBeHidden(); // needs JS, so it stays out of the way
     await expect(page.locator('[data-visited-tick]:visible')).toHaveCount(0);
     await expect(page.locator('a[href="/ai-quiz/"]')).toBeVisible();
