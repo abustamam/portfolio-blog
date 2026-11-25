@@ -1,4 +1,4 @@
-import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -13,11 +13,6 @@ const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const SCRIPT = join(ROOT, 'scripts/check-glossary-terms.mjs');
 const GUIDES = join(ROOT, 'src/content/guides');
 
-// The five "start from zero" posts were written before the check and may not be
-// edited by the audit (#122). Their findings are printed as warnings, not
-// failures, until a follow-up marks them. Remove an id here once its post is clean.
-const SOFT = ['does-it-remember', 'first-ten-minutes', 'photos-files-voice', 'usage-limits', 'what-is-ai'];
-
 const check = (args: string[] = []) => spawnSync('node', [SCRIPT, ...args], { encoding: 'utf8' });
 
 test.describe('guide jargon check', () => {
@@ -29,19 +24,10 @@ test.describe('guide jargon check', () => {
   });
 
   test('every guide is clean', () => {
-    const r = check(['--soft', SOFT.join(',')]);
+    const r = check();
     if (r.stderr) console.log(r.stderr);
     expect(r.status, r.stderr).toBe(0);
     expect(r.stdout).toContain('guides clean');
-  });
-
-  test('only the five start-from-zero posts are soft', () => {
-    expect([...SOFT].sort()).toEqual(['does-it-remember', 'first-ten-minutes', 'photos-files-voice', 'usage-limits', 'what-is-ai']);
-    const guides = readdirSync(GUIDES).filter((f) => f.endsWith('.mdx')).map((f) => f.replace(/\.mdx$/, ''));
-    for (const id of SOFT) expect(guides, id).toContain(id);
-    for (const id of ['examples', 'job-search', 'never-paste', 'prompt', 'when-ai-is-wrong', 'which-model', 'which-tool']) {
-      expect(SOFT, id).not.toContain(id);
-    }
   });
 
   test('every allowlist entry has a reason and a sentence', () => {
@@ -56,14 +42,14 @@ test.describe('guide jargon check', () => {
     const dir = mkdtempSync(join(tmpdir(), 'jargon-'));
     try {
       cpSync(GUIDES, dir, { recursive: true });
-      const file = join(dir, 'job-search.mdx');
+      const file = join(dir, 'does-it-remember.mdx'); // a start-from-zero post
       const src = readFileSync(file, 'utf8');
       expect(src).toContain('<Term>chat app</Term>');
       writeFileSync(file, src.replace('<Term>chat app</Term>', 'chat app'));
-      const r = check(['--dir', dir, '--soft', SOFT.join(',')]);
+      const r = check(['--dir', dir]);
       console.log(r.stderr);
       expect(r.status).toBe(1);
-      expect(r.stderr).toContain('job-search.mdx');
+      expect(r.stderr).toContain('does-it-remember.mdx');
       expect(r.stderr).toContain('"chat app"');
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -94,5 +80,36 @@ test.describe('guide jargon check', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  const sample = (lines: string[]) => {
+    const dir = mkdtempSync(join(tmpdir(), 'jargon-'));
+    try {
+      writeFileSync(join(dir, 'sample.mdx'), ['---', 'title: Sample', '---', '', ...lines, ''].join('\n'));
+      return check(['--dir', dir]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  test('a bold lead-in that is exactly the term counts as defining it', () => {
+    expect(sample(['- **Prompt.** What you type to it.', '- **Model.** The part that writes.']).status).toBe(0);
+    // Not exactly the term: still a finding.
+    const r = sample(['- **A good prompt.** What you type to it.']);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('"prompt"');
+  });
+
+  test('a bold lead-in counts when the same list item marks the term', () => {
+    expect(sample(['- **The large model.** A <Term>model</Term> writes the answers.', '- **A thinking setting.** The <Term id="thinking">thinking setting</Term> helps.']).status).toBe(0);
+    // The term is marked in the next item, not this one: still a finding.
+    const r = sample(['- **The large model.** It writes the answers.', '- **Another.** A <Term>model</Term> writes.']);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('"model"');
+  });
+
+  test('--soft is gone: a guide cannot be made warn-only', () => {
+    const src = readFileSync(SCRIPT, 'utf8');
+    expect(src).not.toMatch(/soft/i);
   });
 });

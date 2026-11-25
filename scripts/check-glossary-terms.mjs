@@ -11,9 +11,11 @@
 // expressions, headings, link text, inline and fenced code, <pre>/<code>/
 // <style>/<script> blocks and HTML tags (so attribute values are skipped).
 //
-// Usage: node scripts/check-glossary-terms.mjs [--dir <guidesDir>] [--allow <file>] [--soft a,b] [--list-excludes]
-// --soft: guides whose findings are printed as warnings and do not fail the run (for guides
-// this change may not edit; the spec names them and the PR reports them).
+// A bold lead-in at the start of a list item ("- **Prompt.** What you type...")
+// counts as marking the term when it is exactly the term, or when the same item
+// marks the term with <Term> (#141).
+//
+// Usage: node scripts/check-glossary-terms.mjs [--dir <guidesDir>] [--allow <file>] [--list-excludes]
 // Exit 0 when clean, 1 on findings, 2 on a bad allowlist or setup.
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -158,6 +160,28 @@ export function loadAllow(path) {
   return { entries, problems };
 }
 
+/**
+ * Bold lead-ins ("- **Prompt.** What you type...") that define their own term:
+ * the lead-in is exactly the term, or the same list item marks the term with <Term>.
+ * Such an occurrence is the term's definition, so it counts as marked.
+ */
+function markLeadIns(text, occ) {
+  const itemRe = /^[ \t]*(?:[-*+]|\d+[.)])[ \t]+\*\*([^*\n]+)\*\*/gm;
+  for (const m of text.matchAll(itemRe)) {
+    const from = m.index + m[0].indexOf('**');
+    const to = from + m[1].length + 4;
+    const rest = text.slice(m.index + m[0].length);
+    const end = m.index + m[0].length + (rest.search(/\n[ \t]*(?:[-*+]|\d+[.)])[ \t]|\n[ \t]*\n/) + 1 || rest.length + 1) - 1;
+    const bare = m[1].trim().replace(/[.:]$/, '').trim().toLowerCase();
+    for (const o of occ) {
+      if (o.marked || o.start < from || o.end > to) continue;
+      const exact = o.text.toLowerCase() === bare;
+      const marksInItem = occ.some((x) => x.marked && x.entry === o.entry && x.start >= to && x.end <= end);
+      if (exact || marksInItem) o.marked = true;
+    }
+  }
+}
+
 /** Check one guide. Returns { findings, used } where used = allowlist entries that matched. */
 export function checkGuide(id, source, glossary, allow) {
   const { text, terms } = extract(source, glossary);
@@ -172,6 +196,7 @@ export function checkGuide(id, source, glossary, allow) {
     }
   }
   occ.sort((a, b) => a.start - b.start);
+  markLeadIns(text, occ);
 
   for (const entry of glossary) {
     if (entry.guide === id) continue; // the home guide explains it itself
@@ -200,28 +225,27 @@ export function checkGuide(id, source, glossary, allow) {
 }
 
 // ------------------------------------------------------------------- main
-export function run({ dir, allowPath, glossaryPath, soft = [] } = {}) {
+export function run({ dir, allowPath, glossaryPath } = {}) {
   const guidesDir = dir ?? join(ROOT, 'src/content/guides');
   const glossary = loadGlossary(glossaryPath);
   const { entries: allow, problems } = loadAllow(allowPath ?? join(ROOT, 'scripts/glossary-terms-allow.json'));
   const excluded = new Set(EXCLUDES.map((e) => e.file));
   const files = readdirSync(guidesDir).filter((f) => f.endsWith('.mdx') && !excluded.has(f)).sort();
   const lines = [...problems];
-  const warnings = [];
   const used = new Set();
   for (const f of files) {
     const id = basename(f, '.mdx');
     const source = readFileSync(join(guidesDir, f), 'utf8');
     const res = checkGuide(id, source, glossary, allow);
     res.used.forEach((i) => used.add(i));
-    for (const x of res.findings) (soft.includes(id) ? warnings : lines).push(`${f}:${x.line}: ${x.msg}`);
+    for (const x of res.findings) lines.push(`${f}:${x.line}: ${x.msg}`);
   }
   allow.forEach((a, i) => {
     if (!used.has(i) && guidesDir === join(ROOT, 'src/content/guides')) {
       lines.push(`allowlist entry ${i + 1} (${a.guide}, "${a.term}") matches nothing: remove it or fix its sentence`);
     }
   });
-  return { files, lines, warnings };
+  return { files, lines };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -238,8 +262,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     console.error(`check-glossary-terms: ${dir} does not exist`);
     process.exit(2);
   }
-  const { files, lines, warnings } = run({ dir, allowPath: arg('--allow'), soft: (arg('--soft') ?? '').split(',').filter(Boolean) });
-  for (const w of warnings) console.warn(`warning: ${w}`);
+  const { files, lines } = run({ dir, allowPath: arg('--allow') });
   if (lines.length) {
     console.error(`check-glossary-terms: ${lines.length} problem(s) in ${files.length} guides\n`);
     for (const l of lines) console.error(l);
