@@ -25,7 +25,7 @@ async function fill(page: Page) {
   await pick(page, 'tools', 'gemini-free');
   await pick(page, 'tools', 'chatgpt-paid');
   await pick(page, 'workRestricts', 'not-sure');
-  await pick(page, 'track', 'applied');
+  await pick(page, 'track', 'everyday');
   await page.locator('input[name="recordingConsent"]').check();
 }
 
@@ -47,11 +47,11 @@ test.describe('cohort intake', () => {
     }
   });
 
-  test('shows the schedule and no email address or phone number', async ({ page }) => {
+  test('asks for it a week ahead, names no fixed dates, and shows no email address or phone number', async ({ page }) => {
     await page.goto(PATH);
-    await expect(page.locator('#intake-schedule')).toContainText('Jan 11, Jan 18, Jan 25, Feb 1, 2027');
-    await expect(page.locator('#intake-schedule')).toContainText('6:30–8:00pm Pacific');
-    await expect(page.locator('#intake-intro')).toContainText('January 4, 2027');
+    await expect(page.locator('#intake-intro')).toContainText('at least a week before your first session');
+    await expect(page.locator('body')).not.toContainText('January 4');
+    await expect(page.locator('body')).not.toContainText('Jan 11');
     const text = await page.locator('main, body').first().innerText();
     expect(text).not.toMatch(/[\w.+-]+@[\w-]+\.\w+/);
     expect(text).not.toMatch(/\+?\d[\d\s().-]{7,}\d/);
@@ -100,11 +100,67 @@ test.describe('cohort intake', () => {
       inputs: ['spreadsheet', 'email'],
       tools: ['gemini-free', 'chatgpt-paid'],
       workRestricts: 'not-sure',
-      track: 'applied',
+      track: 'everyday',
+      platform: '',
+      account: '',
+      os: '',
+      coding: '',
+      buildIdea: '',
       privateConcerns: '',
       recordingConsent: true,
       website: '',
     });
+  });
+
+  test('offers the three training tracks, with Connect and Build questions only for those tracks', async ({ page }) => {
+    await page.goto(PATH);
+    await expect(page.locator('input[name="track"]')).toHaveCount(3);
+    const connect = page.locator('[data-track-extra="connect"]');
+    const build = page.locator('[data-track-extra="build"]');
+    await expect(connect).toBeHidden();
+    await expect(build).toBeHidden();
+    await pick(page, 'track', 'connect');
+    await expect(connect).toBeVisible();
+    await expect(build).toBeHidden();
+    await pick(page, 'track', 'build');
+    await expect(build).toBeVisible();
+    await expect(connect).toBeHidden();
+  });
+
+  test('Connect needs its answers before sending, and POSTs them', async ({ page }) => {
+    let body: Record<string, unknown> | null = null;
+    await page.route(ENDPOINT, async (route) => {
+      body = JSON.parse(route.request().postData() ?? '{}');
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+    });
+    await page.goto(PATH);
+    await fill(page);
+    await pick(page, 'track', 'connect');
+    await page.locator('#intake-submit').click();
+    await expect(page.locator('#intake-error')).toHaveText(
+      'Please add which email and calendar you use, whether it is a work or personal account.',
+    );
+    expect(body).toBeNull();
+    await pick(page, 'platform', 'microsoft');
+    await pick(page, 'account', 'work');
+    await page.locator('#intake-submit').click();
+    await expect(page.locator('#intake-thanks')).toBeVisible();
+    expect(body).toMatchObject({ track: 'connect', platform: 'microsoft', account: 'work' });
+  });
+
+  test('Build needs its answers before sending', async ({ page }) => {
+    await page.route(ENDPOINT, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await page.goto(PATH);
+    await fill(page);
+    await pick(page, 'track', 'build');
+    await page.locator('#intake-submit').click();
+    await expect(page.locator('#intake-error')).toHaveText(
+      'Please add which computer you will use, how much code you have written.',
+    );
+    await pick(page, 'os', 'mac');
+    await pick(page, 'coding', 'none');
+    await page.locator('#intake-submit').click();
+    await expect(page.locator('#intake-thanks')).toBeVisible();
   });
 
   test('"None yet" clears the other tools', async ({ page }) => {

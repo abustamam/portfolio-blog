@@ -28,9 +28,12 @@ create table if not exists cohort_intake (
   inputs            jsonb not null,
   tools             jsonb not null,
   work_restricts    text check (work_restricts in ('yes', 'no', 'not-sure')),
-  track             text not null check (track in ('foundations', 'applied', 'builder')),
+  -- The quiz's track names (cohort 1's first form) and the /ai-training/ tracks.
+  track             text not null check (track in ('foundations', 'applied', 'builder', 'everyday', 'connect', 'build')),
   private_concerns  text,
   recording_consent boolean not null check (recording_consent),
+  -- Track-specific answers: platform/account (connect), os/coding/buildIdea (build).
+  extras            jsonb not null default '{}',
   user_agent        text
 );
 
@@ -50,3 +53,10 @@ create table if not exists cohort_waitlist (
 
 revoke all on cohort_waitlist from public;
 grant insert on cohort_waitlist to ai_quiz;
+
+-- Intake for the /ai-training/ tracks (idempotent; run on databases created
+-- before it). Keeps the quiz's track names valid for rows already stored.
+alter table cohort_intake add column if not exists extras jsonb not null default '{}';
+alter table cohort_intake drop constraint if exists cohort_intake_track_check;
+alter table cohort_intake add constraint cohort_intake_track_check
+  check (track in ('foundations', 'applied', 'builder', 'everyday', 'connect', 'build'));

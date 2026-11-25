@@ -24,15 +24,26 @@ export function formatNotification(row: Row): string {
 }
 
 const TIME_LABELS: Record<string, string> = Object.fromEntries(INTAKE_OPTIONS.timeTaken.map((o) => [o.value, o.label]));
+const INTAKE_TRACKS: Record<string, string> = Object.fromEntries(INTAKE_OPTIONS.track.map((o) => [o.value, o.label]));
+const label = (k: 'platform' | 'account' | 'os' | 'coding', v?: string) =>
+  v ? (INTAKE_OPTIONS[k] as readonly { value: string; label: string }[]).find((o) => o.value === v)?.label ?? v : null;
 
 /** Same rules as formatNotification: plain text, and no contact details. */
 export function formatIntakeNotification(row: IntakeRow): string {
   return [
     `New cohort intake: ${row.name}`,
-    `Track: ${TRACK_NAMES[row.track]}`,
+    `Track: ${INTAKE_TRACKS[row.track] ?? row.track}`,
     `Time now: ${TIME_LABELS[row.timeTaken]}`,
     `Task: ${row.weeklyTask}`,
+    ...setupLine(row.extras),
+    ...(row.extras?.buildIdea ? [`Wants to build: ${row.extras.buildIdea}`] : []),
   ].join('\n');
+}
+
+function setupLine(x: IntakeRow['extras'] | undefined): string[] {
+  const parts = [label('platform', x?.platform), label('account', x?.account), label('os', x?.os), label('coding', x?.coding)];
+  const shown = parts.filter((p): p is string => Boolean(p));
+  return shown.length ? [`Setup: ${shown.join(' · ')}`] : [];
 }
 
 /** Same rules: plain text, and no contact details. The note is the person's own words, so it stays in. */

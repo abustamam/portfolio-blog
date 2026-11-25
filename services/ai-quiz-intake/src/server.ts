@@ -42,10 +42,10 @@ const handle = createHandler({
   insertIntake: async (row, userAgent) => {
     await sql`
       insert into cohort_intake (name, contact, weekly_task, time_taken, inputs, tools, work_restricts, track,
-                                 private_concerns, recording_consent, user_agent)
+                                 private_concerns, recording_consent, extras, user_agent)
       values (${row.name}, ${row.contact}, ${row.weeklyTask}, ${row.timeTaken}, ${row.inputs}::jsonb,
               ${row.tools}::jsonb, ${row.workRestricts}, ${row.track}, ${row.privateConcerns},
-              ${row.recordingConsent}, ${userAgent})`;
+              ${row.recordingConsent}, ${row.extras}::jsonb, ${userAgent})`;
   },
   notifyWaitlist,
   insertWaitlist: async (row, userAgent) => {

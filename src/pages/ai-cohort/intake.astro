@@ -1,34 +1,33 @@
 ---
-// Pre-session form for people who have paid for cohort 1. Unlisted: noindex,
+// Pre-session form for people who have reserved a track on /ai-training/.
+// Connect and Build show a few extra questions once that track is picked. Unlisted: noindex,
 // kept out of the sitemap (astro.config.mjs), and not linked from the nav.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { AI_QUIZ_ENDPOINT } from '../../consts/aiQuiz';
-import { INTAKE_LIMITS, INTAKE_OPTIONS } from '../../../services/ai-quiz-intake/src/intake';
+import { INTAKE_LIMITS, INTAKE_OPTIONS, TRACK_EXTRAS } from '../../../services/ai-quiz-intake/src/intake';
 
 // Same service and Caddy route as the quiz: POST /api/ai-quiz/intake.
 const endpoint = AI_QUIZ_ENDPOINT ? `${AI_QUIZ_ENDPOINT.replace(/\/$/, '')}/intake` : '';
-
-const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
+// The page script reads this to know which extra fields each track requires.
+const requiredExtras = JSON.stringify(Object.fromEntries(Object.entries(TRACK_EXTRAS).map(([t, x]) => [t, x.required])));
 ---
 
 <BaseLayout
-  title="Cohort 1 intake — Rasheed Bustamam"
-  description="Pre-session form for the hands-on AI cohort."
+  title="Before we start — Hands-on AI training"
+  description="Pre-session form for the hands-on AI training."
   chromePath="/ai-cohort/intake"
   noindex
 >
   <div class="page-shell pt-10 pb-20 max-w-2xl">
     <header id="intake-intro" class="mb-8">
-      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ cohort 1 · before we start</div>
+      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ ai training · before we start</div>
       <h1 class="font-serif text-[clamp(2rem,7vw,3.25rem)] font-medium tracking-[-0.028em] leading-[1.1] text-ink m-0 mb-4">
         Tell me about the task you'll bring
       </h1>
       <p class="font-serif text-lg text-mute m-0 mb-4 leading-[1.5]">
-        Thanks for joining. This takes about five minutes and lets me plan each session around your real work.
-        Please send it by <strong class="text-ink">Monday, January 4, 2027</strong>.
-      </p>
-      <p class="font-mono text-13 text-faint m-0 leading-[1.6]" id="intake-schedule">
-        4 Mondays on Google Meet: {sessions.join(', ')}, 2027 · 6:30–8:00pm Pacific
+        Thanks for reserving your seat. This takes about five minutes and lets me plan each session around your real
+        work. Please send it <strong class="text-ink">at least a week before your first session</strong>; I'll message
+        you the dates when your track launches.
       </p>
     </header>
 
@@ -36,7 +35,7 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
       <p class="quiz-status" data-state="warn">This form needs JavaScript. If you can't turn it on, message Rasheed on WhatsApp and he'll send you the questions.</p>
     </noscript>
 
-    <form id="cohort-intake" class="quiz" novalidate data-endpoint={endpoint}>
+    <form id="cohort-intake" class="quiz" novalidate data-endpoint={endpoint} data-required-extras={requiredExtras}>
       <fieldset class="quiz-step">
         <legend class="quiz-legend">Your name</legend>
         <input type="text" name="name" autocomplete="name" required maxlength={INTAKE_LIMITS.name} class="quiz-input" />
@@ -46,6 +45,76 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
         <legend class="quiz-legend">How should I reach you?</legend>
         <p class="quiz-hint">Your email or WhatsApp number.</p>
         <input type="text" name="contact" autocomplete="email" required maxlength={INTAKE_LIMITS.contact} class="quiz-input" />
+      </fieldset>
+
+      <fieldset class="quiz-step">
+        <legend class="quiz-legend">Which track did you reserve?</legend>
+        <p class="quiz-hint">Not sure? Pick the closest one. You can switch before it starts.</p>
+        <div class="quiz-options">
+          {INTAKE_OPTIONS.track.map((o) => (
+            <label class="quiz-option">
+              <input type="radio" name="track" value={o.value} required />
+              <span><strong class="font-medium">{o.label}</strong>: {o.hint}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="quiz-step" data-track-extra="connect" hidden>
+        <legend class="quiz-legend">Which email and calendar do you use?</legend>
+        <div class="quiz-options">
+          {INTAKE_OPTIONS.platform.map((o) => (
+            <label class="quiz-option">
+              <input type="radio" name="platform" value={o.value} />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+        <div class="quiz-group mt-6">
+          <div class="quiz-sublabel">Is it a work or a personal account?</div>
+          <div class="quiz-options">
+            {INTAKE_OPTIONS.account.map((o) => (
+              <label class="quiz-option">
+                <input type="radio" name="account" value={o.value} />
+                <span>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="quiz-step" data-track-extra="build" hidden>
+        <legend class="quiz-legend">Your computer and your coding</legend>
+        <div class="quiz-group">
+          <div class="quiz-sublabel">Which computer will you use?</div>
+          <div class="quiz-options">
+            {INTAKE_OPTIONS.os.map((o) => (
+              <label class="quiz-option">
+                <input type="radio" name="os" value={o.value} />
+                <span>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div class="quiz-group">
+          <div class="quiz-sublabel">How much code have you written?</div>
+          <div class="quiz-options">
+            {INTAKE_OPTIONS.coding.map((o) => (
+              <label class="quiz-option">
+                <input type="radio" name="coding" value={o.value} />
+                <span>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div class="quiz-sublabel">What would you like to build? <span class="text-faint">(optional)</span></div>
+        <textarea
+          name="buildIdea"
+          rows="3"
+          maxlength={INTAKE_LIMITS.buildIdea}
+          class="quiz-input"
+          placeholder="e.g. Something that reads new form responses and drafts a reply to each one."
+        ></textarea>
       </fieldset>
 
       <fieldset class="quiz-step">
@@ -111,19 +180,6 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
       </fieldset>
 
       <fieldset class="quiz-step">
-        <legend class="quiz-legend">Which track feels right?</legend>
-        <p class="quiz-hint">Your own pick. You can change your mind in the first session.</p>
-        <div class="quiz-options">
-          {INTAKE_OPTIONS.track.map((o) => (
-            <label class="quiz-option">
-              <input type="radio" name="track" value={o.value} required />
-              <span><strong class="font-medium">{o.label}</strong>: {o.hint}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset class="quiz-step">
         <legend class="quiz-legend">Anything private in your files you're worried about? <span class="text-faint">(optional)</span></legend>
         <p class="quiz-hint">For example names, phone numbers or money. We'll plan around it.</p>
         <textarea name="privateConcerns" rows="3" maxlength={INTAKE_LIMITS.privateConcerns} class="quiz-input"></textarea>
@@ -155,7 +211,7 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
     <section id="intake-thanks" class="quiz-result" hidden aria-live="polite">
       <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ got it</div>
       <h2 class="font-serif text-[clamp(2rem,7vw,3rem)] font-medium tracking-[-0.02em] text-ink m-0 mb-4">
-        Thank you, see you January 11.
+        Thank you. I'll be in touch with the dates.
       </h2>
       <p class="font-serif text-lg leading-[1.55] text-ink m-0 mb-4">
         One more step: send Rasheed one sample file for this task on WhatsApp, in the participants' group or directly.
@@ -179,10 +235,26 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
   const REQUIRED: [string, string][] = [
     ['name', 'your name'],
     ['contact', 'how to reach you'],
+    ['track', 'your track'],
     ['weeklyTask', 'the weekly task'],
     ['timeTaken', 'how long it takes'],
-    ['track', 'a track'],
   ];
+  const EXTRA_LABELS: Record<string, string> = {
+    platform: 'which email and calendar you use',
+    account: 'whether it is a work or personal account',
+    os: 'which computer you will use',
+    coding: 'how much code you have written',
+  };
+  const requiredExtras: Record<string, string[]> = JSON.parse(form.dataset.requiredExtras ?? '{}');
+
+  // Show only the reserved track's extra questions.
+  function showExtras() {
+    const track = (new FormData(form).get('track') as string | null) ?? '';
+    form.querySelectorAll<HTMLElement>('[data-track-extra]').forEach((el) => {
+      el.hidden = el.dataset.trackExtra !== track;
+    });
+  }
+  showExtras();
 
   function payload() {
     const fd = new FormData(form);
@@ -196,6 +268,11 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
       tools: fd.getAll('tools') as string[],
       workRestricts: one('workRestricts'),
       track: one('track'),
+      platform: one('platform'),
+      account: one('account'),
+      os: one('os'),
+      coding: one('coding'),
+      buildIdea: one('buildIdea'),
       privateConcerns: one('privateConcerns'),
       recordingConsent: fd.get('recordingConsent') === 'yes',
       website: (fd.get('website') as string | null) ?? '',
@@ -203,7 +280,9 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
   }
 
   function missing(p: ReturnType<typeof payload>): string[] {
-    const out = REQUIRED.filter(([k]) => !(p as Record<string, unknown>)[k]).map(([, label]) => label);
+    const rec = p as Record<string, unknown>;
+    const out = REQUIRED.filter(([k]) => !rec[k]).map(([, label]) => label);
+    for (const k of requiredExtras[p.track] ?? []) if (!rec[k]) out.push(EXTRA_LABELS[k] ?? k);
     if (!p.recordingConsent) out.push('your agreement to be recorded');
     return out;
   }
@@ -254,6 +333,7 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
   // "None yet" is exclusive with the other tools.
   form.addEventListener('change', (e) => {
     const el = e.target as HTMLInputElement;
+    if (el.name === 'track') showExtras();
     if (el.name !== 'tools' || !el.checked) return;
     form.querySelectorAll<HTMLInputElement>('input[name="tools"]').forEach((box) => {
       if (el.value === 'none' ? box.value !== 'none' : box.value === 'none') box.checked = false;
@@ -320,6 +400,9 @@ const sessions = ['Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'];
   }
   .quiz-group {
     margin-bottom: 1.5rem;
+  }
+  .quiz-step[hidden] {
+    display: none;
   }
   .quiz-sublabel {
     font-family: var(--font-mono);
