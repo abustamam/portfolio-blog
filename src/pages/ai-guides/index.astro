@@ -4,6 +4,7 @@
 // quiz and the training page. Works without JavaScript.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getGuides, guidePath } from './_guides';
+import StartHere from '../../components/guides/StartHere.astro';
 import '../../styles/ai.css';
 
 const guides = await getGuides();
@@ -24,10 +25,16 @@ const guides = await getGuides();
       </p>
     </header>
 
-    <ol class="hub-list" data-rise style="--i:3" aria-label="Guides">
+    <StartHere />
+
+    <ol class="hub-list" data-rise style="--i:3" aria-label="Guides" data-guide-list>
       {guides.map((g) => (
-        <li>
+        <li data-guide-id={g.id} data-step={g.data.step}>
           <a class="ai-card hub-card" href={guidePath(g.id)} data-guide-card={g.id}>
+            <span class="hub-card__badges">
+              <span class="hub-card__badge" data-start-badge hidden>Start here</span>
+              <span class="hub-card__badge hub-card__badge--done" data-visited-tick hidden>&#10003; Read</span>
+            </span>
             <span class="hub-card__title">{g.data.title}</span>
             <span class="hub-card__line">{g.data.description}</span>
             <span class="ai-label hub-card__meta">
@@ -37,6 +44,10 @@ const guides = await getGuides();
         </li>
       ))}
     </ol>
+
+    <p class="hub-reset" data-hub-reset hidden>
+      <button type="button" class="ai-link hub-reset__btn" data-reset-progress>Reset what I've read</button>
+    </p>
 
     <h2 class="ai-label hub-next">When you want more</h2>
     <ul class="hub-list">
@@ -58,6 +69,31 @@ const guides = await getGuides();
   </div>
 </BaseLayout>
 
+<script>
+  import { guideStore } from '../../utils/guideStore';
+
+  const sync = () => {
+    const visited = new Set(guideStore.getVisited());
+    let any = false;
+    document.querySelectorAll<HTMLElement>('[data-guide-id]').forEach((li) => {
+      const done = visited.has(li.dataset.guideId!);
+      any ||= done;
+      li.toggleAttribute('data-visited', done);
+      const tick = li.querySelector<HTMLElement>('[data-visited-tick]');
+      if (tick) tick.hidden = !done;
+    });
+    const reset = document.querySelector<HTMLElement>('[data-hub-reset]');
+    if (reset) reset.hidden = !any;
+  };
+  document.querySelector('[data-reset-progress]')?.addEventListener('click', () => {
+    guideStore.clearVisited();
+    sync();
+  });
+  // Back/forward restores the hub from cache; re-read what was visited meanwhile.
+  window.addEventListener('pageshow', sync);
+  sync();
+</script>
+
 <style>
   .hub-list { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; gap: .875rem; }
   .hub-card {
@@ -69,5 +105,17 @@ const guides = await getGuides();
   .hub-card__title { font-family: var(--font-serif); font-weight: 500; font-size: 1.375rem; line-height: 1.2; letter-spacing: -.015em; }
   .hub-card__line { font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.5; color: var(--color-mute); }
   .hub-card__meta { margin-top: .25rem; }
+  .hub-card__badges { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .hub-card__badges:not(:has(:not([hidden]))) { display: none; }
+  .hub-card__badge {
+    font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-loose); text-transform: uppercase;
+    color: var(--color-accent); border: 1px solid var(--color-accent); border-radius: 999px; padding: .1rem .55rem;
+  }
+  .hub-card__badge[hidden] { display: none; }
+  .hub-card__badge--done { color: var(--color-mute); border-color: var(--color-line); }
+  [data-recommended] .hub-card { border-color: var(--color-accent); }
+  .hub-reset { margin: -1.5rem 0 2.5rem; }
+  .hub-reset[hidden] { display: none; }
+  .hub-reset__btn { background-color: transparent; border: 0; padding: 0 0 2px; cursor: pointer; }
   .hub-next { margin: 0 0 1rem; }
 </style>
