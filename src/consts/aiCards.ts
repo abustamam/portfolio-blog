@@ -72,7 +72,7 @@ export const AI_CARDS: AiCard[] = [
     id: 'never-paste',
     path: '/ai-cohort/never-paste/',
     eyebrow: 'AI training · handout',
-    title: 'Never paste these',
+    title: "What's safe to paste into AI",
     subtitle: 'Sessions 1 and 2',
     motif: 'never-paste',
   },

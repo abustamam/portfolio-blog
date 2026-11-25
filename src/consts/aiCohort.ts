@@ -49,7 +49,7 @@ export const SESSIONS: CohortSession[] = [
     tryThis: "Run your prompt once on this week's real task, made safe first, and note one place it was wrong.",
     handouts: [
       { label: 'The five-part prompt', href: COHORT_LINKS.prompt },
-      { label: 'Never paste these', href: COHORT_LINKS.neverPaste },
+      { label: "What's safe to paste", href: COHORT_LINKS.neverPaste },
     ],
   },
   {

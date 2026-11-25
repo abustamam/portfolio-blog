@@ -1,0 +1,128 @@
+---
+title: Which model to pick in the menu
+description: The model menu in ChatGPT, Gemini, Copilot and Claude, translated into plain sizes, with when to switch and when not to bother.
+lead: Every AI app has a menu of models, and the names change every few months. Underneath, each app offers much the same few sizes. Once you know the sizes, you can read any app's menu, including next year's.
+step: 4.5
+minutes: 5
+tool: Read my menu
+ctaLine: The hands-on training is about getting AI to do a task from your own week and checking what it gives you.
+---
+import ModelMenu from '../../components/guides/ModelMenu.astro';
+import { AI_MODELS } from '../../consts/guides/aiModels';
+import { oldestChecked, formatChecked, SIZE_LABELS, FREE_LABELS } from '../../utils/modelMenu';
+
+export const lastChecked = oldestChecked(AI_MODELS);
+
+{/* Every name and fact comes from src/consts/guides/aiModels.ts, read on each company's own page. Re-check quarterly and edit only that file. */}
+
+<p class="ai-label" data-last-checked={lastChecked}>Last checked <time datetime={lastChecked}>{formatChecked(lastChecked)}</time></p>
+
+## Do you need to change it?
+
+If it's a work or school account, use what your employer allows. That comes before anything else on this page.
+
+- For most everyday work, leave it on the default the app picks.
+- Move to a bigger option only when the answer comes back wrong or shallow.
+- A bigger model won't rescue a vague request, and you still have to check what it says.
+
+If you haven't picked an app yet, start with [Which AI app should I use?](/ai-guides/which-tool/).
+
+## The sizes
+
+Each company offers roughly the same few sizes under its own names. I find it easiest to think of them as people at work you could ask.
+
+### Small and fast
+
+Good for short answers, quick rewrites and summaries. It replies quickly and uses little of your limit. It's the colleague you ask a quick question on the way past their desk.
+
+### Everyday
+
+Good for most work: emails, letters, documents, plans, spreadsheets. It's usually what the app starts on. This is your regular go-to person, right for almost everything.
+
+### Large
+
+For complex, long or careful work. It's slower, uses up your limit faster, and often needs a paid plan. Think of booking an hour with a specialist. You wouldn't do that for a quick question.
+
+### A "thinking" setting on top
+
+Many apps also let you choose how long the model thinks before it answers. That isn't a different size. It's the same colleague, given time to work something out instead of answering on the spot. There's more on it [below](#thinking-or-reasoning-settings).
+
+## What your app's menu means
+
+Tap your app and your account to see what each option in its menu is. Then pick what you're doing, and one option is highlighted with the reason. Nothing you tap is saved or sent anywhere.
+
+<ModelMenu />
+
+## Every option, by app
+
+This is what each app's menu showed on the day I last checked, taken from each company's own help or product pages. "Limited" means the free plan includes it with tighter limits or only some of the time. "Not stated" means the company's page doesn't say, so check your app.
+
+<table data-model-table>
+  <thead>
+    <tr><th>App</th><th>In the menu</th><th>Size</th><th>Free plan</th><th>Pick it when</th><th>Source</th></tr>
+  </thead>
+  <tbody>
+    {AI_MODELS.map((m) => (
+      <tr data-model-row data-vendor={m.vendor}>
+        <td>{m.vendor}</td>
+        <td>{m.name}</td>
+        <td>{SIZE_LABELS[m.size]}{m.thinking ? ' (thinking)' : ''}</td>
+        <td>{FREE_LABELS[m.freePlan]}</td>
+        <td>{m.pickWhen}</td>
+        <td><a href={m.source} data-model-source>{new URL(m.source).hostname.replace(/^www\./, '')}</a></td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+Some details don't fit in the table:
+
+- In ChatGPT, most of the menu is a thinking level (Instant, Medium, High, Extra High, Pro), shown under "Latest" or "GPT-6". The free plan offers Instant and Think.
+- In Gemini, once you choose a model yourself you can also choose a thinking level: Low, Medium or High. If you don't choose, it uses Low.
+- Copilot calls these "conversation modes", and some only appear when you're signed in.
+- In Claude, "More models" holds older versions. Effort and thinking are separate settings in the same menu.
+
+## "Thinking" or "reasoning" settings
+
+With thinking turned on, the app spends time breaking the problem down and planning before it answers. Some apps show a summary of that working, which can help you see how it got there.
+
+ChatGPT puts its thinking level in the model menu. Gemini offers Low, Medium and High after you pick a model. Claude has an Effort setting and a Thinking switch in the same menu. Copilot has Think Deeper.
+
+It helps with:
+
+- problems with several steps
+- anything with numbers or calculations
+- planning a schedule, a budget or a project
+- reading a long document carefully
+
+For quick questions, simple rewrites and everyday writing, it mostly makes you wait. Higher levels also use up your limit faster, so I leave it at medium or the default unless the answer needs more.
+
+For my own work I start on Claude's largest model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet. That's a coding setup. In the chat app, the default is fine.
+
+## Common questions
+
+### Is the newest always best?
+
+Not for every job. A new release is usually a newer version of the same sizes. For a quick rewrite, the small or everyday option is still the right size, whatever its version number.
+
+### Is the paid one worth it?
+
+Pay if you keep hitting the free limits, or if your work is often the hard kind that needs the large option. For everyday questions, the free plan is often enough.
+
+### Why did my menu change?
+
+Companies rename and replace models every few months, and they often roll changes out to some accounts before others, so two people on the same app can see different menus on the same day. The sizes underneath stay the same.
+
+### Why does the same question get a different answer?
+
+These apps don't look up a stored answer. They write a new one each time, so the wording and details can change. If two answers disagree on a fact, check it.
+
+### Does a better model stop making things up?
+
+No. Every model can state something wrong and sound sure of it. A larger model or a thinking setting helps with hard problems, but you still need to check names, numbers, dates and quotes against a source you trust. I go through the usual mistakes, and the check for each, in [When AI gets it wrong](/ai-guides/when-ai-is-wrong/).
+
+## What this page cannot tell you
+
+Which option is best at everything. I don't include scores, rankings or claims that one company beats another. Those comparisons change with every release, and none of them tells you whether an answer is right for your task. You find that out by checking it.
+
+Menus change faster than anything else on this site. The date at the top says when I last checked the table against each company's own pages.
