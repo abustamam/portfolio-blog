@@ -37,6 +37,11 @@ function resolves(urlPath) {
 
 const attrRe = /\s(?:href|src)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
 const srcsetRe = /\ssrcset\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
+// Paths a server answers, not files in dist. Listed one by one so a typo in
+// any other /api/... link still fails. /api/ai-quiz/whatsapp is a 302 from the
+// ai-quiz-intake service (see docs/ai-quiz-setup.md).
+const SERVER_ROUTES = new Set(['/api/ai-quiz/whatsapp']);
+
 const files = walk(dist).filter((f) => f.endsWith('.html'));
 let checked = 0;
 let skipped = 0;
@@ -51,6 +56,7 @@ function check(file, raw) {
 	const pageUrl = '/' + relative(dist, file).split(sep).join('/');
 	const abs = clean.startsWith('/') ? clean : new URL(clean, 'http://x' + pageUrl).pathname;
 	checked++;
+	if (SERVER_ROUTES.has(abs)) return;
 	if (!resolves(abs)) broken.push({ page: pageUrl, link: url });
 }
 
