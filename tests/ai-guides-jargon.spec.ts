@@ -36,6 +36,7 @@ test.describe('guide jargon check', () => {
   });
 
   test('only the five start-from-zero posts are soft', () => {
+    expect([...SOFT].sort()).toEqual(['does-it-remember', 'first-ten-minutes', 'photos-files-voice', 'usage-limits', 'what-is-ai']);
     const guides = readdirSync(GUIDES).filter((f) => f.endsWith('.mdx')).map((f) => f.replace(/\.mdx$/, ''));
     for (const id of SOFT) expect(guides, id).toContain(id);
     for (const id of ['examples', 'job-search', 'never-paste', 'prompt', 'when-ai-is-wrong', 'which-model', 'which-tool']) {
