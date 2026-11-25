@@ -180,7 +180,7 @@ export const TRACKS: Track[] = [
         outcome: 'Your project running on a schedule or at a button press, with keys and costs kept safe.',
       },
     ],
-    end: 'One working tool or agent you built yourself, and the judgement to know when to trust it.',
+    end: 'One working tool or agent you built yourself, and the judgment to know when to trust it.',
     needs: 'A laptop you can install software on. You may need a paid AI plan (about $20 a month) or a few dollars of API credit.',
   },
 ];

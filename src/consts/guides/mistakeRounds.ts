@@ -119,7 +119,7 @@ export const MISTAKE_ROUNDS: MistakeRound[] = [
     id: 'committee-notes',
     kind: 'illustration',
     type: 'unread',
-    ask: 'Summarise these committee meeting notes in a few lines.',
+    ask: 'Summarize these committee meeting notes in a few lines.',
     source: {
       kind: 'passage',
       caption: 'Committee meeting notes',

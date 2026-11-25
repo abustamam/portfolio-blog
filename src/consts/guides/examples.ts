@@ -77,7 +77,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     label: 'Office admin',
     summary: 'Drafting replies to the routine questions that land in the shared inbox every week.',
     situation:
-      'I run the front office at a community center. The shared inbox gets the same few questions every week: opening hours, booking a room, parking, cancelling a class.',
+      'I run the front office at a community center. The shared inbox gets the same few questions every week: opening hours, booking a room, parking, canceling a class.',
     task: 'Draft a reply to each question below. Only use the facts in my office info.',
     input:
       'Office info: open Monday to Friday, 9 to 5, and Saturday mornings for classes only. Rooms are booked at the front desk and need a deposit. Free parking in the lot behind the building. Questions: PERSON-1 wants to know if they can book the hall on a Sunday. PERSON-2 is asking where to park for the Saturday class.',

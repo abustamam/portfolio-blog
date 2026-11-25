@@ -245,7 +245,7 @@ export function aiCardSvg(card: AiCard): string {
   const { size, lines } = fit(card.title);
   const lineH = Math.round(size * 1.1);
   const block = lineH * (lines.length - 1);
-  // Centre eyebrow + title + subtitle in the band above the footer rule (y 10..506)
+  // Center eyebrow + title + subtitle in the band above the footer rule (y 10..506)
   const total = 40 + block + size * 0.75 + 56;
   const top = Math.round(10 + (496 - total) / 2);
   const titleTop = top + 40 + Math.round(size * 0.75);
