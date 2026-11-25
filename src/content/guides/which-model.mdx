@@ -1,0 +1,124 @@
+---
+title: Which model to pick in the menu
+description: The model menu in ChatGPT, Gemini, Copilot and Claude, translated into plain sizes, with when to switch and when not to bother.
+lead: Every AI app has a menu of models, and the names change every few months. The shape of the menu does not. Learn the shape once and you can read any app's menu, including next year's.
+step: 4.5
+minutes: 5
+tool: Read my menu
+ctaLine: Picking the model is the easy part. The hands-on training is about getting it to do your weekly task, and checking what it gives you.
+---
+import ModelMenu from '../../components/guides/ModelMenu.astro';
+import { AI_MODELS } from '../../consts/guides/aiModels';
+import { oldestChecked, formatChecked, SIZE_LABELS, FREE_LABELS } from '../../utils/modelMenu';
+
+export const lastChecked = oldestChecked(AI_MODELS);
+
+{/* Every name and fact comes from src/consts/guides/aiModels.ts, read on each company's own page. Re-check quarterly and edit only that file. */}
+
+<p class="ai-label" data-last-checked={lastChecked}>Last checked <time datetime={lastChecked}>{formatChecked(lastChecked)}</time></p>
+
+## The short answer
+
+- **For most everyday work, use the default** the app picks for you.
+- **Switch up only when the answer is wrong or shallow.**
+- **A bigger model does not fix a vague request**, and it does not remove the need to check the answer.
+
+On a work or school account, one rule comes first: use what your employer allows.
+
+## The sizes, in plain words
+
+Each company offers roughly the same few sizes, under its own names. Think of them as colleagues you can ask.
+
+### Small and fast
+
+Good for short answers, quick rewrites and summaries. It answers quickly and uses little of your limit. Like asking a colleague a quick question as you pass their desk.
+
+### Everyday
+
+Good for most work: emails, letters, documents, plans, spreadsheets. It is usually what the app starts on. Like your regular go-to colleague: right for almost everything.
+
+### Large
+
+Good for complex, long or careful work. It is slower, uses up your limit faster, and often needs a paid plan. Like booking an hour with a specialist: worth it for the hard case, a waste for a quick question.
+
+### A "thinking" setting on top
+
+Many apps also let you choose how long the model thinks before it answers. That is not a different size; it is like giving the same colleague time to work something out instead of asking them to answer on the spot. More on it [below](#thinking-or-reasoning-settings).
+
+## Read my menu
+
+Tap your app to see what its menu means. Then say what you are doing, and one option is highlighted with the reason. Nothing you tap is saved or sent anywhere.
+
+<ModelMenu />
+
+## Every option, by app
+
+What each app's menu showed on the day this page was last checked, according to each company's own help or product page. "Limited" means the free plan includes it with tighter limits or only some of the time. "Not stated" means the company's page does not say; check your app.
+
+<table data-model-table>
+  <thead>
+    <tr><th>App</th><th>In the menu</th><th>Size</th><th>Free plan</th><th>Pick it when</th><th>Source</th></tr>
+  </thead>
+  <tbody>
+    {AI_MODELS.map((m) => (
+      <tr data-model-row data-vendor={m.vendor}>
+        <td>{m.vendor}</td>
+        <td>{m.name}</td>
+        <td>{SIZE_LABELS[m.size]}{m.thinking ? ' (thinking)' : ''}</td>
+        <td>{FREE_LABELS[m.freePlan]}</td>
+        <td>{m.pickWhen}</td>
+        <td><a href={m.source} data-model-source>{new URL(m.source).hostname.replace(/^www\./, '')}</a></td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+A few things the table cannot show:
+
+- **ChatGPT:** most of the menu is a thinking level (Instant, Medium, High, Extra High, Pro), shown under "Latest" or "GPT-6". The free plan offers Instant and Think.
+- **Gemini:** when you choose a model yourself, you can also choose a thinking level: Low, Medium or High. If you do not choose, it uses Low.
+- **Copilot:** these are "conversation modes". Some only appear when you are signed in.
+- **Claude:** "More models" in the menu holds older versions. Effort and thinking are separate settings in the same menu.
+
+## "Thinking" or "reasoning" settings
+
+**What it does.** The app spends time breaking the problem down and planning before it answers. Some apps show a summary of that working, which can help you see how it got to the answer.
+
+**Where to find it.** ChatGPT has a thinking level in the model menu. Gemini has Low, Medium and High after you pick a model. Claude has an Effort setting and a Thinking switch in the same menu. Copilot has Think Deeper.
+
+**When it helps:**
+
+- problems with several steps
+- anything with numbers or calculations
+- planning: a schedule, a budget, a project
+- reading a long document carefully
+
+**When it only makes you wait:** quick questions, simple rewrites, everyday writing. Higher thinking levels also use up your limit faster, so leave it low unless the answer needs it.
+
+## Common questions
+
+### Is the newest always best?
+
+Not for every job. "Newest" usually means a newer version of the same sizes. For a quick rewrite, the small or everyday option is still the right size, whatever its version number.
+
+### Is the paid one worth it?
+
+Pay when you keep hitting the free limits, or when your work is regularly the hard kind that needs the large option. For everyday questions, the free plan is often enough.
+
+### Why did my menu change?
+
+Companies rename and replace models every few months, and they often roll changes out to some accounts before others. Two people on the same app can see different menus on the same day. The sizes underneath stay the same.
+
+### Why does the same question get a different answer?
+
+These apps do not look up a stored answer. They write a new one each time, so the wording and details can change. If two answers disagree on a fact, that is your cue to check it.
+
+### Does a better model stop making things up?
+
+No. Every model can state something wrong in a confident voice. A larger model or a thinking setting helps with hard problems, but you still check names, numbers, dates and quotes against a source you trust.
+
+## What this page cannot tell you
+
+Which option is best at everything. There are no scores here, no rankings, and no claims that one company beats another. Those comparisons change with every release, and they do not tell you whether an answer is right for your task. Only checking the answer does.
+
+Menus change faster than anything else on this site. The date at the top says when the table was last checked against each company's own pages.
