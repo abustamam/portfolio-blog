@@ -28,5 +28,23 @@
     "term": "project",
     "sentence": "planning a schedule, a budget or a project",
     "reason": "A piece of work being planned, not the app feature."
+  },
+  {
+    "guide": "first-ten-minutes",
+    "term": "projects",
+    "sentence": "Now I use Claude at home for personal tasks and projects.",
+    "reason": "Pieces of work in the ordinary sense, not the saved-space feature; marking it would send a first-time reader to the projects guide too early."
+  },
+  {
+    "guide": "photos-files-voice",
+    "term": "plan",
+    "sentence": "When I need to plan, I take a screenshot",
+    "reason": "The verb in the everyday sense (working out her day), not an account plan."
+  },
+  {
+    "guide": "usage-limits",
+    "term": "history",
+    "sentence": "won't have to re-read a long conversation history",
+    "reason": "Inside a verbatim quotation from Google's help page, which can't be edited to carry a <Term>."
   }
 ]
