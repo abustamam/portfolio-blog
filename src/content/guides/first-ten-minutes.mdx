@@ -1,0 +1,131 @@
+---
+title: Your first ten minutes with an AI app
+description: "Never used an AI app? Open one, sign in, ask one real question and a follow-up. What each part of the screen is for."
+lead: "If you've never opened an AI app, this is the whole first visit: sign in, ask one real question, ask a follow-up, and start a new chat. Ten minutes, on a phone or a computer."
+group: start
+step: 0.2
+minutes: 6
+tool: Labelled screen
+ctaLine: "In the hands-on training we do this together on a task from your own week."
+---
+import Term from '../../components/guides/Term.astro';
+import ChatScreen from '../../components/guides/ChatScreen.astro';
+import { APPS, APP_FACT_LABELS, APP_FACT_ORDER, oldestChecked, formatChecked } from '../../consts/guides/chatScreen';
+
+export const lastChecked = oldestChecked(APPS);
+
+{/* The schematic carries no vendor facts. The table's cells come from src/consts/guides/chatScreen.ts, read on each company's own pages. Re-check quarterly and edit only that file. */}
+
+## Pick one, and don't agonize
+
+Pick the <Term>AI app</Term> that matches the email you already use. A Gmail address points to Gemini. A Microsoft or Outlook address points to Copilot. Anything else, start with ChatGPT or Claude. They all do the same everyday jobs, and you can change your mind next week.
+
+I used ChatGPT at home for a long time, then switched to Claude in one afternoon. Now I use Claude at home for personal tasks and projects. For my programming work I use Claude, ChatGPT and a few other AI apps side by side. What you pick today isn't set in stone.
+
+If you want help choosing, [Which AI app should I use?](/ai-guides/which-tool/) has the details. Don't spend long on it. The first ten minutes teach you more than the choice does.
+
+## Open it and sign in
+
+Open the app on your phone, or go to its website on a computer. Either works, and what you see is nearly the same. An account is a login that belongs to you, with your email or a similar sign-in. A chat is one back-and-forth with the app, from your first message to your last, and the account lets the app keep your chats so you can find them again next time.
+
+Most of the apps let you look around before you make one. Your chats are saved only once you sign in, so I'd sign in first. The table below says where to sign in and what each free account asks for. Look at the Claude row: it asks for a phone number that can receive a text, so have your phone nearby.
+
+The free account costs nothing, but it lets you use the app less than a paid account does. That's a <Term>free plan</Term>. For learning, it's enough.
+
+<p class="ai-label" data-last-checked={lastChecked}>Last checked <time datetime={lastChecked}>{formatChecked(lastChecked)}</time></p>
+
+<div class="app-table">
+<table data-app-table>
+  <thead>
+    <tr>
+      <th scope="col">App</th>
+      {APP_FACT_ORDER.map((key) => <th scope="col">{APP_FACT_LABELS[key]}</th>)}
+    </tr>
+  </thead>
+  <tbody>
+    {APPS.map((app) => (
+      <tr data-app={app.id}>
+        <th scope="row">{app.name}</th>
+        {APP_FACT_ORDER.map((key) => {
+          const fact = app.facts[key];
+          return (
+            <td data-fact={key} data-label={APP_FACT_LABELS[key]} data-confirmed={String(fact.confirmed)}>
+              <span>
+                {fact.confirmed
+                  ? <>{fact.text}{' '}<a href={fact.source} data-source rel="noopener">Source</a></>
+                  : <a href={fact.source} data-source rel="noopener">{fact.text}</a>}
+              </span>
+            </td>
+          );
+        })}
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+
+<style>{`
+  .app-table table { display: table; width: 100%; font-size: 15px; }
+  @media (max-width: 47.99rem) {
+    .app-table table, .app-table tbody, .app-table tr, .app-table td { display: block; width: 100%; }
+    .app-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .app-table tr { margin: 0 0 1rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+    .app-table th[scope='row'] { display: block; border: 0; }
+    .app-table td { border: 0; border-top: 1px solid var(--color-line-soft); display: grid; grid-template-columns: 7.5rem 1fr; gap: .5rem; }
+    .app-table td::before { content: attr(data-label); font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  }
+`}</style>
+
+Where a cell says "Check the company's page", that company's help pages didn't say, and I didn't want to guess. The link goes to the page to check.
+
+If you'd rather talk or show it a picture than type, you can do that too. That comes later, in [Photos, files, voice and your phone](/ai-guides/photos-files-voice/).
+
+## The screen
+
+Every one of these apps looks different, and they change their looks often. Underneath, they have the same six parts. The drawing below is a plain sketch, not any one app, so it stays true when the apps are redesigned. Tap a number to see what that part does.
+
+<ChatScreen />
+
+A few words I'll use from here on. A **message** is one thing you send, or one reply. A chat is a run of messages, and a **new chat** starts fresh: it can't see what you said in the last one. Some apps can carry over a few saved facts; [Does it remember me?](/ai-guides/does-it-remember/) covers that.
+
+The app keeps your <Term>past chats</Term> in that side list, so you can come back to one next week. On a phone, the list hides behind a menu button, usually three lines in a corner. Whether the app also remembers things between chats is a separate question.
+
+The sixth part is the <Term>model</Term> menu. The model is the part that writes the answers, and the menu lets you choose one. Leave it alone for now. When you're curious, [Which model to pick in the menu](/ai-guides/which-model/) explains the choices.
+
+In the apps themselves, the buttons sit in different places and have different names. Look back at the table above for what yours calls the new-chat button.
+
+## Ask one real question
+
+Ask something you'd really want to know this week, so you can tell whether the answer is any good. Here are three that need no private details:
+
+- "Plan five weeknight dinners for four people. Nothing that takes more than 30 minutes."
+- "Explain what an escrow account is, as if I have never had a mortgage."
+- "Write a short, polite note to my neighbor about their dog barking early in the morning."
+
+Type one into the message box and press Send. Don't worry about the wording. What you type is called a <Term>prompt</Term>, and later you can learn to write a better one, but a plain sentence is a fine start. [The five-part prompt](/ai-guides/prompt/) shows how.
+
+The answer appears a few words at a time. Read it the way you'd read a note from a helpful stranger: useful, but check anything you plan to rely on. A recipe is easy to judge. A claim about your mortgage or a medical question is worth checking against a source you trust.
+
+## Ask a follow-up
+
+A follow-up is your next message in the same chat. The app can see what came before, so you don't repeat yourself. If the answer was the dinner plan, you could type:
+
+- "Make two of those vegetarian."
+
+You don't need to say which dinners, or for how many people. It's a conversation, and you pick up where you left off. If an answer is close but not right, say what's wrong with it. "Shorter." "Less formal." "Skip the pasta." That does more than asking the same question again.
+
+## Start a new chat for a new topic
+
+When you change topic, press New chat. It starts fresh and can't see the last chat. A fresh chat for each job keeps the answers on track. If you keep going in one long chat, older parts can drop out and the answers can wander. You can find each chat later in the list of past chats.
+
+Free plans also have a <Term>usage limit</Term>: after a good amount of use, the app asks you to wait a few hours. That's normal. [You've reached your limit](/ai-guides/usage-limits/) says what to do when it happens.
+
+## What not to type yet
+
+For now, don't type anything you wouldn't be comfortable leaving on someone else's computer: passwords, bank details, other people's private information, or work files. Your three questions above are safe. [What's safe to paste into AI](/ai-guides/never-paste/) goes through what's fine, what isn't, and how to check before you press Enter.
+
+If a word in this guide was new to you, the [glossary](/ai-guides/glossary/) lists them in plain language.
+
+## What this page cannot tell you
+
+Exactly what your app's screen looks like today. Companies move buttons around, so use the numbers on the drawing to find the idea, not the exact spot. If something here doesn't match your screen, the company's own pages, linked in the table, are the place to look.
