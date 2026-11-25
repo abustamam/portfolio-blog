@@ -158,6 +158,109 @@ ones (`src/tracks.ts`). Two env vars turn it on:
 
 The startup log line `notifications` shows `tracks` and `counts`.
 
+## Weekly funnel digest
+
+One Telegram message a week with four counts, from data that already exists.
+No tracking script, no cookies, nothing new stored. The site says so in one
+line (the guides hub and `/colophon/`).
+
+| Step | Source | What it counts |
+|---|---|---|
+| 1. Page views | nginx access lines in Loki | `GET` with 200/304 on `/ai-guides/` (hub), `/ai-guides/<id>/`, `/ai-quiz/`, `/ai-training/`, people only |
+| 2. Quiz finished | `responses` | rows per track in the week |
+| 3. Reserve opened | Stripe Checkout Sessions | sessions created on each track's payment links (`STRIPE_TRACKS`) |
+| 4. Paid | the same sessions | `payment_status: paid` |
+
+Code: `services/ai-quiz-intake/src/funnel.ts` (counting) and `src/digest.ts`
+(sends once and exits). Tests: `test/funnel.test.ts`.
+
+### Access log source (confirmed 2026-11-25)
+
+- Caddy does **not** log `bustamam.tech` (its site block has no `log`
+  directive). (MEASURED)
+- The `portfolio-blog` container's nginx writes access lines to stdout in the
+  default combined format: address, time, request, status, bytes, referer,
+  user agent, `X-Forwarded-For`. (MEASURED)
+- `docker logs` is useless for this: the container is replaced on every deploy.
+  (MEASURED)
+- Alloy ships every container's stdout to Loki, label
+  `container="portfolio-blog"`, kept 30 days (`retention_period: 720h`; oldest
+  line seen 27 Oct 2026). (MEASURED) The digest queries
+  `{container="portfolio-blog"} |~ "GET /ai-(guides|quiz|training)"`. Anything
+  older than 30 days survives only as the counts in past digests.
+
+### Bots and link previews
+
+WhatsApp, Telegram, iMessage and other apps fetch a page every time a link is
+posted, and deploy checks and agents use curl. In a sample of 23 to 25 Nov
+2026, 62% of `/ai-*` lines were bots or tools. `isBot` drops any user agent
+without a `Mozilla/` token, plus known preview, crawler and headless tokens
+(`whatsapp`, `facebookexternalhit`, `bot`, `headless`, ...). In-app browsers
+(Instagram, Facebook, Telegram's web view) count as people. The message reports
+how many lines were filtered.
+
+Own visits look like anyone else's. To drop them, set `DIGEST_EXCLUDE_IPS`
+(comma-separated). Lines whose address or `X-Forwarded-For` contains one of
+them are counted as "own visits excluded". The address is compared in memory
+and never stored. `X-Forwarded-For` holds the visitor's address first, then
+the Cloudflare edge (MEASURED 2026-11-25 on the live log), so an excluded
+address matches.
+
+### What it cannot see
+
+The path one person took, or which guide led to a deposit. Step 3 counts
+checkout sessions, so one person opening the link twice counts twice. At this
+volume (tens a week), a change of a few from last week is noise.
+
+### Owner steps (one time)
+
+1. **Read access to quiz counts.** Done 2026-11-25. The app role could only insert. Let it read
+   the track and time, and nothing else (also at the bottom of `schema.sql`):
+
+   ```bash
+   docker exec -i postgres psql -U postgres -d ai_quiz -v ON_ERROR_STOP=1 \
+     -c "grant select (track, submitted_at) on responses to ai_quiz;"
+   ```
+
+   Checked on a scratch database: the digest query runs, and
+   `select name, contact from responses` as the role is still
+   `permission denied`. (MEASURED)
+
+2. **Stripe key.** The digest uses the same `STRIPE_API_KEY` and
+   `STRIPE_TRACKS` as the deposit counts (a **restricted** key with Read on
+   Checkout Sessions is enough for the digest). Without them, step 3/4 reads
+   "Unavailable".
+
+3. **Reach Loki.** Done 2026-11-25. `ai-quiz-intake` and Loki are both on
+   `srv-network`, and Loki answers there as `loki` (MEASURED: `/ready` from
+   inside the container). No network change is needed. `/srv/docker-compose.yml`
+   now sets these for the service, and the next deploy picks them up
+   (`deploy-blog` runs `docker compose up --force-recreate`):
+
+   ```yaml
+         LOKI_URL: http://loki:3100
+         # Optional: your own address(es), dropped from page views.
+         DIGEST_EXCLUDE_IPS: ${DIGEST_EXCLUDE_IPS:-}
+   ```
+
+4. **Check it**, then schedule it. `--dry-run` prints the message without
+   sending:
+
+   ```bash
+   docker exec ai-quiz-intake bun services/ai-quiz-intake/src/digest.ts --dry-run
+   ```
+
+   Then a weekly cron entry on the box. The box runs on UTC, so 16:00 UTC is
+   Monday 08:00 Pacific (09:00 during daylight time):
+
+   ```cron
+   0 16 * * 1  docker exec ai-quiz-intake bun services/ai-quiz-intake/src/digest.ts >> /var/log/funnel-digest.log 2>&1
+   ```
+
+A source that fails shows as "Unavailable: <reason>" in the message instead of
+a zero, and the run exits 1. The log line `digest sent` carries only which
+sections worked.
+
 ## Server setup (one time)
 
 All of this is on the Hetzner box, in `/srv`.

@@ -15,6 +15,10 @@ create table if not exists responses (
 
 revoke all on responses from public;
 grant insert on responses to ai_quiz;
+-- Weekly funnel digest (src/digest.ts): counts quiz results per week. The app
+-- role may read the track and time only, never names, contacts or answers.
+-- Idempotent, so it also covers databases created before it.
+grant select (track, submitted_at) on responses to ai_quiz;
 
 -- Cohort 1 pre-session form (/ai-cohort/intake, POST /api/ai-quiz/intake).
 -- Same rule: the app role can insert rows and do nothing else with them.
