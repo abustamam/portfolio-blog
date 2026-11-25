@@ -78,7 +78,7 @@ I wrote one prompt and ran it in every repo I actively use, on both machines, pl
 Three instructions in that prompt did most of the work:
 
 - **Read only; change nothing.** Collection runs in every repo on every machine. None of them should be editing anything.
-- **Don't merge, don't drop, don't paraphrase away the evidence.** The collector is the wrong place for judgement. It sees one repo; consolidation sees all of them.
+- **Don't merge, don't drop, don't paraphrase away the evidence.** The collector is the wrong place for judgment. It sees one repo; consolidation sees all of them.
 - **Never copy a secret value.** Name it, never print it.
 
 The raw output went into comments on a tracking issue, never into the repo. Every machine pulls the repo, and the harvest from one machine describes projects that have no business landing on the other.
@@ -111,7 +111,7 @@ Updating a rule is now: edit it in the repo, then on each machine `git pull && .
 
 ## Four rules, with their evidence
 
-Every rule in the system carries a tag: **MEASURED** if something measured it, **ASSUMED** if it's a judgement or an untagged note. Here are four from the universal layer, with the evidence that put them there.
+Every rule in the system carries a tag: **MEASURED** if something measured it, **ASSUMED** if it's a judgment or an untagged note. Here are four from the universal layer, with the evidence that put them there.
 
 **Report measurements, not verdicts.** "It rendered" is a verdict. The pixel standard deviation is a measurement. "Server ready" is a verdict; the PID holding the port is a measurement. A wrapper's status says nothing about the thing it wraps. The incident behind it: a cheaper model, delegated a render job, reported success on 49 frames that were solid black. Its "done" was true about the script it ran and false about the output. *(ASSUMED: the incident is real, but nobody counted how often verdicts lie.)*
 

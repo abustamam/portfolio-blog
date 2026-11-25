@@ -10,7 +10,7 @@ export type Track = 'foundations' | 'applied' | 'builder';
 /** A track on /ai-training/, by its id there. The result screen names exactly one. */
 export type Offer = 'everyday' | 'connect' | 'build';
 
-/** Answers as the form serialises them. Multi-selects are arrays. */
+/** Answers as the form serializes them. Multi-selects are arrays. */
 export interface QuizAnswers {
   frequency?: string;
   tools?: string[];

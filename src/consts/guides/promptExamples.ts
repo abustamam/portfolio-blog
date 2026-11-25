@@ -27,7 +27,7 @@ export const PROMPT_EXAMPLES: PromptPreset[] = [
     label: 'Reply to a difficult email',
     situation: 'I manage a small office. A client, PERSON-1, wrote an upset email saying an invoice was wrong. I want to keep the relationship.',
     task: "Draft a calm reply that acknowledges the problem and says what I'll do next.",
-    input: "PERSON-1's email says the invoice charged for a service they cancelled last month. I checked: the cancellation arrived, but the invoice had already gone out. I will send a corrected invoice by Friday.",
+    input: "PERSON-1's email says the invoice charged for a service they canceled last month. I checked: the cancellation arrived, but the invoice had already gone out. I will send a corrected invoice by Friday.",
     format: 'Under 150 words. Polite and direct, no excuses, and no promises beyond the corrected invoice.',
     check: "Point out anything in my input that looks wrong or inconsistent, and don't add details I didn't give you.",
   },

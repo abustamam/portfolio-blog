@@ -17,7 +17,7 @@ On a free or personal account, or any account your employer hasn't approved for 
 | **Other people's personal details**: names, emails, phone numbers, addresses | Swap in placeholders: PERSON-1, EMAIL-1, PHONE-1. Keep the key (who is who) in your own file. |
 | **Passwords, API keys, one-time codes** | Never, not even "just to check it". Describe the problem without the secret. |
 | **Account and card numbers** | Mask them: \*\*\*\*4821, or ACCOUNT-1. |
-| **Health details** about you or anyone else | Generalise: "a family member with a chronic condition". |
+| **Health details** about you or anyone else | Generalize: "a family member with a chronic condition". |
 
 ## Make a file safe in three steps
 
@@ -34,7 +34,7 @@ On a free or personal account, or any account your employer hasn't approved for 
 
 On an account that isn't approved for this kind of data, ask yourself:
 
-- [ ] Could anyone in this text be recognised by someone who knows them?
+- [ ] Could anyone in this text be recognized by someone who knows them?
 - [ ] Is there any number that unlocks money or an account?
 - [ ] Would I be comfortable if this text were shown to the people it's about?
 

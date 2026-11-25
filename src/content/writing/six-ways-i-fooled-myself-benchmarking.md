@@ -19,7 +19,7 @@ So I measured it instead. Twelve releases later, here's the method, the numbers,
 
 ## The method
 
-The nice thing about a context selector is that you already have thousands of labelled examples sitting in your git history. Every bug fix is a task description paired with the exact set of files that turned out to matter.
+The nice thing about a context selector is that you already have thousands of labeled examples sitting in your git history. Every bug fix is a task description paired with the exact set of files that turned out to matter.
 
 So for each historical fix in [GavelUp](https://gavelup.app), my meeting-runner app for Toastmasters clubs — a TypeScript/Postgres codebase with about 35 tables — I did this:
 

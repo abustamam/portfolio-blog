@@ -96,7 +96,7 @@ export const AI_CARDS: AiCard[] = [
     id: 'data-analysis',
     path: '/ai-cohort/data-analysis/',
     eyebrow: 'AI training · resource',
-    title: 'Analyse a spreadsheet with AI, and check it',
+    title: 'Analyze a spreadsheet with AI, and check it',
     subtitle: 'Sample file · four prompts · the true answers',
     motif: 'never-paste',
   },

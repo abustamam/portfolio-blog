@@ -1,5 +1,5 @@
 ---
-// "Labelled screen": a neutral schematic of a chat app with six numbered parts.
+// "Labeled screen": a neutral schematic of a chat app with six numbered parts.
 // Pick a number (tap, click, or Tab then Enter or Space) and the part is
 // highlighted and its one line shows. The numbers on the drawing sit in drawing
 // order (6, 4, 5, 3, 1, 2), so they are clickable but skipped by Tab; the list
@@ -14,7 +14,7 @@ const part = (id: PartId) => SCREEN_PARTS.find((p) => p.id === id)!;
 const PAST_CHATS = ['Weeknight dinners', 'Birthday party list', 'Letter to the landlord'];
 ---
 
-<section class="chat-screen" data-chat-screen aria-label="Labelled chat screen">
+<section class="chat-screen" data-chat-screen aria-label="Labeled chat screen">
   <div class="cs-frame">
     <div class="cs-top">
       <span class="cs-menu-icon" aria-hidden="true"></span>

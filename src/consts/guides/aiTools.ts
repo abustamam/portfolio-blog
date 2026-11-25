@@ -154,7 +154,7 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       work: {
-        text: 'Copilot Chat is available at no additional cost when you sign in with a work account that has an eligible Microsoft 365 subscription. Microsoft describes the no-cost version as web-grounded chat; more needs the paid Microsoft 365 Copilot licence.',
+        text: 'Copilot Chat is available at no additional cost when you sign in with a work account that has an eligible Microsoft 365 subscription. Microsoft describes the no-cost version as web-grounded chat; more needs the paid Microsoft 365 Copilot license.',
         source: 'https://www.microsoft.com/en-us/microsoft-365-copilot/chat',
         checked: CHECKED,
         confirmed: true,

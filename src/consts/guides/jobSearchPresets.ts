@@ -60,14 +60,14 @@ export const COVER_LETTER: PromptPreset = {
 
 export const INTERVIEW_PRACTICE: PromptPreset = {
   id: 'interview-practice',
-  label: 'Practise for the interview',
+  label: 'Practice for the interview',
   situation:
     'I have an interview for front desk coordinator at a community health clinic. I am going back to work after five years at home with my children.',
   task:
     'Interview me for this job. Ask one question at a time and wait for my answer. After each answer, ask one follow-up question the way a real interviewer would, then tell me in two or three sentences what was clear and what was vague.',
   input: POSTING,
   format:
-    'Five questions in total, including one about the gap in my work history. Keep each question short. At the end, a short list: my two strongest answers and the one to practise again.',
+    'Five questions in total, including one about the gap in my work history. Keep each question short. At the end, a short list: my two strongest answers and the one to practice again.',
   check:
     'Base your feedback only on what I actually said. Tell me when you are guessing what the employer wants.',
 };
