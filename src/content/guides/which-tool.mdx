@@ -1,11 +1,11 @@
 ---
 title: Which AI app should I use?
-description: Gemini, ChatGPT, Copilot or Claude for everyday work. What is free, what your employer may already pay for, what each can see, and a plain pick for your situation.
-lead: The first question everyone asks. For everyday work, the right app is decided mostly by three things you already know, your account, your email and your employer, not by which one is "best".
+description: Gemini, ChatGPT, Copilot or Claude for everyday work. What each costs, what your employer may already pay for, what it can see, and which one I would start with.
+lead: Gemini, ChatGPT, Copilot and Claude can all help with everyday work. Which one to start with depends mostly on whether it is for your job, and on which email you already use.
 step: 4
 minutes: 5
 tool: Tool picker
-ctaLine: Picking the app is the easy part. The hands-on training sets it up on a task from your own week, and shows you how to check what it gives back.
+ctaLine: The hands-on training sets one of these up on a real task from your week.
 ---
 import ToolPicker from '../../components/guides/ToolPicker.astro';
 import { AI_TOOLS, FACT_LABELS, FACT_ORDER, lastChecked } from '../../consts/guides/aiTools';
@@ -15,13 +15,17 @@ import { fmtLongDate } from '../../utils/date';
 
 <p class="ai-label which-tool-checked">Last checked <time data-last-checked datetime={lastChecked()}>{fmtLongDate(new Date(lastChecked()))}</time>. Prices and plans change; each fact links the vendor's own page.</p>
 
-## The short answer
+## Where to start
 
-- **Using it for work?** Use what your employer allows, signed in with your work account.
-- **Using it for yourself?** Start with the free app that matches your email: Gemini if you use Gmail, Copilot if you use Outlook. Otherwise, ChatGPT or Claude.
-- **Start free.** Pay only when you hit the free limits every week, or want the AI inside Gmail, Word or Outlook.
+If it is for work, use what your employer allows, signed in with your work account.
 
-## Pick in four taps
+If it is for you, start with the free app that matches your email: Gemini if you use Gmail, Copilot if you use Outlook. If you use neither, ChatGPT or Claude.
+
+Stay on the free plan until you hit its limits every week, or until you want the AI inside Gmail, Word or Outlook.
+
+## Four questions
+
+Answer these and the picker gives you one app and a first thing to try.
 
 <ToolPicker />
 
@@ -56,29 +60,39 @@ Every cell links the vendor page it came from. Where a vendor page did not say, 
 </table>
 </div>
 
-"Connect" means you sign in and give the app permission yourself, and you can disconnect it again in the app's settings. Connecting your email is a bigger step than chatting: read the training column first.
+"Connect" means you sign in and give the app permission yourself, and you can disconnect it again in the app's settings. Connecting your email is a bigger step than chatting, so check what the table says about your chats before you do it.
 
-## What we'd pick, by situation
+## What I'd pick, by situation
 
-**You sign in to work with a Microsoft account.** Use what your employer allows. That is most likely Copilot Chat, signed in with your work account, not a personal one. Don't copy work files into a personal AI account, even a paid one.
+### Work, with a Microsoft account
 
-**You sign in to work with a Google account.** The same rule: ask what is allowed, then use Gemini with your work account if your company has it turned on.
+Use what your employer allows. That is most likely Copilot Chat, signed in with your work account, not a personal one. Don't copy work files into a personal AI account, even one you pay for.
 
-**Your household runs on Gmail.** Start with Gemini on your personal Google Account. It is free with your Google Account, and it can connect to your Gmail, Calendar and Drive once you turn that on in Connected Apps. If you want the AI to work across your email and calendar for you, that is what the [Connect track](/ai-training/#connect) sets up.
+### Work, with a Google account
 
-**You are looking for a job.** Use a personal account, never your current employer's. Any of the four free plans can help you rewrite a CV or practise interview answers. Read the training setting in the table first, and leave out other people's details (see [Never paste these](/ai-guides/never-paste/)).
+Same rule: ask what is allowed. If your company has Gemini turned on, use it with your work account.
 
-**You want to write code.** You can ask any of them about code in an ordinary chat. If you have no account yet, ChatGPT's free plan includes limited access to its coding tool. Going from snippets to building something that runs is what the [Build track](/ai-training/#build) covers.
+### Home, if your household runs on Gmail
+
+I'd start with Gemini on your personal Google Account. It is free with your Google Account, and it can connect to your Gmail, Calendar and Drive once you turn that on in Connected Apps.
+
+### Looking for a job
+
+Use a personal account, never your current employer's. Any of the four free plans can help you rewrite a CV or practise interview answers. Check in the table whether your chats are used to train the AI, and leave out other people's details (see [what's safe to paste into AI](/ai-guides/never-paste/)).
+
+### Writing code
+
+You can ask any of them about code in an ordinary chat. If you have no account yet, ChatGPT's free plan includes limited access to its coding tool.
 
 ## Free or paid?
 
-For learning the habit, the free plan of any of these is enough. Paying (about $20 a month for the usual personal plan; exact prices are in the table) matters when:
+For learning the habit, the free plan of any of these is enough. The usual personal plan is about $20 a month; exact prices are in the table. I would pay when one of these is true:
 
-- **you hit the limit** most weeks and have to wait or stop;
-- **you want it inside the apps you already use**: Gemini inside Gmail and Docs, or Copilot inside Word, Excel and Outlook, come with the paid personal plans;
-- **you need longer files or more uploads** than the free plan allows.
+- You hit the limit most weeks and have to wait or stop.
+- You want it inside the apps you already use. Gemini inside Gmail and Docs, and Copilot inside Word, Excel and Outlook, come with the paid personal plans.
+- You need longer files or more uploads than the free plan allows.
 
-Paying does not fix a vague request, and it does not remove the need to check the answer. If the free plan gives you a poor answer, a clearer request usually helps more than a bigger plan.
+A bigger plan won't rescue a vague request. When the free plan gives you a poor answer, ask more clearly before you think about upgrading, and check what comes back either way.
 
 <style>{`
   .which-tool-checked { margin: 0 0 2rem; }

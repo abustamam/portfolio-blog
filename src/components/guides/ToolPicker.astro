@@ -1,12 +1,12 @@
 ---
-// "Tool picker" for /ai-guides/which-tool/: up to four taps give one
+// "Tool picker" for /ai-guides/which-tool/: up to four answers give one
 // recommendation, the reason and a first step. The rules are the pure
 // functions in src/utils/toolPicker.ts. Nothing is typed, stored or sent:
 // the answers live in this page's memory and are gone on reload.
 ---
 
 <section class="ai-card tool-picker" data-tool-picker aria-labelledby="tool-picker-title">
-  <p class="ai-label" id="tool-picker-title">Tool picker · up to four taps</p>
+  <p class="ai-label" id="tool-picker-title">Tool picker · four questions at most</p>
 
   <div data-tp-ask hidden>
     <p class="tool-picker__count" data-tp-count aria-live="polite"></p>
@@ -20,11 +20,10 @@
     <p class="tool-picker__pick" data-tp-pick></p>
     <p><strong>Why:</strong> <span data-tp-reason></span></p>
     <p><strong>First step:</strong> <span data-tp-step></span></p>
-    <p data-tp-link-wrap hidden><a class="ai-link" data-tp-link href="/ai-training/"></a></p>
     <button type="button" class="tool-picker__restart ai-link" data-tp-restart>Start again</button>
   </div>
 
-  <noscript><p>The picker needs JavaScript. The recommendations by situation below say the same thing.</p></noscript>
+  <noscript><p>The picker needs JavaScript. The section “What I’d pick, by situation” below says the same thing.</p></noscript>
 </section>
 
 <script>
@@ -40,8 +39,6 @@
     const question = $('[data-tp-question]');
     const options = $('[data-tp-options]');
     const back = $<HTMLButtonElement>('[data-tp-back]');
-    const linkWrap = $('[data-tp-link-wrap]');
-    const link = $<HTMLAnchorElement>('[data-tp-link]');
 
     // Answers in order, so Back can undo the last one.
     let answers: Partial<Answers> = {};
@@ -86,11 +83,6 @@
       $('[data-tp-pick]').hidden = r.first.startsWith('Start with');
       $('[data-tp-reason]').textContent = r.reason;
       $('[data-tp-step]').textContent = r.firstStep;
-      linkWrap.hidden = !r.link;
-      if (r.link) {
-        link.href = r.link.href;
-        link.textContent = `${r.link.label} →`;
-      }
       result.dataset.tool = r.tool ?? 'employer';
     };
 

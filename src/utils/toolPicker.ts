@@ -84,19 +84,11 @@ export interface Recommendation {
   /** One sentence. */
   reason: string;
   firstStep: string;
-  /** Where the answers point to the hands-on training, if anywhere. */
-  link?: { href: '/ai-training/#connect' | '/ai-training/#build'; label: string };
 }
 
 const NAMES: Record<ToolId, string> = { gemini: 'Gemini', chatgpt: 'ChatGPT', copilot: 'Copilot', claude: 'Claude' };
 
-const CONNECT = { href: '/ai-training/#connect', label: 'The Connect track sets this up on your own inbox' } as const;
-const BUILD = { href: '/ai-training/#build', label: 'The Build track takes this further' } as const;
-
-const linkFor = (task: Task) => (task === 'inbox' ? CONNECT : task === 'code' ? BUILD : undefined);
-
 function work(a: Answers): Recommendation {
-  const link = linkFor(a.task);
   if (a.ecosystem === 'google') {
     return {
       first: EMPLOYER_LINE,
@@ -104,7 +96,6 @@ function work(a: Answers): Recommendation {
       workAccount: true,
       reason: 'Most Google Workspace business plans include Gemini, and your company’s rules then cover what you put in it.',
       firstStep: 'Open gemini.google.com signed in with your work account. If it is not there, ask IT before using anything else.',
-      link,
     };
   }
   if (a.ecosystem === 'microsoft') {
@@ -114,7 +105,6 @@ function work(a: Answers): Recommendation {
       workAccount: true,
       reason: 'Copilot Chat comes at no additional cost with eligible Microsoft 365 work accounts, under your company’s protections.',
       firstStep: 'Sign in to Copilot with your work account, not a personal one. If it is not available, ask IT which tool is approved.',
-      link,
     };
   }
   return {
@@ -123,13 +113,11 @@ function work(a: Answers): Recommendation {
     workAccount: true,
     reason: 'Your employer decides which AI tools are allowed for work information.',
     firstStep: 'Ask IT or your manager which AI tool is approved. Until then, keep work files out of personal AI accounts.',
-    link,
   };
 }
 
 function personal(a: Answers): Recommendation {
   const pay = a.pay === 'yes';
-  const link = linkFor(a.task);
   const paidNote = pay ? ' If you hit the free limits every week, the paid plan in the table below is the next step.' : '';
 
   if (a.ecosystem === 'google') {
@@ -145,7 +133,6 @@ function personal(a: Answers): Recommendation {
         (a.task === 'inbox'
           ? 'Open gemini.google.com, connect Google Workspace in Connected Apps, then ask about one email thread.'
           : 'Open gemini.google.com with your Google Account and ask it to help with one real task from this week.') + paidNote,
-      link,
     };
   }
   if (a.ecosystem === 'microsoft') {
@@ -161,7 +148,6 @@ function personal(a: Answers): Recommendation {
           ? 'Open copilot.microsoft.com and look for Connectors to link Outlook.com or OneDrive. Microsoft describes this for Microsoft 365 plans.'
           : 'Open copilot.microsoft.com signed in with your Microsoft account and ask it to help with one real task from this week.') +
         paidNote,
-      link,
     };
   }
   // Neither Google nor Microsoft: pick by task.
@@ -179,7 +165,6 @@ function personal(a: Answers): Recommendation {
     workAccount: false,
     reason,
     firstStep: `Make a free account at ${site} and try it on one real task from this week.${paidNote}`,
-    link,
   };
 }
 

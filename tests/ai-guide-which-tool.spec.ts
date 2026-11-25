@@ -7,6 +7,11 @@ import { EMPLOYER_LINE, QUESTIONS, allAnswerSets, nextQuestion, questionsFor, re
 
 const PATH = '/ai-guides/which-tool/';
 
+// Words that would plug the course. Allowed only inside the GuideCta block.
+const SALES_WORDS = /\b(tracks?|training|courses?|cohorts?)\b/i;
+// The site speaks as "I". Matches "we", "we'd", "we're", "our" as whole words.
+const WE_WORDS = /\b(we|we['’](d|re|ll|ve)|our|ours)\b/i;
+
 const onDomain = (url: string, domains: string[]) => {
   const { protocol, hostname } = new URL(url);
   return protocol === 'https:' && domains.some((d) => hostname === d || hostname.endsWith(`.${d}`));
@@ -48,10 +53,26 @@ test.describe('which-tool: picker rules', () => {
       expect(r.reason.length, where).toBeGreaterThan(0);
       expect(r.firstStep.length, where).toBeGreaterThan(0);
       if (r.tool) expect(AI_TOOLS.map((t) => t.id), where).toContain(r.tool);
-      if (a.task === 'inbox') expect(r.link?.href, where).toBe('/ai-training/#connect');
-      if (a.task === 'code') expect(r.link?.href, where).toBe('/ai-training/#build');
-      if (a.task === 'everyday') expect(r.link, where).toBeUndefined();
     }
+  });
+
+  test('no result or question mentions the training, and none speaks as "we"', () => {
+    // The owner's review: the only call to action is the GuideCta at the bottom,
+    // and the site speaks as "I". Results carry text only, no links.
+    for (const a of allAnswerSets()) {
+      const r = recommend(a);
+      const where = JSON.stringify(a);
+      expect(Object.keys(r).sort(), where).toEqual(['first', 'firstStep', 'reason', 'tool', 'workAccount']);
+      for (const text of [r.first, r.reason, r.firstStep]) {
+        expect(text, where).not.toMatch(SALES_WORDS);
+        expect(text, where).not.toMatch(WE_WORDS);
+      }
+    }
+    for (const q of QUESTIONS)
+      for (const text of [q.text, ...q.options.map((o) => o.label)]) {
+        expect(text).not.toMatch(SALES_WORDS);
+        expect(text).not.toMatch(WE_WORDS);
+      }
   });
 
   test('a work account always gets "use what your employer allows" first, never a personal account', () => {
@@ -130,8 +151,7 @@ test.describe('which-tool: page', () => {
       await expect(result.locator('[data-tp-reason]')).toHaveText(r.reason);
       await expect(result.locator('[data-tp-step]')).toHaveText(r.firstStep);
       await expect(result).toHaveAttribute('data-tool', r.tool ?? 'employer');
-      if (r.link) await expect(result.locator('[data-tp-link]')).toHaveAttribute('href', r.link.href);
-      else await expect(result.locator('[data-tp-link-wrap]')).toBeHidden();
+      await expect(result.locator('a[href*="/ai-training"]')).toHaveCount(0);
 
       await result.locator('[data-tp-restart]').click();
       await expect(result).toBeHidden();
@@ -141,6 +161,34 @@ test.describe('which-tool: page', () => {
     expect(requests).toEqual([]);
     expect(page.url()).toBe(url);
     expect(await page.evaluate(() => JSON.stringify({ ...localStorage }))).toBe(storage);
+  });
+
+  test('the guide prose has no course plug and no "we" outside the GuideCta', async ({ page }) => {
+    await page.goto(PATH);
+    // The header (title and lead) and the article, without the facts table:
+    // vendor facts there use "training" in the model-training sense.
+    const prose = await page.evaluate(() => {
+      const parts = [document.querySelector('[data-guide] > header'), document.querySelector('[data-guide] > article')];
+      return parts
+        .map((el) => {
+          if (!el) return '';
+          const copy = el.cloneNode(true) as HTMLElement;
+          copy.querySelectorAll('table, style, script, [data-guide-cta]').forEach((n) => n.remove());
+          return copy.textContent ?? '';
+        })
+        .join('\n');
+    });
+    expect(prose.length).toBeGreaterThan(1000);
+    expect(prose.match(SALES_WORDS)?.[0], 'course word in the guide prose').toBeUndefined();
+    expect(prose.match(WE_WORDS)?.[0], '"we" in the guide prose').toBeUndefined();
+
+    // No link to the training from the body; the one call to action is the GuideCta below it.
+    const bodyHrefs = await page
+      .locator('[data-guide] > header a, [data-guide] > article a')
+      .evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+    expect(bodyHrefs.filter((h) => h.includes('/ai-training') || h.includes('/ai-quiz'))).toEqual([]);
+    await expect(page.locator('[data-guide-cta]')).toHaveCount(1);
+    await expect(page.locator('[data-guide-cta] a[href="/ai-training/"]')).toHaveCount(1);
   });
 
   test('Back undoes the last answer', async ({ page }) => {
