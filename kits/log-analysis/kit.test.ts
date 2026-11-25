@@ -16,7 +16,7 @@ const seeded: string[] = JSON.parse(read('tools/seeded-pii.json'));
 const tmp = mkdtempSync(join(tmpdir(), 'log-kit-'));
 
 function run(cmd: string[]) {
-  const r = Bun.spawnSync(cmd, { stdout: 'pipe', stderr: 'pipe' });
+  const r = Bun.spawnSync(cmd, { stdout: 'pipe', stderr: 'pipe', env: { ...process.env, POWERSHELL_TELEMETRY_OPTOUT: '1' } });
   if (r.exitCode !== 0) throw new Error(`${cmd.join(' ')} exited ${r.exitCode}: ${r.stderr.toString()}`);
   return r.stdout.toString();
 }
@@ -70,7 +70,8 @@ describe('scrub', () => {
     const py = join(tmp, 'py-for-ps.log');
     scrubWithPython(py);
     expect(readFileSync(out).equals(readFileSync(py))).toBe(true);
-  });
+    // pwsh's cold start on a CI runner takes longer than bun's 5 s default.
+  }, 60_000);
 });
 
 describe('zip', () => {
