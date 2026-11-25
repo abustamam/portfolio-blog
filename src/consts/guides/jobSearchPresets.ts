@@ -1,5 +1,5 @@
 // Presets and tap-to-add Check lines for the prompt builder on /ai-guides/job-search/.
-// One invented person and one invented posting run through all three, and the
+// One invented person and one invented posting run through all four, and the
 // page labels them as an illustration. Nobody real is named; the hiring manager
 // is a placeholder (PERSON-1). The person's own name and contact details are
 // left out on purpose: the page tells readers to redact them from a copy of
@@ -12,6 +12,22 @@ export const MAKE_IT_BETTER = 'Make my résumé better.';
 /** The posting, as the reader would paste it: only the lines that matter. */
 const POSTING =
   'The posting (key lines): Greet patients and run the front desk. Schedule appointments in a shared calendar. Answer phones and email. Keep patient records accurate. Experience with Google Sheets or similar is a plus.';
+
+/** Before there is a posting: job titles to search for, and the words postings use. The reader searches the boards. */
+export const FIND_TITLES: PromptPreset = {
+  id: 'find-titles',
+  label: 'Find job titles to search for',
+  situation:
+    'I am going back to work after five years at home with my children. I want an office job, but I am not sure which job titles to type into the job boards.',
+  task:
+    'Suggest six to eight job titles I could search for, based on my experience below. For each title, list the keywords that postings for that title often use. Do not look up or list open jobs. I will search the job boards myself.',
+  input:
+    'My experience: office assistant at a dental practice from 2015 to 2019, answering phones, booking appointments and keeping patient files in order. Volunteer coordinator at a weekend school since 2021, where I build the monthly volunteer rota in Google Sheets for about 30 families.',
+  format:
+    'A table with three columns: job title, keywords postings use, and the part of my experience that fits it.',
+  check:
+    'After the table, say which titles are a stretch for me and why.',
+};
 
 export const TAILOR_RESUME: PromptPreset = {
   id: 'tailor-resume',
@@ -56,7 +72,7 @@ export const INTERVIEW_PRACTICE: PromptPreset = {
     'Base your feedback only on what I actually said. Tell me when you are guessing what the employer wants.',
 };
 
-export const JOB_SEARCH_PRESETS: PromptPreset[] = [TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE];
+export const JOB_SEARCH_PRESETS: PromptPreset[] = [FIND_TITLES, TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE];
 
 /** Tap-to-add Check lines for job-search prompts. */
 export const JOB_SEARCH_CHECK_LINES: string[] = [

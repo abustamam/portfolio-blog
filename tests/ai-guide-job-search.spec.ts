@@ -3,13 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { test, expect, type Page } from '@playwright/test';
 import { PROMPT_FIELDS, assemblePrompt } from '../src/utils/promptBuilder';
 import {
-  JOB_SEARCH_CHECK_LINES, JOB_SEARCH_PRESETS, MAKE_IT_BETTER, TAILOR_RESUME, TRACKER_COLUMNS,
+  FIND_TITLES, JOB_SEARCH_CHECK_LINES, JOB_SEARCH_PRESETS, MAKE_IT_BETTER, TAILOR_RESUME, TRACKER_COLUMNS,
 } from '../src/consts/guides/jobSearchPresets';
 import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const PAGE = '/ai-guides/job-search/';
 const PROMPT_PAGE = '/ai-guides/prompt/';
+const WRONG_PAGE = '/ai-guides/when-ai-is-wrong/';
 const CSV_PATH = '/downloads/job-application-tracker.csv';
 const B = '#job-search-builder';
 
@@ -27,26 +28,39 @@ const text = (h: string) =>
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ');
 
+// Prose with curly apostrophes made straight, for matching sentences.
+const plain = (h: string) => text(h).replace(/’/g, "'").trim();
+
 const field = (page: Page, f: string, root = B) => page.locator(`${root} [data-pb-field="${f}"]`);
 const out = (page: Page) => page.locator(`${B} [data-pb-output]`);
 
 test.describe('job-search presets', () => {
-  test('three presets, each with all five parts and a Check line', () => {
-    expect(JOB_SEARCH_PRESETS.map((p) => p.id)).toEqual(['tailor-resume', 'cover-letter', 'interview-practice']);
+  test('four presets, each with all five parts and a Check line', () => {
+    expect(JOB_SEARCH_PRESETS.map((p) => p.id)).toEqual(['find-titles', 'tailor-resume', 'cover-letter', 'interview-practice']);
     for (const p of JOB_SEARCH_PRESETS) {
       for (const f of PROMPT_FIELDS) expect(p[f].trim(), `${p.id}.${f}`).not.toBe('');
     }
     // The résumé check asks for anything that is not in the original.
-    expect(JOB_SEARCH_PRESETS[0].check).toMatch(/not in my original/);
+    expect(TAILOR_RESUME.check).toMatch(/not in my original/);
+  });
+
+  test('the search preset asks for titles and keywords from my experience, leaves the searching to me, and checks for stretches', () => {
+    expect(FIND_TITLES.label).toBe('Find job titles to search for');
+    expect(FIND_TITLES.task).toMatch(/job titles I could search for/);
+    expect(FIND_TITLES.task).toMatch(/keywords that postings for that title/);
+    expect(FIND_TITLES.task).toMatch(/Do not look up or list open jobs\. I will search the job boards myself\./);
+    expect(FIND_TITLES.input).toMatch(/^My experience: /);
+    expect(FIND_TITLES.check).toMatch(/which titles are a stretch for me and why/);
   });
 });
 
 test.describe('job-search guide page', () => {
   test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
-  test('the builder shows the three presets and each fills the five fields', async ({ page }) => {
+  test('the builder shows the four presets, the search one first, and each fills the five fields', async ({ page }) => {
     await page.goto(PAGE);
-    await expect(page.locator(`${B} [data-pb-chip]`)).toHaveCount(3);
+    await expect(page.locator(`${B} [data-pb-chip]`)).toHaveCount(4);
+    await expect(page.locator(`${B} [data-pb-chip="find-titles"]`)).toHaveText(FIND_TITLES.label);
     for (const p of JOB_SEARCH_PRESETS) {
       await page.locator(`${B} [data-pb-chip="${p.id}"]`).click();
       for (const f of PROMPT_FIELDS) await expect(field(page, f), `${p.id}.${f}`).toHaveValue(p[f]);
@@ -60,7 +74,7 @@ test.describe('job-search guide page', () => {
     const pres = [...article(dist(PAGE)).matchAll(/<pre[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)].map((m) =>
       m[1].replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&'),
     );
-    // The "make it better" starting point comes first, then the three full prompts.
+    // The "make it better" starting point comes first, then the four full prompts (the search one first).
     expect(pres).toEqual([MAKE_IT_BETTER, ...JOB_SEARCH_PRESETS.map((p) => assemblePrompt(p))]);
 
     await page.goto(PAGE);
@@ -120,6 +134,8 @@ test.describe('job-search guide page', () => {
   test('zero network requests while using the page, nothing in the URL, storage only through guideStore', async ({ page }) => {
     await page.goto(PAGE);
     await page.waitForLoadState('networkidle');
+    // The site header's wordmark keeps its own sessionStorage flag from page load; the guide must add nothing.
+    const sessionBefore = await page.evaluate(() => ({ ...sessionStorage }));
     const requests: string[] = [];
     page.on('request', (r) => requests.push(r.url()));
     await page.locator(`${B} [data-pb-chip="tailor-resume"]`).click();
@@ -133,8 +149,8 @@ test.describe('job-search guide page', () => {
     await field(page, 'task').fill('One more line.');
     expect(requests).toEqual([]);
     expect(page.url()).toBe(new URL(PAGE, page.url()).href);
-    const keys = await page.evaluate(() => [Object.keys(localStorage), Object.keys(sessionStorage), document.cookie]);
-    expect(keys).toEqual([[GUIDE_STORE_KEY], [], '']);
+    const keys = await page.evaluate(() => [Object.keys(localStorage), { ...sessionStorage }, document.cookie]);
+    expect(keys).toEqual([[GUIDE_STORE_KEY], sessionBefore, '']);
   });
 });
 
@@ -158,8 +174,54 @@ test.describe('job-search copy and the free/paid line', () => {
     expect(t).toMatch(/save a copy of your résumé, redact the copy and upload that one/);
   });
 
+  test('a search section comes before tailoring: titles from the tool, the searching done by me', () => {
+    const t = text(article(dist(PAGE)));
+    const search = t.indexOf('What to search for');
+    expect(search).toBeGreaterThan(t.indexOf('The example on this page'));
+    expect(search).toBeLessThan(t.indexOf('1. Tailor your résumé to one posting'));
+    expect(t).toContain('ask for job titles to search for, plus the words postings for those titles tend to use');
+    expect(t).toContain('Then I search the job boards myself.');
+    expect(t.indexOf(`Task: ${FIND_TITLES.task}`)).toBeGreaterThan(search);
+    expect(t.indexOf(`Task: ${FIND_TITLES.task}`)).toBeLessThan(t.indexOf('1. Tailor your résumé to one posting'));
+  });
+
+  test('the search section warns that AI can invent or show closed postings, and links When AI gets it wrong', () => {
+    const a = article(dist(PAGE));
+    const warn = a.match(/<p data-search-warning[^>]*>([\s\S]*?)<\/p>/)!;
+    expect(warn, 'warning paragraph').toBeTruthy();
+    const w = plain(warn[1]);
+    expect(w).toMatch(/ask an AI tool to find or list open jobs/);
+    expect(w).toMatch(/invent postings/);
+    expect(w).toMatch(/ones that have already closed/);
+    expect(w).toMatch(/find the actual posting on the employer's own site or on a job board/);
+    expect(warn[1]).toContain(`<a href="${WRONG_PAGE}">When AI gets it wrong</a>`);
+    // It sits inside the search section, before tailoring.
+    expect(a.indexOf('data-search-warning')).toBeLessThan(a.indexOf('1. Tailor your résumé'));
+  });
+
+  test('the tailoring section says to paste the posting text, not only its link', () => {
+    const a = article(dist(PAGE));
+    const tailor = a.slice(a.indexOf('1. Tailor your résumé'), a.indexOf('2. A cover letter'));
+    const p = tailor.match(/<p data-paste-not-link[^>]*>([\s\S]*?)<\/p>/)!;
+    expect(p, 'paste-not-link paragraph').toBeTruthy();
+    expect(plain(p[1])).toBe(
+      "Paste the posting's text, not only its link. Some AI apps can't open links, and some guess what is behind one, so check that the result uses the posting's actual wording.",
+    );
+  });
+
+  test('nothing above the call to action is about agents, auto-applying or autopilot', () => {
+    const t = text(prose(dist(PAGE)));
+    expect(t).toContain('What to search for');
+    for (const banned of [/agents?\b/i, /agentic/i, /auto-?apply/i, /auto-?applying/i, /autopilot/i]) {
+      expect(t, String(banned)).not.toMatch(banned);
+    }
+  });
+
   test('the guide speaks as "I" and mentions no course, training, track or cohort outside the call to action', () => {
     const h = dist(PAGE);
+    // The search section and its preset are part of the prose checked here.
+    expect(text(prose(h))).toContain('What to search for');
+    expect(JOB_SEARCH_PRESETS).toContain(FIND_TITLES);
     const strings = [
       text(prose(h)),
       metaDescription(h),
@@ -195,11 +257,12 @@ test.describe('job-search copy and the free/paid line', () => {
     expect(t).toContain('PERSON-1');
   });
 
-  test('the article links only to guides already published, and the never-paste guide', () => {
+  test('the article links only to guides already published', () => {
     const hrefs = [...article(dist(PAGE)).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
     expect(hrefs).toContain('/ai-guides/never-paste/');
     expect(hrefs).toContain(PROMPT_PAGE);
+    expect(hrefs).toContain(WRONG_PAGE);
     expect(article(dist(PAGE))).toMatch(/<a href="\/ai-guides\/never-paste\/">what(&#39;|&#x27;|'|’)s safe to paste into AI<\/a>/);
-    for (const h of hrefs) expect(['/ai-guides/never-paste/', PROMPT_PAGE, CSV_PATH], h).toContain(h);
+    for (const h of hrefs) expect(['/ai-guides/never-paste/', PROMPT_PAGE, WRONG_PAGE, CSV_PATH], h).toContain(h);
   });
 });

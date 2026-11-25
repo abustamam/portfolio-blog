@@ -3,14 +3,14 @@ title: AI for your job search
 description: "Use AI on one job application: tailor your résumé, write a cover letter in your own words, practise the interview and keep a record of where you applied."
 lead: "Take one job posting and use an AI tool on it from start to finish: a résumé tailored to that posting, a cover letter that still sounds like you, interview practice with follow-up questions, and a simple sheet of where you applied."
 step: 6
-minutes: 7
+minutes: 8
 tool: Prompt builder
 ctaLine: "The hands-on training works on a task from your own week, and a job application can be that task."
 ---
 import PromptBuilder from '../../components/guides/PromptBuilder.astro';
 import { assemblePrompt } from '../../utils/promptBuilder';
 import {
-  JOB_SEARCH_PRESETS, JOB_SEARCH_CHECK_LINES, MAKE_IT_BETTER, TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE, TRACKER_COLUMNS,
+  JOB_SEARCH_PRESETS, JOB_SEARCH_CHECK_LINES, MAKE_IT_BETTER, FIND_TITLES, TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE, TRACKER_COLUMNS,
 } from '../../consts/guides/jobSearchPresets';
 
 ## Where most people start
@@ -39,6 +39,16 @@ The same goes for anything else you paste. See [what's safe to paste into AI](/a
 
 Every prompt on this page uses one invented person and one invented job. Nothing in them is real. The person is going back to work after five years at home with their children, and is applying to be a front desk coordinator at a community health clinic. Their résumé has two roles: office assistant at a dental practice from 2015 to 2019, and volunteer coordinator at a weekend school since 2021, where they build the monthly volunteer rota in Google Sheets for about 30 families. Read each prompt to see the shape, then swap in your own résumé and your own posting.
 
+## What to search for
+
+Before there is a posting to tailor anything to, there is the search. The hard part for me is often knowing what to type into the job board, because the job I'd be good at may go by a title I'd never think of. So I give the tool my experience and ask for job titles to search for, plus the words postings for those titles tend to use. Then I search the job boards myself.
+
+<pre><code>{assemblePrompt(FIND_TITLES)}</code></pre>
+
+<p><button type="button" class="ai-link" data-prompt-fill="find-titles" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
+
+<p data-search-warning>Don't ask an AI tool to find or list open jobs for you. It can invent postings that don't exist, or show ones that have already closed, and they look as real as the rest of the answer. When a title looks right, find the actual posting on the employer's own site or on a job board. [When AI gets it wrong](/ai-guides/when-ai-is-wrong/) has more on mistakes like this.</p>
+
 ## 1. Tailor your résumé to one posting
 
 This is the same upload and the same "make it better", with more around it. The posting goes in so the tool knows what to aim for. The task says to reorder and reword what is already there and add nothing. The last line asks the tool to list anything it added anyway, because that is the part you need to check.
@@ -48,6 +58,8 @@ This is the same upload and the same "make it better", with more around it. The 
 <p><button type="button" class="ai-link" data-prompt-fill="tailor-resume" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
 
 If your AI tool can't take a file, paste the text of your redacted copy under the posting instead.
+
+<p data-paste-not-link>Paste the posting's text, not only its link. Some AI apps can't open links, and some guess what is behind one, so check that the result uses the posting's actual wording.</p>
 
 When the list comes back, check it, then read the new résumé side by side with your original anyway. The list can miss things. Anything you can't back up in an interview comes out.
 
@@ -80,7 +92,7 @@ Treat the feedback as a starting point. The tool doesn't know the clinic or the 
 
 ## Write your own version
 
-Tap one of the three examples, then replace the invented details with your own: your situation, your posting, your notes. For the résumé prompt, upload your redacted copy alongside it. Your prompt appears underneath as you type. Copy it into whichever AI tool you use. New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one.
+Tap one of the four examples, then replace the invented details with your own: your situation, your posting, your notes. For the résumé prompt, upload your redacted copy alongside it. Your prompt appears underneath as you type. Copy it into whichever AI tool you use. New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one.
 
 <PromptBuilder
   presets={JOB_SEARCH_PRESETS}
