@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { TRACKS } from '../src/utils/aiQuiz';
 
 type Path = {
   frequency: string;
@@ -74,7 +75,7 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#quiz-step-label')).toHaveText('question 2 of 9');
   });
 
-  test('beginner lands on Foundations and sees the no-endpoint notice', async ({ page }) => {
+  test('beginner lands on Everyday AI and sees the no-endpoint notice', async ({ page }) => {
     await page.goto('/ai-quiz');
     await page.evaluate(() => {
       document.getElementById('ai-quiz')!.dataset.endpoint = '';
@@ -83,12 +84,13 @@ test.describe('AI quiz', () => {
     const result = page.locator('#quiz-result');
     await expect(result).toBeVisible();
     await expect(result).toHaveAttribute('data-track', 'foundations');
-    await expect(page.locator('#result-track')).toHaveText('Foundations');
+    await expect(page.locator('#result-track')).toHaveText('Everyday AI');
+    await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#everyday');
     await expect(page.locator('#result-build')).toContainText(beginner.weeklyTask);
     await expect(page.locator('#result-status')).toContainText("aren't being collected yet");
   });
 
-  test('advanced user lands on Builder and the response is POSTed', async ({ page }) => {
+  test('advanced user lands on Connect or Build and the response is POSTed', async ({ page }) => {
     let body: Record<string, unknown> | null = null;
     await page.route('**/api/ai-quiz', async (route) => {
       body = JSON.parse(route.request().postData() ?? '{}');
@@ -102,6 +104,8 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#ai-quiz')).toHaveAttribute('data-endpoint', '/api/ai-quiz');
     await complete(page, builder);
     await expect(page.locator('#quiz-result')).toHaveAttribute('data-track', 'builder');
+    await expect(page.locator('#result-track')).toHaveText('Connect or Build');
+    await expect(page.locator('#result-reserve')).toHaveAttribute('href', '/ai-training/#tracks');
     await expect(page.locator('#result-status')).toContainText('answers were sent');
     expect(body).toMatchObject({
       track: 'builder',
@@ -138,5 +142,14 @@ test.describe('AI quiz', () => {
   test('launch post links to the quiz', async ({ page }) => {
     await page.goto('/writing/hands-on-ai-cohort');
     await expect(page.locator('a[href="/ai-quiz"]').first()).toBeVisible();
+  });
+
+  test('every result names tracks that exist on /ai-training/', async ({ page }) => {
+    await page.goto('/ai-training/');
+    const offered = await page.locator('.training-track .track-name').allInnerTexts();
+    expect(offered.length).toBeGreaterThan(0);
+    for (const [key, t] of Object.entries(TRACKS)) {
+      for (const name of t.name.split(' or ')) expect(offered, `${key}: ${name}`).toContain(name);
+    }
   });
 });

@@ -55,38 +55,46 @@ export function scoreQuiz(a: QuizAnswers): QuizResult {
   return { track, score, privacyGap };
 }
 
+// What the result screen shows. The keys stay as they are (they are stored in
+// quiz_responses), but the names must be /ai-training/ track names, joined
+// with " or " when a result fits more than one. tests/ai-quiz.spec.ts checks
+// that. The text lives here, not imported from src/consts/aiCohort.ts, because
+// the intake service's image copies only this file.
+export const EVERYDAY_BUILD =
+  'a version of that task you can rerun every week, a way to check its work, and a write-up so you can keep it running';
+
 export const TRACKS: Record<Track, { name: string; summary: string; covers: string[]; build: string }> = {
   foundations: {
-    name: 'Foundations',
+    name: 'Everyday AI',
     summary:
-      "You're early, and that's the best place to start. Most of the value in AI comes from a few habits: giving it enough context, checking what it tells you, and knowing what to keep out of it.",
+      "You're early, and that's the best place to start. Everyday AI takes one task you already do every week and builds the few habits that matter most: giving AI enough context, checking what it tells you, and knowing what to keep out of it. No code.",
     covers: [
-      'Writing prompts with real context, so answers fit your situation',
-      'Catching wrong answers before they cost you',
-      'What never to paste into an AI tool, and safer ways to get the same help',
+      'Writing your task down, and a prompt that works on it',
+      'Running it on your own file, with a check you trust',
+      'What never to paste into an AI tool, and how to make a file safe first',
     ],
-    build: 'a reusable prompt kit for the task you named, plus a checklist for verifying what comes back',
+    build: EVERYDAY_BUILD,
   },
   applied: {
-    name: 'Applied',
+    name: 'Everyday AI',
     summary:
-      "You already use AI and get value from it. The next step is pointing it at your actual work: the spreadsheets, documents, email and recurring operations that eat your week.",
+      'You already use AI and get value from it. Everyday AI points it at one real task from your week, on your own spreadsheet, document or emails, and turns it into something you can rerun without starting over. No code.',
     covers: [
-      'Spreadsheets: cleaning data, writing formulas, summarising and checking the result',
-      'Documents and email: drafts, templates, and summaries you can trust',
-      'Turning a recurring task into a repeatable, documented workflow',
+      'Running your task on your own file, with a check you trust',
+      'Making it repeatable, so next week starts where this one ended',
+      'What never to paste into an AI tool, and how to make a file safe first',
     ],
-    build: 'a working, documented workflow for the task you named, using your own files',
+    build: EVERYDAY_BUILD,
   },
   builder: {
-    name: 'Builder',
+    name: 'Connect or Build',
     summary:
-      "You're past the basics and want AI to do work, not just answer questions. That means connecting it to your tools, chaining steps together, and deciding what runs locally versus in the cloud.",
+      "You're past the basics and want AI to do work, not just answer questions. Two tracks fit. Connect puts AI inside your email and calendar, with no code. Build has you code with AI and build your own agents; pick it if you're comfortable installing software.",
     covers: [
-      'Agents and multi-step workflows, and where they break',
-      'Connecting AI to email, Sheets, calendars and other tools',
-      'Local vs cloud models: cost, privacy and quality trade-offs',
+      'Connect: drafted replies, summaries and scheduling, with you approving what goes out',
+      'Build: AI reading and acting on your email, Sheets, calendar or files, with limits on what it can touch',
+      'Both: a multi-step automation that stops for your approval where it matters',
     ],
-    build: 'an automation that runs the task you named end to end, with a human check where it matters',
+    build: 'an automation that runs that task end to end, with a human check where it matters',
   },
 };
