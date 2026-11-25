@@ -43,6 +43,43 @@ test.describe('scrub() rules', () => {
     expect(scrub('dana@x.com', ['dana']).text).toBe('EMAIL-1');
   });
 
+  test('a full name is one person: the phrase and each part share one PERSON-n', () => {
+    const r = scrub('Dana Lee paid. Ms Lee called. Dana said hi.', ['Dana Lee']);
+    expect(r.text).toBe('PERSON-1 paid. Ms PERSON-1 called. PERSON-1 said hi.');
+  });
+
+  test('the full phrase is matched before its parts (never PERSON-1 PERSON-1)', () => {
+    const r = scrub('Dana Lee and dana   lee', ['Dana Lee']);
+    expect(r.text).toBe('PERSON-1 and PERSON-1');
+    expect(r.text).not.toContain('PERSON-1 PERSON-1');
+  });
+
+  test('a part shared by two entries goes to the entry added first; full phrases keep their own', () => {
+    const r = scrub('Dana Lee, Sam Lee, Lee, Sam, Dana', ['Dana Lee', 'Sam Lee']);
+    expect(r.text).toBe('PERSON-1, PERSON-2, PERSON-1, PERSON-2, PERSON-1');
+    const flipped = scrub('Lee', ['Sam Lee', 'Dana Lee']);
+    expect(flipped.text).toBe('PERSON-1');
+  });
+
+  test('parts and phrase match in every case variant, whole words only', () => {
+    const r = scrub('DANA LEE, dana, LEE, Leeds, Danae', ['Dana Lee']);
+    expect(r.text).toBe('PERSON-1, PERSON-1, PERSON-1, Leeds, Danae');
+  });
+
+  test('a single-word entry still matches only that word', () => {
+    const r = scrub('Dana Lee and Dana', ['Dana']);
+    expect(r.text).toBe('PERSON-1 Lee and PERSON-1');
+  });
+
+  test('the key shows the full entry as typed, and an email with the name stays an email', () => {
+    const r = scrub('Lee wrote from dana.lee@x.com', ['Dana Lee']);
+    expect(r.text).toBe('PERSON-1 wrote from EMAIL-1');
+    expect(r.key).toEqual([
+      { placeholder: 'EMAIL-1', original: 'dana.lee@x.com' },
+      { placeholder: 'PERSON-1', original: 'Dana Lee' },
+    ]);
+  });
+
   test('the key maps every placeholder back and the round trip is exact', () => {
     const input = 'Dana (dana@x.com, 555-123-4567) paid with 4111 1111 1111 1111. Sam <sam@y.org> saw Dana. Dana again.';
     const r = scrub(input, ['Dana', 'Sam']);
@@ -71,6 +108,15 @@ test.describe('Scrubber on the page', () => {
     await page.locator('[data-copy-key]').click();
     await expect(page.locator('[data-scrub-status]')).toContainText('Key copied');
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('EMAIL-1 = dana@x.com\nPHONE-1 = 555-123-4567\nPERSON-1 = Dana');
+  });
+
+  test('adding a full name in the page replaces the phrase and each part', async ({ page }) => {
+    await page.goto(PAGE);
+    await page.locator('[data-scrub-name]').fill('Dana Lee');
+    await page.locator('[data-scrub-add]').click();
+    await page.locator('[data-scrub-in]').fill('Dana Lee paid. Ms Lee called. Dana said hi.');
+    await expect(page.locator('[data-scrub-out]')).toHaveValue('PERSON-1 paid. Ms PERSON-1 called. PERSON-1 said hi.');
+    await expect(page.locator('[data-scrub-key] tbody tr')).toHaveText('PERSON-1Dana Lee');
   });
 
   test('zero network requests while typing and copying; nothing in the URL or storage', async ({ page, context }) => {

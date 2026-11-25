@@ -26,21 +26,29 @@ function normalise(kind: Kind, value: string): string {
 /**
  * Replace emails, phone numbers and long digit runs with numbered
  * placeholders, plus every whole-word, case-insensitive occurrence of each
- * name in `names` with PERSON-n. The same value always gets the same
- * placeholder; numbering follows first appearance (names: list order).
+ * name in `names` (and of each word of a multi-word name) with PERSON-n.
+ * The same value always gets the same placeholder; numbering follows first appearance (names: list order).
  * The key lists every placeholder used and the first original it replaced.
  */
 export function scrub(input: string, names: string[] = []): ScrubResult {
   // Names: trimmed, de-duplicated ignoring case, numbered in list order.
   const people: string[] = [];
   for (const raw of names) {
-    const n = raw.trim();
+    const n = raw.trim().replace(/\s+/g, ' ');
     if (n && !people.some((p) => p.toLowerCase() === n.toLowerCase())) people.push(n);
   }
-  const personNumber = new Map(people.map((p, i) => [p.toLowerCase(), i + 1]));
-  const longestFirst = [...people].sort((a, b) => b.length - a.length);
-  const nameAlt = longestFirst.length
-    ? `|((?<![\\p{L}\\p{N}_])(?:${longestFirst.map((n) => n.replace(ESCAPE, '\\$&')).join('|')})(?![\\p{L}\\p{N}_]))`
+  // A full name counts as one person: the whole phrase and each of its words
+  // map to that entry's PERSON-n. Full phrases claim their own entry first;
+  // a part shared by two entries goes to the entry added first.
+  const fold = (t: string) => t.replace(/\s+/g, ' ').toLowerCase();
+  const tokenOwner = new Map<string, number>(); // folded token -> index in people
+  people.forEach((p, i) => tokenOwner.set(fold(p), i));
+  people.forEach((p, i) => {
+    for (const part of p.split(/\s+/)) if (!tokenOwner.has(fold(part))) tokenOwner.set(fold(part), i);
+  });
+  const tokens = [...tokenOwner.keys()].sort((a, b) => b.length - a.length);
+  const nameAlt = tokens.length
+    ? `|((?<![\\p{L}\\p{N}_])(?:${tokens.map((n) => n.split(' ').map((w) => w.replace(ESCAPE, '\\$&')).join('\\s+')).join('|')})(?![\\p{L}\\p{N}_]))`
     : '';
   const re = new RegExp(`(${EMAIL})|(${PHONE})|(${ACCOUNT})${nameAlt}`, 'giu');
 
@@ -49,8 +57,9 @@ export function scrub(input: string, names: string[] = []): ScrubResult {
   const text = input.replace(re, (match, email, phone, account, person) => {
     let placeholder: string;
     if (typeof person === 'string') {
-      placeholder = `PERSON-${personNumber.get(match.toLowerCase())}`;
-      if (!used.has(placeholder)) used.set(placeholder, people.find((p) => p.toLowerCase() === match.toLowerCase()) ?? match);
+      const owner = tokenOwner.get(fold(match))!;
+      placeholder = `PERSON-${owner + 1}`;
+      if (!used.has(placeholder)) used.set(placeholder, people[owner]);
       return placeholder;
     }
     const kind: Kind = email ? 'EMAIL' : phone ? 'PHONE' : 'ACCOUNT';

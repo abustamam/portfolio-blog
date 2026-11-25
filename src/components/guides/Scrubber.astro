@@ -14,9 +14,9 @@
 
   <div class="scrubber__names">
     <label class="scrubber__label" for="scrub-name">Names to replace</label>
-    <p class="scrubber__hint"><strong>Check names yourself.</strong> The tool cannot tell a name from any other word, so add each name here and it becomes PERSON-1, PERSON-2 and so on.</p>
+    <p class="scrubber__hint"><strong>Check names yourself.</strong> The tool cannot tell a name from any other word. Add each person's full name, like Dana Lee. The tool then also replaces Dana or Lee on its own. If two people share a name, check the result yourself.</p>
     <div class="scrubber__row">
-      <input id="scrub-name" type="text" autocomplete="off" spellcheck="false" data-scrub-name placeholder="A name, e.g. Dana" />
+      <input id="scrub-name" type="text" autocomplete="off" spellcheck="false" data-scrub-name placeholder="A full name, e.g. Dana Lee" />
       <button type="button" class="scrubber__btn" data-scrub-add>Add name</button>
     </div>
     <ul class="scrubber__chips" data-scrub-chips aria-label="Names being replaced"></ul>
