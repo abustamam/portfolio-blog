@@ -1,0 +1,186 @@
+---
+// Log analysis kit: scrub first, then analyze. Unlisted (noindex via
+// CohortPage, out of the sitemap via astro.config.mjs, not in the cohort nav).
+// Everything shown here is read from kits/log-analysis/, the same files that
+// go into the zip (scripts/build-log-kit.mjs), so the page and the download
+// cannot drift.
+import CohortPage from '../../layouts/CohortPage.astro';
+import rawLog from '../../../kits/log-analysis/sample-logs/app.log?raw';
+import scrubbedLog from '../../../kits/log-analysis/sample-logs/app.scrubbed.log?raw';
+import promptsMd from '../../../kits/log-analysis/prompts.md?raw';
+import seeded from '../../../kits/log-analysis/tools/seeded-pii.json';
+
+const ZIP = '/downloads/log-analysis-kit.zip';
+
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const reEsc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const seededRe = new RegExp(
+  [...(seeded as string[])].sort((a, b) => b.length - a.length).map((v) => reEsc(esc(v))).join('|'),
+  'g',
+);
+const markPii = (line: string) => esc(line).replace(seededRe, (m) => `<mark class="log-pii">${m}</mark>`);
+const markPlaceholders = (line: string) =>
+  esc(line).replace(/&lt;[A-Z_]+&gt;/g, (m) => `<mark class="log-ph">${m}</mark>`);
+
+// One example line of each kind, in log order. Scrubbing keeps lines 1:1.
+const rawLines = rawLog.split('\n');
+const scrubbedLines = scrubbedLog.split('\n');
+const KINDS = [/\[accounts\] .*new signup/, /Bearer /, /PaymentGatewayTimeout/, /card declined/, /api_key=/];
+const picks = KINDS.map((re) => rawLines.findIndex((l) => re.test(l)))
+  .filter((i) => i >= 0)
+  .sort((a, b) => a - b);
+const excerpt = picks.map((i) => ({ raw: markPii(rawLines[i]), scrubbed: markPlaceholders(scrubbedLines[i]) }));
+
+const prompts = [...promptsMd.matchAll(/^## (.+)\n\n```text\n([\s\S]*?)\n```/gm)].map((m) => ({
+  title: m[1].replace(/^\d+\.\s*/, ''),
+  body: m[2],
+}));
+
+const RULES = [
+  ['Bearer tokens and JWTs', '<TOKEN>'],
+  ['api_key= values', '<SECRET>'],
+  ['Email addresses', '<EMAIL>'],
+  ['Card-like numbers', '<CARD>'],
+  ['IPv4 addresses', '<IP>'],
+  ['User IDs (usr_…)', '<USER_ID>'],
+];
+---
+
+<CohortPage
+  title="Find errors in app logs with AI, safely"
+  kicker="cohort resource · log analysis kit"
+  lead="A sample kit you can hand to your IT team: fake logs, a scrub script that removes private details, and three prompts for Microsoft Copilot."
+>
+  <p class="kit-download">
+    <a class="cohort-cta" href={ZIP} download data-kit-download>Download the kit (.zip)</a>
+    <span class="kit-download__note font-mono">sample logs · scrub scripts · prompts · IT checklist</span>
+  </p>
+
+  <h2 id="the-idea">The idea</h2>
+  <p>
+    <strong>Scrub first, then analyze.</strong> Before any AI sees a log, a small script on your own computer swaps
+    every private detail (emails, IP addresses, user IDs, login tokens, card numbers) for a label like
+    <code>&lt;EMAIL&gt;</code>. A person checks the result. Only that cleaned copy goes into your company's Copilot,
+    which then groups the errors, ranks them and spots what changed. The AI never sees the raw log.
+  </p>
+
+  <h2 id="the-logs">What the logs look like</h2>
+  <p>
+    The kit's sample is about 200 lines from an invented online shop: normal requests, a payment error that keeps
+    happening, a short database outage, and a new bug after a deploy. Private details are mixed in, the way they are
+    in real logs. They are <mark class="log-pii">highlighted</mark> here.
+  </p>
+  <div class="log-lines" aria-label="Sample log lines with private details highlighted">
+    {excerpt.map((l) => <code set:html={l.raw} />)}
+  </div>
+  <p class="kit-note font-mono">Everything is fake: example.com emails, documentation IP ranges, public test card numbers.</p>
+
+  <h2 id="step-1-scrub">Step 1: scrub</h2>
+  <p>
+    Run the scrub script on a work computer. It reads the log, writes a cleaned copy next to it, and tells you how
+    many values it replaced. Nothing is sent anywhere. Here are the same lines, before and after:
+  </p>
+  <ol class="log-compare">
+    {excerpt.map((l) => (
+      <li>
+        <span class="log-compare__label font-mono">before</span>
+        <code set:html={l.raw} />
+        <span class="log-compare__label font-mono">after</span>
+        <code set:html={l.scrubbed} />
+      </li>
+    ))}
+  </ol>
+
+  <h3>What it replaces</h3>
+  <table>
+    <thead><tr><th>Found in the log</th><th>Becomes</th></tr></thead>
+    <tbody>
+      {RULES.map(([what, ph]) => <tr><td>{what}</td><td><code>{ph}</code></td></tr>)}
+    </tbody>
+  </table>
+  <p>
+    On Windows, open PowerShell in the kit folder and run:
+  </p>
+  <div class="log-lines"><code>powershell -ExecutionPolicy Bypass -File .\scrub\scrub.ps1 -InputPath .\app.log -OutputPath .\app.scrubbed.log</code></div>
+  <p>
+    There is a Python version with the same rules for Mac and Linux. <strong>The script is a first pass, not a
+    guarantee.</strong> It does not catch names or addresses typed into messages, phone numbers, or IDs in other
+    formats. Always read a sample of the cleaned file before you use it, and ask IT to add rules your logs need.
+  </p>
+
+  <h2 id="step-2-analyze">Step 2: analyze</h2>
+  <p>
+    Open Copilot signed in with your <strong>work</strong> account. Copy a prompt, paste it, then paste the cleaned
+    log underneath (or attach the cleaned file). Try them on the kit's sample first, so you know what a good answer
+    looks like.
+  </p>
+  {prompts.map((p, i) => (
+    <>
+      <h3>{i + 1}. {p.title}</h3>
+      <pre data-prompt><code class="language-prompt">{p.body}</code></pre>
+    </>
+  ))}
+  <p>
+    Treat the answers as a starting point. Copilot can miscount or guess at causes; the prompts ask it to say when it
+    is guessing, and you can check any claim against the log lines it quotes.
+  </p>
+
+  <h2 id="for-it">For your IT team</h2>
+  <p>The kit includes a one-page checklist (<code>README-for-IT.md</code>). The short version:</p>
+  <ul>
+    <li><strong>It runs inside your own systems.</strong> The scripts are short plain text, make no network calls and install nothing. IT can read them in a few minutes.</li>
+    <li><strong>Scrub runs before any AI step.</strong> The raw log is never emailed, uploaded or pasted anywhere.</li>
+    <li><strong>Stay inside your company's Microsoft 365.</strong> Use only the company's licensed Copilot, with a work sign-in. No personal AI accounts.</li>
+    <li><strong>A person checks a sample</strong> of every cleaned file before it is used.</li>
+  </ul>
+  <p>Questions to ask about your Copilot setup:</p>
+  <ul>
+    <li>Does enterprise data protection apply to Copilot Chat for us, and how can I tell it is on?</li>
+    <li>Are prompts, answers and uploaded files kept? Where, and for how long?</li>
+    <li>Who can see my prompts and answers (for example through audit logs), and is that fine for log content?</li>
+    <li>Is web search turned on in Copilot, and could part of a prompt go to a search service?</li>
+    <li>Does our AI policy allow cleaned application logs, and who signs off?</li>
+  </ul>
+
+  <h2 id="download">Download the kit</h2>
+  <p>One zip file, small enough to forward by email or chat:</p>
+  <ul>
+    <li><code>sample-logs/app.log</code>: the fake log, private details and all</li>
+    <li><code>sample-logs/app.scrubbed.log</code>: the same log after the script ran, to compare without running anything</li>
+    <li><code>scrub/scrub.ps1</code> and <code>scrub/scrub.py</code>: the scrub script for Windows, and the same rules in Python</li>
+    <li><code>prompts.md</code>: the three prompts above</li>
+    <li><code>README-for-IT.md</code>: the checklist and questions for IT</li>
+  </ul>
+  <p class="kit-download">
+    <a class="cohort-cta" href={ZIP} download data-kit-download>Download the kit (.zip)</a>
+  </p>
+</CohortPage>
+
+<style is:global>
+  .kit-download { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 8px; }
+  .kit-download__note, .kit-note { font-size: 12px; letter-spacing: .04em; color: var(--color-faint); }
+  .kit-note { margin-top: -8px; }
+
+  .log-lines {
+    display: grid; gap: 10px; margin: 20px 0 24px; padding: 16px 18px;
+    background: var(--color-code); border: 1px solid var(--color-line); border-radius: 6px;
+  }
+  .cohort-prose .log-lines code, .cohort-prose .log-compare code {
+    display: block; background: none; padding: 0; color: var(--color-ink);
+    font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .cohort-prose ol.log-compare { list-style: none; padding: 0; margin: 20px 0 28px; display: grid; gap: 14px; }
+  .cohort-prose .log-compare li {
+    margin: 0; padding: 14px 16px; display: grid; gap: 4px;
+    background: var(--color-code); border: 1px solid var(--color-line); border-radius: 6px;
+  }
+  .log-compare__label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-faint); }
+  .log-compare__label:not(:first-child) { margin-top: 8px; }
+
+  mark.log-pii {
+    background: color-mix(in srgb, #e5484d 18%, transparent); color: inherit;
+    border-bottom: 1px solid color-mix(in srgb, #e5484d 70%, transparent); padding: 0 1px; border-radius: 2px;
+  }
+  mark.log-ph { background: var(--color-accent-bg); color: var(--color-accent-ink); padding: 0 1px; border-radius: 2px; }
+  .cohort-prose pre[data-prompt] code { font-size: 13px; }
+</style>

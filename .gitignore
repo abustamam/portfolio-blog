@@ -46,3 +46,6 @@ pnpm-debug.log*
 CLAUDE.local.md
 .release-worktree/
 test-results/
+
+# built from kits/log-analysis by scripts/build-log-kit.mjs
+public/downloads/log-analysis-kit.zip
