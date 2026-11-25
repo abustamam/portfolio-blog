@@ -16,7 +16,7 @@ const B = '#job-search-builder';
 const dist = (p: string) => readFileSync(`${DIST}${p.slice(1)}index.html`, 'utf8');
 const article = (h: string) => h.slice(h.indexOf('<article'), h.indexOf('</article>'));
 // The guide's own words: header, article and share button, up to (not including) the GuideCta.
-const prose = (h: string) => h.slice(h.indexOf('<div class="ai-shell"'), h.indexOf('data-guide-cta'));
+const prose = (h: string) => h.slice(h.indexOf('<div class="ai-shell"'), h.lastIndexOf('<', h.indexOf('data-guide-cta')));
 const metaDescription = (h: string) => h.match(/<meta name="description" content="([^"]*)"/)![1];
 const text = (h: string) =>
   h
