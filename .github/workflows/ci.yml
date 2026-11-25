@@ -39,6 +39,9 @@ jobs:
       - name: Test the log-analysis kit
         run: bun test kits/log-analysis
 
+      - name: Test the data-analysis kit
+        run: bun test kits/data-analysis
+
       - name: Install Playwright browsers
         run: bunx playwright install chromium
 

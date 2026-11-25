@@ -1,11 +1,13 @@
-// Builds public/downloads/log-analysis-kit.zip from kits/log-analysis/.
+// Builds the kit zips under public/downloads/ from kits/<name>/: the log
+// analysis kit and the data analysis kit, with one shared zip writer.
 // Runs before `astro dev` and `astro build` (see package.json), so the zip is
 // always made from the kit source in the same commit and never drifts. The zip
 // is gitignored. No `zip` binary needed (the Docker build image has none): a
 // small writer below, with a fixed timestamp so the same source gives the same
 // bytes.
 //
-//   node scripts/build-log-kit.mjs [outPath]
+//   node scripts/build-log-kit.mjs             builds every kit
+//   node scripts/build-log-kit.mjs [outPath]   builds only the log kit, to outPath
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -13,7 +15,6 @@ import { fileURLToPath } from 'node:url';
 import { deflateRawSync } from 'node:zlib';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
-const KIT = `${ROOT}kits/log-analysis/`;
 export const ZIP_ROOT = 'log-analysis-kit/';
 // What IT receives. The generator and seed list in tools/ stay out.
 export const KIT_FILES = [
@@ -89,16 +90,32 @@ export function buildZip(files) {
   return Buffer.concat([...locals, ...centrals, end]);
 }
 
-export function buildKitZip(out = `${ROOT}public/downloads/log-analysis-kit.zip`) {
+// One entry per kit. `files` is what the person receives; generators and
+// seed lists stay out.
+export const KITS = {
+  'log-analysis': { zipRoot: ZIP_ROOT, files: KIT_FILES },
+  'data-analysis': {
+    zipRoot: 'data-analysis-kit/',
+    files: ['prompts.md', 'expenses-2025.csv', 'answer-key.json'],
+  },
+};
+
+export function buildKit(name, out = `${ROOT}public/downloads/${name}-kit.zip`) {
+  const { zipRoot, files } = KITS[name];
   const zip = buildZip(
-    KIT_FILES.map((f) => ({ name: ZIP_ROOT + f, data: readFileSync(KIT + f) })),
+    files.map((f) => ({ name: zipRoot + f, data: readFileSync(`${ROOT}kits/${name}/${f}`) })),
   );
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, zip);
   return { out, bytes: zip.length };
 }
 
+export const buildKitZip = (out) => buildKit('log-analysis', out);
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const { out, bytes } = buildKitZip(process.argv[2]);
-  console.log(`log-analysis kit: ${bytes} bytes -> ${out.replace(ROOT, '')}`);
+  const names = process.argv[2] ? ['log-analysis'] : Object.keys(KITS);
+  for (const name of names) {
+    const { out, bytes } = buildKit(name, process.argv[2]);
+    console.log(`${name} kit: ${bytes} bytes -> ${out.replace(ROOT, '')}`);
+  }
 }

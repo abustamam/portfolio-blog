@@ -49,3 +49,6 @@ test-results/
 
 # built from kits/log-analysis by scripts/build-log-kit.mjs
 public/downloads/log-analysis-kit.zip
+
+# built from kits/data-analysis by the same script
+public/downloads/data-analysis-kit.zip

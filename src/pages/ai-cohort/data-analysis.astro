@@ -1,0 +1,212 @@
+---
+// Data analysis kit: a sample spreadsheet, four prompts, and the true answers
+// to check them against. Unlisted (noindex via CohortPage, out of the sitemap
+// via astro.config.mjs, not in the cohort nav). Everything shown is read from
+// kits/data-analysis/, the same files that go into the zip
+// (scripts/build-log-kit.mjs), so the page and the download cannot drift.
+import CohortPage from '../../layouts/CohortPage.astro';
+import csv from '../../../kits/data-analysis/expenses-2025.csv?raw';
+import promptsMd from '../../../kits/data-analysis/prompts.md?raw';
+import facts from '../../../kits/data-analysis/answer-key.json';
+
+const ZIP = '/downloads/data-analysis-kit.zip';
+const ZIP_NOTE = 'sample spreadsheet · four prompts · answer key';
+
+const money = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthName = (ym: string) => MONTHS[Number(ym.slice(5)) - 1];
+
+// The file as the sheet shows it: row 1 is the header, so line i is row i + 1.
+const lines = csv.trimEnd().split('\n');
+const rowText = (n: number) => lines[n - 1];
+const o = facts.oddities;
+const biggest = Object.entries(facts.byCategory).sort((a, b) => b[1] - a[1])[0];
+
+const prompts = [...promptsMd.matchAll(/^## (.+)\n\n```text\n([\s\S]*?)\n```/gm)].map((m) => ({
+  title: m[1].replace(/^\d+\.\s*/, ''),
+  body: m[2],
+}));
+
+// Per prompt: the 30-second check, and the true answer (every number from answer-key.json).
+const checks = [
+  {
+    check: 'Sort the Amount column from largest to smallest and look at the top. Then sort Category A to Z and scan the names. Select the whole sheet and use Data, Remove duplicates to see how many rows it would drop. Filter Amount to "Blanks".',
+  },
+  {
+    check: 'Insert a pivot table with Category in Rows and the sum of Amount in Values. Compare it with the AI\'s table. Then click the Amount column letter and read the total in the status bar at the bottom of the window.',
+  },
+  {
+    check: 'Filter Category to Travel and Date to March, then select the Amount cells that are left. The status bar shows their sum. Or type a SUMIFS formula that adds Amount where Category is Travel and the month is March.',
+  },
+  {
+    check: `Take each number in the three sentences and find it in your own pivot table or status bar. Check that the biggest category really is the biggest. Check there are exactly three sentences.`,
+  },
+];
+---
+
+<CohortPage
+  title="Analyse a spreadsheet with AI, and check it"
+  kicker="cohort resource · data analysis kit"
+  lead="Assalamu alaikum. A made-up expenses spreadsheet with a few mistakes hidden in it, four prompts to try, and the true answers, so you can see for yourself how far to trust what AI tells you about your numbers."
+>
+  <p class="kit-download">
+    <a class="cohort-cta" href={ZIP} download data-kit-download>Download the kit (.zip)</a>
+    <span class="kit-download__note font-mono">{ZIP_NOTE}</span>
+  </p>
+
+  <h2 id="the-idea">The idea</h2>
+  <p>
+    I wanted a safe way to practise. AI is good at reading a spreadsheet and bad at telling you when it got a number
+    wrong. So the file in this kit has <strong>four mistakes planted in it</strong>, and I wrote down the true answers
+    before any AI saw it. You run each prompt, then spend 30 seconds checking the answer in your own sheet. That check
+    is the habit. It is the one in <a href="/ai-guides/when-ai-is-wrong/">when AI is wrong</a>: AI can be fluent and
+    wrong at the same time, so check the numbers yourself.
+  </p>
+
+  <h2 id="the-file">The sample file</h2>
+  <p>
+    <code>{facts.file}</code> is a year of team expenses for an invented office: <span data-fact="rowsInFile">{facts.rowsInFile}</span>
+    rows, with a Date, Vendor, Category, Amount and Paid by on each. Every vendor and person is made up. Open it in
+    Excel or Google Sheets and look at it first.
+  </p>
+  <div class="log-lines" aria-label="First rows of the sample file">
+    {lines.slice(0, 5).map((l) => <code>{l}</code>)}
+  </div>
+
+  <h3>The four planted mistakes</h3>
+  <p>A real spreadsheet usually has some of these. Row numbers are as your sheet shows them (the header is row 1).</p>
+  <ul class="oddities">
+    <li>
+      <strong>A duplicate.</strong> Rows <span data-fact="oddities.duplicate.rows">{o.duplicate.rows.join(' and ')}</span> are the same purchase entered twice.
+      <code>{rowText(o.duplicate.rows[0])}</code>
+    </li>
+    <li>
+      <strong>A blank.</strong> Row <span data-fact="oddities.blank.row">{o.blank.row}</span> has no {o.blank.column}.
+      <code>{rowText(o.blank.row)}</code>
+    </li>
+    <li>
+      <strong>An outlier.</strong> Row <span data-fact="oddities.outlier.row">{o.outlier.row}</span> says
+      <span data-fact="oddities.outlier.amount">{money(o.outlier.amount)}</span> for one purchase. No other purchase
+      is over $900. I meant {money(o.outlier.likelyAmount)}: the decimal point slipped.
+      <code>{rowText(o.outlier.row)}</code>
+    </li>
+    <li>
+      <strong>A category written two ways.</strong> {o.category.rows.length} rows (<span data-fact="oddities.category.rows">{o.category.rows.join(', ')}</span>)
+      say "{o.category.variant}" where the rest say "{o.category.canonical}".
+      <code>{rowText(o.category.rows[0])}</code>
+    </li>
+  </ul>
+
+  <h3>The true answers</h3>
+  <p>
+    To get these I removed the duplicate, merged the two category names, fixed the outlier to
+    {money(o.outlier.likelyAmount)}, and counted the blank as nothing (we cannot know what it was).
+  </p>
+  <ul class="oddities">
+    <li>
+      Total as the file stands: <strong data-fact="totals.asInFile">{money(facts.totals.asInFile)}</strong>.
+      After the fixes: <strong data-fact="totals.afterFixes">{money(facts.totals.afterFixes)}</strong>.
+    </li>
+    <li>
+      Rows: {facts.rowsInFile} in the file, <span data-fact="rowsAfterRemovingDuplicate">{facts.rowsAfterRemovingDuplicate}</span> once the duplicate is gone.
+    </li>
+    <li>
+      Biggest category: {biggest[0]}, <span data-fact={`byCategory.${biggest[0]}`}>{money(biggest[1])}</span>.
+    </li>
+    <li>
+      {facts.question.text}
+      <strong data-fact="question.answer">{money(facts.question.answer)}</strong>
+      (from {facts.question.rows} rows).
+    </li>
+  </ul>
+
+  <table class="totals">
+    <thead><tr><th>Category</th><th>True total</th></tr></thead>
+    <tbody>
+      {Object.entries(facts.byCategory).map(([k, v]) => (
+        <tr><td>{k}</td><td data-fact={`byCategory.${k}`}>{money(v)}</td></tr>
+      ))}
+    </tbody>
+  </table>
+  <table class="totals">
+    <thead><tr><th>Month</th><th>True total</th></tr></thead>
+    <tbody>
+      {Object.entries(facts.byMonth).map(([k, v]) => (
+        <tr><td>{monthName(k)}</td><td data-fact={`byMonth.${k}`}>{money(v)}</td></tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2 id="make-your-own-safe">Make your own file safe first</h2>
+  <p>
+    The sample file is made up, so you can put it in any AI tool. Your own spreadsheet is different. Before you paste
+    or attach it, make a copy with only the columns the AI needs, and swap names and account numbers for placeholders.
+    The three steps are in <a href="/ai-cohort/never-paste/#make-a-file-safe-in-three-steps">make a file safe in three steps</a>.
+    Use the account your workplace approves, and if you are not sure whether a file is allowed, ask before you paste.
+  </p>
+
+  <h2 id="the-prompts">Four prompts, and how to check each</h2>
+  <p>
+    Each prompt is the <a href="/ai-guides/prompt/">five-part prompt</a>: situation, task, input, format, check. Copy
+    one, paste it into your AI chat, then attach <code>expenses-2025.csv</code>. Expect the AI to get some of this
+    wrong. That is the point.
+  </p>
+  {prompts.map((p, i) => (
+    <>
+      <h3>{i + 1}. {p.title}</h3>
+      <pre data-prompt><code class="language-prompt">{p.body}</code></pre>
+      <div class="check-box">
+        <p><strong>30-second check.</strong> {checks[i].check}</p>
+        {i === 0 && (
+          <p><strong>The true answer.</strong> A good answer finds all four: the duplicate (rows {o.duplicate.rows.join(' and ')}), the blank (row {o.blank.row}), the outlier (row {o.outlier.row}, {money(o.outlier.amount)}) and the two category names ("{o.category.canonical}" and "{o.category.variant}"). Missing one is normal. Inventing a fifth is the warning sign.</p>
+        )}
+        {i === 1 && (
+          <p><strong>The true answer.</strong> Grand total {money(facts.totals.afterFixes)}. If the AI used the file as it stands, it will say {money(facts.totals.asInFile)}, which is the outlier and the duplicate counted in. The category table is above, and Office Supplies should be one line, not two.</p>
+        )}
+        {i === 2 && (
+          <p><strong>The true answer.</strong> {money(facts.question.answer)}, from {facts.question.rows} rows. This one the planted mistakes do not touch, so a wrong answer here means the AI mis-added or picked the wrong rows.</p>
+        )}
+        {i === 3 && (
+          <p><strong>The true answer.</strong> Total spend {money(facts.totals.afterFixes)}. The biggest category is {biggest[0]} at {money(biggest[1])}. If a sentence quotes a total of {money(facts.totals.asInFile)}, the AI trusted the mistakes.</p>
+        )}
+      </div>
+    </>
+  ))}
+  <p>
+    If an answer is off, do not just ask again. Find the row it got wrong, tell the AI, and see whether it can say
+    why. The guide on <a href="/ai-guides/when-ai-is-wrong/">when AI is wrong</a> has the five mistakes to look for.
+  </p>
+
+  <h2 id="download">Download the kit</h2>
+  <p>One small zip, easy to send to a colleague:</p>
+  <ul>
+    <li><code>expenses-2025.csv</code>: the sample spreadsheet</li>
+    <li><code>prompts.md</code>: the four prompts above</li>
+    <li><code>answer-key.json</code>: the true totals and where each mistake is</li>
+  </ul>
+  <p class="kit-download">
+    <a class="cohort-cta" href={ZIP} download data-kit-download>Download the kit (.zip)</a>
+  </p>
+</CohortPage>
+
+<style is:global>
+  .kit-download { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 8px; }
+  .kit-download__note { font-size: 12px; letter-spacing: .04em; color: var(--color-faint); }
+
+  .log-lines {
+    display: grid; gap: 10px; margin: 20px 0 24px; padding: 16px 18px;
+    background: var(--color-code); border: 1px solid var(--color-line); border-radius: 6px;
+  }
+  .cohort-prose .log-lines code, .cohort-prose ul.oddities code {
+    display: block; background: none; padding: 0; color: var(--color-ink);
+    font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .cohort-prose ul.oddities code { margin-top: 4px; }
+  .cohort-prose table.totals { width: 100%; margin: 12px 0 20px; }
+  .cohort-prose table.totals td:last-child, .cohort-prose table.totals th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .cohort-prose .check-box {
+    margin: 4px 0 28px; padding: 4px 16px; border-left: 3px solid var(--color-accent-ink);
+    background: var(--color-accent-bg); border-radius: 0 6px 6px 0;
+  }
+  .cohort-prose pre[data-prompt] code { font-size: 13px; }
+</style>
