@@ -146,10 +146,35 @@ test.describe('first-ten-minutes: the labelled screen with JavaScript', () => {
     await page.keyboard.press('Space');
     await expect(readout).toContainText(SCREEN_PARTS[1].line);
     await expect(page.locator(`${SCREEN} .cs-frame [data-part][data-active]`)).toHaveAttribute('data-part', '2');
-    // Tab reaches the numbers in turn without a mouse.
-    await badge(page, 6).focus();
-    await page.keyboard.press('Tab');
-    await expect(page.locator(':focus')).toHaveAttribute('data-badge', '4');
+  });
+
+  test('Tab meets the numbered parts in order 1 to 6, and each still highlights', async ({ page }) => {
+    await open(page);
+    const readout = page.locator('[data-cs-readout]');
+    // Start just before the schematic and Tab through it.
+    await page.locator(SCREEN).evaluate((el) => {
+      const probe = document.createElement('button');
+      probe.id = 'tab-probe';
+      el.before(probe);
+      probe.focus();
+    });
+    const seen: string[] = [];
+    for (let i = 0; i < 30; i++) {
+      await page.keyboard.press('Tab');
+      const hit = await page.evaluate((sel) => {
+        const a = document.activeElement as HTMLElement | null;
+        if (!a || !a.closest(sel)) return 'out';
+        return a.dataset.badge ?? a.dataset.legendBtn ?? 'other';
+      }, SCREEN);
+      if (hit === 'out') break;
+      seen.push(hit);
+      if (hit !== 'other') {
+        await page.keyboard.press('Enter');
+        await expect(page.locator(`${SCREEN} .cs-frame [data-part][data-active]`)).toHaveAttribute('data-part', hit);
+        await expect(readout).toContainText(SCREEN_PARTS[Number(hit) - 1].line);
+      }
+    }
+    expect(seen).toEqual(['1', '2', '3', '4', '5', '6']);
   });
 
   test('the list under the drawing works too', async ({ page }) => {

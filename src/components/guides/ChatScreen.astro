@@ -1,7 +1,9 @@
 ---
 // "Labelled screen": a neutral schematic of a chat app with six numbered parts.
 // Pick a number (tap, click, or Tab then Enter or Space) and the part is
-// highlighted and its one line shows. With JavaScript off, the schematic keeps
+// highlighted and its one line shows. The numbers on the drawing sit in drawing
+// order (6, 4, 5, 3, 1, 2), so they are clickable but skipped by Tab; the list
+// under the drawing carries keyboard focus in order 1 to 6. With JavaScript off, the schematic keeps
 // its numbers and the legend under it shows all six lines.
 // The drawing is plain boxes in the site's own colors: no vendor logo, color or
 // wording, so it does not age with each app redesign. Copy lives in
@@ -19,7 +21,7 @@ const PAST_CHATS = ['Weeknight dinners', 'Birthday party list', 'Letter to the l
       <span class="cs-model cs-part" data-part="6">
         Model
         <span class="cs-caret" aria-hidden="true"></span>
-        <button type="button" class="cs-badge" data-badge="6" aria-pressed="false" aria-label={`6, ${part(6).name}`}><span aria-hidden="true">6</span></button>
+        <button type="button" class="cs-badge" tabindex="-1" data-badge="6" aria-pressed="false" aria-label={`6, ${part(6).name}`}><span aria-hidden="true">6</span></button>
       </span>
     </div>
 
@@ -27,14 +29,14 @@ const PAST_CHATS = ['Weeknight dinners', 'Birthday party list', 'Letter to the l
       <p class="cs-menu-title" aria-hidden="true"><span class="cs-menu-icon"></span>Menu</p>
       <div class="cs-newchat cs-part" data-part="4">
         <span aria-hidden="true" class="cs-plus">+</span> New chat
-        <button type="button" class="cs-badge" data-badge="4" aria-pressed="false" aria-label={`4, ${part(4).name}`}><span aria-hidden="true">4</span></button>
+        <button type="button" class="cs-badge" tabindex="-1" data-badge="4" aria-pressed="false" aria-label={`4, ${part(4).name}`}><span aria-hidden="true">4</span></button>
       </div>
       <div class="cs-past cs-part" data-part="5">
         <p class="cs-small">Past chats</p>
         <ul>
           {PAST_CHATS.map((c, i) => <li data-current={i === 0 ? '' : undefined}>{c}</li>)}
         </ul>
-        <button type="button" class="cs-badge" data-badge="5" aria-pressed="false" aria-label={`5, ${part(5).name}`}><span aria-hidden="true">5</span></button>
+        <button type="button" class="cs-badge" tabindex="-1" data-badge="5" aria-pressed="false" aria-label={`5, ${part(5).name}`}><span aria-hidden="true">5</span></button>
       </div>
     </div>
 
@@ -43,18 +45,18 @@ const PAST_CHATS = ['Weeknight dinners', 'Birthday party list', 'Letter to the l
       <div class="cs-answer cs-part" data-part="3">
         <p>Here are five dinners, each 30 minutes or less.</p>
         <p>1. Sheet-pan chicken with potatoes<br />2. Pasta with garlic and spinach<span class="cs-cursor" aria-hidden="true"></span></p>
-        <button type="button" class="cs-badge" data-badge="3" aria-pressed="false" aria-label={`3, ${part(3).name}`}><span aria-hidden="true">3</span></button>
+        <button type="button" class="cs-badge" tabindex="-1" data-badge="3" aria-pressed="false" aria-label={`3, ${part(3).name}`}><span aria-hidden="true">3</span></button>
       </div>
     </div>
 
     <div class="cs-composer">
       <div class="cs-box cs-part" data-part="1">
         <span class="cs-placeholder">Type a message</span>
-        <button type="button" class="cs-badge" data-badge="1" aria-pressed="false" aria-label={`1, ${part(1).name}`}><span aria-hidden="true">1</span></button>
+        <button type="button" class="cs-badge" tabindex="-1" data-badge="1" aria-pressed="false" aria-label={`1, ${part(1).name}`}><span aria-hidden="true">1</span></button>
       </div>
       <div class="cs-send cs-part" data-part="2">
         <span class="cs-arrow" aria-hidden="true"></span>
-        <button type="button" class="cs-badge" data-badge="2" aria-pressed="false" aria-label={`2, ${part(2).name}`}><span aria-hidden="true">2</span></button>
+        <button type="button" class="cs-badge" tabindex="-1" data-badge="2" aria-pressed="false" aria-label={`2, ${part(2).name}`}><span aria-hidden="true">2</span></button>
       </div>
     </div>
   </div>
