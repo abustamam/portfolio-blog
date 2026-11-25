@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Rosette from '../components/ai/Rosette.astro';
+import '../styles/ai.css';
 import { AI_QUIZ_ENDPOINT } from '../consts/aiQuiz';
 
 type Opt = { value: string; label: string };
@@ -119,18 +121,19 @@ const steps = 9; // 6 skill + free text + privacy + logistics
   title="AI training quiz — Rasheed Bustamam"
   description="Nine short questions to find the right track for a small, hands-on AI cohort in Roseville and online."
   chromePath="/ai-quiz"
+  chrome="letterhead"
 >
-  <div class="page-shell pt-10 pb-20 max-w-2xl">
-    <div class="mb-6 font-mono text-13 text-mute tracking-[.04em]">
-      <a href="/writing/hands-on-ai-cohort" class="text-mute no-underline">← about the cohort</a>
+  <div class="ai-shell">
+    <div class="mb-8">
+      <a href="/ai-training/" class="ai-link">← Hands-on AI training</a>
     </div>
 
     <header id="quiz-intro" class="mb-8">
-      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ ai training intake</div>
-      <h1 class="font-serif text-[clamp(2rem,7vw,3.25rem)] font-medium tracking-[-0.028em] leading-[1.1] text-ink m-0 mb-4">
+      <div class="ai-kicker" data-rise style="--i:0">ai training intake</div>
+      <h1 class="ai-title ai-title--page" data-rise style="--i:1">
         Which AI track fits you?
       </h1>
-      <p class="font-serif text-lg text-mute m-0 leading-[1.5]">
+      <p class="ai-lead" data-rise style="--i:2">
         Nine short questions about what you actually do with AI. No right answers. It takes about four minutes, and
         you'll get a result at the end.
       </p>
@@ -140,13 +143,13 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       <p class="quiz-status" data-state="warn">This quiz needs JavaScript. If you can't turn it on, email admin@bustamam.tech and I'll send the questions.</p>
     </noscript>
 
-    <form id="ai-quiz" class="quiz" novalidate data-endpoint={AI_QUIZ_ENDPOINT}>
+    <form id="ai-quiz" class="quiz" data-rise style="--i:3" novalidate data-endpoint={AI_QUIZ_ENDPOINT}>
       <div class="quiz-progress mb-6" aria-hidden="true">
         <div class="flex justify-between font-mono text-13 text-faint mb-2">
           <span id="quiz-step-label">question 1 of {steps}</span>
         </div>
-        <div class="h-1 bg-line-soft rounded-full overflow-hidden">
-          <div id="quiz-bar" class="h-full bg-accent transition-[width] duration-300" style={`width:${100 / steps}%`}></div>
+        <div class="h-[3px] bg-line-soft rounded-full overflow-hidden">
+          <div id="quiz-bar" class="h-full bg-accent rounded-full transition-[width] duration-500 ease-out" style={`width:${100 / steps}%`}></div>
         </div>
       </div>
 
@@ -282,12 +285,13 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       </div>
     </form>
 
-    <section id="quiz-result" class="quiz-result" hidden aria-live="polite">
-      <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">§ your track</div>
+    <section id="quiz-result" class="quiz-result ai-reveal" hidden aria-live="polite">
+      <Rosette draw size={72} />
+      <div class="ai-kicker">your track</div>
       <h2 id="result-track" class="font-serif text-[clamp(2rem,7vw,3rem)] font-medium tracking-[-0.02em] text-ink m-0 mb-4"></h2>
       <p id="result-summary" class="font-serif text-lg leading-[1.55] text-ink m-0 mb-6"></p>
 
-      <div class="p-5 border border-line rounded bg-surface mb-6">
+      <div class="ai-card p-5 sm:p-6 mb-8">
         <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">what you'd build</div>
         <p id="result-build" class="font-serif text-base leading-[1.6] text-ink m-0"></p>
       </div>
@@ -300,8 +304,8 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         short session and it'll save you trouble.
       </p>
 
-      <p class="font-serif text-lg m-0 mb-6">
-        <a id="result-reserve" href="/ai-training/#tracks" class="text-accent">See the tracks and reserve your seat →</a>
+      <p class="m-0 mb-8">
+        <a id="result-reserve" href="/ai-training/#tracks" class="cohort-cta">See the tracks and reserve your seat →</a>
       </p>
 
       <p id="result-status" class="quiz-status" role="status"></p>
@@ -480,156 +484,3 @@ const steps = 9; // 6 skill + free text + privacy + logistics
 
   show(0);
 </script>
-
-<style>
-  .quiz-step {
-    border: 0;
-    padding: 0;
-    margin: 0 0 2rem;
-    min-width: 0;
-  }
-  .quiz-legend {
-    font-family: var(--font-serif);
-    font-size: clamp(1.25rem, 4.5vw, 1.5rem);
-    line-height: 1.3;
-    color: var(--color-ink);
-    margin-bottom: 0.75rem;
-    padding: 0;
-  }
-  .quiz-hint {
-    font-family: var(--font-mono);
-    font-size: var(--text-13);
-    color: var(--color-faint);
-    margin: 0 0 1rem;
-  }
-  .quiz-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .quiz-option {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    min-height: 48px;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
-    background: var(--color-surface);
-    font-family: var(--font-serif);
-    font-size: 1.0625rem;
-    line-height: 1.45;
-    color: var(--color-ink);
-    cursor: pointer;
-  }
-  .quiz-option:has(input:checked) {
-    border-color: var(--color-accent);
-    background: var(--color-accent-bg);
-  }
-  .quiz-option:has(input:focus-visible) {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-  .quiz-option input {
-    accent-color: var(--color-accent);
-    width: 1.125rem;
-    height: 1.125rem;
-    margin-top: 0.2rem;
-    flex-shrink: 0;
-  }
-  .quiz-group {
-    margin-bottom: 1.5rem;
-  }
-  .quiz-sublabel {
-    font-family: var(--font-mono);
-    font-size: var(--text-13);
-    color: var(--color-ink);
-    margin-bottom: 0.5rem;
-  }
-  .quiz-input {
-    display: block;
-    width: 100%;
-    padding: 0.875rem 1rem;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
-    background: var(--color-surface);
-    color: var(--color-ink);
-    font-family: var(--font-serif);
-    font-size: 1.0625rem; /* ≥16px stops iOS zooming on focus */
-    line-height: 1.45;
-  }
-  .quiz-input:focus {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 1px;
-  }
-  .quiz-trap {
-    position: absolute;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-  }
-  .quiz-nav {
-    display: flex;
-    gap: 0.75rem;
-    position: sticky;
-    bottom: 0;
-    padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom));
-    background: var(--color-bg);
-  }
-  .quiz-btn {
-    flex: 1;
-    min-height: 48px;
-    padding: 0 1.25rem;
-    border: 1px solid var(--color-accent);
-    border-radius: 6px;
-    background: var(--color-accent);
-    color: var(--color-bg);
-    font-family: var(--font-mono);
-    font-size: var(--text-13);
-    letter-spacing: var(--tracking-snug);
-    cursor: pointer;
-  }
-  .quiz-btn-ghost {
-    flex: 0 0 auto;
-    background: transparent;
-    color: var(--color-ink);
-    border-color: var(--color-line);
-  }
-  .quiz-btn[hidden] {
-    display: none;
-  }
-  .quiz-error {
-    font-family: var(--font-mono);
-    font-size: var(--text-13);
-    color: var(--color-danger);
-    margin: 0 0 0.75rem;
-  }
-  .quiz-status {
-    font-family: var(--font-mono);
-    font-size: var(--text-13);
-    line-height: 1.5;
-    padding: 0.875rem 1rem;
-    border-radius: 6px;
-    border: 1px solid var(--color-line);
-    margin: 0 0 1rem;
-  }
-  .quiz-status:empty {
-    display: none;
-  }
-  .quiz-status[data-state='ok'] {
-    border-color: var(--color-accent);
-    color: var(--color-accent-ink);
-    background: var(--color-accent-bg);
-  }
-  .quiz-status[data-state='warn'],
-  .quiz-status[data-state='error'] {
-    border-color: var(--color-danger);
-    color: var(--color-danger);
-  }
-  /* Without JS every question shows and the nav is useless, so hide it. */
-  .quiz:not(.js) .quiz-nav,
-  .quiz:not(.js) .quiz-progress {
-    display: none;
-  }
-</style>

@@ -1,0 +1,255 @@
+/* Shared styles for the AI training routes (/ai-training/, /ai-quiz/, /ai-cohort/*).
+ * These pages are for a non-technical audience, so they swap the terminal
+ * chrome for a letterhead and use a calmer, editorial layout. Tokens only:
+ * every colour follows the site theme. */
+
+/* ── Shells ─────────────────────────────────────────── */
+/* .page-shell's max-width beats Tailwind's max-w-* (unlayered CSS wins over
+ * layered utilities), so the AI pages use their own shells. */
+.ai-shell {
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: clamp(2.25rem, 6vw, 4.5rem) var(--spacing-gutter) clamp(4rem, 9vw, 7rem);
+}
+.ai-wide {
+  width: 100%;
+  max-width: 74rem;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* ── Letterhead (replaces the terminal chrome) ──────── */
+.ai-letterhead {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  min-height: 2.5rem; padding: 0 var(--spacing-gutter);
+  border-bottom: 1px solid var(--color-line); background: var(--color-surface);
+  font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-loose);
+  text-transform: uppercase; color: var(--color-mute);
+}
+.ai-letterhead__mark { display: inline-flex; align-items: center; gap: .6rem; color: var(--color-ink); text-decoration: none; }
+.ai-letterhead__mark svg { width: 1.125rem; height: 1.125rem; color: var(--color-accent); }
+.ai-letterhead__right { display: flex; align-items: center; gap: .9rem; min-width: 0; }
+.ai-letterhead__note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) { .ai-letterhead__note { display: none; } }
+
+/* ── Rosette: the seal used on the letterhead, guarantee and confirmations ── */
+.ai-rosette { display: block; color: var(--color-accent); overflow: visible; }
+.ai-rosette path, .ai-rosette circle { fill: none; stroke: currentColor; stroke-width: var(--sw, 1.4); stroke-linejoin: round; }
+@keyframes ai-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@media screen and (prefers-reduced-motion: no-preference) {
+  .ai-rosette[data-draw] path, .ai-rosette[data-draw] circle {
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: ai-draw 1.6s cubic-bezier(.65, 0, .25, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 180ms + var(--draw-delay, 150ms));
+  }
+}
+
+/* `data-draw="scroll"`: below the fold, so the lines draw as the seal scrolls into view. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ai-rosette[data-draw='scroll'] path, .ai-rosette[data-draw='scroll'] circle {
+      animation: ai-draw linear both; animation-delay: 0s;
+      animation-timeline: view(); animation-range: entry 10% cover 45%;
+    }
+  }
+}
+
+/* ── Type ───────────────────────────────────────────── */
+.ai-kicker {
+  font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-caps);
+  text-transform: uppercase; color: var(--color-accent); margin: 0 0 1rem;
+  display: flex; align-items: center; gap: .75rem;
+}
+.ai-kicker::before { content: ''; width: 1.75rem; height: 1px; background: currentColor; opacity: .6; }
+.ai-title {
+  font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.03em; line-height: 1.04;
+  font-size: clamp(2.25rem, 6.2vw, 4.25rem); color: var(--color-ink); margin: 0 0 1.25rem; text-wrap: balance;
+}
+.ai-title em { font-style: italic; color: var(--color-accent); font-weight: 500; }
+.ai-title--page { font-size: clamp(2.1rem, 6vw, 3.4rem); line-height: 1.08; }
+.ai-lead {
+  font-family: var(--font-serif); font-size: clamp(1.125rem, 2.2vw, 1.3125rem); line-height: 1.55;
+  color: var(--color-mute); margin: 0; max-width: 36rem; text-wrap: pretty;
+}
+.ai-h2 {
+  font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.022em; line-height: 1.1;
+  font-size: clamp(1.75rem, 4vw, 2.5rem); color: var(--color-ink); margin: 0 0 .75rem; text-wrap: balance;
+}
+.ai-sub { font-family: var(--font-serif); font-size: 1.125rem; line-height: 1.55; color: var(--color-mute); margin: 0; max-width: 38rem; }
+.ai-label {
+  font-family: var(--font-mono); font-size: var(--text-12); font-weight: 500; letter-spacing: var(--tracking-loose);
+  text-transform: uppercase; color: var(--color-faint);
+}
+
+/* Load-in for the first screen. Opacity and transform only, so no layout shift. */
+@keyframes ai-rise { from { opacity: 0; transform: translateY(.75rem); } to { opacity: 1; transform: none; } }
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-rise] { animation: ai-rise .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+.cohort-cta, .cohort-prose a.cohort-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font-family: var(--font-mono); font-size: 14px; letter-spacing: .02em; line-height: 1.2;
+  background: var(--color-accent); color: var(--color-bg); text-decoration: none;
+  padding: 14px 22px; min-height: 48px; border-radius: 4px; border: 1px solid var(--color-accent);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.cohort-cta:hover, .cohort-prose a.cohort-cta:hover {
+  filter: brightness(1.08); transform: translateY(-1px);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+.cohort-cta:active { transform: none; box-shadow: none; }
+.ai-link {
+  font-family: var(--font-mono); font-size: 14px; color: var(--color-accent); text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .25s ease;
+  padding-bottom: 2px;
+}
+.ai-link:hover { background-size: 100% 1px; }
+
+/* ── Cards and seals ────────────────────────────────── */
+.ai-card {
+  background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 8px;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-ink) 4%, transparent), 0 18px 40px -28px color-mix(in srgb, var(--color-ink) 28%, transparent);
+}
+.ai-seal {
+  display: grid; grid-template-columns: auto 1fr; gap: 1.25rem 1.5rem; align-items: center;
+  padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--color-line); border-radius: 8px;
+  background: linear-gradient(180deg, var(--color-accent-bg), transparent 140%), var(--color-surface);
+}
+.ai-seal .ai-rosette { width: clamp(3.25rem, 9vw, 5rem); height: auto; }
+.ai-seal h2, .ai-seal h3 { font-family: var(--font-serif); font-weight: 500; font-size: clamp(1.3rem, 3vw, 1.6rem); letter-spacing: -.015em; line-height: 1.15; margin: 0 0 .35rem; color: var(--color-ink); }
+.ai-seal p { font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.55; margin: 0; color: var(--color-mute); }
+.ai-seal p strong { color: var(--color-ink); font-weight: 500; }
+
+/* ── Cohort prose (handouts and the hub) ────────────── */
+.cohort-nav { display: flex; flex-wrap: wrap; gap: 6px 6px; margin: 0 0 2.5rem; font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: .04em; }
+.cohort-nav a {
+  color: var(--color-mute); text-decoration: none; padding: 7px 12px; border: 1px solid transparent; border-radius: 999px;
+  transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.cohort-nav a:hover { color: var(--color-ink); border-color: var(--color-line); }
+.cohort-nav a[aria-current='page'] { color: var(--color-accent-ink); background: var(--color-accent-bg); }
+
+.cohort-prose { font-family: var(--font-serif); font-size: 18px; line-height: 1.65; color: var(--color-ink); }
+.cohort-prose p { margin: 0 0 20px; }
+.cohort-prose h2 {
+  font-family: var(--font-serif); font-size: 28px; font-weight: 500; letter-spacing: -.015em; line-height: 1.15;
+  margin: 52px 0 14px; color: var(--color-ink);
+}
+.cohort-prose h3 { font-family: var(--font-serif); font-size: 22px; font-weight: 500; margin: 32px 0 10px; }
+.cohort-prose a { color: var(--color-accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.cohort-prose ul, .cohort-prose ol { margin: 0 0 20px; padding-left: 1.3em; }
+/* The site's reset removes list markers; prose lists need them back. */
+.cohort-prose ul { list-style: disc; }
+.cohort-prose ol { list-style: decimal; }
+.cohort-prose li { margin: 0 0 8px; }
+.cohort-prose li::marker { color: var(--color-faint); }
+.cohort-prose code {
+  font-family: var(--font-mono); font-size: .85em; background: var(--color-code); padding: 1px 6px;
+  border-radius: 2px; color: var(--color-accent-ink);
+}
+.cohort-prose pre {
+  margin: 28px 0; background: var(--color-code); border: 1px solid var(--color-line); border-radius: 6px;
+  padding: 18px 20px; overflow: auto; line-height: 1.65; white-space: pre-wrap;
+}
+.cohort-prose pre code { background: none; padding: 0; color: var(--color-ink); font-size: 13px; }
+.cohort-prose blockquote {
+  margin: 24px 0; padding: 16px 22px; border-left: 2px solid var(--color-accent);
+  background: var(--color-surface); color: var(--color-ink); border-radius: 0 6px 6px 0;
+}
+.cohort-prose blockquote p:last-child { margin-bottom: 0; }
+.cohort-prose table {
+  display: block; overflow-x: auto; max-width: 100%; border-collapse: collapse; margin: 8px 0 28px;
+  font-size: 16px; line-height: 1.5;
+}
+.cohort-prose th, .cohort-prose td { border: 1px solid var(--color-line); padding: 8px 12px; text-align: left; vertical-align: top; }
+.cohort-prose th {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--color-mute); background: var(--color-surface);
+}
+.cohort-prose td:empty::after { content: '\00a0'; }
+.cohort-prose ul.contains-task-list { list-style: none; padding-left: 0; }
+.cohort-prose .task-list-item input { margin: 0 10px 0 0; accent-color: var(--color-accent); }
+.cohort-prose hr { border: 0; border-top: 1px solid var(--color-line-soft); margin: 40px 0; }
+
+@media (max-width: 767px) {
+  .cohort-prose { font-size: 17px; }
+  .cohort-prose h2 { font-size: 1.55rem; margin-top: 2.25rem; }
+}
+@media print {
+  .cohort-nav, .copy-btn, .ai-letterhead { display: none !important; }
+  .cohort-prose { font-size: 12pt; }
+}
+
+/* ── Forms (quiz, intake, waitlist) ─────────────────── */
+.quiz-step[hidden] { display: none; }
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* Each question eases in as it replaces the last. */
+  .quiz.js .quiz-step:not([hidden]) { animation: ai-rise .45s cubic-bezier(.2, .7, .2, 1) both; }
+}
+.quiz-step { border: 0; padding: 0; margin: 0 0 2.25rem; min-width: 0; }
+.quiz-legend {
+  font-family: var(--font-serif); font-size: clamp(1.35rem, 4.5vw, 1.75rem); font-weight: 500; letter-spacing: -.012em;
+  line-height: 1.25; color: var(--color-ink); margin-bottom: .75rem; padding: 0; text-wrap: balance;
+}
+.quiz-hint { font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-faint); margin: 0 0 1rem; }
+.quiz-options { display: flex; flex-direction: column; gap: .5rem; }
+.quiz-option {
+  display: flex; align-items: flex-start; gap: .75rem; padding: .9375rem 1rem; min-height: 52px;
+  border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface);
+  font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.45; color: var(--color-ink); cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.quiz-option:hover { border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line)); transform: translateY(-1px); box-shadow: 0 8px 18px -16px var(--color-ink); }
+.quiz-option:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-bg); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.quiz-option:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.quiz-option input { accent-color: var(--color-accent); width: 1.125rem; height: 1.125rem; margin-top: .2rem; flex-shrink: 0; }
+.quiz-group { margin-bottom: 1.5rem; }
+.quiz-sublabel { font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-ink); margin-bottom: .5rem; }
+.quiz-input {
+  display: block; width: 100%; padding: .9375rem 1rem; border: 1px solid var(--color-line); border-radius: 8px;
+  background: var(--color-surface); color: var(--color-ink); font-family: var(--font-serif);
+  font-size: 1.0625rem; /* ≥16px stops iOS zooming on focus */
+  line-height: 1.45; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.quiz-input:hover { border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-line)); }
+.quiz-input:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent); }
+.quiz-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.quiz-nav {
+  display: flex; gap: .75rem; position: sticky; bottom: 0;
+  padding: .75rem 0 calc(.75rem + env(safe-area-inset-bottom)); background: var(--color-bg);
+}
+.quiz-btn {
+  flex: 1; min-height: 52px; padding: 0 1.25rem; border: 1px solid var(--color-accent); border-radius: 8px;
+  background: var(--color-accent); color: var(--color-bg); font-family: var(--font-mono); font-size: 14px;
+  letter-spacing: var(--tracking-snug); cursor: pointer; transition: filter .15s ease, transform .15s ease;
+}
+.quiz-btn:hover { filter: brightness(1.08); }
+.quiz-btn:active { transform: translateY(1px); }
+.quiz-btn:disabled { opacity: .6; cursor: progress; }
+.quiz-btn-ghost { flex: 0 0 auto; background: transparent; color: var(--color-ink); border-color: var(--color-line); }
+.quiz-btn[hidden] { display: none; }
+.quiz-error { font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-danger); margin: 0 0 .75rem; }
+.quiz-status {
+  font-family: var(--font-mono); font-size: var(--text-13); line-height: 1.5; padding: .875rem 1rem;
+  border-radius: 8px; border: 1px solid var(--color-line); margin: 0 0 1rem;
+}
+.quiz-status:empty { display: none; }
+.quiz-status[data-state='ok'] { border-color: var(--color-accent); color: var(--color-accent-ink); background: var(--color-accent-bg); }
+.quiz-status[data-state='warn'], .quiz-status[data-state='error'] { border-color: var(--color-danger); color: var(--color-danger); }
+/* The stepped quiz only: without JS every question shows and the nav is useless, so hide it.
+ * (The intake and waitlist forms are single-page and keep their submit button.) */
+#ai-quiz:not(.js) .quiz-nav, #ai-quiz:not(.js) .quiz-progress { display: none; }
+
+/* A result or thank-you: the moment after someone sends something. */
+.ai-reveal { text-align: left; }
+.ai-reveal .ai-rosette { width: 4.5rem; height: auto; margin: 0 0 1.5rem; }
+@media screen and (prefers-reduced-motion: no-preference) {
+  .ai-reveal:not([hidden]) > * { animation: ai-rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+  .ai-reveal:not([hidden]) > :nth-child(2) { animation-delay: .25s; }
+  .ai-reveal:not([hidden]) > :nth-child(3) { animation-delay: .4s; }
+  .ai-reveal:not([hidden]) > :nth-child(4) { animation-delay: .55s; }
+  .ai-reveal:not([hidden]) > :nth-child(n + 5) { animation-delay: .7s; }
+}
