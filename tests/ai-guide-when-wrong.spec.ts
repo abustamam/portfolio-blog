@@ -99,6 +99,8 @@ async function play(page: Page, opts: { missFirst?: number; key?: 'Enter' | ' ' 
     await expect(reveal).toContainText(MISTAKE_ROUNDS[r].check);
     const next = round.locator('[data-next]');
     if (opts.key) {
+      // Focus moves to the explanation so it is read out, and Tab reaches Next.
+      await expect(reveal).toBeFocused();
       await page.keyboard.press('Tab');
       await expect(next).toBeFocused();
       await page.keyboard.press(opts.key);
