@@ -1,9 +1,12 @@
 // Turns an untrusted /api/ai-quiz POST body into a row to store.
 // The track and score are recomputed here; whatever the browser sent for them is ignored.
-import { scoreQuiz, type Track } from '../../../src/utils/aiQuiz';
+import { scoreQuiz, type Offer, type Track } from '../../../src/utils/aiQuiz';
 
+// `goal` is optional here although the form requires it: a page cached from
+// before the question existed must still be able to submit. `format` and
+// `price` are no longer asked; they stay so such a page's answers are kept.
 const ONE = [
-  'frequency', 'wrongAnswer', 'prompt', 'files', 'connected',
+  'frequency', 'wrongAnswer', 'prompt', 'files', 'connected', 'goal',
   'format', 'price', 'context', 'start', 'payer',
 ] as const;
 const MANY = ['tools', 'neverPaste', 'schedule', 'followUp'] as const;
@@ -15,7 +18,14 @@ const MAX_ITEMS = 12;
 const LIMITS = { weeklyTask: 600, name: 120, contact: 160 } as const;
 
 export interface Row {
+  /** Skill level. This is the `track` column. */
   track: Track;
+  /**
+   * The /ai-training/ track the result screen named. Not a column: it follows
+   * from `answers` (the goal, then the skill answers), and is here for the
+   * notification.
+   */
+  recommend: Offer;
   score: number;
   privacyGap: boolean;
   weeklyTask: string;
@@ -69,6 +79,7 @@ export function parseSubmission(raw: unknown): Parsed {
       kind: 'ok',
       row: {
         track: result.track,
+        recommend: result.recommend,
         score: result.score,
         privacyGap: result.privacyGap,
         weeklyTask,

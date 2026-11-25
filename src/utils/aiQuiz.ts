@@ -1,7 +1,14 @@
 // Scoring for the AI training intake quiz (/ai-quiz).
 // Pure functions so the page script and the tests share one source of truth.
 
+/**
+ * Skill level, from the scored questions. It is stored with every response
+ * (and predates the goal question), so its values and meaning must not change.
+ */
 export type Track = 'foundations' | 'applied' | 'builder';
+
+/** A track on /ai-training/, by its id there. The result screen names exactly one. */
+export type Offer = 'everyday' | 'connect' | 'build';
 
 /** Answers as the form serialises them. Multi-selects are arrays. */
 export interface QuizAnswers {
@@ -11,6 +18,8 @@ export interface QuizAnswers {
   prompt?: string;
   files?: string;
   connected?: string;
+  /** What they most want AI to do. Missing on responses from before the question existed. */
+  goal?: string;
   weeklyTask?: string;
   neverPaste?: string[];
 }
@@ -45,8 +54,14 @@ export function skillScores(a: QuizAnswers): { key: (typeof SKILL_KEYS)[number];
 /** Items a careful user keeps out of AI tools. "nothing" is the red flag. */
 export const SENSITIVE = ['personal-info', 'passwords', 'financial', 'health'] as const;
 
+/** The goal answers that name a track outright. "unsure" (or no answer) falls back on the skill questions. */
+export const GOAL_OFFER: Record<string, Offer> = { 'weekly-task': 'everyday', inbox: 'connect', build: 'build' };
+
 export interface QuizResult {
+  /** Skill level: what they already do with AI. */
   track: Track;
+  /** The /ai-training/ track to reserve: what they want, or failing that, what they already do. */
+  recommend: Offer;
   score: number;
   /** True when the privacy answer suggests a gap worth covering first. */
   privacyGap: boolean;
@@ -67,52 +82,97 @@ export function scoreQuiz(a: QuizAnswers): QuizResult {
   else if (score >= 6) track = 'applied';
   else track = 'foundations';
 
-  return { track, score, privacyGap };
+  // The goal decides the track to reserve, whatever the score: /ai-training/
+  // offers Connect to people catching up and Build to people starting to code,
+  // so a low score must not route them away from what they came for.
+  let recommend: Offer | undefined = GOAL_OFFER[a.goal ?? ''];
+  if (!recommend) {
+    if (track !== 'builder') recommend = 'everyday';
+    else recommend = usesBuilderTools || a.connected === 'agents' ? 'build' : 'connect';
+  }
+
+  return { track, recommend, score, privacyGap };
 }
 
-// What the result screen shows. The keys stay as they are (they are stored in
-// quiz_responses), but the names must be /ai-training/ track names, joined
-// with " or " when a result fits more than one. tests/ai-quiz.spec.ts checks
-// that. The text lives here, not imported from src/consts/aiCohort.ts, because
-// the intake service's image copies only this file.
-export const EVERYDAY_BUILD =
+// What the result screen shows: one /ai-training/ track, with a summary that
+// fits the person's skill level. The names must be that page's track names;
+// tests/ai-quiz.spec.ts checks that. The text lives here, not imported from
+// src/consts/aiCohort.ts, because the intake service's image copies only this
+// file.
+export const OFFER_NAMES: Record<Offer, string> = { everyday: 'Everyday AI', connect: 'Connect', build: 'Build' };
+
+export interface ResultCopy {
+  name: string;
+  summary: string;
+  covers: string[];
+  /** Finishes "you'd bring it and leave with …". */
+  build: string;
+}
+
+const EVERYDAY_BUILD =
   'a version of that task you can rerun every week, a way to check its work, and a write-up so you can keep it running';
 
-export const TRACKS: Record<Track, { name: string; summary: string; covers: string[]; build: string }> = {
-  foundations: {
-    name: 'Everyday AI',
-    summary:
-      "You're early, and that's the best place to start. Everyday AI takes one task you already do every week and builds the few habits that matter most: giving AI enough context, checking what it tells you, and knowing what to keep out of it. No code.",
-    covers: [
-      'Writing your task down, and a prompt that works on it',
-      'Running it on your own file, with a check you trust',
-      'What never to paste into an AI tool, and how to make a file safe first',
-    ],
-    build: EVERYDAY_BUILD,
-  },
-  applied: {
-    name: 'Everyday AI',
-    summary:
-      'You already use AI and get value from it. Everyday AI points it at one real task from your week, on your own spreadsheet, document or emails, and turns it into something you can rerun without starting over. No code.',
-    covers: [
-      'Running your task on your own file, with a check you trust',
-      'Making it repeatable, so next week starts where this one ended',
-      'What never to paste into an AI tool, and how to make a file safe first',
-    ],
-    build: EVERYDAY_BUILD,
-  },
-  builder: {
-    name: 'Connect or Build',
-    summary:
-      "You're past the basics and want AI to do work, not just answer questions. Two tracks fit. Connect puts AI inside your email and calendar, with no code. Build has you code with AI and build your own agents; pick it if you're comfortable installing software.",
-    covers: [
-      'Connect: drafted replies, summaries and scheduling, with you approving what goes out',
-      'Build: AI reading and acting on your email, Sheets, calendar or files, with limits on what it can touch',
-      'Both: a multi-step automation that stops for your approval where it matters',
-    ],
-    build: 'an automation that runs that task end to end, with a human check where it matters',
-  },
+const EVERYDAY_EARLY: ResultCopy = {
+  name: OFFER_NAMES.everyday,
+  summary:
+    "You're early, and that's the best place to start. Everyday AI takes one task you already do every week and builds the few habits that matter most: giving AI enough context, checking what it tells you, and knowing what to keep out of it. No code.",
+  covers: [
+    'Writing your task down, and a prompt that works on it',
+    'Running it on your own file, with a check you trust',
+    'What never to paste into an AI tool, and how to make a file safe first',
+  ],
+  build: EVERYDAY_BUILD,
 };
+
+const EVERYDAY_USING: ResultCopy = {
+  name: OFFER_NAMES.everyday,
+  summary:
+    'You already use AI and get value from it. Everyday AI points it at one real task from your week, on your own spreadsheet, document or emails, and turns it into something you can rerun without starting over. No code.',
+  covers: [
+    'Running your task on your own file, with a check you trust',
+    'Making it repeatable, so next week starts where this one ended',
+    'What never to paste into an AI tool, and how to make a file safe first',
+  ],
+  build: EVERYDAY_BUILD,
+};
+
+const CONNECT: ResultCopy = {
+  name: OFFER_NAMES.connect,
+  summary:
+    "Your inbox and calendar are where your week goes, so that's where we put AI. Connect turns on Gemini or Copilot in your own account, with clear limits on what it can see and do, and uses it for drafted replies, thread summaries and scheduling. You approve what goes out. No code.",
+  covers: [
+    'Gemini or Copilot turned on in your own account, with clear limits on what it can see and do',
+    'Drafted replies and thread summaries that you approve before anything is sent',
+    'Meeting requests, scheduling and follow-up notes handled by rules you set',
+  ],
+  build: 'one no-code automation that runs that task end to end, with a human check where it matters',
+};
+
+const BUILD: ResultCopy = {
+  name: OFFER_NAMES.build,
+  summary:
+    "You want AI to do things, not just answer questions. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. Coding experience helps but isn't required. You do need to be comfortable installing software.",
+  covers: [
+    'Coding with AI, and the habits that stop AI-written code from quietly being wrong',
+    'AI reading and acting on your email, Sheets, calendar or files, with limits on what it can touch',
+    'An agent that gathers, decides and acts, and stops for your approval before anything goes out',
+  ],
+  build: 'one working tool or agent you built yourself, running on a schedule or at a button press',
+};
+
+// For someone early with AI whose goal still points at Connect or Build: the
+// same track, with a summary that says starting here is fine.
+const CONNECT_EARLY =
+  "Your inbox and calendar are where your week goes, so that's where we put AI. You don't need to have used AI much: Connect starts by turning on Gemini or Copilot in your own account, with clear limits on what it can see and do, then uses it for drafted replies, thread summaries and scheduling. You approve what goes out. No code.";
+const BUILD_EARLY =
+  "You want AI to do things, not just answer questions. Build has you code with AI, connect it to your email, Sheets, calendar or files, and build an agent that stops for your approval before anything goes out. You're early with AI, and that's fine: the first session starts with the habits that stop AI-written code from quietly being wrong. You do need to be comfortable installing software.";
+
+export function resultCopy(r: Pick<QuizResult, 'track' | 'recommend'>): ResultCopy {
+  const early = r.track === 'foundations';
+  if (r.recommend === 'connect') return early ? { ...CONNECT, summary: CONNECT_EARLY } : CONNECT;
+  if (r.recommend === 'build') return early ? { ...BUILD, summary: BUILD_EARLY } : BUILD;
+  return early ? EVERYDAY_EARLY : EVERYDAY_USING;
+}
 
 // Free guides the result screen suggests, picked from the answers that show a
 // gap. Ids are guide file names in src/content/guides/; the quiz page fails the

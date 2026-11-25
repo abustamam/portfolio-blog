@@ -309,8 +309,10 @@ a.term-card__more:focus-visible { outline: 2px solid var(--color-accent); outlin
 /* ── Quiz result: the track's mark and the skill reading ── */
 .result-glyph { display: flex; align-items: center; gap: 1.25rem; margin: 0 0 1.5rem; }
 .result-glyph .track-glyph { margin: 0; display: none; }
-.quiz-result:not([data-track='builder']) .track-glyph[data-glyph='everyday'],
-.quiz-result[data-track='builder'] .track-glyph:not([data-glyph='everyday']) { display: block; }
+/* One mark: the result names one track (data-offer), whatever the skill level (data-track). */
+.quiz-result[data-offer='everyday'] .track-glyph[data-glyph='everyday'],
+.quiz-result[data-offer='connect'] .track-glyph[data-glyph='connect'],
+.quiz-result[data-offer='build'] .track-glyph[data-glyph='build'] { display: block; }
 @keyframes glyph-join { from { transform: translateX(var(--from)); } }
 @media screen and (prefers-reduced-motion: no-preference) {
   /* Once their lines are drawn, the plugs meet and the page gets its check. */

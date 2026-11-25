@@ -22,14 +22,19 @@ the endpoint in any build.
 - Bodies over 16 KB get a 413. Option values must be short kebab-case tokens
   from the form, and text fields are length-capped (task 600, name 120,
   contact 160).
-- It ignores the browser's `track` and `score` and recomputes them with the
-  same `src/utils/aiQuiz.ts` the page uses.
+- It ignores the browser's `track`, `recommend` and `score` and recomputes them
+  with the same `src/utils/aiQuiz.ts` the page uses.
+- `track` is the skill level from the scored questions (`foundations`,
+  `applied`, `builder`). The track the result screen recommends (`everyday`,
+  `connect`, `build`) is not a column: it follows from the `goal` answer in
+  `answers`, and from the skill answers when the goal is `unsure` or missing.
+  Rows from before the goal question have no `goal`.
 - The hidden `website` honeypot field gets a fake `ok` and nothing is stored.
 - Limits each IP to 10 submissions an hour (`RATE_LIMIT`), keyed on
   `X-Real-IP`, which Caddy sets from `Cf-Connecting-Ip`.
 - Never echoes database errors to the client.
-- After a row is saved, sends a Telegram message (name, track, score, payer,
-  start, format, price, task) when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
+- After a row is saved, sends a Telegram message (name, recommended track,
+  goal, skill level, score, payer, start, task) when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
   are set. Contact details are never sent; read them from the database. The
   message is fire-and-forget: a Telegram failure is logged as `notify failed`
   and the submission still succeeds. The startup log line `notifications`
@@ -90,7 +95,8 @@ The quiz itself no longer asks for name or contact, so every quiz row is
 anonymous. The ask sits on the result screen instead, under the reserve button,
 once people have seen their track: optional name, plus email or WhatsApp
 number. It POSTs to `POST /api/ai-quiz/waitlist` with `source: quiz:<track>`
-(`foundations`, `applied` or `builder`), so the row lands in `cohort_waitlist`
+(the recommended track: `everyday`, `connect` or `build`; rows from before the
+goal question carry `foundations`, `applied` or `builder`), so the row lands in `cohort_waitlist`
 next to the guides sign-ups. It is not linked to the quiz row. Browser test:
 `tests/ai-quiz.spec.ts`.
 
@@ -189,7 +195,7 @@ line (the guides hub and `/colophon/`).
 | Step | Source | What it counts |
 |---|---|---|
 | 1. Page views | nginx access lines in Loki | `GET` with 200/304 on `/ai-guides/` (hub), `/ai-guides/<id>/`, `/ai-quiz/`, `/ai-training/`, people only |
-| 2. Quiz finished | `responses` | rows per track in the week |
+| 2. Quiz finished | `responses` | rows per skill level in the week (the digest's role cannot read `answers`, so it cannot count by recommended track) |
 | 3. Reserve opened | Stripe Checkout Sessions | sessions created on each track's payment links (`STRIPE_TRACKS`) |
 | 4. Paid | the same sessions | `payment_status: paid` |
 
@@ -455,8 +461,11 @@ select submitted_at, track, score, answers->>'payer' as payer,
        answers->>'start' as start, weekly_task, name, contact
 from responses order by submitted_at desc;
 
--- demand by track and who pays
+-- demand by skill level and who pays
 select track, answers->>'payer' as payer, count(*) from responses group by 1, 2 order by 1, 2;
+
+-- what people said they want (the goal question; null on rows from before it)
+select answers->>'goal' as goal, track as level, count(*) from responses group by 1, 2 order by 1, 2;
 ```
 
 Cohort intake:

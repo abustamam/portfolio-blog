@@ -165,6 +165,8 @@ describe('guides sign-up (source)', () => {
       row: { name: 'Q', contact: 'reader@example.com', note: null, source: 'quiz:builder' },
     });
     for (const t of ['foundations', 'applied']) expect(parseWaitlist({ ...guides, source: `quiz:${t}` }).kind).toBe('ok');
+    // The result screen now tags a sign-up with the /ai-training/ track it recommended.
+    for (const t of ['everyday', 'connect', 'build']) expect(parseWaitlist({ ...guides, source: `quiz:${t}` }).kind).toBe('ok');
     expect(parseWaitlist({ ...guides, source: 'quiz:wizard' })).toEqual({ kind: 'invalid', error: 'bad source' });
     expect(parseWaitlist({ ...guides, source: 'quiz' })).toEqual({ kind: 'invalid', error: 'bad source' });
   });
