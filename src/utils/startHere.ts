@@ -47,7 +47,7 @@ export const isExperience = (x: unknown): x is Experience => EXPERIENCE.some((e)
 
 // Guide ids as planned in #79 (what-is-ai is the first of the "start from zero" set): never-paste, prompt, when-ai-is-wrong, which-tool, job-search, examples.
 const BY_EXPERIENCE: Record<Experience, string[]> = {
-  never: ['what-is-ai', 'never-paste', 'prompt', 'which-tool'],
+  never: ['what-is-ai', 'first-ten-minutes', 'never-paste', 'prompt', 'which-tool'],
   some: ['prompt', 'when-ai-is-wrong', 'never-paste'],
   often: ['when-ai-is-wrong', 'never-paste', 'examples'],
 };
@@ -93,59 +93,61 @@ export function byStep<T extends GuideRef>(guides: readonly T[]): T[] {
   return [...guides].sort((a, b) => a.step - b.step || a.id.localeCompare(b.id));
 }
 
-/**
- * The guide to read first, or null when there are no answers (or no guides).
- * Someone who has never used AI always starts with safety; otherwise a field
- * with its own guide wins, then the experience preference.
- */
-export function recommend<T extends GuideRef>(answers: StartAnswers, guides: readonly T[]): T | null {
-  const sorted = byStep(guides);
-  if (sorted.length === 0) return null;
+/** Guide ids the answers point at, most wanted first (may repeat, may be unpublished). */
+function wantedIds(answers: StartAnswers): string[] {
   const field = isField(answers.field) ? answers.field : null;
   const experience = isExperience(answers.experience) ? answers.experience : null;
-  if (!field && !experience) return null;
-
   const wanted: string[] = [];
   if (experience === 'never') wanted.push(...BY_EXPERIENCE.never);
   if (field) wanted.push(...BY_FIELD[field]);
   if (experience && experience !== 'never') wanted.push(...BY_EXPERIENCE[experience]);
+  return wanted;
+}
 
-  for (const id of wanted) {
+const hasAnswer = (a: StartAnswers) => isField(a.field) || isExperience(a.experience);
+
+/**
+ * The guide to read first, or null when there are no answers (or no guides).
+ * Someone who has never used AI always starts with the basics; otherwise a field
+ * with its own guide wins, then the experience preference.
+ */
+export function recommend<T extends GuideRef>(answers: StartAnswers, guides: readonly T[]): T | null {
+  const sorted = byStep(guides);
+  if (sorted.length === 0 || !hasAnswer(answers)) return null;
+  for (const id of wantedIds(answers)) {
     const hit = sorted.find((g) => g.id === id);
     if (hit) return hit;
   }
   return sorted[0];
 }
 
-/** Guides in the order the hub shows them: the recommended one first, the rest in step order. */
-export function orderGuides<T extends GuideRef>(answers: StartAnswers, guides: readonly T[]): T[] {
-  const sorted = byStep(guides);
-  const first = recommend(answers, sorted);
-  return first ? [first, ...sorted.filter((g) => g.id !== first.id)] : sorted;
-}
-
-export interface HubArrangement {
-  /** Guide ids per list, in the order that list shows them. */
-  order: Record<string, string[]>;
-  /** The recommended guide (it gets the badge), or null with no answers. */
-  badged: string | null;
-}
-
 /**
- * The hub across all its lists. The recommendation is computed over every guide
- * on the hub; the recommended guide moves to the top of its own list only and a
- * guide never changes list. With no answers every list stays in step order.
+ * The reader's first few guides, in reading order: the recommended guide, then
+ * the rest of what the answers point at, then the hub in step order. Reference
+ * guides only join when the answers name them (you look those up, you do not
+ * read on into them), and someone who already uses AI is not sent back to the
+ * "start from zero" set unless their answers name one of those guides.
+ * Empty with no answers.
  */
-export function arrangeHub<T extends GuideRef>(answers: StartAnswers, lists: Record<string, readonly T[]>): HubArrangement {
-  const all = Object.values(lists).flat();
-  const pick = recommend(answers, all);
-  const order: Record<string, string[]> = {};
-  for (const [key, list] of Object.entries(lists)) {
-    const sorted = byStep(list);
-    const first = pick && sorted.find((g) => g.id === pick.id);
-    order[key] = (first ? [first, ...sorted.filter((g) => g.id !== first.id)] : sorted).map((g) => g.id);
+export function startPath<T extends GuideRef & { group?: GuideGroup }>(answers: StartAnswers, guides: readonly T[], size = 3): T[] {
+  const first = recommend(answers, guides);
+  if (!first) return [];
+  const sorted = byStep(guides);
+  const knowsAI = answers.experience === 'some' || answers.experience === 'often';
+  const named = wantedIds(answers).map((id) => sorted.find((g) => g.id === id)).filter((g): g is T => !!g);
+  const fill = sorted.filter((g) => g.group !== 'reference' && !(knowsAI && g.group === 'start'));
+  const path: T[] = [first];
+  for (const g of [...named, ...fill]) {
+    if (path.length >= size) break;
+    if (!path.includes(g)) path.push(g);
   }
-  return { order, badged: pick ? pick.id : null };
+  return path;
+}
+
+/** The first guide on the path not read yet, or null when every one has been read. */
+export function nextUnread(path: readonly string[], visited: readonly string[]): string | null {
+  const read = new Set(visited);
+  return path.find((id) => !read.has(id)) ?? null;
 }
 
 /** Canonical form of a page URL for sharing: no query string, no fragment. */
