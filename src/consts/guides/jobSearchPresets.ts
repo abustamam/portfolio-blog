@@ -2,8 +2,12 @@
 // One invented person and one invented posting run through all three, and the
 // page labels them as an illustration. Nobody real is named; the hiring manager
 // is a placeholder (PERSON-1). The person's own name and contact details are
-// left out on purpose: the page tells readers to delete them before pasting.
+// left out on purpose: the page tells readers to redact them from a copy of
+// their résumé before they upload it.
 import type { PromptPreset } from '../../utils/promptBuilder';
+
+/** Where most people start: upload the résumé file and type this. The page shows it first. */
+export const MAKE_IT_BETTER = 'Make my résumé better.';
 
 /** The posting, as the reader would paste it: only the lines that matter. */
 const POSTING =
@@ -13,10 +17,10 @@ export const TAILOR_RESUME: PromptPreset = {
   id: 'tailor-resume',
   label: 'Tailor my résumé',
   situation:
-    'I am applying for one job: front desk coordinator at a community health clinic. I am going back to work after five years at home with my children. My résumé below is accurate. I took out my name and contact details.',
+    'I am applying for one job: front desk coordinator at a community health clinic. I am going back to work after five years at home with my children. My résumé is attached. It is accurate, and I redacted my contact details and references from it.',
   task:
-    'Rewrite my résumé for this one posting. Reorder and reword what is already there so the parts that match the posting come first. Do not add any experience, skill, qualification, number or date that is not in my résumé.',
-  input: `${POSTING}\n\nMy résumé: Office assistant at a dental practice, 2015 to 2019: answered phones, booked appointments, kept the paper filing system up to date. Volunteer coordinator at a weekend school, 2021 to now: build the monthly volunteer rota in Google Sheets and send reminder messages to about 30 families.`,
+    'Make my résumé better for this one posting. Reorder and reword what is already there so the parts that match the posting come first. Do not add any experience, skill, qualification, number or date that is not in my résumé.',
+  input: POSTING,
   format:
     'Plain text, one page: a three-line summary at the top, then each role with three or four bullet points. Keep my dates and job titles exactly as they are.',
   check:

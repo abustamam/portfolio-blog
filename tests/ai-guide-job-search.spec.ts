@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { test, expect, type Page } from '@playwright/test';
 import { PROMPT_FIELDS, assemblePrompt } from '../src/utils/promptBuilder';
 import {
-  JOB_SEARCH_CHECK_LINES, JOB_SEARCH_PRESETS, TRACKER_COLUMNS,
+  JOB_SEARCH_CHECK_LINES, JOB_SEARCH_PRESETS, MAKE_IT_BETTER, TAILOR_RESUME, TRACKER_COLUMNS,
 } from '../src/consts/guides/jobSearchPresets';
 import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
 
@@ -15,6 +15,9 @@ const B = '#job-search-builder';
 
 const dist = (p: string) => readFileSync(`${DIST}${p.slice(1)}index.html`, 'utf8');
 const article = (h: string) => h.slice(h.indexOf('<article'), h.indexOf('</article>'));
+// The guide's own words: header, article and share button, up to (not including) the GuideCta.
+const prose = (h: string) => h.slice(h.indexOf('<div class="ai-shell"'), h.indexOf('data-guide-cta'));
+const metaDescription = (h: string) => h.match(/<meta name="description" content="([^"]*)"/)![1];
 const text = (h: string) =>
   h
     .replace(/<script[\s\S]*?<\/script>/g, ' ')
@@ -57,7 +60,8 @@ test.describe('job-search guide page', () => {
     const pres = [...article(dist(PAGE)).matchAll(/<pre[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)].map((m) =>
       m[1].replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&'),
     );
-    expect(pres).toEqual(JOB_SEARCH_PRESETS.map((p) => assemblePrompt(p)));
+    // The "make it better" starting point comes first, then the three full prompts.
+    expect(pres).toEqual([MAKE_IT_BETTER, ...JOB_SEARCH_PRESETS.map((p) => assemblePrompt(p))]);
 
     await page.goto(PAGE);
     for (const p of [...JOB_SEARCH_PRESETS].reverse()) {
@@ -135,6 +139,48 @@ test.describe('job-search guide page', () => {
 });
 
 test.describe('job-search copy and the free/paid line', () => {
+  test('the page starts where most people start: upload the résumé and ask to "make it better"', () => {
+    const a = article(dist(PAGE));
+    const t = text(a);
+    expect(MAKE_IT_BETTER).toMatch(/make my résumé better/i);
+    // It is the first prompt on the page, ahead of the redaction section and the tailored prompt.
+    const first = a.match(/<pre[^>]*><code>([\s\S]*?)<\/code><\/pre>/)!;
+    expect(first[0]).toContain('data-make-it-better');
+    expect(first[1]).toBe(MAKE_IT_BETTER);
+    expect(t.indexOf('upload their résumé file')).toBeGreaterThan(-1);
+    expect(t.indexOf(MAKE_IT_BETTER)).toBeLessThan(t.indexOf('What to redact before you upload'));
+    expect(t.indexOf('What to redact before you upload')).toBeLessThan(t.indexOf(`Task: ${TAILOR_RESUME.task}`));
+    // The tailored prompt builds on the same upload and the same ask.
+    expect(TAILOR_RESUME.situation).toMatch(/résumé is attached/);
+    expect(TAILOR_RESUME.situation).toMatch(/redacted my contact details and references/);
+    expect(TAILOR_RESUME.task).toMatch(/^Make my résumé better for this one posting/);
+    // Redaction fits an upload: work on a copy of the file.
+    expect(t).toMatch(/save a copy of your résumé, redact the copy and upload that one/);
+  });
+
+  test('the guide speaks as "I" and mentions no course, training, track or cohort outside the call to action', () => {
+    const h = dist(PAGE);
+    const strings = [
+      text(prose(h)),
+      metaDescription(h),
+      MAKE_IT_BETTER,
+      ...JOB_SEARCH_PRESETS.flatMap((p) => [p.label, ...PROMPT_FIELDS.map((f) => p[f])]),
+      ...JOB_SEARCH_CHECK_LINES,
+      ...TRACKER_COLUMNS.flatMap((c) => [c.name, c.note]),
+    ];
+    for (const s of strings) {
+      expect(s, s).not.toMatch(/\b(tracks?|training|courses?|cohorts?)\b/i);
+      // No illustration on this page is written in character as "we", so the rule has no exception here.
+      expect(s, s).not.toMatch(/\b(we|our|ours)\b/i);
+    }
+    expect(text(prose(h))).toMatch(/\bI\b/);
+    // The bullets in the redaction section carry no bold label.
+    const a = article(h);
+    const redact = a.slice(a.indexOf('What to redact before you upload'), a.indexOf('The example on this page'));
+    expect(redact).toContain('<li>');
+    expect(redact).not.toMatch(/<li>\s*<strong>/);
+  });
+
   test('no reusable set-up on the page: no Gems, custom GPTs or saved assistants', () => {
     const t = text(dist(PAGE));
     for (const banned of [/\bGems?\b/i, /custom GPTs?/i, /saved assistants?/i, /master r[ée]sum[ée]/i]) {
@@ -153,6 +199,7 @@ test.describe('job-search copy and the free/paid line', () => {
     const hrefs = [...article(dist(PAGE)).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
     expect(hrefs).toContain('/ai-guides/never-paste/');
     expect(hrefs).toContain(PROMPT_PAGE);
+    expect(article(dist(PAGE))).toMatch(/<a href="\/ai-guides\/never-paste\/">what(&#39;|&#x27;|'|’)s safe to paste into AI<\/a>/);
     for (const h of hrefs) expect(['/ai-guides/never-paste/', PROMPT_PAGE, CSV_PATH], h).toContain(h);
   });
 });

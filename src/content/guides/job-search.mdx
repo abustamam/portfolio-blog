@@ -1,43 +1,55 @@
 ---
 title: AI for your job search
-description: "Use AI on one job application: tailor your résumé, write a cover letter in your own words, practise the interview and track where you applied."
-lead: "Take one job posting and use an AI tool on it from start to finish: a résumé tailored to that posting, a cover letter that still sounds like you, interview practice with follow-up questions, and a simple sheet to track where you applied."
+description: "Use AI on one job application: tailor your résumé, write a cover letter in your own words, practise the interview and keep a record of where you applied."
+lead: "Take one job posting and use an AI tool on it from start to finish: a résumé tailored to that posting, a cover letter that still sounds like you, interview practice with follow-up questions, and a simple sheet of where you applied."
 step: 6
 minutes: 7
 tool: Prompt builder
-ctaLine: "This is one application. The hands-on training makes it your weekly routine."
+ctaLine: "The hands-on training works on a task from your own week, and a job application can be that task."
 ---
 import PromptBuilder from '../../components/guides/PromptBuilder.astro';
 import { assemblePrompt } from '../../utils/promptBuilder';
 import {
-  JOB_SEARCH_PRESETS, JOB_SEARCH_CHECK_LINES, TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE, TRACKER_COLUMNS,
+  JOB_SEARCH_PRESETS, JOB_SEARCH_CHECK_LINES, MAKE_IT_BETTER, TAILOR_RESUME, COVER_LETTER, INTERVIEW_PRACTICE, TRACKER_COLUMNS,
 } from '../../consts/guides/jobSearchPresets';
 
-## Before you paste anything
+## Where most people start
 
-A résumé is mostly about you, and what you share about yourself is your call. Three things should come out before any of it goes into an AI chat:
+Most people open an AI chat, upload their résumé file and type something like this:
 
-- **Your references.** Their names, phone numbers and emails. They agreed to take a call from an employer, not to be pasted into an AI tool. Leave them off completely.
-- **Your current employer's data.** Client names, internal figures, documents from work. Describe what you did ("kept the client list up to date") without pasting the list.
-- **Your full address, phone and email.** Delete the contact block at the top of your résumé before you paste it, and add it back at the end. The tool does not need it to do the work.
+<pre data-make-it-better><code>{MAKE_IT_BETTER}</code></pre>
 
-The same rules apply to everything else you paste. See [what never to paste into an AI chat](/ai-guides/never-paste/).
+That does help a little. The tool tidies the wording, fixes typos and tightens long bullet points. But it doesn't know which job you want, so the result tends to come back generic. It can also add a skill or a number you never had, and that reads as confidently as the true parts.
+
+I keep the upload and the "make it better", and add the job posting plus a few lines about what I want back. Section 1 shows the full version. First, a few things to redact from the file.
+
+## What to redact before you upload
+
+A résumé is mostly about you, and what you share about yourself is your call. Three things should be redacted before you upload the file or paste any of it into an AI chat. The easiest way is to save a copy of your résumé, redact the copy and upload that one.
+
+- Your references: their names, phone numbers and emails. They agreed to take a call from an employer, not to be put into an AI tool. Delete them from the copy completely.
+- Anything from your current employer: client names, internal figures, documents from work. Describe what you did ("kept the client list up to date") without including the list.
+- The contact block at the top: your full address, phone and email. The tool doesn't need it to do the work. Your original file still has it for the version you send.
+
+The same goes for anything else you paste. See [what's safe to paste into AI](/ai-guides/never-paste/).
 
 ## The example on this page
 
 <p class="ai-label">Illustration</p>
 
-Every prompt on this page uses one invented person and one invented job. Nothing in them is real. The person is going back to work after five years at home with their children, and is applying to be a front desk coordinator at a community health clinic. Read each prompt to see the shape, then swap in your own résumé and your own posting.
+Every prompt on this page uses one invented person and one invented job. Nothing in them is real. The person is going back to work after five years at home with their children, and is applying to be a front desk coordinator at a community health clinic. Their résumé has two roles: office assistant at a dental practice from 2015 to 2019, and volunteer coordinator at a weekend school since 2021, where they build the monthly volunteer rota in Google Sheets for about 30 families. Read each prompt to see the shape, then swap in your own résumé and your own posting.
 
 ## 1. Tailor your résumé to one posting
 
-Paste the posting and your résumé, and ask the tool to reorder and reword what is already there. The important part is the last line: it asks the tool to list anything it added. AI tools sometimes add a skill or a number you never gave them, and it reads just as confidently as the true parts.
+This is the same upload and the same "make it better", with more around it. The posting goes in so the tool knows what to aim for. The task says to reorder and reword what is already there and add nothing. The last line asks the tool to list anything it added anyway, because that is the part you need to check.
 
 <pre><code>{assemblePrompt(TAILOR_RESUME)}</code></pre>
 
 <p><button type="button" class="ai-link" data-prompt-fill="tailor-resume" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
 
-When the list comes back, check it, then read the new résumé side by side with your original anyway. The list can miss things. Anything you cannot back up in an interview comes out.
+If your AI tool can't take a file, paste the text of your redacted copy under the posting instead.
+
+When the list comes back, check it, then read the new résumé side by side with your original anyway. The list can miss things. Anything you can't back up in an interview comes out.
 
 ## 2. A cover letter that doesn't read as AI
 
@@ -52,23 +64,23 @@ Then cut:
 - Any sentence you would not say out loud to the person interviewing you.
 - Any claim that is not in your notes.
 - Stock openings and closings, and big words you never use.
-- Lines that repeat your résumé. The letter is for the why; the résumé already has the what.
+- Lines that repeat your résumé. The letter is where you say why you want the job.
 
 Read what is left out loud. If it does not sound like you, change the words until it does.
 
 ## 3. Practise the interview
 
-One prompt turns the tool into an interviewer. It asks a question, waits for your answer, then asks a follow-up, the way a real interviewer digs into what you said. Answer the way you would in the room, not the way you would write it.
+One prompt turns the tool into an interviewer. It asks a question, waits for your answer, then asks a follow-up, the way a real interviewer digs into what you said. Answer the way you would say it in the room.
 
 <pre><code>{assemblePrompt(INTERVIEW_PRACTICE)}</code></pre>
 
 <p><button type="button" class="ai-link" data-prompt-fill="interview-practice" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
 
-The feedback is a starting point, not a verdict. The tool does not know the clinic or the person who will interview you.
+Treat the feedback as a starting point. The tool doesn't know the clinic or the person who will interview you.
 
-## Build your prompt
+## Write your own version
 
-Tap one of the three examples, then replace the invented details with your own: your situation, your posting, your résumé or notes. Your prompt appears underneath as you type. Copy it into whichever AI tool you use. New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one.
+Tap one of the three examples, then replace the invented details with your own: your situation, your posting, your notes. For the résumé prompt, upload your redacted copy alongside it. Your prompt appears underneath as you type. Copy it into whichever AI tool you use. New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one.
 
 <PromptBuilder
   presets={JOB_SEARCH_PRESETS}
@@ -78,9 +90,9 @@ Tap one of the three examples, then replace the invented details with your own: 
   chipsNote="These examples are an illustration: an invented person and an invented job. Tap one, then change it to fit your own application."
 />
 
-## 4. Keep track of your applications
+## 4. A sheet for your applications
 
-A plain sheet with one row per application is enough. These are the columns:
+I'd keep a plain sheet with one row per application. These are the columns:
 
 <table data-tracker-columns>
   <thead><tr><th>Column</th><th>What goes in it</th></tr></thead>
@@ -91,7 +103,7 @@ A plain sheet with one row per application is enough. These are the columns:
 
 <p><a class="cohort-cta" href="/downloads/job-application-tracker.csv" download="job-application-tracker.csv">Download the tracker (CSV)</a></p>
 
-The file has the column names and nothing else. Open it in Google Sheets (File, then Import) or in Excel. The sheet is for you, not for the AI tool: keep it out of the chat.
+The file has the column names and nothing else. Open it in Google Sheets (File, then Import) or in Excel. Keep the sheet out of the AI chat. It is only for you.
 
 ## Before you send
 
