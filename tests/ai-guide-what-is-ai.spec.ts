@@ -89,7 +89,8 @@ test.describe('what-is-ai: page', () => {
     await page.goto(PAGE);
     const text = await page.locator('[data-guide] > article').innerText();
     expect(text).not.toMatch(/\b(?:unlock|powerful|magic|magical|game-changer|revolutionary)\b/i);
-    expect(text).not.toContain('!');
+    // The one allowed exclamation mark is the quoted "You're absolutely right!".
+    expect(text.replace(/You(?:'|’)re absolutely right!/g, '')).not.toContain('!');
     expect(text).not.toMatch(/\b(?:we|our|ours)\b/i);
     expect(text.replace(/training data/gi, '')).not.toMatch(/\b(?:tracks?|training|courses?|cohorts?)\b/i);
     // American spelling

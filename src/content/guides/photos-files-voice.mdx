@@ -6,7 +6,7 @@ group: start
 step: 0.5
 minutes: 5
 tool: Worked examples
-ctaLine: "The hands-on training does this with a document of your own, after making it safe to share."
+ctaLine: "The hands-on training does this with a document of your own."
 ---
 import Term from '../../components/guides/Term.astro';
 import AttachExamples from '../../components/guides/AttachExamples.astro';
@@ -17,7 +17,7 @@ import { fmtLongDate } from '../../utils/date';
 
 ## You can hand it things, not only words
 
-Next to the box where you type, most <Term id="chat-app">chat apps</Term> have a button for adding things: a paperclip, a plus sign or a camera. To **attach** something means to hand the app a photo or a document along with your message. Some apps call the same thing **upload**. The app reads what you attached and answers using it.
+Next to the box where you type, most <Term id="chat-app">chat apps</Term> have a button for adding things: a paperclip, a plus sign or a camera. To **attach** something means to hand the app a photo or a document along with your message. Some apps call the same thing **upload**. It works like attaching a file to an email: the paperclip does the same job here. The app reads what you attached and answers using it.
 
 Many also have a microphone, so you can talk instead of typing.
 
@@ -63,7 +63,7 @@ Everything in [When AI gets it wrong](/ai-guides/when-ai-is-wrong/) still applie
 
 - **Misread numbers.** Amounts, dates, phone numbers and account numbers are the things to double-check against the original.
 - **Skipped pages.** A long file gets read unevenly. The answer may leave out the page that matters, and nothing in the answer tells you it did.
-- **Made-up details.** If the answer isn't in the file, the app may state something plausible anyway, which people call <Term>hallucination</Term>. Asking for the page number is how you catch that.
+- **Made-up details.** If the answer isn't in the file, the app may state something plausible anyway, which people call <Term>hallucination</Term>. Asking for the page number is one way to catch that.
 
 Files and photos also use up more of your <Term>usage limit</Term> than a short typed question does, which is [why you can hit the limit sooner](/ai-guides/usage-limits/) when you attach things.
 
@@ -73,6 +73,8 @@ Look at the three check lines again. The first two ask me to go back to the sour
 
 The difference is what happens if the answer is off. If I misread the water bill, I could pay the wrong amount or miss a date. If the dishwasher answer is wrong, I could spend an hour on the wrong fix. If the chicken and rice is a little bland, I add salt. I check hard when a wrong answer costs money, time or trouble, and I just use the answer when it doesn't.
 
+Here is one that sits at the low end. My toddler's sleep is hard to predict. I keep a project in my AI app, which is a saved space that holds the instructions and files for one ongoing job, with the key facts about her: her age, how we parent, the gear we use. When I need to plan, I take a screenshot of the nap-tracking app and ask it to suggest her next nap and when to wake her. That needs very little checking. It's a suggestion, I can overrule it, and a nap that runs a little long costs me nothing.
+
 ## Before you attach anything
 
 Anything you attach goes to the company that runs the app. A photo of a letter has a name and an address on it. A bank statement has account numbers. Before you attach a document, cover or remove the names, account numbers and addresses that the question doesn't need. A thumb over the corner of a photo is enough for a quick question. For a file, blank them out first.
@@ -81,7 +83,7 @@ How much you may share also depends on which account you use. I go through that,
 
 ## What each free plan accepts
 
-This is what each app's <Term>free plan</Term> says it accepts, taken from each company's own pages. Where a page doesn't say, the cell says "Check the vendor's page" and links it. It doesn't mean the app can't do it.
+This is what each app's <Term>free plan</Term> says it accepts, taken from each company's own pages. Where a cell says "Check the company's page", that company's help pages didn't say. The link goes to the page to check. It doesn't mean the app can't do it.
 
 <p class="ai-label pfv-checked">Last checked <time data-last-checked datetime={lastChecked()}>{fmtLongDate(new Date(lastChecked()))}</time>. Plans change, and each cell links the page it came from.</p>
 

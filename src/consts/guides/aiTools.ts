@@ -3,7 +3,7 @@
 // Every fact was read on the vendor's own page on its `checked` date and links
 // that page as `source`. Nothing here is from memory or a third-party article.
 // When a vendor page did not confirm a fact, `confirmed` is false and the page
-// shows "check the vendor's page" with the link instead of a claim.
+// shows "check the company's page" with the link instead of a claim.
 //
 // Re-check every quarter: open each `source`, update `text` and `checked`.
 // The page's "last checked" date is the oldest `checked` below.
@@ -22,7 +22,7 @@ export interface Fact {
   source: string;
   /** The day `source` was read, YYYY-MM-DD. */
   checked: string;
-  /** False when the vendor page did not confirm it; the page then says "check the vendor's page". */
+  /** False when the vendor page did not confirm it; the page then says "check the company's page". */
   confirmed: boolean;
   /** Further vendor pages, when one page did not say all of `text`. */
   more?: string[];
@@ -50,7 +50,7 @@ export const FACT_LABELS: Record<FactKey, string> = {
 export const FACT_ORDER: FactKey[] = ['free', 'paid', 'work', 'sees', 'training'];
 
 /** Shown in place of a fact the vendor page did not confirm. */
-export const UNCONFIRMED = "Check the vendor's page";
+export const UNCONFIRMED = "Check the company's page";
 
 const CHECKED = '2026-11-24';
 

@@ -76,7 +76,7 @@ test.describe('photos-files-voice: page', () => {
     await expect(cards.nth(2).locator('[data-ax-check="none"]')).toContainText('Nothing to verify');
   });
 
-  test('the matrix shows every cell; unconfirmed cells read "Check the vendor\'s page" and link the source', async ({ page }) => {
+  test('the matrix shows every cell; unconfirmed cells read "Check the company\'s page" and link the source', async ({ page }) => {
     await page.goto(PATH);
     await expect(page.locator('[data-attach-table] tbody tr')).toHaveCount(4);
     await expect(page.locator('[data-attach-table] td')).toHaveCount(12);

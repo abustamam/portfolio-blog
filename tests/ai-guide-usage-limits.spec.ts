@@ -263,6 +263,37 @@ test.describe('usage-limits: page, with JavaScript', () => {
     await expect(page.locator('.allowance__made-up')).toContainText('made up');
   });
 
+  test('the unconfirmed text reads "Check the company\'s page"', () => {
+    expect(UNCONFIRMED).toBe("Check the company's page");
+  });
+
+  test('once cut off, the list offers wait and another app, not a fresh chat; the fresh chat sits under "To make it last longer"', async ({ page }) => {
+    await page.goto(PAGE);
+    const cutOff = page.locator('article h2', { hasText: 'What to do when you are cut off' });
+    await expect(cutOff).toHaveCount(1);
+    const items = await cutOff.evaluate((h) => {
+      const out: string[] = [];
+      for (let el = h.nextElementSibling; el && el.tagName !== 'H2'; el = el.nextElementSibling) {
+        el.querySelectorAll('li').forEach((li) => out.push(li.textContent ?? ''));
+      }
+      return out;
+    });
+    expect(items.length).toBeGreaterThanOrEqual(2);
+    for (const t of items) expect(t).not.toMatch(/fresh chat|new chat|switch to the smaller|turn it off/i);
+    const later = page.locator('article h2', { hasText: 'To make it last longer' });
+    await expect(later).toHaveCount(1);
+    await expect(page.locator('article li', { hasText: 'Start a fresh chat' })).toHaveCount(1);
+  });
+
+  test('no reader-visible "vendor" in the five start-from-zero posts', async ({ page }) => {
+    for (const slug of ['what-is-ai', 'first-ten-minutes', 'usage-limits', 'does-it-remember', 'photos-files-voice']) {
+      await page.goto(`/ai-guides/${slug}/`);
+      const text = await page.evaluate(() => document.querySelector('[data-guide]')?.textContent ?? '');
+      expect(text.length, slug).toBeGreaterThan(1500);
+      expect(text.match(/vendor/i)?.[0], `${slug} mentions vendor`).toBeUndefined();
+    }
+  });
+
   test('the page never mentions the training above the call to action and never says "we"', async ({ page }) => {
     await page.goto(PAGE);
     const text = await page.evaluate(() =>

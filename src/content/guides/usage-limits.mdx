@@ -1,7 +1,7 @@
 ---
 title: "\"You've reached your limit\""
 description: "Why an AI app stops answering and asks you to wait or pay. Free and paid plans, what uses your allowance faster, when it refills, and what to do meanwhile."
-lead: "Sooner or later an AI app tells you that you have reached your limit. Nothing is broken. Every account has an allowance, some things use it faster than others, and it refills by itself."
+lead: "Sooner or later an AI app tells you that you have reached your limit. Every account has an allowance, some things use it faster than others, and it refills by itself."
 group: start
 step: 0.3
 minutes: 6
@@ -15,11 +15,11 @@ import { fmtLongDate } from '../../utils/date';
 
 {/* Vendor facts live in src/consts/guides/usageLimits.ts (and the paid prices in aiTools.ts), each with its source and checked date. Re-check every quarter. */}
 
-<p class="ai-label" data-last-checked={oldestChecked()}>Last checked <time datetime={oldestChecked()}>{fmtLongDate(new Date(oldestChecked()))}</time>. Limits change often; each fact links the vendor's own page.</p>
+<p class="ai-label" data-last-checked={oldestChecked()}>Last checked <time datetime={oldestChecked()}>{fmtLongDate(new Date(oldestChecked()))}</time>. Limits change often; each fact links the company's own page.</p>
 
 ## What the message means
 
-You are typing to a <Term>chat app</Term>, and it stops. It says you have reached your limit and offers to let you wait, or pay. Nothing has broken, and nobody has caught you doing something wrong.
+You are typing to a <Term>chat app</Term>, and it stops. It says you have reached your limit and offers to let you wait, or pay. That's normal, and it isn't a penalty.
 
 Every account gets an allowance. You used it up, for now. I'll call it an allowance, but you will see the same idea under other names: a **usage limit**, a **quota**, a **cap**. They all mean how much you can use the app before it asks you to wait or pay.
 
@@ -32,7 +32,7 @@ Two more words come up on the way:
 
 Every answer is written fresh, by a very large program running on computers the company pays for. A longer, harder request takes more of that computing time than a short one. A limit is how the company stops a free account from using a lot of it for nothing. I think of it like a prepaid card for a photocopier at the library: a few pages free, then wait or pay.
 
-Apps count your use in **tokens**. A token is a short word or a piece of a longer one, and it is the unit your allowance is measured in. You never need to count them. There is [a plain-words entry in the glossary](/ai-guides/glossary/#token) if you want one.
+Apps count your use in **tokens**. A token is a short word or a piece of a longer one, and it is the unit your allowance is measured in. You generally don't need to count them. There is [a plain-words entry in the glossary](/ai-guides/glossary/#token) if you want one.
 
 ## What uses it up faster
 
@@ -53,16 +53,21 @@ For a quick question in a new chat, none of that matters much. In the meter abov
 
 Most apps' limits refill by themselves. When depends on the app, and the table further down says what each one states. Gemini and Claude refill every five hours and add a weekly limit on top. ChatGPT shows you the time inside the app.
 
-Where an app's page doesn't say, I haven't guessed. Look for a message that names a time, as in "try again at 4:00 pm".
+If you're not sure, the limit message itself usually says when to come back, like "try again at 4:00 pm".
 
 ## What to do when you are cut off
 
-In the order I would try:
+The limit is on your account, not on the chat you are in. Once you are cut off, a new chat or the smaller model in the same app usually won't get you past it. Two things do:
 
-1. **Wait.** If the message names a time, close the tab and do something else until then.
-2. **Start a fresh chat.** If you were deep in a long one, a new chat costs less per message. Paste in the two or three lines it needs to know. [Does it remember me?](/ai-guides/does-it-remember/) explains what carries over and what doesn't.
-3. **Switch to the smaller model.** If you had the large model or the thinking setting on, turn it off for the easy parts.
-4. **Use a different app for the afternoon.** The four apps count separately. If you don't have a second one yet, [Which AI app should I use?](/ai-guides/which-tool/) will help you pick.
+1. **Wait.** If the message names a time, close the tab and do something else until then. Some messages also offer a smaller model you can keep using; take it if it's there.
+2. **Use a different app for the afternoon.** The four apps count separately. If you don't have a second one yet, [Which AI app should I use?](/ai-guides/which-tool/) will help you pick.
+
+## To make it last longer
+
+These help before you hit the limit, not after:
+
+- **Start a fresh chat for each new topic.** A long chat costs more per message. Paste in the two or three lines the new one needs to know. [Does it remember me?](/ai-guides/does-it-remember/) explains what carries over and what doesn't.
+- **Use the smaller model for easy parts.** If you had the large model or the thinking setting on, turn it off for a quick question.
 
 ## Free or paid?
 
@@ -72,12 +77,12 @@ My rule is to pay when you hit the limit most weeks and it is costing you time. 
 
 Before you pay anything, check two other places:
 
-- **Work or school.** Your employer or school may already pay for an app, and it may be the better account to use. Ask before you start paying out of your own pocket.
+- **Work or school.** Your employer or school may already pay for an app, and it may be the better account to use. Ask before you start paying out of your own pocket. Check the usage policy too: a work account may not be meant for personal tasks or side projects, and your employer or school may be able to see what you type. [What's safe to paste into AI](/ai-guides/never-paste/) goes through that.
 - **The free plan of another app.** If one app keeps cutting you off, the others may not.
 
 ## The four apps side by side
 
-What each app says about its free plan, the refill and where to see your usage. The paid price comes from [the which-app table](/ai-guides/which-tool/#the-four-apps-side-by-side), so there is one copy of it. Every cell links the page it came from. Where the vendor's page did not say, the cell says so and links the page to check.
+What each app says about its free plan, the refill and where to see your usage. The paid price is the same as in [the which-app table](/ai-guides/which-tool/#the-four-apps-side-by-side). Where a cell says "Check the company's page", that company's help pages didn't say. The link goes to the page to check.
 
 <div class="limits-table">
 <table data-limits-table>
@@ -131,8 +136,8 @@ What each app says about its free plan, the refill and where to see your usage. 
 
 ## What this page cannot tell you
 
-How big your allowance is. None of these apps publishes a number you can plan around, and the meter above is made up to show proportions, not to predict anything. The vendors describe their caps in vague terms, and they change them often.
+How big your allowance is. None of these apps publishes a number you can plan around, and the meter above is made up to show proportions, not to predict anything. The companies describe their caps in vague terms, and they change them often.
 
 It also cannot tell you how fast you will use yours. That depends on your chats, your files and your settings. The way to find out is to use the app and watch for the message, or to open the place the table names for your app and look.
 
-The date at the top says when I last checked each cell against the vendor's own page.
+The date at the top says when I last checked each cell against the company's own page.

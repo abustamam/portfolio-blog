@@ -81,7 +81,7 @@ test.describe('first-ten-minutes: page', () => {
     expect(text).not.toMatch(/agonis|neighbour/i);
   });
 
-  test('the table shows each fact with its source; unconfirmed cells say "Check the vendor\'s page" and link out', async ({ page }) => {
+  test('the table shows each fact with its source; unconfirmed cells say "Check the company\'s page" and link out', async ({ page }) => {
     await page.goto(PAGE);
     const oldest = oldestChecked(APPS);
     const stamp = page.locator('[data-last-checked]');
