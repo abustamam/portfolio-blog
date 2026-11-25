@@ -1,0 +1,31 @@
+---
+title: One weekly task, by profession
+description: "Five everyday weekly tasks, one per line of work: the prompt, what you check, and how the week goes before and after."
+lead: "Is this for someone like me? Pick your line of work and see one ordinary weekly task done with AI: the task, the prompt, what you check yourself, and what changes. Then try the prompt."
+step: 5
+minutes: 4
+tool: Example cards
+ctaLine: "These cards show what changes, not how it was set up. The hands-on training takes one task from your own week and works on it with you, with feedback, until it repeats."
+---
+import ExampleCards from '../../components/guides/ExampleCards.astro';
+import PromptBuilder from '../../components/guides/PromptBuilder.astro';
+import { EXAMPLE_CARDS, toPresets } from '../../consts/guides/examples';
+
+## Pick your field
+
+Each card is one task that comes round every week. Tap **Before** and **After** to see how the week changes, and **Try this prompt** to open the prompt in the builder below.
+
+<ExampleCards builderId="examples-builder" />
+
+## Try the prompt
+
+The card you picked lands here, split into its five parts. Change any part and the prompt underneath changes with it. Copy it into any AI tool, then check the answer the way the card says.
+
+<PromptBuilder
+  presets={toPresets(EXAMPLE_CARDS)}
+  storageKey="examples"
+  id="examples-builder"
+  chipsLabel="Or start from another example"
+/>
+
+New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one. Before you paste anything of your own, read [Never paste these](/ai-guides/never-paste/).
