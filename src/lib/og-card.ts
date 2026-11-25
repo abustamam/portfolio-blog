@@ -12,15 +12,15 @@ const loadFont = (spec: string) => {
   return opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
 };
 
-const serif = loadFont('@fontsource/newsreader/files/newsreader-latin-500-normal.woff');
-const mono = loadFont('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff');
-const black = loadFont('@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff');
+export const serif = loadFont('@fontsource/newsreader/files/newsreader-latin-500-normal.woff');
+export const mono = loadFont('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff');
+export const black = loadFont('@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff');
 
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
 
 // Tokens from src/styles/global.css (light theme)
-const C = { bg: '#f5f4ef', ink: '#0c0f14', mute: '#565c66', line: '#dcdad2', accent: '#1f6f43' };
+export const C = { bg: '#f5f4ef', ink: '#0c0f14', mute: '#565c66', line: '#dcdad2', accent: '#1f6f43' };
 
 type Font = opentype.Font;
 
@@ -46,17 +46,17 @@ function layout(font: Font, text: string, size: number, tracking = 0) {
   return { chars, xs, width: x - (chars.length ? tracking : 0) };
 }
 
-function width(font: Font, text: string, size: number, tracking = 0) {
+export function width(font: Font, text: string, size: number, tracking = 0) {
   return layout(font, text, size, tracking).width;
 }
 
 /** Path data for a line of text, optionally letter-spaced. Baseline at y. */
-function textPath(font: Font, text: string, x: number, y: number, size: number, tracking = 0) {
+export function textPath(font: Font, text: string, x: number, y: number, size: number, tracking = 0) {
   const { chars, xs } = layout(font, text, size, tracking);
   return chars.map((ch, i) => font.getPath(ch, round(x + xs[i]), y, size).toPathData(2)).join('');
 }
 
-function wrap(font: Font, text: string, size: number, maxWidth: number): string[] {
+export function wrap(font: Font, text: string, size: number, maxWidth: number): string[] {
   const lines: string[] = [];
   let line = '';
   for (const word of text.split(/\s+/).filter(Boolean)) {
@@ -82,7 +82,7 @@ function fitTitle(text: string, maxWidth: number, maxLines: number) {
   return { size, lines };
 }
 
-const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+export const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 export interface CardInput {
   title: string;
@@ -118,7 +118,25 @@ export function cardSvg({ title, eyebrow, subtitle }: CardInput): string {
     parts.push(`<path fill="${C.mute}" d="${textPath(mono, subtitle, PAD, y, subSize)}"/>`);
   }
 
-  // Footer rule + wordmark (BUSTAMAM / TECHNOLOGY) + host
+  parts.push(footer());
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}"><title>${esc(title)}</title>${parts.join('')}</svg>`;
+  if (svg.includes('NaN')) throw new Error(`og-card: NaN in path data for "${title}"`);
+  return svg;
+}
+
+export async function renderCard(input: CardInput): Promise<Buffer> {
+  return sharp(Buffer.from(cardSvg(input)))
+    .resize(OG_WIDTH, OG_HEIGHT)
+    .png({ compressionLevel: 9, palette: true })
+    .toBuffer();
+}
+
+/** Footer rule + wordmark (BUSTAMAM / TECHNOLOGY) + host, shared by every card. */
+export function footer(): string {
+  const PAD = 80;
+  const maxW = OG_WIDTH - PAD * 2;
+  const parts: string[] = [];
   parts.push(`<rect x="${PAD}" y="506" width="${maxW}" height="2" fill="${C.line}"/>`);
   const wmSize = 44;
   const wmW = width(black, 'BUSTAMAM', wmSize, -1);
@@ -134,14 +152,5 @@ export function cardSvg({ title, eyebrow, subtitle }: CardInput): string {
     `<path fill="${C.mute}" d="${textPath(mono, host, OG_WIDTH - PAD - width(mono, host, hostSize), 580, hostSize)}"/>`,
   );
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}"><title>${esc(title)}</title>${parts.join('')}</svg>`;
-  if (svg.includes('NaN')) throw new Error(`og-card: NaN in path data for "${title}"`);
-  return svg;
-}
-
-export async function renderCard(input: CardInput): Promise<Buffer> {
-  return sharp(Buffer.from(cardSvg(input)))
-    .resize(OG_WIDTH, OG_HEIGHT)
-    .png({ compressionLevel: 9, palette: true })
-    .toBuffer();
+  return parts.join('');
 }

@@ -1,9 +1,12 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 import { renderCard, type CardInput } from '../../lib/og-card';
+import { renderAiCard } from '../../lib/og-ai';
+import { AI_CARDS, type AiCard } from '../../consts/aiCards';
 import { isPublished } from '../../utils/content';
 
-// Emits /og/default.png and /og/{writing,work,series}/<id>.png at build time.
+// Emits /og/default.png, /og/{writing,work,series}/<id>.png and
+// /og/ai/<id>.png (the AI training pages) at build time.
 export const getStaticPaths: GetStaticPaths = async () => {
   const [writing, work, series] = await Promise.all([
     getCollection('writing', ({ data }) => isPublished(data)),
@@ -41,10 +44,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
     })),
   ];
 
-  return cards.map(({ slug, card }) => ({ params: { slug }, props: { card } }));
+  return [
+    ...cards.map(({ slug, card }) => ({ params: { slug }, props: { card } })),
+    ...AI_CARDS.map((ai) => ({ params: { slug: `ai/${ai.id}` }, props: { ai } })),
+  ];
 };
 
 export const GET: APIRoute = async ({ props }) => {
-  const png = await renderCard(props.card as CardInput);
+  const png = props.ai ? await renderAiCard(props.ai as AiCard) : await renderCard(props.card as CardInput);
   return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });
 };
