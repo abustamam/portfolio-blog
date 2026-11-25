@@ -36,6 +36,11 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
       <slot />
     </article>
 
+    <div class="guide-share" data-guide-share hidden>
+      <button type="button" class="guide-share__btn" data-share-button data-share-title={title} data-share-line={description}>Share this guide</button>
+      <span class="guide-share__status" data-share-status role="status"></span>
+    </div>
+
     <GuideCta line={ctaLine} />
 
     <nav class="guide-more" aria-labelledby="guide-more-title" data-more-guides>
@@ -61,11 +66,53 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
 
   const id = document.querySelector<HTMLElement>('[data-guide]')?.dataset.guide;
   if (id) guideStore.markVisited(id);
+
+  // Share: the browser's share sheet where there is one, otherwise copy
+  // "title — one line — link". The link is the canonical URL with nothing
+  // appended, and nothing is sent anywhere.
+  import { shareText, canonicalShareUrl } from '../utils/startHere';
+
+  const box = document.querySelector<HTMLElement>('[data-guide-share]');
+  const btn = box?.querySelector<HTMLButtonElement>('[data-share-button]');
+  const note = box?.querySelector<HTMLElement>('[data-share-status]');
+  if (box && btn && note) {
+    box.hidden = false;
+    btn.addEventListener('click', async () => {
+      const title = btn.dataset.shareTitle ?? document.title;
+      const line = btn.dataset.shareLine ?? '';
+      const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href ?? location.origin + location.pathname;
+      const url = canonicalShareUrl(canonical);
+      try {
+        if (typeof navigator.share === 'function') {
+          await navigator.share({ title, text: line, url });
+          return;
+        }
+      } catch (e) {
+        if ((e as Error)?.name === 'AbortError') return; // the reader closed the sheet
+      }
+      const text = shareText(title, line, url);
+      try {
+        await navigator.clipboard.writeText(text);
+        note.textContent = 'Copied. Paste it into a message.';
+      } catch {
+        note.textContent = text; // clipboard blocked: show it so it can be copied by hand
+      }
+    });
+  }
 </script>
 
 <style>
   .guide-kicker-link { color: inherit; text-decoration: none; }
   .guide-kicker-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .guide-share { margin-top: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+  .guide-share[hidden] { display: none; }
+  .guide-share__btn {
+    font-family: var(--font-mono); font-size: 14px; color: var(--color-ink); background: var(--color-surface);
+    border: 1px solid var(--color-line); border-radius: 6px; padding: .6rem 1rem; min-height: 44px; cursor: pointer;
+  }
+  .guide-share__btn:hover { border-color: var(--color-accent); }
+  .guide-share__btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .guide-share__status { font-family: var(--font-serif); color: var(--color-mute); min-width: 0; overflow-wrap: anywhere; }
   .guide-more { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--color-line-soft); }
   .guide-more h2 { margin: 0 0 1rem; }
   .guide-more ol { list-style: none; margin: 0 0 1.25rem; padding: 0; }
