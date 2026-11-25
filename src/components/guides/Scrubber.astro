@@ -1,20 +1,28 @@
 ---
 // The never-paste Scrubber. Everything runs in this page: no fetch, no
 // storage (it does not use guideStore), nothing typed goes in a URL.
+// The box starts with an invented sample so the reader sees it work. The
+// sample lives in the markup only; nothing, sample or typed, is saved.
+import { scrub } from '../../utils/scrub';
+
+const SAMPLE =
+  'Made-up example: Hi, this is Dana Lee. Email me at dana.lee@example.com or call 555-123-4567. My card number is 4111 1111 1111 1111.';
+const sampleOut = scrub(SAMPLE).text;
 ---
 
 <section class="scrubber" data-scrubber aria-labelledby="scrubber-title">
-  <h2 id="scrubber-title">Try it: scrub some text</h2>
+  <h2 id="scrubber-title">See it in action</h2>
+  <p class="scrubber__account" data-scrub-account>This is for a personal account, or one your employer hasn't approved. On an approved work account, follow your employer's rules instead.</p>
   <p class="scrubber__privacy"><strong>Nothing you type here leaves this page.</strong> It is not sent, not saved, and it is gone when you reload.</p>
-  <p>Paste any text below. Email addresses, phone numbers and long digit runs (card and account numbers) are swapped for placeholders. Use a made-up example if you just want to see how it works.</p>
+  <p>The box starts with a made-up example, so you can see what happens. Email addresses, phone numbers and long digit runs (card and account numbers) are swapped for placeholders. Paste your own text over it to try it.</p>
+  <p data-scrub-habit>You don't need this tool. Find-and-replace in your own document does the same job, and that's the habit to keep.</p>
 
   <label class="scrubber__label" for="scrub-in">Your text</label>
-  <textarea id="scrub-in" class="scrubber__box" rows="6" autocomplete="off" spellcheck="false" data-scrub-in
-    placeholder="e.g. Please email Dana at dana.lee@example.com or call 555-123-4567 about card 4111 1111 1111 1111."></textarea>
+  <textarea id="scrub-in" class="scrubber__box" rows="6" autocomplete="off" spellcheck="false" data-scrub-in>{SAMPLE}</textarea>
 
   <div class="scrubber__names">
     <label class="scrubber__label" for="scrub-name">Names to replace</label>
-    <p class="scrubber__hint"><strong>Check names yourself.</strong> The tool cannot tell a name from any other word. Add each person's full name, like Dana Lee. The tool then also replaces Dana or Lee on its own. If two people share a name, check the result yourself.</p>
+    <p class="scrubber__hint"><strong>Check names yourself.</strong> The tool cannot tell a name from any other word. Add each person's full name, like Dana Lee. It replaces the full name, and Dana or Lee on its own when it starts with a capital letter, so "may" stays when you add Rose May. If two people share a name, check the result.</p>
     <div class="scrubber__row">
       <input id="scrub-name" type="text" autocomplete="off" spellcheck="false" data-scrub-name placeholder="A full name, e.g. Dana Lee" />
       <button type="button" class="scrubber__btn" data-scrub-add>Add name</button>
@@ -23,7 +31,7 @@
   </div>
 
   <label class="scrubber__label" for="scrub-out">Safe version</label>
-  <textarea id="scrub-out" class="scrubber__box" rows="6" readonly data-scrub-out></textarea>
+  <textarea id="scrub-out" class="scrubber__box" rows="6" readonly data-scrub-out>{sampleOut}</textarea>
   <button type="button" class="scrubber__btn" data-copy-safe>Copy safe text</button>
 
   <h3>Your key</h3>
@@ -61,9 +69,9 @@
     const names: string[] = [];
     let keyText = '';
 
-    // A reload can restore a typed value from the browser's form memory; the
-    // spec is an empty box after a reload.
-    input.value = '';
+    // A reload can restore a typed value from the browser's form memory.
+    // Put the sample from the markup back instead, so typed text is gone.
+    input.value = input.defaultValue;
     nameInput.value = '';
 
     function render() {
@@ -147,6 +155,7 @@
   .ba-label { margin: 0 0 .4rem !important; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
   .scrubber { margin: 2.5rem 0; padding: 1.5rem; border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-surface); }
   .scrubber h2 { margin-top: 0 !important; }
+  .scrubber__account { font-size: 16px; color: var(--color-mute); }
   .scrubber__privacy { margin-bottom: .75rem; }
   .scrubber__label { display: block; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); margin: 1.25rem 0 .4rem; }
   .scrubber__hint { font-size: 16px; margin: 0 0 .75rem; }

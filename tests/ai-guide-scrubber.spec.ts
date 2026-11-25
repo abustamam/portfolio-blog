@@ -2,10 +2,14 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { scrub, restore } from '../src/utils/scrub';
+import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
 
 // Page tests read the built site: run `bun run build` first.
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const PAGE = '/ai-guides/never-paste/';
+// The invented sample the Scrubber's box starts with (src/components/guides/Scrubber.astro).
+const SAMPLE =
+  'Made-up example: Hi, this is Dana Lee. Email me at dana.lee@example.com or call 555-123-4567. My card number is 4111 1111 1111 1111.';
 
 test.describe('scrub() rules', () => {
   test('emails, numbered by first appearance, same value same placeholder', () => {
@@ -49,7 +53,7 @@ test.describe('scrub() rules', () => {
   });
 
   test('the full phrase is matched before its parts (never PERSON-1 PERSON-1)', () => {
-    const r = scrub('Dana Lee and dana   lee', ['Dana Lee']);
+    const r = scrub('Dana Lee and DANA   LEE', ['Dana Lee']);
     expect(r.text).toBe('PERSON-1 and PERSON-1');
     expect(r.text).not.toContain('PERSON-1 PERSON-1');
   });
@@ -61,9 +65,24 @@ test.describe('scrub() rules', () => {
     expect(flipped.text).toBe('PERSON-1');
   });
 
-  test('parts and phrase match in every case variant, whole words only', () => {
-    const r = scrub('DANA LEE, dana, LEE, Leeds, Danae', ['Dana Lee']);
+  test('parts and phrase match when capitalised, whole words only', () => {
+    const r = scrub('DANA LEE, Dana, LEE, Leeds, Danae', ['Dana Lee']);
     expect(r.text).toBe('PERSON-1, PERSON-1, PERSON-1, Leeds, Danae');
+  });
+
+  test('a part of a full name in lower case is left alone', () => {
+    expect(scrub('dana and lee and dana lee', ['Dana Lee']).text).toBe('dana and lee and dana lee');
+    expect(scrub('Dana lee', ['Dana Lee']).text).toBe('PERSON-1 lee');
+  });
+
+  test('a name made of ordinary words replaces only the capitalised words (Rose May)', () => {
+    expect(scrub('Rose May said we may need a rose for May.', ['Rose May']).text).toBe(
+      'PERSON-1 said we may need a rose for PERSON-1.',
+    );
+  });
+
+  test('a lower-case run of a name\'s words is left alone (Will Grant)', () => {
+    expect(scrub('Will Grant will grant it.', ['Will Grant']).text).toBe('PERSON-1 will grant it.');
   });
 
   test('a single-word entry still matches only that word', () => {
@@ -125,7 +144,8 @@ test.describe('Scrubber on the page', () => {
     await page.waitForLoadState('networkidle');
     const requests: string[] = [];
     page.on('request', (r) => requests.push(r.url()));
-    await page.locator('[data-scrub-in]').pressSequentially('secret@x.com 4111 1111 1111 1111', { delay: 5 });
+    await page.locator('[data-scrub-in]').fill('');
+    await page.locator('[data-scrub-in]').pressSequentially('secret@x.com 4242 4242 4242 4242', { delay: 5 });
     await page.locator('[data-scrub-name]').fill('Dana');
     await page.locator('[data-scrub-add]').click();
     await page.locator('[data-copy-safe]').click();
@@ -136,16 +156,81 @@ test.describe('Scrubber on the page', () => {
     expect(page.url()).not.toMatch(/secret|\?|#/);
     const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
     expect(stored).not.toContain('secret');
-    expect(stored).not.toContain('4111');
+    expect(stored).not.toContain('4242');
   });
 
-  test('after a reload the textarea is empty', async ({ page }) => {
+  test('the box starts with the sample and its safe version, with no typing', async ({ page }) => {
+    await page.goto(PAGE);
+    await expect(page.locator('[data-scrub-in]')).toHaveValue(SAMPLE);
+    await expect(page.locator('[data-scrub-out]')).toHaveValue(
+      'Made-up example: Hi, this is Dana Lee. Email me at EMAIL-1 or call PHONE-1. My card number is ACCOUNT-1.',
+    );
+    await expect(page.locator('[data-scrub-key] tbody tr')).toHaveCount(3);
+    await expect(page.locator('[data-scrubber]')).toContainText('made-up example');
+  });
+
+  test('loading the page with the sample writes nothing but guideStore, and never the sample', async ({ page }) => {
+    await page.addInitScript(() => {
+      const writes: string[][] = [];
+      (window as unknown as { __writes: string[][] }).__writes = writes;
+      const orig = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k: string, v: string) {
+        writes.push([k, v]);
+        return orig.call(this, k, v);
+      };
+    });
+    await page.goto(PAGE);
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-scrub-out]')).toHaveValue(/EMAIL-1/);
+    const writes = await page.evaluate(() => (window as unknown as { __writes: string[][] }).__writes);
+    // The layout marks the guide visited through guideStore, so the recorder is seen working.
+    expect(writes.length).toBeGreaterThan(0);
+    for (const [k, v] of writes) {
+      expect(k).toBe(GUIDE_STORE_KEY);
+      expect(v).not.toMatch(/dana|4111|555-123|Made-up/i);
+    }
+    const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
+    expect(stored).not.toMatch(/dana|4111|555-123|Made-up/i);
+  });
+
+  test('after a reload the typed text is gone and the sample is back', async ({ page }) => {
     await page.goto(PAGE);
     await page.locator('[data-scrub-in]').fill('x@y.com');
     await expect(page.locator('[data-scrub-out]')).toHaveValue('EMAIL-1');
     await page.reload();
-    await expect(page.locator('[data-scrub-in]')).toHaveValue('');
-    await expect(page.locator('[data-scrub-out]')).toHaveValue('');
+    await expect(page.locator('[data-scrub-in]')).toHaveValue(SAMPLE);
+    await expect(page.locator('[data-scrub-out]')).not.toHaveValue(/x@y\.com|^EMAIL-1$/);
+  });
+
+  test('the demo is headed "See it in action", labelled for unapproved accounts, and says the tool is optional', async ({ page }) => {
+    await page.goto(PAGE);
+    await expect(page.locator('[data-scrubber] h2')).toHaveText('See it in action');
+    await expect(page.locator('[data-scrub-account]')).toHaveText(
+      "This is for a personal account, or one your employer hasn't approved. On an approved work account, follow your employer's rules instead.",
+    );
+    await expect(page.locator('[data-scrub-habit]')).toHaveText(
+      "You don't need this tool. Find-and-replace in your own document does the same job, and that's the habit to keep.",
+    );
+  });
+
+  test('the page has the account-first title, lead and description, and opens with the account question', async ({ page }) => {
+    await page.goto(PAGE);
+    await expect(page.locator('h1')).toHaveText("What's safe to paste into AI");
+    await expect(page.locator('.ai-lead')).toHaveText(
+      'Whatever you paste into an AI chat leaves your computer. What you may paste depends on which account you use, so start there.',
+    );
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      "Check which account you're using first, then what to keep out of an AI chat and how to make a file safe in three steps.",
+    );
+    const firstH2 = await page.locator('article h2').first().getAttribute('id');
+    expect(firstH2).toBe('first-which-account');
+    const order = await page.evaluate(() => {
+      const pos = (sel: string) => document.querySelector(sel)!.getBoundingClientRect().top + scrollY;
+      return [pos('#first-which-account'), pos('[data-scrubber]'), pos('#check-before-you-press-enter')];
+    });
+    expect(order[0]).toBeLessThan(order[1]);
+    expect(order[1]).toBeLessThan(order[2]);
   });
 
   test('the Scrubber sits after the three-step section and before the checklist; the checklist is tickable', async ({ page }) => {
