@@ -1,0 +1,99 @@
+---
+title: "Projects: a saved space for one ongoing job"
+description: "If you keep pasting the same background into new AI chats, a project saves it once. What a project is, an example, what to put in one, and what each app calls it."
+lead: "If you use AI for the same job every week, you end up typing the same background every time. A project is a saved space that holds it, so every new chat starts with it already there."
+group: start
+step: 0.6
+minutes: 6
+tool: Two new chats
+ctaLine: "In the hands-on training you make one weekly task repeatable, so the AI has what it needs each time without retyping it."
+---
+import Term from '../../components/guides/Term.astro';
+import TwoNewChats from '../../components/guides/TwoNewChats.astro';
+import { PROJECT_APPS, PROJECT_LABELS, PROJECT_ORDER, UNCONFIRMED, GEMS_NOTICE, oldestChecked } from '../../consts/guides/projects';
+import { fmtLongDate } from '../../utils/date';
+
+{/* Company facts live in src/consts/guides/projects.ts, each with its source and checked date. Re-check every quarter. */}
+
+If you use AI for the same job every week, you end up typing the same background every time: who it's for, how you like it written, the facts it keeps needing. [Does it remember me?](/ai-guides/does-it-remember/) has one fix: start a new <Term id="conversation">chat</Term> with a two-line summary. A project saves you from writing that summary at all.
+
+## What a project is
+
+A project is a saved space for one ongoing job. You give it standing instructions and a few files once, and every new chat you start inside it begins with them. The apps call it different things (Projects in ChatGPT and Claude, Notebooks in Gemini and Copilot), but the idea is the same.
+
+It isn't the same as saved <Term id="memory">memory</Term>. Saved memory is what the app keeps about you everywhere. A project keeps what one job needs, and only inside that project. It isn't one long chat, either: each chat in a project starts fresh with the project's instructions and files, so it doesn't slow down or blur the way a very long chat does.
+
+Here is the difference. Same job, same answer, two ways to get there. The example text is made up.
+
+<TwoNewChats />
+
+## An example: my toddler's naps
+
+This is the project I use most. My toddler's sleep is hard to predict, so I keep a project for it.
+
+- **The instructions:** her age, how we parent, the gear we use (blackout curtains, a white-noise machine), and "suggest a next nap time and a wake-up time, and say why in one line".
+- **When I need it:** I take a screenshot of the nap-tracking app and ask, "When should her next nap be?" It already knows everything else.
+
+<div class="ai-label" data-todo-screenshot>TODO(author): screenshot of the project's instruction screen, and one chat with the nap-app screenshot and the answer.</div>
+
+Notice what's not in it: her name, her photo, where we live. It doesn't need them. And this is a low-stakes job: it's a suggestion, I can overrule it, and a nap that runs a little long costs nothing. I wouldn't hand a project anything where a wrong answer is expensive without checking it.
+
+## What to put in one
+
+Put in what you'd otherwise retype: who it's for, how you want the answer, the facts that don't change, and a reference file or two (a menu you're planning around, a style guide, a price list). Keep it short. Leave out anything you wouldn't paste into a chat. A project's files are kept with your account until you delete them. [What's safe to paste into AI](/ai-guides/never-paste/) has the list.
+
+## Does it use more of your allowance?
+
+The project's instructions and files are read again with each chat, so a project full of big files uses your allowance faster, just like attaching them every time. ChatGPT says credits and usage charges apply to project chats "the same as" regular chats. Claude says project content is cached and counts less when reused. The others don't say. [You've reached your limit](/ai-guides/usage-limits/) explains the <Term id="usage-limit">allowance</Term>.
+
+## Where to find it
+
+<p class="ai-label" data-last-checked={oldestChecked()}>Last checked <time datetime={oldestChecked()}>{fmtLongDate(new Date(oldestChecked()))}</time>. These features are being renamed and retired; each fact links the company's own page.</p>
+
+What each app says about its version of a project. Where a cell says "Check the company's page", that company's help pages didn't say, and I didn't want to guess. The link goes to the page to check.
+
+<div class="projects-table">
+<table data-projects-table>
+  <thead>
+    <tr>
+      <th scope="col">App</th>
+      {PROJECT_ORDER.map((key) => <th scope="col">{PROJECT_LABELS[key]}</th>)}
+    </tr>
+  </thead>
+  <tbody>
+    {PROJECT_APPS.map((app) => (
+      <tr data-app={app.id}>
+        <th scope="row">{app.name}</th>
+        {PROJECT_ORDER.map((key) => {
+          const fact = app.facts[key];
+          return (
+            <td data-fact={key} data-label={PROJECT_LABELS[key]} data-confirmed={String(fact.confirmed)}>
+              {fact.confirmed ? <>{fact.text}{' '}<a href={fact.source} data-source rel="noopener">Source</a></> : <a href={fact.source} data-source rel="noopener">{UNCONFIRMED}</a>}
+            </td>
+          );
+        })}
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+
+<p data-gems-notice>{GEMS_NOTICE.text}{' '}<a href={GEMS_NOTICE.source} data-source rel="noopener">Source</a></p>
+
+<style>{`
+  .projects-table table { display: table; width: 100%; font-size: 15px; }
+  .projects-table td { overflow-wrap: anywhere; }
+  .projects-table tbody th { font-family: var(--font-serif); font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--color-ink); }
+  @media (max-width: 47.99rem) {
+    .projects-table table, .projects-table tbody, .projects-table tr, .projects-table th, .projects-table td { display: block; width: 100%; }
+    .projects-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .projects-table tr { margin: 0 0 1.5rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+    .projects-table th, .projects-table td { border: 0; border-top: 1px solid var(--color-line-soft); }
+    .projects-table tbody th { border-top: 0; }
+    .projects-table td::before {
+      content: attr(data-label); display: block; margin-bottom: .25rem;
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute);
+    }
+  }
+  [data-todo-screenshot] { padding: 1rem; border: 2px dashed var(--color-accent); border-radius: 8px; margin: 1rem 0; }
+`}</style>

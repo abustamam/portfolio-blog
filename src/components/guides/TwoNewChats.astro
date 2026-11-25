@@ -1,0 +1,76 @@
+---
+// "Two new chats": a static side-by-side, no interactivity. Left, a new chat
+// where the first message has to carry the background before the question.
+// Right, a new chat inside a project: the saved instructions sit above, greyed
+// out, and the first message is just the question. Both get the same answer.
+// Neutral, made-up text and plain boxes in the site's own colors: no company
+// logo, color or wording, so it does not age with each app redesign.
+const BACKGROUND = [
+  'I run a book club of eight people.',
+  'We meet on Thursdays at 7 pm.',
+  'Keep it friendly and under 60 words.',
+  'End with next week’s reading.',
+];
+const QUESTION = 'Write this week’s reminder.';
+const ANSWER = 'Hi all! A reminder that book club meets Thursday at 7 pm. Bring a snack if you like. Next week we read chapters 4 to 6.';
+---
+
+<figure class="two-chats" data-two-chats aria-label="Two new chats side by side">
+  <div class="tc-grid">
+    <section class="tc-chat" data-chat="plain" aria-labelledby="tc-plain-title">
+      <h3 id="tc-plain-title" class="tc-title">A new chat</h3>
+      <div class="tc-screen">
+        <p class="tc-you">
+          {BACKGROUND.map((line) => <span class="tc-line" data-background-line>{line}</span>)}
+          <span class="tc-line tc-question">{QUESTION}</span>
+        </p>
+        <p class="tc-answer" data-answer>{ANSWER}</p>
+      </div>
+      <p class="tc-note">You type the background first, every time.</p>
+    </section>
+
+    <section class="tc-chat" data-chat="project" aria-labelledby="tc-project-title">
+      <h3 id="tc-project-title" class="tc-title">A new chat in a project</h3>
+      <div class="tc-screen">
+        <div class="tc-saved" data-project-instructions>
+          <p class="tc-saved-label">Saved in the project</p>
+          {BACKGROUND.map((line) => <span class="tc-line">{line}</span>)}
+        </div>
+        <p class="tc-you">
+          <span class="tc-line tc-question">{QUESTION}</span>
+        </p>
+        <p class="tc-answer" data-answer>{ANSWER}</p>
+      </div>
+      <p class="tc-note">The project already has the background. You type the question.</p>
+    </section>
+  </div>
+</figure>
+
+<style>
+  .two-chats { margin: 2rem 0 2.5rem; padding: 0; }
+  .tc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .tc-chat { min-width: 0; display: flex; flex-direction: column; gap: .5rem; }
+  .tc-title { margin: 0; font-size: 1rem; font-family: var(--font-serif); color: var(--color-ink); }
+  .tc-screen {
+    flex: 1; display: flex; flex-direction: column; gap: .75rem; padding: .75rem;
+    border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-bg);
+    font-size: 15px; line-height: 1.4; color: var(--color-ink);
+  }
+  .tc-line { display: block; overflow-wrap: anywhere; }
+  .tc-you {
+    align-self: flex-end; max-width: 95%; margin: 0; padding: .625rem .875rem; border-radius: 12px 12px 2px 12px;
+    background: var(--color-code); border: 1px solid var(--color-line-soft);
+  }
+  .tc-question { font-weight: 600; }
+  .tc-saved {
+    padding: .625rem .875rem; border: 1px dashed var(--color-line); border-radius: 8px;
+    background: var(--color-surface); color: var(--color-mute);
+  }
+  .tc-saved-label { margin: 0 0 .35rem; font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--tracking-loose); text-transform: uppercase; color: var(--color-faint); }
+  .tc-answer { margin: 0; padding: .625rem .75rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); overflow-wrap: anywhere; }
+  .tc-note { margin: 0; font-size: 14px; color: var(--color-mute); }
+
+  @media (max-width: 47.99rem) {
+    .tc-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  }
+</style>
