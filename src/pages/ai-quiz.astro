@@ -2,15 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Rosette from '../components/ai/Rosette.astro';
 import '../styles/ai.css';
-import { AI_QUIZ_ENDPOINT } from '../consts/aiQuiz';
+import { AI_QUIZ_ENDPOINT, WHATSAPP_HREF } from '../consts/aiQuiz';
 import { WAITLIST_LIMITS } from '../../services/ai-quiz-intake/src/waitlist';
 
-// Same service and Caddy route as the quiz. Both empty in dev builds.
+// Same service and Caddy route as the quiz. Empty in dev builds.
 const api = AI_QUIZ_ENDPOINT.replace(/\/$/, '');
 const notifyEndpoint = api ? `${api}/waitlist` : '';
-// The service redirects this to the WhatsApp chat. The number is in the server's
-// env (WHATSAPP_NUMBER), never in the site's HTML or JS.
-const whatsappHref = api ? `${api}/whatsapp` : '';
+const whatsappHref = WHATSAPP_HREF;
 
 type Opt = { value: string; label: string };
 type Q = {

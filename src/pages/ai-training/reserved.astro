@@ -6,11 +6,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Rosette from '../../components/ai/Rosette.astro';
 import { COHORT_LINKS, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../../consts/aiCohort';
 import { GENERIC_GUIDES, RESERVED_CONTACT, SHARE_URL, TRACK_GUIDES } from '../../consts/aiReserved';
+import { WHATSAPP_HREF } from '../../consts/aiQuiz';
 import '../../styles/ai.css';
 
 const names = TRACKS.map((t) => t.name);
 const trackList = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 const shareText = `I reserved a seat in a small hands-on AI course. Each track needs ${TRAINING.launchAt} people to launch, so join me: ${SHARE_URL}`;
+// "Message me" opens WhatsApp through the intake service's redirect; email in dev builds.
+const messageMe = WHATSAPP_HREF
+  ? { href: WHATSAPP_HREF, target: '_blank', rel: 'noopener nofollow' }
+  : { href: RESERVED_CONTACT.mailto };
 const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 ---
 
@@ -51,7 +56,7 @@ const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
           <strong>Your deposit is refundable.</strong>
           <span>
             If your track doesn't launch, or the dates don't work for you, your {TRAINING.deposit} comes back in full.
-            Just <a href={RESERVED_CONTACT.mailto}>message me</a>.
+            Just <a {...messageMe}>message me</a>.
           </span>
         </li>
       </ol>

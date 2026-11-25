@@ -94,7 +94,9 @@ number. It POSTs to `POST /api/ai-quiz/waitlist` with `source: quiz:<track>`
 next to the guides sign-ups. It is not linked to the quiz row. Browser test:
 `tests/ai-quiz.spec.ts`.
 
-The card also has a "Message me on WhatsApp" link, opened in a new tab. It
+The card also has a "Message me on WhatsApp" link, opened in a new tab. Every
+"message me" link on `/ai-training/` and `/ai-training/reserved/` uses the same
+link (`WHATSAPP_HREF` in `src/consts/aiQuiz.ts`; dev builds fall back to email). It
 points at `GET /api/ai-quiz/whatsapp`, which answers with a 302 to
 `https://wa.me/<WHATSAPP_NUMBER>`, so the number is in the server's env and
 never in the site's HTML or JS. A browser test fails if any built file carries
