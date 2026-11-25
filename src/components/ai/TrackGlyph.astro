@@ -1,0 +1,39 @@
+---
+// A hairline mark for each quiz result, drawn in the rosette's line style so
+// it reuses the same draw-on animation. `track` is the /ai-training/ track the
+// result names: the page and its check for Everyday AI, two plugs that meet
+// for Connect, the hammer for Build.
+interface Props { track: 'everyday' | 'connect' | 'build'; size?: number }
+const { track, size = 72 } = Astro.props;
+---
+<svg class="ai-rosette track-glyph" data-glyph={track} data-draw="" viewBox="-50 -50 100 100" width={size} height={size} style={`--sw:${(115 / size).toFixed(2)}`} aria-hidden="true" focusable="false">
+  {track === 'everyday' ? (
+    <>
+      <path d="M-26,-40H10L26,-24V40H-26Z" pathLength="1" style="--i:0" />
+      <path d="M10,-40V-24H26" pathLength="1" style="--i:1" />
+      <path d="M-14,-12H14" pathLength="1" style="--i:2" />
+      <path d="M-14,0H14" pathLength="1" style="--i:3" />
+      <path class="track-glyph__check" d="M-13,21L-4,30L14,11" pathLength="1" style="--i:5" />
+    </>
+  ) : track === 'connect' ? (
+    <>
+      <g class="track-glyph__plug" style="--from:-7px">
+        <path d="M-46,0H-28" pathLength="1" style="--i:0" />
+        <path d="M-28,-15H-10V15H-28Z" pathLength="1" style="--i:1" />
+        <path d="M-10,-7H3M-10,7H3" pathLength="1" style="--i:2" />
+      </g>
+      <g class="track-glyph__plug" style="--from:7px">
+        <path d="M46,0H28" pathLength="1" style="--i:0" />
+        <path d="M28,-15H14Q4,-15 4,0Q4,15 14,15H28Z" pathLength="1" style="--i:1" />
+      </g>
+    </>
+  ) : (
+    <>
+      <path d="M-42,40H42" pathLength="1" style="--i:0" />
+      <g transform="translate(-12 40) rotate(32)">
+        <path d="M-5,-44V0H5V-44" pathLength="1" style="--i:1" />
+        <path d="M-28,-50L-16,-68H22V-44H-16Z" pathLength="1" style="--i:2" />
+      </g>
+    </>
+  )}
+</svg>

@@ -26,6 +26,21 @@ export const POINTS: Record<string, Record<string, number>> = {
 
 export const SKILL_KEYS = ['frequency', 'wrongAnswer', 'prompt', 'files', 'connected'] as const;
 export const MAX_SCORE = SKILL_KEYS.length * 3;
+export const MAX_PER_SKILL = 3;
+
+/** Short names for the skill questions, shown beside each one's score on the result. */
+export const SKILL_LABELS: Record<(typeof SKILL_KEYS)[number], string> = {
+  frequency: 'using it',
+  wrongAnswer: 'checking answers',
+  prompt: 'giving context',
+  files: 'working on files',
+  connected: 'connecting tools',
+};
+
+/** Points for each skill question, in SKILL_KEYS order. Their sum is the score. */
+export function skillScores(a: QuizAnswers): { key: (typeof SKILL_KEYS)[number]; points: number }[] {
+  return SKILL_KEYS.map((key) => ({ key, points: POINTS[key][a[key] ?? ''] ?? 0 }));
+}
 
 /** Items a careful user keeps out of AI tools. "nothing" is the red flag. */
 export const SENSITIVE = ['personal-info', 'passwords', 'financial', 'health'] as const;
@@ -38,7 +53,7 @@ export interface QuizResult {
 }
 
 export function scoreQuiz(a: QuizAnswers): QuizResult {
-  const score = SKILL_KEYS.reduce((sum, k) => sum + (POINTS[k][a[k] ?? ''] ?? 0), 0);
+  const score = skillScores(a).reduce((sum, s) => sum + s.points, 0);
 
   const paste = a.neverPaste ?? [];
   const sensitiveCount = SENSITIVE.filter((s) => paste.includes(s)).length;

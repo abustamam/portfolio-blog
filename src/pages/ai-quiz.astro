@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Rosette from '../components/ai/Rosette.astro';
+import TrackGlyph from '../components/ai/TrackGlyph.astro';
 import '../styles/ai.css';
 import { AI_QUIZ_ENDPOINT, WHATSAPP_HREF } from '../consts/aiQuiz';
 import { WAITLIST_LIMITS } from '../../services/ai-quiz-intake/src/waitlist';
@@ -151,11 +152,18 @@ const steps = 9; // 6 skill + free text + privacy + logistics
 
     <form id="ai-quiz" class="quiz" data-rise style="--i:3" novalidate data-endpoint={AI_QUIZ_ENDPOINT}>
       <div class="quiz-progress mb-6" aria-hidden="true">
-        <div class="flex justify-between font-mono text-13 text-faint mb-2">
-          <span id="quiz-step-label">question 1 of {steps}</span>
-        </div>
-        <div class="h-[3px] bg-line-soft rounded-full overflow-hidden">
-          <div id="quiz-bar" class="h-full bg-accent rounded-full transition-[width] duration-500 ease-out" style={`width:${100 / steps}%`}></div>
+        <!-- The seal draws itself one question at a time, over a faint copy of the finished one. -->
+        <span id="quiz-seal" class="quiz-seal" style={`--p:${1 / steps}`}>
+          <Rosette size={36} class="quiz-seal__ghost" />
+          <Rosette size={36} progress />
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between font-mono text-13 text-faint mb-2">
+            <span id="quiz-step-label">question 1 of {steps}</span>
+          </div>
+          <div class="h-[3px] bg-line-soft rounded-full overflow-hidden">
+            <div id="quiz-bar" class="h-full bg-accent rounded-full transition-[width] duration-500 ease-out" style={`width:${100 / steps}%`}></div>
+          </div>
         </div>
       </div>
 
@@ -276,10 +284,19 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     </form>
 
     <section id="quiz-result" class="quiz-result ai-reveal" hidden aria-live="polite">
-      <Rosette draw size={72} />
+      <div class="result-glyph">
+        <TrackGlyph track="everyday" />
+        <TrackGlyph track="connect" />
+        <TrackGlyph track="build" />
+      </div>
       <div class="ai-kicker">your track</div>
       <h2 id="result-track" class="font-serif text-[clamp(2rem,7vw,3rem)] font-medium tracking-[-0.02em] text-ink m-0 mb-4"></h2>
       <p id="result-summary" class="font-serif text-lg leading-[1.55] text-ink m-0 mb-6"></p>
+
+      <div class="mb-8">
+        <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">where you are today</div>
+        <ul id="result-skills" class="skill-reading"></ul>
+      </div>
 
       <div class="ai-card p-5 sm:p-6 mb-8">
         <div class="font-mono text-12 text-faint tracking-caps uppercase mb-3">what you'd build</div>
@@ -337,7 +354,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
 </BaseLayout>
 
 <script>
-  import { scoreQuiz, TRACKS, type QuizAnswers } from '../utils/aiQuiz';
+  import { scoreQuiz, skillScores, SKILL_LABELS, MAX_PER_SKILL, TRACKS, type QuizAnswers } from '../utils/aiQuiz';
 
   const form = document.getElementById('ai-quiz') as HTMLFormElement;
   const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>('.quiz-step'));
@@ -346,6 +363,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
   const submit = document.getElementById('quiz-submit') as HTMLButtonElement;
   const label = document.getElementById('quiz-step-label')!;
   const bar = document.getElementById('quiz-bar')!;
+  const seal = document.getElementById('quiz-seal')!;
   const error = document.getElementById('quiz-error')!;
   let current = 0;
   let lastPayload: Record<string, unknown> | null = null;
@@ -360,6 +378,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     submit.hidden = i !== steps.length - 1;
     label.textContent = `question ${i + 1} of ${steps.length}`;
     bar.style.width = `${((i + 1) / steps.length) * 100}%`;
+    seal.style.setProperty('--p', String((i + 1) / steps.length));
     error.hidden = true;
   }
 
@@ -455,6 +474,32 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         return li;
       }),
     );
+    // One row per skill question: its name, then a pip for each point it can score.
+    document.getElementById('result-skills')!.replaceChildren(
+      ...skillScores(a).map(({ key, points }, row) => {
+        const li = document.createElement('li');
+        const name = document.createElement('span');
+        name.className = 'skill-name';
+        name.textContent = SKILL_LABELS[key];
+        const pips = document.createElement('span');
+        pips.className = 'skill-pips';
+        pips.setAttribute('aria-hidden', 'true');
+        for (let n = 0; n < MAX_PER_SKILL; n++) {
+          const pip = document.createElement('span');
+          pip.className = 'skill-pip';
+          if (n < points) pip.dataset.on = '';
+          pip.style.setProperty('--i', String(row * 2 + n));
+          pips.append(pip);
+        }
+        const text = document.createElement('span');
+        text.className = 'sr-only';
+        text.textContent = `${points} of ${MAX_PER_SKILL}`;
+        li.dataset.points = String(points);
+        li.append(name, pips, text);
+        return li;
+      }),
+    );
+
     // Quiz track -> the training page's track. Builders could fit Connect or Build, so they see both.
     const anchor = result.track === 'builder' ? 'tracks' : 'everyday';
     (document.getElementById('result-reserve') as HTMLAnchorElement).href = `/ai-training/#${anchor}`;
