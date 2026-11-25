@@ -9,6 +9,8 @@ tool: Two new chats
 ctaLine: "In the hands-on training you make one weekly task repeatable, so the AI has what it needs each time without retyping it."
 ---
 import Term from '../../components/guides/Term.astro';
+import { Image } from 'astro:assets';
+import napAppWeek from '../../assets/guides/projects/nap-app-week.png';
 import TwoNewChats from '../../components/guides/TwoNewChats.astro';
 import { PROJECT_APPS, PROJECT_LABELS, PROJECT_ORDER, UNCONFIRMED, GEMS_NOTICE, oldestChecked } from '../../consts/guides/projects';
 import { fmtLongDate } from '../../utils/date';
@@ -33,6 +35,12 @@ This is the project I use most. My toddler's sleep is hard to predict, so I keep
 
 - **The instructions:** her age, how we parent, the gear we use (blackout curtains, a white-noise machine), and "suggest a next nap time and a wake-up time, and say why in one line".
 - **When I need it:** I take a screenshot of the nap-tracking app and ask, "When should her next nap be?" It already knows everything else.
+
+This is the kind of screenshot I send: a week of her sleep in the tracking app.
+
+<figure class="nap-shot">
+  <Image src={napAppWeek} alt="A week of a toddler's sleep in a nap-tracking app: colored bars for night sleep, naps and feeds, one column per day." width={720} />
+</figure>
 
 <div class="ai-label" data-todo-screenshot>TODO(author): screenshot of the project's instruction screen, and one chat with the nap-app screenshot and the answer.</div>
 
@@ -95,5 +103,7 @@ What each app says about its version of a project. Where a cell says "Check the 
       font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute);
     }
   }
+  .nap-shot { margin: 1.5rem 0; }
+  .nap-shot img { max-width: 100%; height: auto; border: 1px solid var(--color-line); border-radius: 8px; }
   [data-todo-screenshot] { padding: 1rem; border: 2px dashed var(--color-accent); border-radius: 8px; margin: 1rem 0; }
 `}</style>
