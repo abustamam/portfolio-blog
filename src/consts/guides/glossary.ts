@@ -166,6 +166,18 @@ export const GLOSSARY: GlossaryTerm[] = [
     why: 'You will meet this abbreviation in articles and product pages, and it just means the same kind of model that your chat app uses.',
     guide: 'what-is-ai',
   },
+  {
+    id: 'stochastic',
+    term: 'stochastic',
+    short: 'Involving chance. An AI app picks each next word with a little randomness, so the same question can get a different answer twice.',
+    why: 'It explains why asking the same question twice does not always give the same answer.',
+  },
+  {
+    id: 'temperature',
+    term: 'temperature',
+    short: 'The setting for how much chance goes into each word. Low keeps answers predictable; high makes them more varied. Chat apps set it for you.',
+    why: 'You will see this word in tool settings and articles, and it only controls how varied the wording is.',
+  },
 ];
 
 const norm = (s: string) => s.trim().toLowerCase();

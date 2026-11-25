@@ -16,7 +16,7 @@ const words = (s: string) => s.trim().split(/\s+/).length;
 
 test.describe('glossary data', () => {
   test('there are 18 entries and six are marked "first"', () => {
-    expect(GLOSSARY).toHaveLength(18);
+    expect(GLOSSARY).toHaveLength(20);
     expect(GLOSSARY.filter((t) => t.first).map((t) => t.id)).toEqual(['ai', 'chat-app', 'prompt', 'model', 'conversation', 'usage-limit']);
   });
 
