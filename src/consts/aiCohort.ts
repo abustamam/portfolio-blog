@@ -89,7 +89,7 @@ export const COHORT2 = {
   deposit: '$25',
   minDeposits: 5,
   deadline: 'Friday, January 15, 2027',
-  starts: 'late February 2027',
+  starts: 'after Ramadan, in late March 2027',
   format: '4 weekly evening sessions, 90 minutes each, on Google Meet',
 } as const;
 
