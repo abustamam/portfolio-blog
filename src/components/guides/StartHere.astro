@@ -1,43 +1,58 @@
 ---
-// "Start here" on the hub: two taps move one guide to the top and mark it.
-// Hidden until the script runs, so without JavaScript the hub is just the list
+// "Start here" on the hub. Two taps pick the reader's first three guides and
+// show them right here, under the questions; the "All guides" lists below never
+// move. Once both questions are answered the questions fold into one line, so on
+// a return visit the box leads with the next unread guide on the path.
+// Hidden until the script runs, so without JavaScript the hub is just the lists
 // in step order. Answers are kept only through guideStore (this browser).
 import { FIELDS, EXPERIENCE } from '../../utils/startHere';
-// Id of the first list the hub renders (decided at build time, no JavaScript).
-const { firstList = 'guides' } = Astro.props;
 ---
 
 <section class="start-here" data-start-here hidden aria-labelledby="start-here-title">
   <h2 id="start-here-title" class="ai-label">Start here</h2>
-  <p class="start-here__hint">Two taps and I'll put the best first guide on top. Or <a href={`#${firstList}`}>go straight to the guides</a>.</p>
 
-  <fieldset class="start-here__group">
-    <legend>What do you do?</legend>
-    <div class="start-here__opts">
-      {FIELDS.map((f) => (
-        <button type="button" class="start-here__opt" data-field={f.value} aria-pressed="false">{f.label}</button>
-      ))}
-    </div>
-  </fieldset>
+  <div data-start-ask>
+    <p class="start-here__hint">Two taps and I'll pick your first three guides. Or <a href="#all-guides">see all the guides</a>.</p>
 
-  <fieldset class="start-here__group">
-    <legend>Have you used AI before?</legend>
-    <div class="start-here__opts">
-      {EXPERIENCE.map((e) => (
-        <button type="button" class="start-here__opt" data-experience={e.value} aria-pressed="false">{e.label}</button>
-      ))}
-    </div>
-  </fieldset>
+    <fieldset class="start-here__group">
+      <legend>What do you do?</legend>
+      <div class="start-here__opts">
+        {FIELDS.map((f) => (
+          <button type="button" class="start-here__opt" data-field={f.value} aria-pressed="false">{f.label}</button>
+        ))}
+      </div>
+    </fieldset>
 
-  <p class="start-here__status" data-start-status role="status"></p>
+    <fieldset class="start-here__group">
+      <legend>Have you used AI before?</legend>
+      <div class="start-here__opts">
+        {EXPERIENCE.map((e) => (
+          <button type="button" class="start-here__opt" data-experience={e.value} aria-pressed="false">{e.label}</button>
+        ))}
+      </div>
+    </fieldset>
+  </div>
+
+  <p class="start-here__summary" data-start-summary hidden>
+    <span data-start-summary-text></span>
+    <button type="button" class="ai-link start-here__change" data-start-change aria-label="Change your answers">Change</button>
+  </p>
+
+  <div class="start-here__path" data-start-path-wrap hidden>
+    <h3 class="start-here__path-title" data-start-path-title tabindex="-1">Your first three</h3>
+    <p class="start-here__status" data-start-status role="status"></p>
+    <ol class="start-path" data-start-path></ol>
+    <p class="start-here__all"><a href="#all-guides">Or browse all the guides</a></p>
+  </div>
 </section>
 
 <style>
-  .start-here { margin: 0 0 2rem; padding: 1.25rem 1.375rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); }
-  .start-here[hidden] { display: none; }
+  .start-here { margin: 0 0 2.5rem; padding: 1.25rem 1.375rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); }
+  .start-here[hidden], .start-here [hidden] { display: none; }
   .start-here h2 { margin: 0 0 .25rem; }
   .start-here__hint { margin: 0 0 1rem; font-family: var(--font-serif); color: var(--color-mute); font-size: 1.0625rem; }
   .start-here__group { border: 0; margin: 0 0 1rem; padding: 0; min-width: 0; }
+  .start-here__group:last-child { margin-bottom: 0; }
   .start-here__group legend { font-family: var(--font-serif); font-size: 1.125rem; margin-bottom: .5rem; padding: 0; }
   .start-here__opts { display: flex; flex-wrap: wrap; gap: .5rem; }
   .start-here__opt {
@@ -46,61 +61,171 @@ const { firstList = 'guides' } = Astro.props;
   }
   .start-here__opt:hover { border-color: var(--color-accent); }
   .start-here__opt[aria-pressed="true"] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
-  .start-here__opt:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-  .start-here__status { margin: 0; font-family: var(--font-serif); color: var(--color-mute); min-height: 1.5em; }
-</style>
+  .start-here__opt:focus-visible, .start-here__change:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 
+  .start-here__summary { margin: .25rem 0 0; font-family: var(--font-serif); font-size: 1.0625rem; color: var(--color-mute); display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .75rem; }
+  .start-here__change { background: transparent; border: 0; padding: 0 0 2px; cursor: pointer; font: inherit; min-height: 44px; }
+
+  .start-here__path { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-line); }
+  .start-here__path-title { margin: 0; font-family: var(--font-serif); font-weight: 500; font-size: 1.375rem; line-height: 1.2; letter-spacing: -.015em; }
+  .start-here__path-title:focus { outline: none; }
+  .start-here__status { margin: .25rem 0 1rem; font-family: var(--font-serif); color: var(--color-mute); font-size: 1.0625rem; }
+  .start-here__all { margin: 1rem 0 0; font-family: var(--font-serif); font-size: 1.0625rem; }
+
+  .start-path { list-style: none; margin: 0; padding: 0; display: grid; gap: .625rem; }
+  .start-path :global(.start-path__card) {
+    display: grid; grid-template-columns: 2rem 1fr; gap: .15rem .875rem; align-items: start;
+    padding: .875rem 1rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-bg);
+    color: var(--color-ink); text-decoration: none; transition: border-color .18s ease;
+  }
+  .start-path :global(.start-path__card:hover) { border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line)); }
+  .start-path :global(.start-path__card:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .start-path :global(.start-path__num) {
+    grid-row: span 2; width: 2rem; height: 2rem; border-radius: 999px; border: 1px solid var(--color-line);
+    display: grid; place-items: center; font-family: var(--font-mono); font-size: var(--text-12); color: var(--color-mute);
+  }
+  .start-path :global(.start-path__title) { font-family: var(--font-serif); font-weight: 500; font-size: 1.1875rem; line-height: 1.25; }
+  .start-path :global(.start-path__meta) { font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-loose); text-transform: uppercase; color: var(--color-mute); }
+  .start-path :global([data-next] .start-path__card) { border-color: var(--color-accent); }
+  .start-path :global([data-next] .start-path__num) { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
+  .start-path :global([data-next] .start-path__meta) { color: var(--color-accent); }
+  .start-path :global([data-read] .start-path__num) { color: var(--color-accent); }
+  .start-path :global([data-read] .start-path__title) { color: var(--color-mute); }
+</style>
 <script>
   import { guideStore } from '../../utils/guideStore';
-  import { arrangeHub, isField, isExperience, type StartAnswers } from '../../utils/startHere';
+  import { FIELDS, EXPERIENCE, startPath, nextUnread, isField, isExperience, type StartAnswers, type GuideGroup } from '../../utils/startHere';
 
   const root = document.querySelector<HTMLElement>('[data-start-here]');
-  const lists = Array.from(document.querySelectorAll<HTMLElement>('[data-hub-list]'));
-  if (root && lists.length) {
+  const hubItems = Array.from(document.querySelectorAll<HTMLLIElement>('[data-hub-list] > li[data-guide-id]'));
+  if (root && hubItems.length) {
     root.hidden = false;
-    const status = root.querySelector<HTMLElement>('[data-start-status]')!;
-    const itemsOf = (ol: HTMLElement) => Array.from(ol.querySelectorAll<HTMLLIElement>(':scope > li[data-guide-id]'));
-    const byKey = Object.fromEntries(lists.map((ol) => [ol.dataset.hubList!, ol]));
-    const data = Object.fromEntries(lists.map((ol) => [ol.dataset.hubList!, itemsOf(ol).map((li) => ({ id: li.dataset.guideId!, step: Number(li.dataset.step), li }))]));
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const ask = $('[data-start-ask]');
+    const summary = $('[data-start-summary]');
+    const summaryText = $('[data-start-summary-text]');
+    const pathWrap = $('[data-start-path-wrap]');
+    const pathTitle = $('[data-start-path-title]');
+    const status = $('[data-start-status]');
+    const pathList = $('[data-start-path]');
+
+    const guides = hubItems.map((li) => ({
+      id: li.dataset.guideId!,
+      step: Number(li.dataset.step),
+      group: (li.dataset.group ?? 'guides') as GuideGroup,
+      li,
+      href: li.querySelector('a')?.getAttribute('href') ?? '#',
+      title: li.querySelector('.hub-card__title')?.textContent?.trim() ?? '',
+      minutes: li.querySelector('.hub-card__meta')?.textContent?.match(/\d+\s*min read/)?.[0] ?? '',
+    }));
 
     const saved = guideStore.getDraft<{ experience?: unknown }>('start-here');
     const answers: StartAnswers = {
       field: isField(guideStore.getField()) ? guideStore.getField() : null,
       experience: isExperience(saved?.experience) ? (saved!.experience as string) : null,
     };
+    const both = () => isField(answers.field) && isExperience(answers.experience);
+    // Folded once both are answered, until the reader asks to change them.
+    let editing = !both();
+
+    const card = (g: (typeof guides)[number], n: number, read: boolean, next: boolean) => {
+      const li = document.createElement('li');
+      li.dataset.pathId = g.id;
+      li.toggleAttribute('data-read', read);
+      li.toggleAttribute('data-next', next);
+      const a = document.createElement('a');
+      a.className = 'start-path__card';
+      a.href = g.href;
+      const num = document.createElement('span');
+      num.className = 'start-path__num';
+      num.setAttribute('aria-hidden', 'true');
+      num.textContent = read ? '\u2713' : String(n);
+      const title = document.createElement('span');
+      title.className = 'start-path__title';
+      title.textContent = g.title;
+      const meta = document.createElement('span');
+      meta.className = 'start-path__meta';
+      meta.textContent = [next ? 'Up next' : read ? 'Read' : '', g.minutes].filter(Boolean).join(' \u00b7 ');
+      a.append(num, title, meta);
+      li.append(a);
+      return li;
+    };
 
     const render = () => {
       root.querySelectorAll<HTMLButtonElement>('[data-field]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.field === answers.field)));
       root.querySelectorAll<HTMLButtonElement>('[data-experience]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.experience === answers.experience)));
-      const { order, badged } = arrangeHub(answers, data);
-      let top = '';
-      for (const [key, ids] of Object.entries(order)) {
-        const lis = new Map(data[key].map((g) => [g.id, g.li]));
-        ids.forEach((id) => {
-          const li = lis.get(id)!;
-          byKey[key].appendChild(li);
-          const mark = id === badged;
-          li.toggleAttribute('data-recommended', mark);
-          const badge = li.querySelector<HTMLElement>('[data-start-badge]');
-          if (badge) badge.hidden = !mark;
-          if (mark) top = li.querySelector('.hub-card__title')?.textContent ?? '';
-        });
+
+      const folded = both() && !editing;
+      ask.hidden = folded;
+      summary.hidden = !folded;
+      if (folded) {
+        const f = FIELDS.find((x) => x.value === answers.field)!.label;
+        const e = EXPERIENCE.find((x) => x.value === answers.experience)!.label;
+        summaryText.textContent = `${f} \u00b7 Used AI: ${e.toLowerCase()}`;
       }
-      status.textContent = top ? `Start with: ${top}` : '';
+
+      const path = startPath(answers, guides);
+      const ids = path.map((g) => g.id);
+      const visited = guideStore.getVisited();
+      const next = nextUnread(ids, visited);
+      const readCount = ids.filter((id) => visited.includes(id)).length;
+
+      pathWrap.hidden = path.length === 0;
+      pathList.replaceChildren(...path.map((g, i) => card(g, i + 1, visited.includes(g.id), g.id === next)));
+      const n = path.length === 3 ? 'three' : path.length === 2 ? 'two' : 'guide';
+      if (path.length === 0) {
+        status.textContent = '';
+      } else if (!next) {
+        pathTitle.textContent = path.length === 1 ? "You've read it" : `You've read all ${n}`;
+        status.textContent = 'Pick any guide from the list below, or change your answers for a new set.';
+      } else if (readCount > 0) {
+        pathTitle.textContent = 'Pick up where you left off';
+        status.textContent = `${readCount} of ${path.length} read. Up next: ${path.find((g) => g.id === next)!.title}.`;
+      } else {
+        pathTitle.textContent = path.length === 1 ? 'Your first guide' : `Your first ${n}`;
+        status.textContent = path.length === 1 ? 'A few minutes, on your phone is fine.' : 'Read them in this order. Each takes a few minutes.';
+      }
+
+      // The lists below never move; the path's guides just carry a tag there.
+      for (const g of guides) {
+        const on = ids.includes(g.id);
+        g.li.toggleAttribute('data-on-path', on);
+        const badge = g.li.querySelector<HTMLElement>('[data-start-badge]');
+        if (badge) badge.hidden = !on;
+      }
     };
 
     root.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
       if (!btn) return;
+      if (btn.hasAttribute('data-start-change')) {
+        editing = true;
+        render();
+        root.querySelector<HTMLButtonElement>('[data-field][aria-pressed="true"]')?.focus();
+        return;
+      }
+      const wasBoth = both();
       if (btn.dataset.field) {
         answers.field = answers.field === btn.dataset.field ? null : btn.dataset.field;
         guideStore.setField(answers.field ?? null);
       } else if (btn.dataset.experience) {
         answers.experience = answers.experience === btn.dataset.experience ? null : btn.dataset.experience;
         guideStore.setDraft('start-here', { experience: answers.experience });
+      } else {
+        return;
       }
+      // Fold once the second answer lands, and hand focus to the result.
+      const fold = both() && (!wasBoth || editing);
+      if (fold) editing = false;
       render();
+      if (fold) pathTitle.focus({ preventScroll: true });
     });
+
+    // The hub's own script owns the read ticks and the reset button; follow it.
+    document.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('[data-reset-progress]')) queueMicrotask(render);
+    });
+    window.addEventListener('pageshow', render);
     render();
   }
 </script>

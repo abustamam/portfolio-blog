@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { test, expect, type Page } from '@playwright/test';
 import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
-import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUrl, byStep, groupGuides, arrangeHub } from '../src/utils/startHere';
+import { FIELDS, EXPERIENCE, recommend, shareText, canonicalShareUrl, byStep, groupGuides, startPath, nextUnread } from '../src/utils/startHere';
 
 // The hub as the front door (#79). Run after `bun run build`: the page tests
 // read dist/ through the preview server.
@@ -12,7 +12,7 @@ const SRC = fileURLToPath(new URL('../src/content/guides/', import.meta.url));
 
 type Group = 'start' | 'guides' | 'reference';
 const GROUP_KEYS: Group[] = ['start', 'guides', 'reference'];
-const HEADINGS: Record<Group, string> = { start: 'Never used AI? Start from zero', guides: '', reference: 'Look something up' };
+const HEADINGS: Record<Group, string> = { start: 'Never used AI? Start from zero', guides: 'Get better answers', reference: 'Look something up' };
 const SECTION_IDS: Record<Group, string> = { start: 'start-from-zero', guides: 'guides', reference: 'look-something-up' };
 
 /** Published guides from the MDX frontmatter (same rule as the collection), with their hub group. */
@@ -46,36 +46,64 @@ const SHUFFLED = [FULL[3], FULL[0], FULL[5], FULL[1], FULL[4], FULL[2]];
 
 const pairs = [null, ...FIELDS.map((f) => f.value)].flatMap((field) => [null, ...EXPERIENCE.map((e) => e.value)].map((experience) => ({ field, experience })));
 
-test.describe('start here: across all three lists', () => {
-  const lists = {
-    start: [{ id: 'what-is-ai', step: 0.1 }, { id: 'first-ten-minutes', step: 0.2 }],
-    guides: FULL,
-    reference: [{ id: 'glossary', step: 90 }],
-  };
-  test('"never" badges the start guide and moves it to the top of the start list only', () => {
-    const { order, badged } = arrangeHub({ experience: 'never' }, { ...lists, start: [lists.start[1], lists.start[0]] });
-    expect(badged).toBe('what-is-ai');
-    expect(order.start).toEqual(['what-is-ai', 'first-ten-minutes']);
-    expect(order.guides).toEqual(ALL_IDS); // step order, never-paste not moved
-    expect(order.reference).toEqual(['glossary']);
+test.describe('start here: the path', () => {
+  const hub = [
+    { id: 'what-is-ai', step: 0.1, group: 'start' as const },
+    { id: 'first-ten-minutes', step: 0.2, group: 'start' as const },
+    ...FULL.map((g) => ({ ...g, group: 'guides' as const })),
+    { id: 'glossary', step: 90, group: 'reference' as const },
+  ];
+  const ids = (a: Parameters<typeof startPath>[0]) => startPath(a, hub).map((g) => g.id);
+
+  test('"never" starts from zero: the basics first, then safety', () => {
+    expect(ids({ experience: 'never' })).toEqual(['what-is-ai', 'first-ten-minutes', 'never-paste']);
   });
-  test('a recommendation in the guides list leaves the other lists in step order', () => {
-    const { order, badged } = arrangeHub({ experience: 'often' }, lists);
-    expect(badged).toBe('when-ai-is-wrong');
-    expect(order.guides[0]).toBe('when-ai-is-wrong');
-    expect(order.start).toEqual(['what-is-ai', 'first-ten-minutes']);
+  test('a field with its own guide leads, then the experience preference', () => {
+    expect(ids({ field: 'volunteer-coordinator', experience: 'some' })).toEqual(['examples', 'prompt', 'when-ai-is-wrong']);
+    expect(ids({ field: 'job-seeker', experience: 'often' })).toEqual(['job-search', 'examples', 'when-ai-is-wrong']);
   });
-  test('with no answers nothing is badged and every list is in step order', () => {
-    const { order, badged } = arrangeHub({}, { ...lists, guides: SHUFFLED });
-    expect(badged).toBeNull();
-    expect(order.guides).toEqual(ALL_IDS);
-    expect(order.start).toEqual(['what-is-ai', 'first-ten-minutes']);
+  test('someone who already uses AI is not sent back to the start set, and reference guides never fill a path', () => {
+    for (const experience of ['some', 'often'] as const) {
+      for (const f of FIELDS) {
+        const path = startPath({ field: f.value, experience }, hub);
+        expect(path.some((g) => g.group === 'start')).toBe(false);
+        expect(path.some((g) => g.group === 'reference')).toBe(false);
+      }
+    }
   });
-  test('the "go straight to the guides" link targets a list that exists', async ({ page }) => {
+  test('every answer pair gives up to three distinct published guides, led by the recommendation', () => {
+    for (const list of [hub, REAL, FULL, ONLY_FIRST, NO_FIRST, SHUFFLED]) {
+      const published = new Set(list.map((g) => g.id));
+      for (const a of pairs) {
+        const path = startPath(a, list).map((g) => g.id);
+        if (!a.field && !a.experience) {
+          expect(path).toEqual([]);
+          continue;
+        }
+        expect(path.length).toBe(Math.min(3, list.length));
+        expect(new Set(path).size).toBe(path.length);
+        for (const id of path) expect(published.has(id)).toBe(true);
+        expect(path[0]).toBe(recommend(a, list)!.id);
+      }
+    }
+  });
+  test('the next guide is the first unread one on the path', () => {
+    expect(nextUnread(['a', 'b', 'c'], [])).toBe('a');
+    expect(nextUnread(['a', 'b', 'c'], ['a', 'x'])).toBe('b');
+    expect(nextUnread(['a', 'b', 'c'], ['b'])).toBe('a');
+    expect(nextUnread(['a', 'b', 'c'], ['c', 'a', 'b'])).toBeNull();
+    expect(nextUnread([], [])).toBeNull();
+  });
+  test('the "see all the guides" links go to the All guides heading', async ({ page }) => {
     await page.goto('/ai-guides/');
-    const href = await page.locator('[data-start-here] .start-here__hint a').getAttribute('href');
-    const first = await page.locator('[data-hub-list]').first().getAttribute('id');
-    expect(href).toBe(`#${first}`);
+    await expect(page.locator('[data-start-here] .start-here__hint a')).toHaveAttribute('href', '#all-guides');
+    await expect(page.locator('h2#all-guides')).toHaveText('All guides');
+    // the heading comes before every list
+    const before = await page.evaluate(() => {
+      const h = document.getElementById('all-guides')!;
+      return Array.from(document.querySelectorAll('[data-hub-list]')).every((ol) => !!(h.compareDocumentPosition(ol) & Node.DOCUMENT_POSITION_FOLLOWING));
+    });
+    expect(before).toBe(true);
   });
 });
 
@@ -85,16 +113,14 @@ test.describe('start here: pure ordering', () => {
       const ids = new Set(list.map((g) => g.id));
       expect(list.length).toBeGreaterThan(0);
       for (const a of pairs) {
-        const ordered = orderGuides(a, list);
-        expect(ordered.map((g) => g.id).sort()).toEqual([...ids].sort()); // nothing lost, nothing invented
         if (a.field || a.experience) expect(ids.has(recommend(a, list)!.id)).toBe(true);
-        expect(ordered[0].id).toBe(a.field || a.experience ? recommend(a, list)!.id : byStep(list)[0].id);
+        else expect(recommend(a, list)).toBeNull();
       }
     });
 
-    test(`no answers returns step order (${name})`, () => {
-      expect(orderGuides({}, list).map((g) => g.id)).toEqual(byStep(list).map((g) => g.id));
-      expect(orderGuides({ field: null, experience: null }, list)).toEqual(byStep(list));
+    test(`no answers recommends nothing (${name})`, () => {
+      expect(startPath({}, list)).toEqual([]);
+      expect(startPath({ field: null, experience: null }, list)).toEqual([]);
       expect(recommend({}, list)).toBeNull();
     });
   }
@@ -142,7 +168,7 @@ test.describe('start here: pure ordering', () => {
 
   test('unknown answers are ignored rather than trusted', () => {
     expect(recommend({ field: 'astronaut', experience: 'wizard' }, FULL)).toBeNull();
-    expect(orderGuides({ field: '__proto__' }, FULL)).toEqual(byStep(FULL));
+    expect(startPath({ field: '__proto__' }, FULL)).toEqual([]);
   });
 
   test('share text is "title — line — canonical url" with no query or fragment', () => {
@@ -197,13 +223,9 @@ test.describe('hub in the page', () => {
         continue;
       }
       await expect(list).toHaveCount(1);
-      if (HEADINGS[key]) {
-        await expect(heading).toHaveText(HEADINGS[key]);
-        // the heading sits directly before its list
-        expect(await heading.evaluate((h) => (h.nextElementSibling as HTMLElement | null)?.dataset.hubList)).toBe(key);
-      } else {
-        await expect(heading).toHaveCount(0);
-      }
+      await expect(heading).toHaveText(HEADINGS[key]);
+      // the heading sits directly before its list
+      expect(await heading.evaluate((h) => (h.nextElementSibling as HTMLElement | null)?.dataset.hubList)).toBe(key);
     }
     // only the guides list is the one the Start here questions are documented against
     await expect(page.locator('[data-guide-list]')).toHaveCount(LISTS.guides.length ? 1 : 0);
@@ -217,64 +239,97 @@ test.describe('hub in the page', () => {
     page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, Array.from(document.querySelectorAll<HTMLElement>(`[data-hub-list="${k}"] > li`)).map((li) => li.dataset.guideId)])), GROUP_KEYS);
   const stepOrderPerList = () => Object.fromEntries(GROUP_KEYS.map((k) => [k, byStep(LISTS[k]).map((g) => g.id)]));
 
-  test('answering the two questions moves the recommended guide to the top of its list, and the answer survives a reload', async ({ page }) => {
+  const box = (page: Page) => page.locator('[data-start-here]');
+  const pathIds = (page: Page) => page.locator('[data-start-path] > li').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.pathId));
+
+  test('answers show the path inside the Start here box, the lists below never move, and the box folds once both are in', async ({ page }) => {
     await page.goto('/ai-guides/');
     const stepOrder = await shownOrder(page);
-    expect(stepOrder).toEqual(stepOrderPerList()); // untouched until the reader answers
-    await expect(page.locator('[data-recommended]')).toHaveCount(0);
+    expect(stepOrder).toEqual(stepOrderPerList());
+    await expect(box(page).locator('[data-start-path-wrap]')).toBeHidden();
+    await expect(page.locator('[data-on-path]')).toHaveCount(0);
 
-    await page.locator('[data-start-here] [data-experience="never"]').click();
-    const first = arrangeHub({ experience: 'never' }, LISTS);
-    expect(first.badged).toBe(recommend({ experience: 'never' }, REAL)!.id);
-    const afterNever = await shownOrder(page);
-    for (const k of GROUP_KEYS) expect(afterNever[k]).toEqual(first.order[k] ?? []);
-    await expect(page.locator('[data-recommended]')).toHaveCount(1);
-    await expect(page.locator(`[data-guide-id="${first.badged}"] [data-start-badge]`)).toBeVisible();
-    await expect(page.locator('[data-hub-list] > li')).toHaveCount(REAL.length); // reorder, never drop
+    await box(page).locator('[data-experience="never"]').click();
+    expect(await pathIds(page)).toEqual(startPath({ experience: 'never' }, REAL).map((g) => g.id));
+    await expect(box(page).locator('[data-start-ask]')).toBeVisible(); // one answer: the questions stay open
+    expect(await shownOrder(page)).toEqual(stepOrder);
 
-    await page.locator('[data-start-here] [data-field="job-seeker"]').click();
+    await box(page).locator('[data-field="volunteer-coordinator"]').click();
+    const want = startPath({ field: 'volunteer-coordinator', experience: 'never' }, REAL).map((g) => g.id);
+    expect(await pathIds(page)).toEqual(want);
+    await expect(box(page).locator('[data-start-ask]')).toBeHidden();
+    await expect(box(page).locator('[data-start-summary]')).toContainText('Running volunteers or a nonprofit');
+    await expect(box(page).locator('[data-start-path-title]')).toBeFocused();
+    await expect(box(page).locator('[data-start-path-title]')).toHaveText('Your first three');
+    await expect(box(page).locator('[data-start-path] > li[data-next]')).toHaveAttribute('data-path-id', want[0]);
+    await expect(page.locator('[data-on-path]')).toHaveCount(want.length);
+    for (const id of want) await expect(page.locator(`[data-hub-list] [data-guide-id="${id}"] [data-start-badge]`)).toBeVisible();
+    expect(await shownOrder(page)).toEqual(stepOrder); // never reordered
+    await expect(page.locator('[data-hub-list] > li')).toHaveCount(REAL.length);
+
+    // the answers and the fold survive a reload
     await page.reload();
-    await expect(page.locator('[data-start-here] [data-field="job-seeker"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-start-here] [data-experience="never"]')).toHaveAttribute('aria-pressed', 'true');
-    const both = arrangeHub({ field: 'job-seeker', experience: 'never' }, LISTS);
-    expect(both.badged).toBe(recommend({ field: 'job-seeker', experience: 'never' }, REAL)!.id);
-    const afterReload = await shownOrder(page);
-    for (const k of GROUP_KEYS) expect(afterReload[k]).toEqual(both.order[k] ?? []);
+    await expect(box(page).locator('[data-start-ask]')).toBeHidden();
+    expect(await pathIds(page)).toEqual(want);
 
-    // tapping an answer again clears it, and with none the hub is back in step order
-    await page.locator('[data-start-here] [data-field="job-seeker"]').click();
-    await page.locator('[data-start-here] [data-experience="never"]').click();
+    // Change opens the questions again; a new answer folds them with a new path
+    await box(page).locator('[data-start-change]').click();
+    await expect(box(page).locator('[data-start-ask]')).toBeVisible();
+    await expect(box(page).locator('[data-field="volunteer-coordinator"]')).toBeFocused();
+    await box(page).locator('[data-experience="often"]').click();
+    await expect(box(page).locator('[data-start-ask]')).toBeHidden();
+    expect(await pathIds(page)).toEqual(startPath({ field: 'volunteer-coordinator', experience: 'often' }, REAL).map((g) => g.id));
+
+    // clearing both answers removes the path and every tag
+    await box(page).locator('[data-start-change]').click();
+    await box(page).locator('[data-field="volunteer-coordinator"]').click();
+    await box(page).locator('[data-experience="often"]').click();
+    await expect(box(page).locator('[data-start-path-wrap]')).toBeHidden();
+    await expect(page.locator('[data-on-path]')).toHaveCount(0);
     expect(await shownOrder(page)).toEqual(stepOrder);
   });
 
-  test('with several guides published, the recommended one moves to the top and back', async ({ page }) => {
-    // Only some guides are on this branch, so serve the hub with a fake card for each of the three
-    // that is not published yet. A guide that is really there is never injected, so ids stay unique
-    // and the test holds whether each of the three is real or fake.
-    const extra = (id: string, step: number) =>
-      `<li data-guide-id="${id}" data-step="${step}"><a class="hub-card" href="/ai-guides/${id}/" data-guide-card="${id}"><span data-start-badge hidden>Start here</span><span data-visited-tick hidden>Read</span><span class="hub-card__title">${id}</span></a></li>`;
-    const wanted = [['prompt', 50], ['when-ai-is-wrong', 51], ['which-tool', 52]] as const;
-    await page.route('**/ai-guides/', async (route) => {
-      const res = await route.fetch();
-      const served = await res.text();
-      const fakes = wanted.filter(([id]) => !served.includes(`data-guide-id="${id}"`)).map(([id, step]) => extra(id, step)).join('');
-      const html = served.replace(/(data-guide-list[^>]*>[\s\S]*?)<\/ol>/, `$1${fakes}</ol>`);
-      await route.fulfill({ response: res, body: html });
-    });
+  test('a return visit leads with the next unread guide on the path', async ({ page }) => {
+    const want = startPath({ field: 'office-admin', experience: 'some' }, REAL).map((g) => g.id);
+    await page.addInitScript(([key, first]) => {
+      if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ v: 1, drafts: { 'start-here': { experience: 'some' } }, visited: [first], field: 'office-admin' }));
+    }, [GUIDE_STORE_KEY, want[0]] as const);
     await page.goto('/ai-guides/');
-    const ids = () => page.locator('[data-guide-list] > li').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.guideId));
-    const before = await ids();
-    expect(new Set(before).size).toBe(before.length); // no duplicate ids, real or fake
-    for (const [id] of wanted) expect(before).toContain(id);
-    expect(before[0]).not.toBe('when-ai-is-wrong'); // not first until the reader answers
-    await expect(page.locator('[data-recommended]')).toHaveCount(0);
-    await page.locator('[data-start-here] [data-experience="often"]').click();
-    const after = await ids();
-    expect(after[0]).toBe('when-ai-is-wrong');
-    expect([...after].sort()).toEqual([...before].sort());
-    await expect(page.locator('[data-guide-id="when-ai-is-wrong"] [data-start-badge]')).toBeVisible();
-    await page.locator('[data-start-here] [data-experience="often"]').click();
-    expect(await ids()).toEqual(before);
+    await expect(box(page).locator('[data-start-ask]')).toBeHidden();
+    await expect(box(page).locator('[data-start-path-title]')).toHaveText('Pick up where you left off');
+    await expect(box(page).locator('[data-start-status]')).toContainText('1 of 3 read');
+    await expect(box(page).locator(`[data-path-id="${want[0]}"]`)).toHaveAttribute('data-read', '');
+    await expect(box(page).locator('[data-start-path] > li[data-next]')).toHaveAttribute('data-path-id', want[1]);
+    // the path card links the guide
+    await expect(box(page).locator(`[data-path-id="${want[1]}"] a`)).toHaveAttribute('href', `/ai-guides/${want[1]}/`);
+
+    // reset clears the read marks on the path too
+    await page.locator('[data-reset-progress]').click();
+    await expect(box(page).locator('[data-start-path-title]')).toHaveText('Your first three');
+    await expect(box(page).locator('[data-start-path] > li[data-next]')).toHaveAttribute('data-path-id', want[0]);
+  });
+
+  test('reading the whole path says so', async ({ page }) => {
+    const want = startPath({ field: 'teacher', experience: 'often' }, REAL).map((g) => g.id);
+    await page.addInitScript(([key, read]) => {
+      if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ v: 1, drafts: { 'start-here': { experience: 'often' } }, visited: read, field: 'teacher' }));
+    }, [GUIDE_STORE_KEY, want] as const);
+    await page.goto('/ai-guides/');
+    await expect(box(page).locator('[data-start-path-title]')).toHaveText("You've read all three");
+    await expect(box(page).locator('[data-start-path] > li[data-next]')).toHaveCount(0);
+  });
+
+  test('at 375px the answered box fits and the first path card is on the first screen', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.addInitScript((key) => {
+      if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ v: 1, drafts: { 'start-here': { experience: 'some' } }, visited: [], field: 'volunteer-coordinator' }));
+    }, GUIDE_STORE_KEY);
+    await page.goto('/ai-guides/');
+    const first = box(page).locator('[data-start-path] > li').first();
+    await expect(first).toBeVisible();
+    const top = await first.evaluate((el) => el.getBoundingClientRect().top);
+    expect(top).toBeLessThan(812);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 
   test('a saved field from guideStore is used when there is one', async ({ page }) => {
@@ -283,7 +338,8 @@ test.describe('hub in the page', () => {
     }, GUIDE_STORE_KEY);
     await page.goto('/ai-guides/');
     await expect(page.locator('[data-start-here] [data-field="job-seeker"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-recommended]')).toHaveCount(1);
+    await expect(page.locator('[data-on-path]')).toHaveCount(3);
+    await expect(page.locator('[data-start-here] [data-start-ask]')).toBeVisible(); // experience not answered yet
   });
 
   test('opening a guide ticks it on the hub, the tick survives a reload, and reset clears it', async ({ page }) => {
