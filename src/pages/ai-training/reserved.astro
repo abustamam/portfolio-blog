@@ -1,0 +1,146 @@
+---
+// Where the three $25 deposit payment links send people after they pay. Unlisted:
+// noindex, out of the sitemap, not in the nav. Works with no ?track= and with
+// JavaScript off (generic content); the script below fits it to ?track=everyday|connect|build.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Rosette from '../../components/ai/Rosette.astro';
+import { COHORT_LINKS, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../../consts/aiCohort';
+import { GENERIC_GUIDES, RESERVED_CONTACT, SHARE_URL, TRACK_GUIDES } from '../../consts/aiReserved';
+import '../../styles/ai.css';
+
+const names = TRACKS.map((t) => t.name);
+const trackList = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+const shareText = `I reserved a seat in a small hands-on AI course. Each track needs ${TRAINING.launchAt} people to launch, so join me: ${SHARE_URL}`;
+const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+---
+
+<BaseLayout
+  title="Your seat is reserved — Rasheed Bustamam"
+  description="Thank you for reserving a seat in the hands-on AI cohort."
+  chromePath="/ai-training/reserved"
+  noindex
+  chrome="letterhead"
+>
+  <main class="ai-shell reserved" id="reserved" data-endpoint={TRACKS_ENDPOINT} data-launch-at={TRAINING.launchAt} data-max={TRAINING.maxSeats} data-waitlist={COHORT_LINKS.waitlist}>
+    <header class="mb-8">
+      <div class="ai-kicker" data-rise style="--i:0">hands-on AI cohort · deposit received</div>
+      <h1 class="ai-title ai-title--page" data-rise style="--i:1">
+        <span data-only="generic">Your seat is reserved</span>
+        {TRACKS.map((t) => <span data-only={t.id} hidden>Your seat in {t.name} is reserved</span>)}
+      </h1>
+      <p class="ai-lead" data-rise style="--i:2">
+        Salaam, and thank you. Your {TRAINING.deposit} deposit is in.
+        <span data-only="generic">That holds a place in one of the three tracks: {trackList}.</span>
+        {TRACKS.map((t) => <span data-only={t.id} hidden>That holds a place in {t.name}.</span>)}
+      </p>
+      <p class="reserved-count" id="reserved-count" hidden></p>
+    </header>
+
+    <section aria-labelledby="next" class="reserved-section">
+      <h2 class="ai-h2" id="next">What happens next</h2>
+      <ol class="reserved-steps">
+        <li>
+          <strong>The track launches at {TRAINING.launchAt} deposits.</strong>
+          <span>Each track needs {TRAINING.launchAt} people before it starts. Up to {TRAINING.maxSeats} can join.</span>
+        </li>
+        <li>
+          <strong>I message you on WhatsApp.</strong>
+          <span>When your track launches, I send you the dates and a link to pay the rest of the price.</span>
+        </li>
+        <li>
+          <strong>Your deposit is refundable.</strong>
+          <span>
+            If your track doesn't launch, or the dates don't work for you, your {TRAINING.deposit} comes back in full.
+            Just <a href={RESERVED_CONTACT.mailto}>message me</a>.
+          </span>
+        </li>
+      </ol>
+      <p class="reserved-note">Nothing else is charged until your track launches.</p>
+    </section>
+
+    <section aria-labelledby="wait" class="reserved-section">
+      <h2 class="ai-h2" id="wait">While you wait</h2>
+      <p class="ai-sub">A few free guides to read before we start. Each takes about five minutes.</p>
+      <ul class="reserved-guides" data-only="generic">
+        {GENERIC_GUIDES.map((g) => <li><a href={g.href}>{g.title}</a><span>{g.why}</span></li>)}
+      </ul>
+      {TRACKS.map((t) => (
+        <ul class="reserved-guides" data-only={t.id} hidden>
+          {TRACK_GUIDES[t.id].map((g) => <li><a href={g.href}>{g.title}</a><span>{g.why}</span></li>)}
+        </ul>
+      ))}
+    </section>
+
+    <section aria-labelledby="share" class="reserved-section">
+      <h2 class="ai-h2" id="share">Know someone who'd like it?</h2>
+      <p class="ai-sub">
+        Each track needs {TRAINING.launchAt} people to launch, so a friend joining helps you too. Send them
+        <a href="/ai-training/">bustamam.tech/ai-training</a>.
+      </p>
+      <p><a class="cohort-cta" href={shareHref} target="_blank" rel="noopener">Share on WhatsApp</a></p>
+    </section>
+
+    <section aria-labelledby="reach" class="reserved-section">
+      <h2 class="ai-h2" id="reach">Reach me</h2>
+      <p class="ai-sub">
+        Haven't heard from me, didn't leave a WhatsApp number, or have a question? Email
+        <a href={RESERVED_CONTACT.mailto} class="text-accent">{RESERVED_CONTACT.email}</a>. I answer every one myself.
+      </p>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  // Fits the page to ?track=. Anything unknown leaves the generic content as it is.
+  const root = document.getElementById('reserved');
+  const id = new URLSearchParams(location.search).get('track') ?? '';
+  const ids = Array.from(root?.querySelectorAll<HTMLElement>('[data-only]') ?? []).map((el) => el.dataset.only);
+  if (root && id !== 'generic' && ids.includes(id)) {
+    for (const el of root.querySelectorAll<HTMLElement>('[data-only]')) el.hidden = el.dataset.only !== id;
+
+    const endpoint = root.dataset.endpoint;
+    const launchAt = Number(root.dataset.launchAt ?? 5);
+    const max = Number(root.dataset.max ?? 8);
+    const line = document.getElementById('reserved-count');
+    if (endpoint && line) {
+      fetch(endpoint)
+        .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+        .then((body: { counts?: Record<string, number> }) => {
+          const n = body.counts?.[id];
+          if (typeof n !== 'number') return;
+          if (n >= max) {
+            const a = document.createElement('a');
+            a.href = root.dataset.waitlist ?? '/ai-cohort/waitlist/';
+            a.textContent = 'Join the waitlist.';
+            line.replaceChildren('This track is full. ', a);
+          } else {
+            line.textContent =
+              n >= launchAt ? `Launching · ${n} of ${max} seats taken` : `${n} of ${launchAt} reserved to launch`;
+          }
+          line.hidden = false;
+        })
+        .catch(() => {});
+    }
+  }
+</script>
+
+<style>
+  [data-only][hidden], .reserved-count[hidden] { display: none !important; }
+  .reserved-section { margin-top: 2.5rem; }
+  .reserved-count { font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-accent); margin: 1rem 0 0; }
+  .reserved-steps { list-style: none; padding: 0; margin: 1.25rem 0 0; display: grid; gap: 1rem; counter-reset: step; }
+  .reserved-steps li {
+    counter-increment: step; display: grid; gap: .25rem; padding: 1rem 0 0 2.5rem; position: relative;
+    border-top: 1px solid var(--color-line); font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.5; color: var(--color-mute);
+  }
+  .reserved-steps li::before {
+    content: counter(step); position: absolute; left: 0; top: .875rem; font-style: italic; font-size: 1.375rem; color: var(--color-accent);
+  }
+  .reserved-steps strong { color: var(--color-ink); font-weight: 500; font-size: 1.125rem; }
+  .reserved-note { font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-faint); margin: 1rem 0 0; }
+  .reserved-guides { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .75rem; }
+  .reserved-guides[hidden] { display: none; }
+  .reserved-guides li { display: grid; gap: .125rem; font-family: var(--font-serif); }
+  .reserved-guides a, .reserved a:not(.cohort-cta) { color: var(--color-accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .reserved-guides span { font-size: .9375rem; color: var(--color-mute); }
+</style>
