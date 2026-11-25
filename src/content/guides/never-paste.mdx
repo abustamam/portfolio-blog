@@ -7,6 +7,7 @@ step: 1
 minutes: 5
 ---
 import { compiledContent } from '../ai-partials/never-paste.md';
+import Term from '../../components/guides/Term.astro';
 import Scrubber from '../../components/guides/Scrubber.astro';
 
 {/* The body is shared with the cohort handout /ai-cohort/never-paste/ so the two cannot drift. Edit it in src/content/ai-partials/never-paste.md. This page renders the same HTML, split before "Check before you press Enter" so the Scrubber sits after the three-step section. The split is asserted at build time. */}
@@ -17,13 +18,15 @@ export const splitOk = (() => { if (splitAt < 1) throw new Error('never-paste.md
 export const beforeChecklist = shared.slice(0, splitAt);
 export const fromChecklist = shared.slice(splitAt);
 
+Never used an AI app? Start with [What an AI chat app is](/ai-guides/what-is-ai/).
+
 <p><a href="#scrubber-title">Try it on a made-up example ↓</a></p>
 
 <Fragment set:html={beforeChecklist} />
 
 ### Before and after: a spreadsheet made safe
 
-An illustration with made-up people, not real data. The first sheet is what you might be tempted to upload to a personal account. The second is the copy I would upload instead. The key (who is PERSON-1) stays in your own file.
+An illustration with made-up people, not real data. The first sheet is what you might be tempted to <Term>upload</Term> to a personal account. The second is the copy I would upload instead. The key (who is PERSON-1) stays in your own file.
 
 <div class="ba-grid">
 <div>

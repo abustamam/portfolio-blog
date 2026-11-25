@@ -263,6 +263,6 @@ test.describe('job-search copy and the free/paid line', () => {
     expect(hrefs).toContain(PROMPT_PAGE);
     expect(hrefs).toContain(WRONG_PAGE);
     expect(article(dist(PAGE))).toMatch(/<a href="\/ai-guides\/never-paste\/">what(&#39;|&#x27;|'|’)s safe to paste into AI<\/a>/);
-    for (const h of hrefs) expect(['/ai-guides/never-paste/', PROMPT_PAGE, WRONG_PAGE, CSV_PATH], h).toContain(h);
+    for (const h of hrefs) expect(['/ai-guides/never-paste/', PROMPT_PAGE, WRONG_PAGE, CSV_PATH, '/ai-guides/photos-files-voice/', '/ai-guides/what-is-ai/'], h).toContain(h);
   });
 });

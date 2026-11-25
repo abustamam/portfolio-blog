@@ -7,6 +7,7 @@ minutes: 6
 tool: Read my menu
 ctaLine: The hands-on training is about getting AI to do a task from your own week and checking what it gives you.
 ---
+import Term from '../../components/guides/Term.astro';
 import ModelMenu from '../../components/guides/ModelMenu.astro';
 import { AI_MODELS } from '../../consts/guides/aiModels';
 import { oldestChecked, formatChecked, SIZE_LABELS, FREE_LABELS } from '../../utils/modelMenu';
@@ -33,7 +34,7 @@ Each company offers roughly the same few sizes under its own names. I find it ea
 
 ### Small and fast
 
-Good for short answers, quick rewrites and summaries. It replies quickly and uses little of your limit. It's the colleague you ask a quick question on the way past their desk.
+Good for short answers, quick rewrites and summaries. It replies quickly and uses little of <Term id="usage-limit">your limit</Term>. It's the colleague you ask a quick question on the way past their desk.
 
 ### Everyday
 
@@ -41,7 +42,7 @@ Good for most work: emails, letters, documents, plans, spreadsheets. It's usuall
 
 ### Large
 
-For complex, long or careful work. It's slower, uses up your limit faster, and often needs a paid plan. Think of booking an hour with a specialist. You wouldn't do that for a quick question.
+For complex, long or careful work. It's slower, uses up your limit faster, and often needs a <Term>paid plan</Term>. Think of booking an hour with a specialist. You wouldn't do that for a quick question.
 
 ### A "thinking" setting on top
 
@@ -110,7 +111,7 @@ It helps with:
 
 For quick questions, simple rewrites and everyday writing, it mostly makes you wait. Higher levels also use up your limit faster, so I leave it at medium or the default unless the answer needs more.
 
-For my own work I start on a large Claude model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet. That's a coding setup. In the chat app, the default is fine.
+For my own work I start on a large Claude model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet. That's a coding setup. In the <Term>chat app</Term>, the default is fine.
 
 ## Common questions
 
@@ -120,7 +121,7 @@ Not for every job. A new release is usually a newer version of the same sizes. F
 
 ### Is the paid one worth it?
 
-Pay if you keep hitting the free limits, or if your work is often the hard kind that needs the large option. For everyday questions, the free plan is often enough.
+Pay if you keep hitting [the free limits](/ai-guides/usage-limits/), or if your work is often the hard kind that needs the large option. For everyday questions, the free plan is often enough.
 
 ### Why did my menu change?
 
