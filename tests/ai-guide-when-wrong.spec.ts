@@ -224,6 +224,30 @@ test.describe('when-ai-is-wrong: build output', () => {
     for (const h of outbound) expect(h).toMatch(/^https:\/\//);
   });
 
+  test('"Build the check in" carries the owner\'s paragraph verbatim, between the mistake types and the checklist', () => {
+    const OWNER =
+      "I don't check every answer by hand any more. Over time I've set things up so the AI has to show where each claim came from, does its sums somewhere I can see them, and gets checked by a second pass before I trust it. None of that is magic, and you can start with the habits below today. Getting it to run on your own work takes some setting up, and that's what we do in the hands-on training.";
+    // The build curls apostrophes; the words must match exactly.
+    const doc = built().replace(/[\u2018\u2019]/g, "'");
+    const paragraphs = [...doc.matchAll(/<p>([^<]*)<\/p>/g)].map((m) => m[1]);
+    expect(paragraphs.filter((t) => t === OWNER)).toHaveLength(1);
+    const at = (needle: string) => {
+      const i = doc.indexOf(needle);
+      expect(i, needle).toBeGreaterThan(-1);
+      return i;
+    };
+    const lastType = at('id="wrong-arithmetic"');
+    const section = at('id="build-the-check-in"');
+    const owner = at(`<p>${OWNER}</p>`);
+    const habits = doc.indexOf('<ul', owner);
+    const checklist = at('id="the-checklist"');
+    expect(lastType).toBeLessThan(section);
+    expect(section).toBeLessThan(owner);
+    // "the habits below": the habit list comes after the paragraph, still inside the section.
+    expect(owner).toBeLessThan(habits);
+    expect(habits).toBeLessThan(checklist);
+  });
+
   test('the page does not include the hand-off template\'s "when it breaks" table', () => {
     const doc = built();
     expect(doc).not.toMatch(/when it breaks/i);
