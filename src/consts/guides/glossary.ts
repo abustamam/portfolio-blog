@@ -178,6 +178,14 @@ export const GLOSSARY: GlossaryTerm[] = [
     short: 'The setting for how much chance goes into each word. Low keeps answers predictable; high makes them more varied. Chat apps set it for you.',
     why: "You'll see this word in app settings and articles about AI; it's one reason the same question can get a different answer twice.",
   },
+  {
+    id: 'project',
+    term: 'project',
+    also: ['projects', 'notebook', 'notebooks'],
+    short: 'A saved space for one ongoing job. You give it instructions and files once, and every new chat inside it starts with them.',
+    why: 'If you keep pasting the same background into new chats, a project saves you from doing it.',
+    guide: 'projects',
+  },
 ];
 
 const norm = (s: string) => s.trim().toLowerCase();
