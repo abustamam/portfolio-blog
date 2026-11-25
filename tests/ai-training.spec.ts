@@ -73,4 +73,34 @@ test.describe('AI training page', () => {
     expect(conf).toMatch(/\^\/ai-cohort-1\/\?\$ \{\s*return 301 \/ai-training\/#everyday;/);
     expect(conf).toMatch(/\^\/ai-cohort-2\/\?\$ \{\s*return 301 \/ai-training\/#connect;/);
   });
+
+  test('every "message me" is a mailto link', async ({ page }) => {
+    const src = readFileSync(fileURLToPath(new URL('../src/pages/ai-training.astro', import.meta.url)), 'utf8');
+    const inSource = src.match(/message me/gi) ?? [];
+    expect(inSource.length).toBe(3);
+    await page.goto(PAGE);
+    const text = await page.locator('main').textContent() ?? '';
+    const total = (text.match(/message me/gi) ?? []).length;
+    expect(total).toBe(3);
+    const links = page.locator('main a[href="mailto:admin@bustamam.tech"]', { hasText: /message me/i });
+    await expect(links).toHaveCount(3);
+  });
+
+  test('a full track links to the waitlist and its Reserve button goes there', async ({ page }) => {
+    await page.route('**/api/ai-quiz/tracks', (r) =>
+      r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, counts: { everyday: 1, connect: 5, build: 8 } }) }),
+    );
+    await page.goto(PAGE);
+    const count = page.locator('.track-count[data-track="build"]');
+    await expect(count).toHaveText('Full. Join the waitlist.');
+    const link = count.locator('a');
+    await expect(link).toHaveAttribute('href', '/ai-cohort/waitlist/');
+    await expect(page.locator('#build a.cohort-cta')).toHaveAttribute('href', '/ai-cohort/waitlist/');
+    const res = await page.request.get(new URL('/ai-cohort/waitlist/', page.url()).href);
+    expect(res.status()).toBe(200);
+    // Other tracks keep their deposit links.
+    await expect(page.locator('#everyday a.cohort-cta')).toHaveAttribute('href', LINKS.everyday);
+    await expect(page.locator('#connect a.cohort-cta')).toHaveAttribute('href', LINKS.connect);
+    await expect(page.locator('.track-count[data-track="connect"] a')).toHaveCount(0);
+  });
 });
