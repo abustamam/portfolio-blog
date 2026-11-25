@@ -1,3 +1,15 @@
+## First: which account?
+
+What you can safely paste depends on the account you are signed in to. Check that before anything else.
+
+- **A free or personal account, or a work file in a personal account:** treat the chat like an email to a stranger. Keep the list below out of it, or make the file safe first. Your employer may not allow work files in personal accounts at all; their rule comes first.
+- **A work account your employer has approved for that kind of data:** follow their policy. You may not need to remove anything at all. Paste what they allow, and nothing they don't. Your employer's agreement with the AI company, and their policy, decide what's allowed.
+- **Not sure which you have:** treat it as the first case until you've asked.
+
+## What to keep out of an account that isn't approved for it
+
+On a free or personal account, or any account your employer hasn't approved for this kind of data:
+
 | Never paste | Do this instead |
 |---|---|
 | **Other people's personal details**: names, emails, phone numbers, addresses | Swap in placeholders: PERSON-1, EMAIL-1, PHONE-1. Keep the key (who is who) in your own file. |
@@ -18,14 +30,12 @@
 
 ## Check before you press Enter
 
+On an account that isn't approved for this kind of data, ask yourself:
+
 - [ ] Could anyone in this text be recognised by someone who knows them?
 - [ ] Is there any number that unlocks money or an account?
 - [ ] Would I be comfortable if this text were shown to the people it's about?
 
-## Work accounts
-
-Your employer may allow only certain tools (often Copilot on a work login), and may forbid putting work files into personal accounts. Their rule comes before anything on this page.
-
 ## If you already pasted something
 
-Delete the conversation, and turn off chat history or training in the tool's settings if you can. If it was a password or key, **change it now**. Deleting the chat doesn't un-send it.
+If it went into an account that isn't approved for it: delete the conversation, and turn off chat history or training in the tool's settings if you can. If it was a password or key, **change it now**. Deleting the chat doesn't un-send it.
