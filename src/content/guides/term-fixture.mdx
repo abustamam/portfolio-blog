@@ -1,0 +1,37 @@
+---
+title: Term fixture
+description: A test-only page that exercises the Term component. It is a draft and never builds.
+lead: This page exists only for tests/ai-guide-term.spec.ts.
+step: 99
+minutes: 1
+draft: true
+---
+import Term from '../../components/guides/Term.astro';
+
+<p id="first">Your <Term>usage limit</Term> refills after a few hours.</p>
+
+<p id="repeat">The same <Term>usage limit</Term> again is plain text.</p>
+
+<p id="synonym">A synonym of it, <Term>quota</Term>, is the same entry, so plain too.</p>
+
+<p id="other-synonym">Another entry by synonym: <Term>chatbot</Term>.</p>
+
+<p id="explicit">An explicit id: <Term id="hallucination">making stuff up</Term>.</p>
+
+<p id="guide-target">An entry whose guide is published: <Term>model</Term>.</p>
+
+<p id="glossary-target">An entry whose guide is not published yet: <Term>token</Term>.</p>
+
+<p id="no-guide">An entry with no guide: <Term>agent</Term>.</p>
+
+<p id="edge" style={{ textAlign: "right" }}>This line is right-aligned so the word ends at the right edge of the screen: <Term>memory</Term></p>
+
+<p id="wrapped">A long stretch of ordinary words that pushes the next term across a line break so that it wraps over two lines of text, as <Term>context window</Term> can.</p>
+
+## About the <Term>conversation</Term> heading
+
+<p id="in-link">A <a id="link-host" href="/ai-guides/">link with a <Term>training data</Term> note</a>.</p>
+
+<p id="in-code">Code: <code id="code-host"><Term>llm</Term></code></p>
+
+<p id="in-button"><button id="button-host" type="button"><Term>attach</Term></button></p>
