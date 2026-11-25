@@ -7,9 +7,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Rosette from '../components/ai/Rosette.astro';
 import WorkedExample from '../components/ai/WorkedExample.astro';
 import profilePic from '../assets/profile-pic.jpeg';
-import { COHORT, INCLUDED, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../consts/aiCohort';
+import { COHORT, COHORT_LINKS, CONTACT_EMAIL, INCLUDED, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../consts/aiCohort';
 import '../styles/ai.css';
 
+const mailto = `mailto:${CONTACT_EMAIL}`;
 ---
 
 <BaseLayout
@@ -91,7 +92,7 @@ import '../styles/ai.css';
         Each is four sessions of {TRAINING.sessionLength}. Not sure which is yours?
         <a class="training-inline" href="/ai-quiz/">The quiz takes four minutes.</a>
       </p>
-      <div class="training-tracks" id="training-tracks" data-endpoint={TRACKS_ENDPOINT} data-launch-at={TRAINING.launchAt} data-max={TRAINING.maxSeats}>
+      <div class="training-tracks" id="training-tracks" data-endpoint={TRACKS_ENDPOINT} data-launch-at={TRAINING.launchAt} data-max={TRAINING.maxSeats} data-waitlist={COHORT_LINKS.waitlist}>
         {TRACKS.map((t) => (
           <section class="training-track ai-card" id={t.id} data-reveal>
             <header class="track-head">
@@ -171,7 +172,7 @@ import '../styles/ai.css';
           <h3>No risk to reserve</h3>
           <p>
             If your track doesn't launch, or the dates don't work for you, <strong>your {TRAINING.deposit} comes back in
-            full</strong>. Just message me.
+            full</strong>. Just <a href={mailto}>message me</a>.
           </p>
         </div>
       </div>
@@ -182,7 +183,7 @@ import '../styles/ai.css';
       <div>
         <p class="ai-kicker">Before you decide</p>
         <h2 class="ai-h2" id="faq">Questions</h2>
-        <p class="ai-sub">Something else? Message me. I answer every one myself.</p>
+        <p class="ai-sub">Something else? <a href={mailto}>Message me</a>. I answer every one myself.</p>
       </div>
       <div class="training-faq">
         <details>
@@ -215,7 +216,7 @@ import '../styles/ai.css';
           <summary>Which track is right for me?</summary>
           <p>
             <a href="/ai-quiz/">Take the 4-minute quiz.</a> It looks at what you do with AI now, not how confident you
-            feel about it. Still unsure? Message me.
+            feel about it. Still unsure? <a href={mailto}>Message me</a>.
           </p>
         </details>
       </div>
@@ -241,6 +242,7 @@ import '../styles/ai.css';
   const endpoint = box?.dataset.endpoint;
   const launchAt = Number(box?.dataset.launchAt ?? 5);
   const max = Number(box?.dataset.max ?? 8);
+  const waitlist = box?.dataset.waitlist ?? '/ai-cohort/waitlist/';
   if (box && endpoint) {
     fetch(endpoint)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
@@ -248,12 +250,22 @@ import '../styles/ai.css';
         for (const el of box.querySelectorAll<HTMLElement>('.track-count')) {
           const n = body.counts?.[el.dataset.track ?? ''];
           if (typeof n !== 'number') continue;
-          el.textContent =
-            n >= max
-              ? 'Full. Join the waitlist.'
-              : n >= launchAt
+          if (n >= max) {
+            const link = document.createElement('a');
+            link.href = waitlist;
+            link.textContent = 'Join the waitlist.';
+            el.replaceChildren('Full. ', link);
+            const reserve = box.querySelector<HTMLAnchorElement>(`a.cohort-cta[data-track="${el.dataset.track}"]`);
+            if (reserve) {
+              reserve.href = waitlist;
+              reserve.textContent = 'Join the waitlist';
+            }
+          } else {
+            el.textContent =
+              n >= launchAt
                 ? `Launching · ${n} of ${max} seats taken`
                 : `${n} of ${launchAt} reserved to launch`;
+          }
           el.hidden = false;
           el.style.setProperty('--fill', `${Math.min(100, (n / launchAt) * 100)}%`);
         }
@@ -336,6 +348,7 @@ import '../styles/ai.css';
   .track-meta { font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-loose); text-transform: uppercase; color: var(--color-faint); }
   .track-name { font-size: 1.625rem; font-weight: 500; letter-spacing: -.015em; line-height: 1.15; margin: 1rem 0 .375rem; color: var(--color-accent); }
   .track-tagline { font-size: 1.125rem; line-height: 1.4; color: var(--color-mute); margin: 0; }
+  .track-count :global(a) { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
   .track-count {
     position: relative; font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-ink);
     margin: 1rem 0 0; padding-bottom: .625rem;

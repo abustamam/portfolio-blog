@@ -15,6 +15,9 @@ export const COHORT = {
   handoffCopyUrl: 'https://docs.google.com/document/d/15kLOVYA2NUcZx9cygiG1EEe0xXvSbxcXV-Xp257YW1c/copy',
 } as const;
 
+/** Where visitors reach me. The same address is on /ai-quiz/. */
+export const CONTACT_EMAIL = 'admin@bustamam.tech';
+
 export interface CohortSession {
   n: number;
   date: string;
