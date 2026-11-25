@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { scrub, restore } from '../src/utils/scrub';
@@ -10,6 +10,20 @@ const PAGE = '/ai-guides/never-paste/';
 // The invented sample the Scrubber's box starts with (src/components/guides/Scrubber.astro).
 const SAMPLE =
   'Made-up example: Hi, this is Dana Lee. Email me at dana.lee@example.com or call 555-123-4567. My card number is 4111 1111 1111 1111.';
+
+// The one sessionStorage flag the site itself writes on every page's first load
+// (src/components/BrandLogo.astro, the wordmark draw-in). It holds no user data, so the
+// storage checks below ignore exactly this key with exactly this value and nothing else.
+const WORDMARK_FLAG: readonly [string, string] = ['wordmark-drawn', '1'];
+const isWordmarkFlag = (k: string, v: string) => k === WORDMARK_FLAG[0] && v === WORDMARK_FLAG[1];
+
+// Everything in local and session storage as one string, minus the site's own wordmark flag.
+async function storedText(page: Page): Promise<string> {
+  const [local, session] = await page.evaluate(() => [{ ...localStorage }, { ...sessionStorage }]);
+  const [flagKey, flagValue] = WORDMARK_FLAG;
+  if (session[flagKey] === flagValue) delete session[flagKey];
+  return JSON.stringify(local) + JSON.stringify(session);
+}
 
 test.describe('scrub() rules', () => {
   test('emails, numbered by first appearance, same value same placeholder', () => {
@@ -154,7 +168,7 @@ test.describe('Scrubber on the page', () => {
     expect(requests).toEqual([]);
     expect(page.url()).toContain(PAGE);
     expect(page.url()).not.toMatch(/secret|\?|#/);
-    const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
+    const stored = await storedText(page);
     expect(stored).not.toContain('secret');
     expect(stored).not.toContain('4242');
   });
@@ -186,10 +200,11 @@ test.describe('Scrubber on the page', () => {
     // The layout marks the guide visited through guideStore, so the recorder is seen working.
     expect(writes.length).toBeGreaterThan(0);
     for (const [k, v] of writes) {
+      if (isWordmarkFlag(k, v)) continue;
       expect(k).toBe(GUIDE_STORE_KEY);
       expect(v).not.toMatch(/dana|4111|555-123|Made-up/i);
     }
-    const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
+    const stored = await storedText(page);
     expect(stored).not.toMatch(/dana|4111|555-123|Made-up/i);
   });
 
