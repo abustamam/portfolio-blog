@@ -1,0 +1,83 @@
+---
+title: What an AI chat app is
+description: "What the AI everyone talks about actually is: an app you type to that writes back. How it comes up with an answer, and why it is not a search engine or a person."
+lead: "The AI people keep mentioning is an app you type to, and it writes back. This page shows how it comes up with what it writes, which explains both why it is useful and why it is sometimes wrong."
+group: start
+step: 0.1
+minutes: 5
+tool: Next-word stepper
+ctaLine: "The hands-on training starts from here: one task from your own week, done with an AI app while I watch."
+---
+import NextWord from '../../components/guides/NextWord.astro';
+import Term from '../../components/guides/Term.astro';
+
+## You type, it writes back
+
+When people say "AI" these days, they almost always mean one thing: a program you type a message to, and it writes a reply in ordinary sentences. That's all I mean by "AI" in these guides. It's not a robot and it's not a person. It's text in and text out.
+
+The app or website where you do the typing is a chat app. You'll also hear "chatbot" or "AI assistant". They mean the same thing. ChatGPT, Gemini, Copilot and Claude are all chat apps. One conversation with it, from your first message to your last, is called a chat.
+
+What you get back is the answer, also called the response. You can ask for a plain-words version of a letter, a list of dinners, or a first draft of an email, and it writes something in a few seconds.
+
+## How it comes up with an answer
+
+It does one thing, over and over. It looks at the words so far and works out which word is likely to come next. It adds that word, then looks at the longer text and does it again, until it reaches a sensible stopping point.
+
+It learned which words tend to follow which from a very large amount of writing, called its <Term>training data</Term>: books, websites, manuals, forum posts. It didn't memorize a page to look up later. It learned patterns, the way you know that "I left my umbrella at home, so I got..." is probably going to end with "wet".
+
+Below is a sentence being finished that way. Each press adds one word. The bars show the words it weighed and how likely each one was, and the highlighted row is the one it picked.
+
+<NextWord />
+
+Three things to notice:
+
+- **Every word is a guess about what usually comes next.** It isn't checking whether the sentence is true. It has no idea whether you actually got wet.
+- **A likely word isn't the same as a correct word.** Usually the two line up, which is why it's so useful. Sometimes they don't.
+- **It doesn't always take the top word.** On the fifth word it picked "home" over "to". That's why you can ask the same question twice and get two different answers.
+
+## Not a search engine
+
+A search engine finds pages that someone wrote and shows you a list. A chat app writes a new answer, one word at a time, as above. It isn't opening a page and copying from it.
+
+Here is the same question both ways.
+
+<NextWord figure="search" />
+
+Both can be useful. The difference is what you can check. With search, you can open the page and see who wrote it. With a chat app, there's often no page behind the sentence at all. It sounds as sure of itself when it is wrong as when it is right, because it's writing what usually comes next, not looking up what's true.
+
+When it states something false as if it were true, such as an invented number, quote or source, that is called a <Term>hallucination</Term>. [When AI gets it wrong](/ai-guides/when-ai-is-wrong/) covers the five mistakes I see most and the 30-second check for each.
+
+Some apps can also search the web when you ask. Then the answer is built from pages it just read, and you can open them. If your app doesn't show its pages, treat the answer as unchecked.
+
+## Not a person
+
+It feels like talking to someone, so it is easy to treat it that way. A few things are different.
+
+- **It has no opinions of its own.** If you ask what it thinks, it writes what a thoughtful person might say. Ask it again with different wording and you may get the opposite.
+- **It doesn't know you.** By default it has no <Term>memory</Term> of you or of your earlier chats. Each new chat starts from nothing, and anything it needs to know, you have to tell it.
+- **It sounds sure either way.** A right answer and a wrong one come out in the same calm tone. Tone tells you nothing about whether it is right.
+- **It is usually agreeable.** If you push back, it will often change its answer, even when the first one was fine.
+
+None of that makes it useless. It means you're the one who decides what's true and what to do with the answer.
+
+## Three words you will keep seeing
+
+- **Chat.** One conversation, as above. Start a new chat and it starts from nothing.
+- **Prompt.** What you type to it: your question or instructions, and anything you paste in with them. A clear prompt gets a better answer. There is more on that in [how to ask](/ai-guides/prompt/).
+- **Model.** The part that writes the answers. One app usually offers a few models, from small and quick to large and careful. If you see "<Term>LLM</Term>" or "large language model", read it as "model". [Which model to pick in the menu](/ai-guides/which-model/) explains the sizes.
+
+The [glossary](/ai-guides/glossary/) has these and the other words you'll meet, each in a sentence.
+
+## What people use it for in an ordinary week
+
+I keep these small, because small is where it helps most:
+
+- **A week of dinners for four from what's in the fridge.** You list what you have and who is eating. It suggests meals and a shopping list for what is missing. You check that nobody on the list is allergic to anything it suggested.
+- **A plain-words explanation of a letter from an insurer.** You paste in the letter, with your name and policy number taken out first. It tells you what the letter is asking you to do and by when. You check the date and the amount against the letter itself.
+- **A first draft of a note to a child's teacher.** You say what happened and how you want to sound. It gives you something to edit, which is easier than staring at a blank page.
+
+In each one, it does the first pass and you do the check. That's the working arrangement for everything else too.
+
+## Where to go next
+
+Next is [your first ten minutes](/ai-guides/first-ten-minutes/), which walks through using an app for the first time. If you want the cautions first, read [When AI gets it wrong](/ai-guides/when-ai-is-wrong/).

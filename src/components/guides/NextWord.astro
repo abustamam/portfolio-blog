@@ -1,0 +1,212 @@
+---
+// The next-word stepper, and a second static figure (search results beside a
+// chat answer) on /ai-guides/what-is-ai/.
+//
+//   <NextWord />                  the stepper
+//   <NextWord figure="search" />  the static search-versus-chat figure
+//
+// The stepper is static HTML first: three stages (steps 1, 3 and 6) with
+// their bars. With JavaScript the stages are swapped for a stepper that adds
+// one word per press. All the data ships with the page (src/consts/guides/
+// nextWord.ts); nothing is fetched, typed, saved or sent.
+import {
+  START, STEPS, STATIC_STEPS, ILLUSTRATION_NOTE, SEARCH_QUESTION, SEARCH_RESULTS, CHAT_ANSWER,
+  sentenceAt, otherPercent,
+} from '../../consts/guides/nextWord';
+
+interface Props {
+  figure?: 'stepper' | 'search';
+}
+const { figure = 'stepper' } = Astro.props;
+
+const label = (w: string) => (w === '.' ? '. (period)' : w);
+const stages = STATIC_STEPS.map((n) => ({
+  n,
+  before: sentenceAt(n - 1),
+  step: STEPS[n - 1],
+}));
+---
+
+{figure === 'stepper' && (
+  <figure class="nw" data-next-word aria-label="Next-word stepper">
+    <div class="nw__static" data-nw-static>
+      <p class="nw__intro">The sentence at three points, with the choices the program weighed at each.</p>
+      {stages.map(({ n, before, step }) => (
+        <div class="nw__stage">
+          <p class="nw__label">Word {n} of {STEPS.length}</p>
+          <p class="nw__sentence">{before}{step.picked === '.' ? '' : ' '}<mark class="nw__new">{step.picked}</mark></p>
+          <ul class="nw__bars">
+            {step.candidates.map((c) => (
+              <li class="nw__row" data-picked={c.word === step.picked ? '' : undefined}>
+                <span class="nw__word">{label(c.word)}</span>
+                <span class="nw__track"><span class="nw__fill" style={`width:${c.percent}%`}></span></span>
+                <span class="nw__pct">{c.percent}%</span>
+                <span class="nw__tag">{c.word === step.picked ? 'picked' : ''}</span>
+              </li>
+            ))}
+          </ul>
+          {step.caption && <p class="nw__caption">{step.caption}</p>}
+        </div>
+      ))}
+    </div>
+
+    <div class="nw__live" data-nw-live hidden>
+      <p class="nw__sentence" data-nw-sentence aria-live="polite">{START}</p>
+      <p class="nw__hint" data-nw-hint>Press the button to add the next word.</p>
+      {STEPS.map((step, i) => (
+        <div class="nw__step" data-nw-step={i + 1} hidden>
+          <p class="nw__label">Word {i + 1} of {STEPS.length}: the choices</p>
+          <ul class="nw__bars">
+            {step.candidates.map((c) => (
+              <li class="nw__row" data-picked={c.word === step.picked ? '' : undefined}>
+                <span class="nw__word">{label(c.word)}</span>
+                <span class="nw__track"><span class="nw__fill" style={`width:${c.percent}%`}></span></span>
+                <span class="nw__pct">{c.percent}%</span>
+                <span class="nw__tag">{c.word === step.picked ? 'picked' : ''}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="nw__other">Everything else: {otherPercent(step)}% combined.</p>
+          {step.caption && <p class="nw__caption">{step.caption}</p>}
+        </div>
+      ))}
+      <div class="nw__controls">
+        <button type="button" class="nw__btn nw__btn--main" data-nw-next>Add the next word</button>
+        <button type="button" class="nw__btn" data-nw-reset hidden>Start again</button>
+      </div>
+    </div>
+    <figcaption class="nw__note">{ILLUSTRATION_NOTE}</figcaption>
+  </figure>
+)}
+
+{figure === 'search' && (
+  <figure class="nw nw-search" data-search-figure aria-label="Search results beside a chat answer">
+    <p class="nw__label">The question</p>
+    <p class="nw-search__q">{SEARCH_QUESTION}</p>
+    <div class="nw-search__cols">
+      <div class="nw-search__col">
+        <p class="nw__label">A search engine shows</p>
+        <ul class="nw-search__list">
+          {SEARCH_RESULTS.map((r) => (
+            <li>
+              <span class="nw-search__link" data-search-result>{r.title}</span>
+              <span class="nw-search__site">{r.site}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="nw-search__col">
+        <p class="nw__label">A chat app writes</p>
+        <p class="nw-search__answer">{CHAT_ANSWER}</p>
+      </div>
+    </div>
+    <figcaption class="nw__note">Search finds pages someone wrote. Chat writes a new sentence, and nothing guarantees it is true. The titles and the answer here are invented.</figcaption>
+  </figure>
+)}
+
+<script>
+  import { STEPS, START, sentenceAt } from '../../consts/guides/nextWord';
+
+  const root = document.querySelector<HTMLElement>('[data-next-word]');
+  if (root) {
+    const staticEl = root.querySelector<HTMLElement>('[data-nw-static]')!;
+    const live = root.querySelector<HTMLElement>('[data-nw-live]')!;
+    const sentence = root.querySelector<HTMLElement>('[data-nw-sentence]')!;
+    const hint = root.querySelector<HTMLElement>('[data-nw-hint]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-nw-next]')!;
+    const reset = root.querySelector<HTMLButtonElement>('[data-nw-reset]')!;
+    let n = 0;
+
+    function render() {
+      const parts: (string | HTMLElement)[] = [START];
+      for (let i = 1; i <= n; i++) {
+        const w = STEPS[i - 1].picked;
+        const mark = document.createElement('mark');
+        mark.className = i === n ? 'nw__new' : 'nw__done';
+        mark.textContent = w;
+        parts.push(w === '.' ? '' : ' ', mark);
+      }
+      sentence.replaceChildren(...parts.filter((p) => p !== ''));
+      sentence.setAttribute('data-nw-text', sentenceAt(n));
+      root!.querySelectorAll<HTMLElement>('[data-nw-step]').forEach((el) => {
+        el.hidden = Number(el.dataset.nwStep) !== n;
+      });
+      const done = n === STEPS.length;
+      hint.hidden = n > 0;
+      next.hidden = done;
+      reset.hidden = n === 0;
+      if (done) reset.focus();
+    }
+
+    next.addEventListener('click', () => {
+      if (n < STEPS.length) n++;
+      render();
+    });
+    reset.addEventListener('click', () => {
+      n = 0;
+      render();
+      next.focus();
+    });
+
+    staticEl.hidden = true;
+    live.hidden = false;
+    render();
+  }
+</script>
+
+<style is:global>
+  .nw { margin: 2rem 0 2.5rem; padding: 1.25rem; border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-surface); }
+  .nw__intro { margin: 0 0 1rem; color: var(--color-mute); font-size: 16px; }
+  .nw__label { margin: 0 0 .4rem; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  .nw__sentence { margin: 0 0 .75rem; font-family: var(--font-serif); font-size: 1.35rem; line-height: 1.4; color: var(--color-ink); overflow-wrap: anywhere; }
+  .nw mark { background: none; color: inherit; padding: 0; }
+  .nw__new { font-weight: 700; color: var(--color-accent-ink); background: var(--color-accent-bg) !important; border-radius: 3px; padding: 0 .2em !important; }
+  .nw__done { font-weight: 600; }
+  .nw__stage { margin: 0 0 1.5rem; padding: 0 0 1.25rem; border-bottom: 1px solid var(--color-line-soft); }
+  .nw__stage:last-of-type { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+  .nw__hint { margin: 0 0 1rem; color: var(--color-mute); font-size: 16px; }
+  .nw__bars { list-style: none !important; margin: 0 0 .5rem !important; padding: 0 !important; }
+  .nw__row {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'word pct tag' 'track track track';
+    align-items: baseline; column-gap: .75rem; row-gap: .25rem; margin: 0 0 .6rem !important; padding: .5rem .625rem;
+    border: 1px solid transparent; border-radius: 6px;
+  }
+  .nw__row[data-picked] { border-color: var(--color-accent); background: var(--color-accent-bg); }
+  .nw__word { grid-area: word; font-family: var(--font-mono); font-size: 15px; color: var(--color-ink); overflow-wrap: anywhere; }
+  .nw__pct { grid-area: pct; font-family: var(--font-mono); font-size: 14px; color: var(--color-ink); text-align: right; }
+  .nw__tag { grid-area: tag; min-width: 3.5rem; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-accent-ink); font-weight: 600; }
+  .nw__track { grid-area: track; display: block; height: 10px; border-radius: 5px; background: var(--color-line-soft); overflow: hidden; }
+  .nw__fill { display: block; height: 100%; border-radius: 5px; background: var(--color-mute); }
+  .nw__row[data-picked] .nw__fill { background: var(--color-accent); }
+  .nw__other { margin: 0 0 .75rem; font-size: 15px; color: var(--color-mute); }
+  .nw__caption { margin: .5rem 0 0; padding: .75rem 1rem; border-left: 2px solid var(--color-accent); background: var(--color-bg); border-radius: 0 6px 6px 0; font-size: 16px; line-height: 1.5; }
+  .nw__controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  .nw__btn {
+    min-height: 48px; padding: 0 1.25rem; border-radius: 8px; cursor: pointer; font-family: var(--font-mono); font-size: 14px;
+    color: var(--color-ink); background: transparent; border: 1px solid var(--color-line);
+  }
+  .nw__btn:hover { border-color: var(--color-accent); color: var(--color-accent-ink); }
+  .nw__btn--main { background: var(--color-accent); color: var(--color-bg); border-color: var(--color-accent); }
+  .nw__btn--main:hover { filter: brightness(1.08); color: var(--color-bg); }
+  .nw__btn[hidden], .nw [hidden] { display: none; }
+  .nw__note { margin: 1rem 0 0; font-size: 15px; line-height: 1.5; color: var(--color-mute); }
+  @media (min-width: 36rem) {
+    .nw__row { grid-template-columns: 7rem minmax(0, 1fr) 3rem 4.5rem; grid-template-areas: 'word track pct tag'; align-items: center; }
+    .nw__track { margin: 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nw__fill { animation: nw-grow .45s ease-out both; }
+  }
+  @keyframes nw-grow { from { width: 0 !important; } }
+
+  .nw-search__q { margin: 0 0 1rem; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-ink); }
+  .nw-search__cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .nw-search__col { padding: 1rem; border: 1px solid var(--color-line-soft); border-radius: 8px; background: var(--color-bg); }
+  .nw-search__list { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+  .nw-search__list li { margin: 0 0 .75rem !important; padding: 0 !important; display: grid; }
+  .nw-search__list li:last-child { margin-bottom: 0 !important; }
+  .nw-search__link { color: var(--color-ink); font-weight: 600; overflow-wrap: anywhere; }
+  .nw-search__site { font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); overflow-wrap: anywhere; }
+  .nw-search__answer { margin: 0; font-size: 1.05rem; line-height: 1.5; color: var(--color-ink); }
+  @media (min-width: 40rem) { .nw-search__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
