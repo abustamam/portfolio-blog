@@ -22,6 +22,14 @@ const text = html
   .replace(/\s+/g, ' ')
   .replace(/ ([,.:])/g, '$1');
 
+// Voice: the GuideCta at the bottom is the page's one call to action, and the
+// site speaks as "I". Nothing above the CTA mentions the training, a course, a
+// cohort or a track, or says "we"/"our"/"us". The five prompt parts on each card
+// are in character (what that person would type), so they may say "we".
+const COURSE_WORDS = /\b(?:tracks?|training|courses?|cohorts?)\b/i;
+const WE_WORDS = /\b(?:we|our|ours|ourselves|us)\b/i;
+const squash = (s: string) => s.replace(/\s+/g, ' ').trim();
+
 const CARD_FIELDS = ['teacher', 'bookkeeper', 'office-admin', 'volunteer-coordinator', 'job-seeker'];
 const card = (page: Page, id: string) => page.locator(`[data-ex-card="${id}"]`);
 const pbField = (page: Page, f: string) => page.locator(`#examples-builder [data-pb-field="${f}"]`);
@@ -60,6 +68,15 @@ test.describe('example cards: data', () => {
     expect(text).not.toMatch(TIME_SAVED_FIGURE);
   });
 
+  test('no card string mentions the training, and only in-character prompt parts say "we"', () => {
+    for (const c of EXAMPLE_CARDS) {
+      for (const t of cardText(c)) expect(t.match(COURSE_WORDS)?.[0], `course word in ${c.id}`).toBeUndefined();
+      for (const k of ['label', 'summary', 'youCheck', 'before', 'after'] as const) {
+        expect(c[k].match(WE_WORDS)?.[0], `"we" in ${c.id}.${k}`).toBeUndefined();
+      }
+    }
+  });
+
   test('presets carry each card\'s five parts under its id', () => {
     const presets = toPresets(EXAMPLE_CARDS);
     expect(presets.map((p) => p.id)).toEqual(EXAMPLE_CARDS.map((c) => c.id));
@@ -78,7 +95,7 @@ test.describe('example cards: data', () => {
 
 test.describe('example cards: built page', () => {
   test('the illustrations note is there, and the page holds no build how-to', () => {
-    expect(text).toContain('These are illustrations, built from practice cases. They are not results from real participants');
+    expect(text).toContain('These are illustrations I built from practice cases. They are not results from real participants.');
     for (const banned of ['Homework', 'Connect:', 'Build:', 'step by step', 'step-by-step', 'every week automatically']) {
       expect(text, banned).not.toContain(banned);
     }
@@ -97,6 +114,27 @@ test.describe('example cards: built page', () => {
 });
 
 test.describe('example cards: in the browser', () => {
+  test('the prose above the call to action has no course plug and no "we", outside in-character prompts', async ({ page }) => {
+    await page.goto(PAGE);
+    const raw = await page.evaluate(() =>
+      [document.querySelector('[data-guide] > header'), document.querySelector('[data-guide] > article')]
+        .map((el) => {
+          if (!el) return '';
+          const copy = el.cloneNode(true) as HTMLElement;
+          copy.querySelectorAll('style, script, [data-guide-cta]').forEach((n) => n.remove());
+          return copy.textContent ?? '';
+        })
+        .join('\n'),
+    );
+    let prose = squash(raw);
+    for (const c of EXAMPLE_CARDS) for (const f of PROMPT_FIELDS) prose = prose.split(squash(c[f])).join(' ');
+    expect(prose.length).toBeGreaterThan(1500);
+    expect(prose.match(COURSE_WORDS)?.[0], 'course word above the CTA').toBeUndefined();
+    expect(prose.match(WE_WORDS)?.[0], '"we" above the CTA').toBeUndefined();
+    await expect(page.locator('[data-guide] > header a[href*="/ai-training"], [data-guide] > article a[href*="/ai-training"]')).toHaveCount(0);
+    await expect(page.locator('[data-guide-cta] a[href="/ai-training/"]')).toHaveCount(1);
+  });
+
   test('choosing a field shows only that card and survives a reload', async ({ page }) => {
     await page.goto(PAGE);
     for (const c of EXAMPLE_CARDS) await expect(card(page, c.id)).toBeVisible();

@@ -19,8 +19,8 @@ const { builderId, cards = EXAMPLE_CARDS } = Astro.props;
 
 <section class="ex" data-examples aria-label="Examples by field">
   <p class="ex-note" data-ex-note>
-    <strong>These are illustrations</strong>, built from practice cases. They are not results from real participants:
-    no real people, no timings. The people in them are placeholders like PERSON-1.
+    These are illustrations I built from practice cases. They are not results from real participants. Nobody in them
+    is real (PERSON-1 stands in for a name), and there are no timings.
   </p>
 
   <div class="ex-filter" data-ex-filter hidden>
@@ -32,7 +32,7 @@ const { builderId, cards = EXAMPLE_CARDS } = Astro.props;
       ))}
     </div>
   </div>
-  <p class="ex-missing">My field isn't here: <a href="/ai-quiz/" data-ex-missing>take the quiz</a>, and tell us what you do.</p>
+  <p class="ex-missing">My field isn't here: <a href="/ai-quiz/" data-ex-missing>take the quiz</a> and tell me what you do.</p>
   <p class="ex-status" data-ex-status role="status"></p>
 
   <ul class="ex-cards" role="list">
@@ -48,7 +48,7 @@ const { builderId, cards = EXAMPLE_CARDS } = Astro.props;
         </div>
 
         <div class="ex-card__block">
-          <p class="ex-card__head">Then you check</p>
+          <p class="ex-card__head">What you check yourself</p>
           <p class="ex-card__line">{c.youCheck}</p>
         </div>
 

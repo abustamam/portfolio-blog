@@ -39,71 +39,71 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     id: 'teacher-note-home',
     field: 'teacher',
     label: 'Teacher',
-    summary: "Write the Friday note home to families about the class's week and what is coming up.",
+    summary: "The Friday note home to families about the week in class and what's coming up.",
     situation:
-      'I teach a fourth-grade class. Every Friday I send families a short note about the week. Most parents read it on their phones, and some read English as a second language.',
-    task: "Turn my notes into this week's note home.",
+      "I teach fourth grade. Every Friday I send families a short note about the week. Most parents read it on their phone, and some of them read English as a second language.",
+    task: "Can you turn my notes into this week's note home?",
     input:
-      "Notes: finished the fractions unit, quizzes come home Monday. Science museum trip next Thursday, permission slips due Tuesday. Please keep signing the reading log each night. Thank you to PERSON-1's family for the classroom plants.",
-    format: 'Under 150 words. Warm, short sentences, no school jargon. End with a short list of dates and things to bring.',
-    check: "List anything you had to guess, like a date or time I didn't give you. Don't add events that aren't in my notes.",
-    youCheck: 'Every date and deadline against the school calendar, and that no child is named.',
+      "My notes: finished the fractions unit, quizzes come home Monday. Science museum trip next Thursday, permission slips due Tuesday. Please keep signing the reading log every night. Thank you to PERSON-1's family for the classroom plants.",
+    format: 'Keep it under 150 words. Warm, short sentences, no school jargon. End with a short list of dates and what to bring.',
+    check: "If you had to guess anything, like a date or a time I didn't give you, tell me. Don't add any events that aren't in my notes.",
+    youCheck: 'Every date and deadline against the school calendar. Also make sure no child is named.',
     before:
-      'The note is rewritten from a blank page every Friday afternoon. Keeping it short and friendly is hard, and a deadline sometimes gets left out.',
+      "Every Friday afternoon the note starts from a blank page. It's hard to keep it short and friendly, and now and then a deadline gets left out.",
     after:
-      'You paste your bullet notes and get a draft in the usual shape. You check the dates, change a line so it sounds like you, and send it.',
+      'You paste in your notes and get a draft in the usual shape. Once the dates are checked and a line or two sounds like you, it goes out.',
   },
   {
     id: 'bookkeeper-unmatched',
     field: 'bookkeeper',
     label: 'Bookkeeper',
-    summary: "Turn the week's unmatched bank lines into one clear list of questions for the business owner.",
+    summary: "Turning the week's unmatched bank lines into one list of questions for the business owner.",
     situation:
-      "I do the books for a few small businesses. Each week some bank lines don't match a receipt or an invoice, and I have to ask the owner what they were.",
-    task: 'Write the questions I need to send the owner, one for each unmatched line.',
+      "I do the books for a few small businesses. Every week there are some bank lines that don't match a receipt or invoice, and I have to ask the owner what they were.",
+    task: 'Write up the questions I need to send the owner, one per unmatched line.',
     input:
-      'Unmatched lines, made safe: 3 Nov, card payment, HARDWARE-STORE-1, 84.20. 5 Nov, transfer out to PERSON-1, 400.00. 6 Nov, card payment, ONLINE-SHOP-1, 19.99, looks like a monthly subscription.',
-    format: 'A numbered list the owner can answer in a word or a line each. Friendly, with no accounting terms.',
-    check: "Copy each date and amount exactly as I gave it. Don't add up anything or guess what a payment was for; ask instead.",
-    youCheck: 'Every date and amount in the list against the bank statement itself, line by line, before it goes to the owner.',
+      "Here are the unmatched lines. I've swapped the names for placeholders. 3 Nov, card payment, HARDWARE-STORE-1, 84.20. 5 Nov, transfer out to PERSON-1, 400.00. 6 Nov, card payment, ONLINE-SHOP-1, 19.99, looks like a monthly subscription.",
+    format: 'A numbered list the owner can answer with a word or a line each. Keep it friendly, no accounting terms.',
+    check: "Copy every date and amount exactly as I gave it. Don't add anything up, and don't guess what a payment was for. Ask instead.",
+    youCheck: 'Every date and amount on the list, line by line against the bank statement itself, before it goes to the owner.',
     before:
-      'Each unmatched line turns into its own back-and-forth message, worded differently every week, and the answers trickle in.',
+      'Each unmatched line becomes its own back-and-forth message, worded differently every week, and the answers trickle in.',
     after:
-      'One clear list goes out at once, with the amounts checked against the statement. The owner answers everything in a single reply.',
+      'One list goes out at once, with the amounts already checked against the statement, and the owner answers all of it in one reply.',
   },
   {
     id: 'office-admin-inbox',
     field: 'office-admin',
     label: 'Office admin',
-    summary: 'Draft replies to the same routine questions that land in the shared inbox every week.',
+    summary: 'Drafting replies to the routine questions that land in the shared inbox every week.',
     situation:
       'I run the front office at a community center. The shared inbox gets the same few questions every week: opening hours, booking a room, parking, cancelling a class.',
-    task: 'Draft a reply to each question below, using only the facts in my office information.',
+    task: 'Draft a reply to each question below. Only use the facts in my office info.',
     input:
-      'Office information: open Monday to Friday, 9 to 5, and Saturday mornings for classes only. Rooms are booked at the front desk and need a deposit. Free parking in the lot behind the building. Questions: PERSON-1 asks if they can book the hall on a Sunday. PERSON-2 asks where to park for the Saturday class.',
+      'Office info: open Monday to Friday, 9 to 5, and Saturday mornings for classes only. Rooms are booked at the front desk and need a deposit. Free parking in the lot behind the building. Questions: PERSON-1 wants to know if they can book the hall on a Sunday. PERSON-2 is asking where to park for the Saturday class.',
     format: 'One short reply per question, under 80 words each. Friendly and plain.',
-    check: "If my office information doesn't answer a question, say so instead of guessing. Point out anything in my input that looks inconsistent.",
-    youCheck: 'Any reply the AI said it could not answer, and every time and rule against the posted office information.',
+    check: "If my office info doesn't answer a question, say so. Don't guess. Also point out anything in what I gave you that doesn't add up.",
+    youCheck: "Any question the AI said it couldn't answer, and every time and rule against the posted office information.",
     before:
-      'The same answers are typed again by hand, and they drift: two people on the desk give two different answers about the deposit.',
+      'The same answers get typed out by hand each time, and they drift. Two people on the desk give two different answers about the deposit.',
     after:
-      'Replies come from one sheet of office facts, so they match. The questions the facts do not cover come back flagged for you to answer yourself.',
+      "The replies all come from one sheet of office facts, so they match. Any question the facts don't cover comes back flagged for you to answer yourself.",
   },
   {
     id: 'volunteer-shift-reminder',
     field: 'volunteer-coordinator',
     label: 'Volunteer coordinator',
-    summary: "Turn this week's sign-ups into a shift reminder and a list of the shifts that are still short.",
+    summary: "Turning this week's sign-ups into a shift reminder and a list of the shifts that are still short.",
     situation:
-      "I coordinate volunteers for a Saturday food pantry. Every Thursday I send a reminder to everyone on Saturday's shifts and ask for help where we are short.",
-    task: 'Write the reminder message and tell me which shifts are short.',
+      "I coordinate volunteers for a Saturday food pantry. Every Thursday I send a reminder to everyone on Saturday's shifts and ask for help where we're short.",
+    task: 'Write the reminder and tell me which shifts are short.',
     input:
-      'Shifts: setup needs three people, distribution needs six, cleanup needs two. Signed up: setup PERSON-1 and PERSON-2. Distribution PERSON-3, PERSON-4, PERSON-5, PERSON-6 and PERSON-7. Cleanup: nobody yet.',
-    format: 'A short group message for WhatsApp, under 100 words. Then, separately, a list of the shifts that are short and by how many.',
-    check: "Show your counting for each shift so I can check it. Don't add any names that aren't in my list.",
-    youCheck: 'The short-shift list against the sign-up sheet itself, before asking anyone for more help.',
+      'Shifts: setup needs 3 people, distribution needs 6, cleanup needs 2. Signed up so far: setup PERSON-1 and PERSON-2. Distribution PERSON-3, PERSON-4, PERSON-5, PERSON-6, PERSON-7. Cleanup: nobody yet.',
+    format: 'A short message for the WhatsApp group, under 100 words. Then, separately, a list of which shifts are short and by how many.',
+    check: "Show me your counting for each shift so I can check it. Don't add any names that aren't on my list.",
+    youCheck: 'The short-shift list against the sign-up sheet itself, before you ask anyone for more help.',
     before:
-      'The reminder is written from scratch each week, and finding the gaps means scanning the sign-up sheet by eye.',
+      'The reminder gets written from scratch each week, and finding the gaps means scanning the sign-up sheet by eye.',
     after:
       'The reminder and the list of gaps come back together. You check the counts against the sheet and post the message.',
   },
@@ -111,19 +111,19 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     id: 'job-seeker-cover-letter',
     field: 'job-seeker',
     label: 'Job seeker',
-    summary: 'Rewrite the opening of your cover letter for each job you apply to this week.',
+    summary: 'Rewriting the opening of your cover letter for each job you apply to this week.',
     situation:
-      'I am applying for office manager jobs. I have a general cover letter, but each posting asks for different things.',
-    task: 'Rewrite the first paragraph of my cover letter for this posting, using only experience I actually have.',
+      "I'm applying for office manager jobs. I have a general cover letter, but every posting asks for different things.",
+    task: 'Rewrite the first paragraph of my cover letter for this posting. Only use experience I actually have.',
     input:
       'The posting asks for: scheduling for a busy team, handling vendor invoices, a calm phone manner. My experience: ran the front desk at a busy dental office, kept the appointment book for several dentists, sent invoices to the billing service.',
     format: 'One paragraph, under 120 words. Plain and confident, no buzzwords.',
-    check: "Don't claim any skill or result that isn't in my experience. List which parts of the posting my experience doesn't cover.",
-    youCheck: "Every claim in the paragraph against what you have really done. Anything you couldn't say out loud in an interview comes out.",
+    check: "Don't claim any skill or result that isn't in my experience. Then list the parts of the posting my experience doesn't cover.",
+    youCheck: "Every claim in the paragraph against what you've really done. If you couldn't say it out loud in an interview, take it out.",
     before:
-      'The same general letter goes to every posting, or a new one is started from nothing each time.',
+      'The same general letter goes to every posting, or you start a new one from nothing each time.',
     after:
-      'Each application opens with a paragraph that answers that posting, and you know which requirements to be ready to talk about.',
+      'Each application opens with a paragraph written for that posting, and you know which requirements to be ready to talk about.',
   },
 ];
 

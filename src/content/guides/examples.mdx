@@ -1,25 +1,25 @@
 ---
 title: One weekly task, by profession
-description: "Five everyday weekly tasks, one per line of work: the prompt, what you check, and how the week goes before and after."
-lead: "Is this for someone like me? Pick your line of work and see one ordinary weekly task done with AI: the task, the prompt, what you check yourself, and what changes. Then try the prompt."
+description: "One ordinary weekly task for each of five jobs, with the prompt someone in that job might type and what they check before using the answer."
+lead: "I wrote up one ordinary weekly task for each of five jobs, with the prompt someone in that job might type, what they check before using the answer, and how the week goes before and after. Pick the job closest to yours and try the prompt."
 step: 5
 minutes: 4
 tool: Example cards
-ctaLine: "These cards show what changes, not how it was set up. The hands-on training takes one task from your own week and works on it with you, with feedback, until it repeats."
+ctaLine: "In the hands-on training I work through one task from your own week with you until you can do it without me."
 ---
 import ExampleCards from '../../components/guides/ExampleCards.astro';
 import PromptBuilder from '../../components/guides/PromptBuilder.astro';
 import { EXAMPLE_CARDS, toPresets } from '../../consts/guides/examples';
 
-## Pick your field
+## Five weekly tasks
 
-Each card is one task that comes round every week. Tap **Before** and **After** to see how the week changes, and **Try this prompt** to open the prompt in the builder below.
+Each card is one task that comes round every week in that job. The Before and After buttons show how the week goes without AI and with it. Try this prompt puts that card's prompt into the builder further down.
 
 <ExampleCards builderId="examples-builder" />
 
-## Try the prompt
+## The prompt in five parts
 
-The card you picked lands here, split into its five parts. Change any part and the prompt underneath changes with it. Copy it into any AI tool, then check the answer the way the card says.
+The prompt from the card you picked shows up here, split into its five parts. Change any part to fit your own week and the full prompt underneath changes with it. Copy it into whichever AI app you use ([Which AI app should I use?](/ai-guides/which-tool/) helps if you haven't picked one), then check the answer the way the card says.
 
 <PromptBuilder
   presets={toPresets(EXAMPLE_CARDS)}
@@ -28,4 +28,4 @@ The card you picked lands here, split into its five parts. Change any part and t
   chipsLabel="Or start from another example"
 />
 
-New to the five parts? [The five-part prompt](/ai-guides/prompt/) explains each one. Before you paste anything of your own, read [Never paste these](/ai-guides/never-paste/).
+[The five-part prompt](/ai-guides/prompt/) explains what each part is for. Before you paste in anything of your own, read [what's safe to paste into AI](/ai-guides/never-paste/).
