@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
+import { previewPort } from './tests/support/previewPort';
+
+// One preview port per git worktree (see tests/support/previewPort.ts).
+const port = previewPort(process.cwd(), process.env);
+const url = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: './tests',
@@ -8,7 +13,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: url,
     trace: 'on-first-retry',
   },
   projects: [
@@ -18,8 +23,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run preview',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
+    command: `npm run preview -- --port ${port}`,
+    url,
+    // Never reuse a server that is already listening: it may be serving
+    // another worktree's build. A busy port fails the run instead.
+    reuseExistingServer: false,
   },
 });
