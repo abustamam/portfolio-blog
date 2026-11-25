@@ -7,13 +7,14 @@ minutes: 8
 tool: Spot the mistake
 ctaLine: A general checklist catches general mistakes. In the hands-on training you build the check for your own file.
 ---
+import Term from '../../components/guides/Term.astro';
 import SpotTheMistake from '../../components/guides/SpotTheMistake.astro';
 
 ## Asking again doesn't fix it
 
-When an answer looks off, most of us ask again, or ask "are you sure?", until it looks right. That isn't checking. The tool will happily agree with itself, or swap one confident answer for another, and it knows no more about what's true the second time. Asking again tells you how the answer *sounds*. Only the source tells you whether it's *right*.
+When an answer looks off, most of us ask again, or ask "are you sure?", until it looks right. That isn't checking. The <Term id="chat-app">tool</Term> will happily agree with itself, or swap one confident answer for another, and it knows no more about what's true the second time. Asking again tells you how the answer *sounds*. Only the source tells you whether it's *right*.
 
-Checking every answer by hand against the source does work, but it doesn't scale: the more you use AI, the more answers there are to check. The better move is to build the check into how you work. Below are the five mistakes that check is looking for, each with a quick check you can do in 30 seconds, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
+Checking every answer by hand against the source does work, but it doesn't scale: the more you use <Term>AI</Term>, the more answers there are to check. The better move is to build the check into how you work. Below are the five mistakes that check is looking for, each with a quick check you can do in 30 seconds, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
 
 ## Five mistakes and the check for each
 
@@ -58,7 +59,7 @@ The answer points to a case, a book, a law or a page that doesn't exist. Made-up
 
 Totals, averages and percentages that are close to right, which is what makes them easy to believe.
 
-**The 30-second check:** redo any number that matters with a calculator or the sheet's own SUM. Don't ask the chat to check its own maths.
+**The 30-second check:** redo any number that matters with a calculator or the sheet's own SUM. Don't ask the <Term>chat</Term> to check its own maths.
 
 **It has happened:**
 - An AI-written CNET article on compound interest said that if you put $10,000 in an account earning 3% a year, you'd earn $10,300 in the first year. You'd earn $300. By the time Engadget reported it, in January 2023, the article had been corrected. ([Engadget](https://www.engadget.com/cnet-reviewing-ai-written-articles-serious-errors-113041405.html))
@@ -79,7 +80,7 @@ Habits you can start today, with no setup:
 
 - **Ask for the line behind each claim.** Ask the AI to quote the line in your source behind every number or claim, and to say what it couldn't find.
 - **Do the sums in a spreadsheet,** not in the chat.
-- **Get a second pass.** Open a fresh chat, or a second tool, give it the source, and ask it to check the first answer against it. That isn't the same as asking the first chat if it's sure: the second pass has the source in front of it.
+- **Get a second pass.** Open [a fresh chat](/ai-guides/does-it-remember/), or a second tool, give it the source, and ask it to check the first answer against it. That isn't the same as asking the first chat if it's sure: the second pass has the source in front of it.
 - **Keep a check you paste in.** For a task you do often, keep a short check and paste it in with every task of that kind. For example: "Quote the line behind each number. List anything you couldn't find."
 
 ## The checklist

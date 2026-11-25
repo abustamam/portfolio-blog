@@ -7,21 +7,22 @@ minutes: 6
 tool: Tool picker
 ctaLine: The hands-on training sets one of these up on a real task from your week.
 ---
+import Term from '../../components/guides/Term.astro';
 import ToolPicker from '../../components/guides/ToolPicker.astro';
 import { AI_TOOLS, FACT_LABELS, FACT_ORDER, lastChecked } from '../../consts/guides/aiTools';
 import { fmtLongDate } from '../../utils/date';
 
 {/* Facts live in src/consts/guides/aiTools.ts, each with its vendor source and checked date. Re-check every quarter. */}
 
-<p class="ai-label which-tool-checked">Last checked <time data-last-checked datetime={lastChecked()}>{fmtLongDate(new Date(lastChecked()))}</time>. Prices and plans change; each fact links the vendor's own page.</p>
+<p class="ai-label which-tool-checked">Last checked <time data-last-checked datetime={lastChecked()}>{fmtLongDate(new Date(lastChecked()))}</time>. Prices and <Term id="plan">plans</Term> change; each fact links the vendor's own page.</p>
 
 ## Where to start
 
 If it is for work, use what your employer allows, signed in with your work account.
 
-If it is for you, start with the free app that matches your email: Gemini if you use Gmail, Copilot if you use Outlook. If you use neither, ChatGPT or Claude.
+If it is for you, start with the free <Term id="chat-app">app</Term> that matches your email: Gemini if you use Gmail, Copilot if you use Outlook. If you use neither, ChatGPT or Claude.
 
-Stay on the free plan until you hit its limits every week, or until you want the AI inside Gmail, Word or Outlook.
+Stay on the free plan until you hit its <Term id="usage-limit">limits</Term> every week, or until you want the <Term>AI</Term> inside Gmail, Word or Outlook.
 
 ## Four questions
 
@@ -60,7 +61,7 @@ Every cell links the vendor page it came from. Where a vendor page did not say, 
 </table>
 </div>
 
-"Connect" means you sign in and give the app permission yourself, and you can disconnect it again in the app's settings. Connecting your email is a bigger step than chatting, so check what the table says about your chats before you do it.
+"Connect" means you sign in and give the app permission yourself, and you can disconnect it again in the app's settings. Connecting your email is a bigger step than chatting, so check what the table says about your <Term id="conversation">chats</Term> before you do it.
 
 ## What I'd pick, by situation
 
@@ -88,9 +89,9 @@ You can ask any of them about code in an ordinary chat. If you have no account y
 
 For learning the habit, the free plan of any of these is enough. The usual personal plan is about $20 a month; exact prices are in the table. I would pay when one of these is true:
 
-- You hit the limit most weeks and have to wait or stop.
+- You hit [the limit](/ai-guides/usage-limits/) most weeks and have to wait or stop.
 - You want it inside the apps you already use. Gemini inside Gmail and Docs, and Copilot inside Word, Excel and Outlook, come with the paid personal plans.
-- You need longer files or more uploads than the free plan allows.
+- You need longer files or more <Term id="attach">uploads</Term> than the free plan allows.
 
 A bigger plan won't rescue a vague request. When the free plan gives you a poor answer, ask more clearly before you think about upgrading, and check what comes back either way.
 

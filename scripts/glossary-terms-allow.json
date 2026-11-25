@@ -1,0 +1,26 @@
+[
+  {
+    "guide": "never-paste",
+    "term": "AI app",
+    "sentence": "Never used an AI app? Start with [What an AI chat app is](/ai-guides/what-is-ai/).",
+    "reason": "The required pointer line (#122 step 3). It sends a reader who has never used one to the page that explains the term, so marking it there would be circular."
+  },
+  {
+    "guide": "when-ai-is-wrong",
+    "term": "training",
+    "sentence": "and that's what we do in the hands-on training.",
+    "reason": "The cohort's hands-on training session, not the data a model learned from."
+  },
+  {
+    "guide": "which-model",
+    "term": "plans",
+    "sentence": "Good for most work: emails, letters, documents, plans, spreadsheets.",
+    "reason": "Plans as a kind of document (a project plan), not an account plan."
+  },
+  {
+    "guide": "which-model",
+    "term": "conversation",
+    "sentence": "Copilot calls these \"conversation modes\", and some only appear when you're signed in.",
+    "reason": "A quotation of the name Copilot's own menu uses for its modes."
+  }
+]
