@@ -18,6 +18,18 @@ const ROOT = process.cwd();
 const PORT = previewPort(ROOT, process.env) + 1000;
 const BASE = process.env.TERM_TEST_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 const PAGE = '/ai-guides/term-fixture/';
+const GUIDES_DIR = join(ROOT, 'src/content/guides');
+// A guide is published when its file exists and is not `draft: true`.
+const isPublishedGuide = (guide: string) => {
+  const file = join(GUIDES_DIR, `${guide}.mdx`);
+  if (!existsSync(file)) return false;
+  const front = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(file, 'utf8'))?.[1] ?? '';
+  return !/^draft:\s*true\s*$/m.test(front);
+};
+const expectedHref = (id: string) => {
+  const guide = GLOSSARY.find((t) => t.id === id)!.guide;
+  return guide && isPublishedGuide(guide) ? `/ai-guides/${guide}/` : `/ai-guides/glossary/#${id}`;
+};
 const short = (id: string) => GLOSSARY.find((t) => t.id === id)!.short;
 
 // One worker for the whole file: one dev server, one temporary build.
@@ -143,9 +155,11 @@ test.describe('on the fixture page', () => {
       const href = (id: string) => page.locator(`a.term[data-term="${id}"]`).getAttribute('href');
       expect(await href('model')).toBe('/ai-guides/which-model/'); // published guide
       expect(await href('hallucination')).toBe('/ai-guides/when-ai-is-wrong/'); // explicit id, published guide
-      expect(await href('token')).toBe('/ai-guides/glossary/#token'); // guide not published yet
       expect(await href('agent')).toBe('/ai-guides/glossary/#agent'); // no guide
-      expect(await href('usage-limit')).toBe('/ai-guides/glossary/#usage-limit');
+      // The rule, read from the files, so it holds whichever guides have landed.
+      for (const id of ['token', 'usage-limit']) {
+        expect(await href(id), id).toBe(expectedHref(id));
+      }
     });
 
     test('a name that is not on the page text but is an explicit id still resolves', async ({ page }) => {
@@ -161,7 +175,7 @@ test.describe('on the fixture page', () => {
     test('the word is a plain link with its definition in the title', async ({ page }) => {
       await page.goto(PAGE);
       const t = page.locator('a.term[data-term="usage-limit"]');
-      await expect(t).toHaveAttribute('href', '/ai-guides/glossary/#usage-limit');
+      await expect(t).toHaveAttribute('href', expectedHref('usage-limit'));
       await expect(t).toHaveAttribute('title', short('usage-limit'));
       expect(await page.locator('.term-card').count()).toBe(0);
     });
@@ -197,7 +211,7 @@ test.describe('on the fixture page', () => {
       await expect(card.locator('.term-card__short')).toHaveText(short('usage-limit'));
       await expect(card.locator('a')).toHaveCount(1);
       await expect(card.locator('a')).toHaveText('More on this');
-      await expect(card.locator('a')).toHaveAttribute('href', '/ai-guides/glossary/#usage-limit');
+      await expect(card.locator('a')).toHaveAttribute('href', expectedHref('usage-limit'));
       await expect(term).toHaveAttribute('aria-describedby', 'term-card');
       await page.mouse.move(5, 5);
       await expect(card).toBeHidden();
@@ -298,7 +312,7 @@ test.describe('on the fixture page', () => {
       await expect(card.locator('a')).toBeFocused();
       await expect(card).toBeVisible();
       await page.keyboard.press('Enter');
-      await expect(page).toHaveURL(/\/ai-guides\/glossary\/#usage-limit$/);
+      await expect(page).toHaveURL((u) => u.pathname + u.hash === expectedHref('usage-limit'));
     });
 
     test('Escape closes the card and puts focus back on the word without reopening it', async ({ page }) => {
