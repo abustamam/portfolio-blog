@@ -35,6 +35,14 @@ for (const path of PAGES) {
       expect(order).toEqual({ headingFirst: true, listFirst: true });
     });
 
+    test('passwords, keys and codes stay out of every account, approved work accounts included', async ({ page }) => {
+      await page.goto(path);
+      const note = page.locator('article h2#first-which-account + p + ul + p');
+      await expect(note).toHaveText(
+        'Passwords, keys and one-time codes stay out of every account. That includes a work account your employer has approved.',
+      );
+    });
+
     test('the linked anchors still exist', async ({ page }) => {
       await page.goto(path);
       await expect(page.locator('article #make-a-file-safe-in-three-steps')).toHaveCount(1);
@@ -49,3 +57,17 @@ for (const path of PAGES) {
     });
   });
 }
+
+test('the cohort handout link says "What\'s safe to paste", not "Never paste these"', async ({ page }) => {
+  await page.goto('/ai-cohort/');
+  const link = page.locator('a[href="/ai-cohort/never-paste/"]', { hasText: "What's safe to paste" });
+  await expect(link).toHaveCount(1);
+  await expect(page.getByText('Never paste these')).toHaveCount(0);
+});
+
+test('when-ai-is-wrong links to the guide as "what\'s safe to paste into AI"', async ({ page }) => {
+  await page.goto('/ai-guides/when-ai-is-wrong/');
+  const link = page.locator('article a[href="/ai-guides/never-paste/"]');
+  // The markdown pipeline turns the apostrophe into a typographic one.
+  await expect(link).toHaveText(/^what[’']s safe to paste into AI$/);
+});

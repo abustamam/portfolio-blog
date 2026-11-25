@@ -6,6 +6,8 @@ What you can safely paste depends on the account you are signed in to. Check tha
 - **A work account your employer has approved for that kind of data:** follow their policy. You may not need to remove anything at all. Paste what they allow, and nothing they don't. Your employer's agreement with the AI company, and their policy, decide what's allowed.
 - **Not sure which you have:** treat it as the first case until you've asked.
 
+Passwords, keys and one-time codes stay out of every account. That includes a work account your employer has approved.
+
 ## What to keep out of an account that isn't approved for it
 
 On a free or personal account, or any account your employer hasn't approved for this kind of data:
