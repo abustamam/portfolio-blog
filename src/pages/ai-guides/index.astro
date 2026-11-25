@@ -5,6 +5,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getGuides, guidePath } from './_guides';
 import StartHere from '../../components/guides/StartHere.astro';
+import NotifyForm from '../../components/guides/NotifyForm.astro';
 import '../../styles/ai.css';
 
 const guides = await getGuides();
@@ -66,6 +67,10 @@ const guides = await getGuides();
         </a>
       </li>
     </ul>
+
+    <div class="ai-card hub-notify" data-hub-notify>
+      <NotifyForm source="guides-hub" />
+    </div>
   </div>
 </BaseLayout>
 
@@ -118,4 +123,5 @@ const guides = await getGuides();
   .hub-reset[hidden] { display: none; }
   .hub-reset__btn { background-color: transparent; border: 0; padding: 0 0 2px; cursor: pointer; }
   .hub-next { margin: 0 0 1rem; }
+  .hub-notify { padding: 1.25rem 1.375rem; margin: -1rem 0 2.5rem; min-width: 0; }
 </style>

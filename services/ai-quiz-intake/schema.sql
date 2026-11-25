@@ -60,3 +60,13 @@ alter table cohort_intake add column if not exists extras jsonb not null default
 alter table cohort_intake drop constraint if exists cohort_intake_track_check;
 alter table cohort_intake add constraint cohort_intake_track_check
   check (track in ('foundations', 'applied', 'builder', 'everyday', 'connect', 'build'));
+
+-- "Tell me when the next cohort opens" on the free guides (idempotent; run on
+-- databases created before it). Those rows have no name, only a contact and
+-- the page they came from (`guides-hub` or `guide:<id>`). Every row still has
+-- a name or a source.
+alter table cohort_waitlist add column if not exists source text;
+alter table cohort_waitlist alter column name drop not null;
+alter table cohort_waitlist drop constraint if exists cohort_waitlist_name_or_source;
+alter table cohort_waitlist add constraint cohort_waitlist_name_or_source
+  check (name is not null or source is not null);
