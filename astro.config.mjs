@@ -15,7 +15,8 @@ export default defineConfig({
       // Redirect-only pages (harmless if they do not exist)
       filter: (page) =>
         !/\/work\/(cdk-global|embedded-insurance)\/?$/.test(page) &&
-        !/\/ai-cohort\//.test(page), // unlisted cohort pages (noindex too)
+        !/\/ai-cohort\//.test(page) && // unlisted cohort pages (noindex too)
+        !/\/ai-training\/reserved\/?$/.test(page), // post-deposit landing page (noindex too)
     }),
   ],
   markdown: {
