@@ -1,0 +1,311 @@
+---
+// "The window": two figures for /ai-guides/does-it-remember/.
+//   <ContextWindow />              a made-up chat under a frame that holds eight
+//                                  messages. With JS the reader adds messages one
+//                                  at a time. Without JS the page shows the same
+//                                  chat at message 4 and at message 12.
+//   <ContextWindow part="boxes" /> a static figure: what a new chat can read.
+// The chat, the frame size and the arithmetic live in
+// src/consts/guides/contextWindow.ts. Nothing is typed, saved or sent.
+import { MESSAGES, CAPTION, windowFor, type ChatMessage } from '../../consts/guides/contextWindow';
+
+interface Props {
+  part?: 'window' | 'boxes';
+}
+const { part = 'window' } = Astro.props;
+
+// The static pair: before any message has slid out, and after.
+const STATIC_COUNTS = [4, 12];
+
+function split(m: ChatMessage) {
+  if (!m.flag) return { before: m.text, flag: '', after: '' };
+  const i = m.text.indexOf(m.flag);
+  return { before: m.text.slice(0, i), flag: m.flag, after: m.text.slice(i + m.flag.length) };
+}
+---
+
+{part === 'window' && (
+  <section class="cw" data-cw aria-label="The window: a chat and what the AI can see of it">
+    <div class="cw__static" data-cw-static>
+      <p class="cw__note">The same chat twice, once after message 4 and once after message 12. The outlined box is what the AI can see. This picture holds eight messages.</p>
+      <div class="cw__pair">
+        {STATIC_COUNTS.map((count) => {
+          const w = windowFor(count);
+          const outside = MESSAGES.slice(0, w.outside);
+          const inside = MESSAGES.slice(w.outside, count);
+          return (
+            <figure class="cw__fig" data-cw-fig={count}>
+              <figcaption class="cw__figcap">After message {count}</figcaption>
+              <div class="cw__col">
+                {outside.length > 0 && (
+                  <ol class="cw__list cw__list--out" start={1} data-cw-out>
+                    {outside.map((m) => {
+                      const s = split(m);
+                      return (
+                        <li class="cw__msg cw__msg--out" data-n={m.n} data-state="out">
+                          <span class="cw__who">{m.n}. {m.who}</span>
+                          <span class="cw__text">{s.before}{s.flag && <u>{s.flag}</u>}{s.after}</span>
+                          <span class="cw__gone">it can no longer see this</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                )}
+                <div class="cw__frame">
+                  <p class="cw__frame-label">What it can see: {w.from === w.to ? `message ${w.to}` : `messages ${w.from} to ${w.to}`}</p>
+                  <ol class="cw__list" start={w.from} data-cw-in>
+                    {inside.map((m) => {
+                      const s = split(m);
+                      return (
+                        <li class={`cw__msg cw__msg--${m.who === 'You' ? 'you' : 'ai'}`} data-n={m.n} data-state="in">
+                          <span class="cw__who">{m.n}. {m.who}</span>
+                          <span class="cw__text">{s.before}{s.flag && <u>{s.flag}</u>}{s.after}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              </div>
+              {count === 12 && <p class="cw__caption" data-cw-static-caption>{CAPTION}</p>}
+            </figure>
+          );
+        })}
+      </div>
+    </div>
+
+    <div class="cw__live" data-cw-live hidden>
+      <p class="cw__note">A made-up chat about a family road trip. The outlined box is what the AI can see, and it holds eight messages. Add messages and watch the early ones slide out.</p>
+      <div class="cw__col">
+        <ol class="cw__list cw__list--out" data-cw-out></ol>
+        <div class="cw__frame" data-cw-frame>
+          <p class="cw__frame-label" data-cw-label></p>
+          <ol class="cw__list" data-cw-in></ol>
+        </div>
+      </div>
+      <p class="cw__caption" data-cw-caption hidden>{CAPTION}</p>
+      <div class="cw__controls">
+        <button type="button" class="cw__btn" data-cw-next>Next message</button>
+        <button type="button" class="cw__btn" data-cw-summary>Start a new chat with a summary</button>
+        <button type="button" class="cw__btn cw__btn--ghost" data-cw-restart hidden>Start the chat again</button>
+      </div>
+      <p class="cw__status" role="status" aria-live="polite" data-cw-status></p>
+    </div>
+  </section>
+)}
+
+{part === 'boxes' && (
+  <figure class="cwb" data-cw-boxes>
+    <figcaption class="cwb__cap">What a new chat can and cannot read</figcaption>
+    <div class="cwb__grid">
+      <ul class="cwb__rows">
+        <li class="cwb__row" data-cwb="saved">
+          <div class="cwb__box"><strong>Saved memory</strong><span>Facts the app keeps about you, if the setting is on.</span></div>
+          <div class="cwb__link cwb__link--yes"><span class="cwb__line" aria-hidden="true"></span><span class="cwb__word">Can read</span></div>
+        </li>
+        <li class="cwb__row" data-cwb="past">
+          <div class="cwb__box"><strong>Past chats</strong><span>Your list of earlier chats.</span></div>
+          <div class="cwb__link cwb__link--maybe"><span class="cwb__line" aria-hidden="true"></span><span class="cwb__word">Only in apps that offer it</span></div>
+        </li>
+        <li class="cwb__row" data-cwb="this">
+          <div class="cwb__box"><strong>This chat</strong><span>The messages in the chat you have open now.</span></div>
+          <div class="cwb__link cwb__link--no"><span class="cwb__line" aria-hidden="true"></span><span class="cwb__word">Cannot read</span></div>
+        </li>
+      </ul>
+      <div class="cwb__new"><strong>A new chat</strong><span>Starts with an empty page.</span></div>
+    </div>
+  </figure>
+)}
+
+<script>
+  import {
+    MESSAGES,
+    RESET_MESSAGES,
+    LAST,
+    windowFor,
+    showCaption,
+    statusLine,
+    RESET_STATUS,
+    type ChatMessage,
+  } from '../../consts/guides/contextWindow';
+
+  const root = document.querySelector<HTMLElement>('[data-cw]');
+  if (root) {
+    const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(`[data-cw-live] ${s}`)!;
+    const live = root.querySelector<HTMLElement>('[data-cw-live]')!;
+    const stat = root.querySelector<HTMLElement>('[data-cw-static]')!;
+    const outList = q<HTMLOListElement>('[data-cw-out]');
+    const inList = q<HTMLOListElement>('[data-cw-in]');
+    const label = q<HTMLElement>('[data-cw-label]');
+    const caption = q<HTMLElement>('[data-cw-caption]');
+    const status = q<HTMLElement>('[data-cw-status]');
+    const next = q<HTMLButtonElement>('[data-cw-next]');
+    const summary = q<HTMLButtonElement>('[data-cw-summary]');
+    const restart = q<HTMLButtonElement>('[data-cw-restart]');
+
+    let count = 1;
+    let reset = false;
+    // Message numbers that were in view on the last render, so only a message
+    // that has just slid out gets the fade.
+    let seenIn = new Set<number>();
+
+    function item(m: ChatMessage, out: boolean, fade: boolean) {
+      const li = document.createElement('li');
+      li.className = `cw__msg cw__msg--${out ? 'out' : m.who === 'You' ? 'you' : 'ai'}${fade ? ' cw__msg--fade' : ''}`;
+      li.dataset.n = String(m.n);
+      li.dataset.state = out ? 'out' : 'in';
+      const who = document.createElement('span');
+      who.className = 'cw__who';
+      who.textContent = `${m.n}. ${m.who}`;
+      const text = document.createElement('span');
+      text.className = 'cw__text';
+      if (m.flag && m.text.includes(m.flag)) {
+        const i = m.text.indexOf(m.flag);
+        const u = document.createElement('u');
+        u.textContent = m.flag;
+        text.append(m.text.slice(0, i), u, m.text.slice(i + m.flag.length));
+      } else {
+        text.textContent = m.text;
+      }
+      li.append(who, text);
+      if (out) {
+        const gone = document.createElement('span');
+        gone.className = 'cw__gone';
+        gone.textContent = 'it can no longer see this';
+        li.append(gone);
+      }
+      return li;
+    }
+
+    function render(say: string) {
+      let msgs: ChatMessage[];
+      let outCount: number;
+      let from: number;
+      if (reset) {
+        msgs = RESET_MESSAGES;
+        outCount = 0;
+        from = 1;
+        label.textContent = 'What it can see: messages 1 to 2';
+      } else {
+        const w = windowFor(count);
+        msgs = MESSAGES.slice(0, count);
+        outCount = w.outside;
+        from = w.from;
+        label.textContent = from === count ? `What it can see: message ${count}` : `What it can see: messages ${from} to ${count}`;
+      }
+      outList.replaceChildren(...msgs.slice(0, outCount).map((m) => item(m, true, seenIn.has(m.n))));
+      inList.replaceChildren(...msgs.slice(outCount).map((m) => item(m, false, false)));
+      inList.start = from;
+      outList.hidden = outCount === 0;
+      seenIn = new Set(msgs.slice(outCount).map((m) => m.n));
+
+      caption.hidden = reset || !showCaption(count);
+      next.hidden = reset;
+      summary.hidden = reset;
+      restart.hidden = !reset;
+      next.disabled = count >= LAST;
+      next.textContent = count >= LAST ? 'That is the last message' : 'Next message';
+      status.textContent = say;
+    }
+
+    next.addEventListener('click', () => {
+      if (count >= LAST) return;
+      count += 1;
+      render(statusLine(count));
+      // The button stays enabled until the last message; at the end hand focus to the summary button.
+      if (count >= LAST) summary.focus();
+    });
+    summary.addEventListener('click', () => {
+      reset = true;
+      seenIn = new Set();
+      render(RESET_STATUS);
+      restart.focus();
+    });
+    restart.addEventListener('click', () => {
+      reset = false;
+      count = 1;
+      seenIn = new Set();
+      render('Chat started again with message 1.');
+      next.focus();
+    });
+
+    // Show the interactive version, hide the two-frame picture.
+    stat.hidden = true;
+    live.hidden = false;
+    render('');
+  }
+</script>
+
+<style is:global>
+  .cw, .cwb { margin: 2rem 0 .5rem; padding: 1.25rem; border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-bg); }
+  .cw [hidden] { display: none !important; }
+  .cw__note { margin: 0 0 1rem !important; font-size: 1rem; color: var(--color-mute); }
+  .cw__pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+  .cw__fig { margin: 0; min-width: 0; }
+  .cw__figcap { margin: 0 0 .5rem; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  .cw__col { min-width: 0; }
+  .cw__list { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+  .cw__list li { margin: 0; }
+  .cw__frame {
+    border: 2px solid var(--color-accent); border-radius: 8px; padding: .5rem .5rem .25rem; background: var(--color-surface);
+  }
+  .cw__frame-label { margin: 0 0 .5rem !important; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--color-accent-ink); }
+  .cw__msg { display: grid; gap: .1rem; margin: 0 0 .4rem !important; padding: .45rem .65rem; border-radius: 6px; border: 1px solid var(--color-line-soft); font-size: 1rem; line-height: 1.4; overflow-wrap: anywhere; }
+  .cw__msg--you { background: var(--color-accent-bg); border-color: transparent; }
+  .cw__msg--ai { background: var(--color-bg); }
+  .cw__msg--out { background: transparent; border-style: dashed; opacity: .55; }
+  .cw__who { font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--color-mute); }
+  .cw__gone { font-family: var(--font-mono); font-size: 12px; color: var(--color-mute); font-style: italic; }
+  .cw__text u { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; text-decoration-color: var(--color-accent); }
+  .cw__list--out { margin-bottom: .6rem !important; }
+  .cw__caption {
+    margin: 1rem 0 0 !important; padding: .75rem 1rem; border-left: 2px solid var(--color-accent); background: var(--color-surface);
+    border-radius: 0 6px 6px 0; font-size: 1rem;
+  }
+  .cw__controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  .cw__btn {
+    min-height: 44px; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: var(--font-mono); font-size: 13px;
+    color: var(--color-bg); background: var(--color-accent); border: 1px solid var(--color-accent);
+  }
+  .cw__btn--ghost, .cw__btn[data-cw-summary] { color: var(--color-ink); background: var(--color-bg); border-color: var(--color-line); }
+  .cw__btn:hover:not(:disabled) { filter: brightness(1.08); }
+  .cw__btn[data-cw-summary]:hover { border-color: var(--color-accent); color: var(--color-accent-ink); filter: none; }
+  .cw__btn:disabled { opacity: .6; cursor: default; }
+  .cw__btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .cw__status { min-height: 1.5em; margin: .75rem 0 0 !important; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; color: var(--color-mute); }
+
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .cw__msg--fade { animation: cw-dim .6s ease-out; }
+    @keyframes cw-dim { from { opacity: 1; background: var(--color-accent-bg); } to { opacity: .55; } }
+  }
+
+  @media (max-width: 640px) {
+    .cw, .cwb { padding: 1rem .75rem; }
+    .cw__pair { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* The three boxes and the new chat box. Lines are drawn with borders, and each says what it means in words. */
+  .cwb { margin-bottom: 1.5rem; }
+  .cwb__cap { margin: 0 0 1rem; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  .cwb__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 11rem); gap: 0; align-items: stretch; }
+  .cwb__rows { list-style: none !important; margin: 0 !important; padding: 0 !important; display: grid; gap: .75rem; }
+  .cwb__row { margin: 0 !important; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+  .cwb__box, .cwb__new { display: grid; gap: .15rem; padding: .65rem .8rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); font-size: 1rem; line-height: 1.35; }
+  .cwb__box span, .cwb__new span { color: var(--color-mute); font-size: .9375rem; }
+  .cwb__new { align-content: center; border: 2px solid var(--color-accent); }
+  .cwb__link { display: grid; gap: .2rem; padding: 0 .5rem; justify-items: center; text-align: center; }
+  .cwb__word { font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--color-ink); }
+  .cwb__line { display: block; width: 100%; height: 0; border-top: 3px solid var(--color-accent); }
+  .cwb__link--maybe .cwb__line { border-top-style: dashed; border-top-width: 2px; }
+  .cwb__link--no .cwb__line { border-top: 2px dotted var(--color-mute); }
+  .cwb__link--no .cwb__word { color: var(--color-mute); }
+  .cwb__link--no .cwb__word::before { content: '\00d7  '; }
+  .cwb__link--yes .cwb__word::before { content: '\2192  '; }
+
+  @media (max-width: 640px) {
+    .cwb__grid { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+    .cwb__new { order: -1; }
+    .cwb__row { grid-template-columns: minmax(0, 1fr); gap: .3rem; }
+    .cwb__link { justify-items: start; text-align: left; padding: 0 .25rem; }
+    .cwb__line { width: 3rem; }
+  }
+</style>
