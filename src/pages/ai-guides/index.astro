@@ -27,7 +27,7 @@ const guides = await getGuides();
 
     <StartHere />
 
-    <ol class="hub-list" data-rise style="--i:3" aria-label="Guides" data-guide-list>
+    <ol id="guides" class="hub-list" data-rise style="--i:3" aria-label="Guides" data-guide-list>
       {guides.map((g) => (
         <li data-guide-id={g.id} data-step={g.data.step}>
           <a class="ai-card hub-card" href={guidePath(g.id)} data-guide-card={g.id}>

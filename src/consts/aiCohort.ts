@@ -152,7 +152,7 @@ export const TRACKS: Track[] = [
       },
     ],
     end: 'Your inbox and calendar doing more of the routine work, and a write-up of how it runs.',
-    needs: 'A Google or Microsoft 365 account you use for work. Your employer may need to allow its AI features.',
+    needs: 'A Google or Microsoft 365 account you use for work. Your employer may need to allow its AI features. On a personal account, Gemini in Gmail and Copilot in Outlook need a paid plan, from about $5 to $10 a month.',
   },
   {
     id: 'build',

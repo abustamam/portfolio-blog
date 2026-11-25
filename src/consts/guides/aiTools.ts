@@ -87,7 +87,7 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       training: {
-        text: 'History is on by default if you are 18 or over. While it is on, Google uses your future chats to train its AI, and some chats are read by human reviewers. Turn it off at gemini.google.com: Settings, then History.',
+        text: 'On by default if you are over 18, and some chats are read by human reviewers. Turn it off at gemini.google.com: Settings, then History, then untick "Chat content including text & uploads". Turning History off is a separate switch; chats are still kept for about two months.',
         source: 'https://support.google.com/gemini/answer/13278892?hl=en',
         checked: CHECKED,
         confirmed: true,
@@ -148,7 +148,7 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       paid: {
-        text: 'Microsoft 365 Personal $9.99/month, or Microsoft 365 Premium $19.99/month (US regular prices; the page also shows a limited-time first-month offer). Personal includes Copilot in Word, Excel and Outlook.',
+        text: 'Microsoft 365 Personal $9.99/month, or Microsoft 365 Premium $19.99/month (US regular prices). Personal includes Copilot in Word, Excel and Outlook.',
         source: 'https://www.microsoft.com/en-us/copilot/pricing/individuals',
         checked: CHECKED,
         confirmed: true,
@@ -166,13 +166,13 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       training: {
-        // Microsoft's privacy pages describe the training opt-out only for the
+        // confirmed: the FAQ wording below was read on the page. Microsoft's privacy pages describe the training opt-out only for the
         // older Copilot app (replaced August 18, 2026); the page for the current
         // app did not say whether chats are used for training or where to turn it off.
-        text: UNCONFIRMED,
-        source: 'https://support.microsoft.com/en-us/privacy/microsoft-copilot/overview',
+        text: "Assume it is on. Microsoft's privacy FAQ says personal Copilot chats can be used to train its AI unless you opt out, but that page now covers only the older app (replaced August 18, 2026) and its page for the new app does not say. Check the privacy settings in the app.",
+        source: 'https://support.microsoft.com/en-us/microsoft-copilot/privacy-faq-for-microsoft-copilot',
         checked: CHECKED,
-        confirmed: false,
+        confirmed: true,
       },
     },
   },

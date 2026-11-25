@@ -4,7 +4,7 @@ description: Check which account you're using first, then what to keep out of an
 lead: Whatever you paste into an AI chat leaves your computer. What you may paste depends on which account you use, so start there.
 ctaLine: The hands-on training does this with a file of your own.
 step: 1
-minutes: 2
+minutes: 5
 ---
 import { compiledContent } from '../ai-partials/never-paste.md';
 import Scrubber from '../../components/guides/Scrubber.astro';
@@ -16,6 +16,8 @@ export const splitAt = shared.indexOf('<h2 id="check-before-you-press-enter"');
 export const splitOk = (() => { if (splitAt < 1) throw new Error('never-paste.mdx: heading "Check before you press Enter" not found in the shared partial'); return true; })();
 export const beforeChecklist = shared.slice(0, splitAt);
 export const fromChecklist = shared.slice(splitAt);
+
+<p><a href="#scrubber-title">Try it on a made-up example ↓</a></p>
 
 <Fragment set:html={beforeChecklist} />
 

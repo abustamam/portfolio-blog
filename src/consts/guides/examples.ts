@@ -116,7 +116,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
       "I'm applying for office manager jobs. I have a general cover letter, but every posting asks for different things.",
     task: 'Rewrite the first paragraph of my cover letter for this posting. Only use experience I actually have.',
     input:
-      'The posting asks for: scheduling for a busy team, handling vendor invoices, a calm phone manner. My experience: ran the front desk at a busy dental office, kept the appointment book for several dentists, sent invoices to the billing service.',
+      'The posting asks for: scheduling for a busy team, handling vendor invoices, a calm phone manner. My experience: six years as a shift lead at a grocery store. I wrote the weekly staff schedule, checked supplier deliveries against their invoices, and took the calls at the service desk.',
     format: 'One paragraph, under 120 words. Plain and confident, no buzzwords.',
     check: "Don't claim any skill or result that isn't in my experience. Then list the parts of the posting my experience doesn't cover.",
     youCheck: "Every claim in the paragraph against what you've really done. If you couldn't say it out loud in an interview, take it out.",

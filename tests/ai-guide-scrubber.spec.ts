@@ -135,7 +135,7 @@ test.describe('Scrubber on the page', () => {
     await expect(page.locator('[data-scrub-key] tbody tr')).toHaveCount(3);
 
     await page.locator('[data-copy-safe]').click();
-    await expect(page.locator('[data-scrub-status]')).toContainText('Safe text copied');
+    await expect(page.locator('[data-scrub-status]')).toContainText('Text copied');
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('PERSON-1: EMAIL-1 or PHONE-1.');
 
     await page.locator('[data-copy-key]').click();

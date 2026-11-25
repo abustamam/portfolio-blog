@@ -27,7 +27,7 @@ On a free or personal account, or any account your employer hasn't approved for 
 
 ### Tricks that help
 - *Spreadsheets:* add an ID column, then make a copy with the name and email columns deleted. Upload the copy.
-- *Text:* Find and replace (Ctrl+H or Cmd+Shift+H) each name with a placeholder before you copy anything.
+- *Text:* Find and replace (Ctrl+H, or Cmd+Shift+H on a Mac in Google Docs and Sheets) each name with a placeholder before you copy anything.
 - *Ask for the method, not the answer:* "Write me a formula that..." means your data never has to leave the sheet.
 
 ## Check before you press Enter

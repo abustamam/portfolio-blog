@@ -193,6 +193,6 @@ test.describe('which-model: voice', () => {
       return out.join('\n');
     });
     expect(text).toContain('medium or the default');
-    expect(text).toContain('largest model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet');
+    expect(text).toContain('a large Claude model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet');
   });
 });

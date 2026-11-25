@@ -1,6 +1,6 @@
 ---
 title: "I'm Running a Small, Hands-On AI Cohort"
-description: "Bring one real workflow, leave with it automated. A small online AI cohort, up to 8 people per track. Take the quiz to find your track."
+description: "Bring one real task, leave with AI handling it and a way to check its work. A small online AI cohort, up to 8 people per track. Take the quiz to find your track."
 pubDate: '2026-11-22'
 updatedDate: '2026-11-24'
 dek: "Not a course about AI. A few sessions where you point AI at your actual work and leave with something that runs."
@@ -29,7 +29,7 @@ That range is the reason I'm not building one generic course. A beginner and som
 
 ## What you get that you won't get from a course
 
-**Bring one real workflow, leave with it automated.** Your spreadsheet, your weekly report, your inbox. Not a textbook example about a fictional coffee shop. If it doesn't work on your actual task, it doesn't count.
+**Bring one real task, leave with AI handling it.** Your spreadsheet, your weekly report, your inbox. Not a textbook example about a fictional coffee shop. If it doesn't work on your actual task, it doesn't count. You also leave with a way to check what it gives you.
 
 **Taught by a practitioner.** I build software for a living, and I run AI agent pipelines every day. I know where these tools are good, and I know where they confidently make things up, because I've been burned by both. I [wrote about some of that](/writing/six-ways-i-fooled-myself-benchmarking) recently.
 
@@ -45,7 +45,7 @@ The quiz points you to a track. It measures what you actually do with AI, not ho
 
 **Everyday AI.** You're new to AI or already use it, and you lose time every week to a report, a spreadsheet or the same emails. We take one task you already do every week and work on the habits that matter most: giving AI enough context to get a useful answer, checking what it tells you, and knowing what to keep out of it. No code. You leave with that task handled by AI, a way to check its work, and a write-up so you can keep it running.
 
-**Connect.** You live in Gmail or Outlook, and replies and meeting requests eat your day. We turn on Gemini or Copilot in your own account, with clear limits on what it can see and do, and use it for drafted replies, thread summaries and scheduling, with you approving what goes out. No code. You leave with one automation that runs your task end to end, with a human check where it matters.
+**Connect.** You live in Gmail or Outlook, and replies and meeting requests eat your day. We turn on Gemini or Copilot in your own account (on a personal account that needs a paid plan, from about $5 to $10 a month), with clear limits on what it can see and do, and use it for drafted replies, thread summaries and scheduling, with you approving what goes out. No code. You leave with one automation that runs your task end to end, with a human check where it matters.
 
 **Build.** You want AI to *do* things, and you're comfortable installing software. We code with AI, connect it to your email, Sheets, calendar or files, and build an agent that gathers, decides and acts, and stops for your approval before anything goes out. You leave with one working tool or agent you built yourself.
 
@@ -57,13 +57,13 @@ People have asked both. It's online, on Google Meet, in the evening (6:30–8:00
 
 Everyday AI is $79, Connect is $99 and Build is $149. You hold a seat with a $25 deposit that counts toward the price and is fully refundable. A track launches once 5 people reserve it. The first slot is Mondays, January 11 – February 1, 2027, for a track that launches by Monday, December 21. The full details are on the [training page](/ai-training/).
 
-Your name and contact details are optional. Leave them if you want me to tell you when it opens.
-
 ---
 
 ## Take the quiz
 
-It takes about four minutes, and you get a result at the end: your track, what it covers, and what you'd build, based on the task you tell me you want back.
+It takes about four minutes, and you get a result at the end: your track, what it covers, and what you'd build, based on the task you tell me you want back. Your name and contact details are optional. Leave them if you want me to tell you when it opens.
+
+Not ready for a quiz? The [free guides](/ai-guides/) cover the same habits in a few minutes each, starting with [what's safe to paste](/ai-guides/never-paste/) and [the five-part prompt](/ai-guides/prompt/).
 
 **[Find your track →](/ai-quiz)**
 

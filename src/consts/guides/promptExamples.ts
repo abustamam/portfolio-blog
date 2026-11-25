@@ -16,9 +16,9 @@ export const PROMPT_EXAMPLES: PromptPreset[] = [
   {
     id: 'weekly-report',
     label: 'Weekly report',
-    situation: 'I coordinate a small community group and send a short update to its board every Friday. Board members read it on their phones.',
+    situation: 'I do sales for a small flooring company and send the owner a short update every Friday. She reads it on her phone between site visits.',
     task: "Turn my rough notes into this week's update.",
-    input: "Notes: Tuesday's intake session went well. The van repair is still waiting on a quote. PERSON-1 offered to cover Saturday setup. We need a decision from the board on the new storage shelf.",
+    input: "Notes: PERSON-1 signed for the kitchen floor. PERSON-2 wants a second quote with the cheaper tile. No reply from PERSON-3 since the site visit. I need a decision on whether we can discount PERSON-2's job.",
     format: 'Under 120 words. Plain language, one short paragraph, then a line that starts "Needs a decision:".',
     check: "List anything you had to guess, and don't add details I didn't give you.",
   },

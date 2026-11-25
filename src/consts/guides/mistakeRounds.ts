@@ -138,7 +138,7 @@ export const MISTAKE_ROUNDS: MistakeRound[] = [
     ],
     explanation:
       'The notes say the decision was postponed. The summary turned "most members liked the idea" into "the committee agreed", as if it had stopped reading before the line that says Decision.',
-    check: 'For each line of a summary, find the line in the original it came from. Read the decisions and the end of the document yourself; that is where summaries most often go wrong.',
+    check: 'For each line of a summary, find the line in the original it came from. Read the decisions and the end of the document yourself; a missed decision changes what the summary means.',
   },
   {
     id: 'handbook-checks',
