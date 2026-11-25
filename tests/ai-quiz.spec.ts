@@ -116,6 +116,39 @@ test.describe('AI quiz', () => {
     });
   });
 
+  test('asks for contact on the result screen, not in the quiz, and tags it with the track', async ({ page }) => {
+    let quizBody: Record<string, unknown> | null = null;
+    let notifyBody: Record<string, unknown> | null = null;
+    const ok = { status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) };
+    await page.route('**/api/ai-quiz', async (route) => {
+      quizBody = JSON.parse(route.request().postData() ?? '{}');
+      await route.fulfill(ok);
+    });
+    await page.route('**/api/ai-quiz/waitlist', async (route) => {
+      notifyBody = JSON.parse(route.request().postData() ?? '{}');
+      await route.fulfill(ok);
+    });
+    await page.goto('/ai-quiz');
+    await expect(page.locator('#ai-quiz input[name="contact"], #ai-quiz input[name="name"]')).toHaveCount(0);
+    await complete(page, builder);
+    await expect(page.locator('#result-status')).toContainText('answers were sent');
+    expect(quizBody).not.toHaveProperty('contact');
+
+    const notify = page.locator('#result-notify');
+    await expect(notify).toBeVisible();
+    await expect(notify).toContainText('Connect or Build');
+    await notify.getByRole('button', { name: 'Tell me' }).click();
+    await expect(page.locator('#result-notify-status')).toContainText('Please add');
+    expect(notifyBody).toBeNull();
+
+    await page.locator('#result-notify-name').fill('Test Person');
+    await page.locator('#result-notify-contact').fill('test@example.com');
+    await notify.getByRole('button', { name: 'Tell me' }).click();
+    await expect(page.locator('#result-notify-status')).toContainText('Thank you');
+    await expect(page.locator('#result-notify-contact')).toBeHidden();
+    expect(notifyBody).toEqual({ name: 'Test Person', contact: 'test@example.com', source: 'quiz:builder', website: '' });
+  });
+
   test('is online only: no Roseville or in-person option, no format question', async ({ page }) => {
     await page.goto('/ai-quiz');
     await expect(page.locator('input[name="format"]')).toHaveCount(0);

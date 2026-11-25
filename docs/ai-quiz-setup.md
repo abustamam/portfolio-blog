@@ -84,6 +84,16 @@ are logged as `waitlist insert failed` and `waitlist notify failed`. Rules live
 in `services/ai-quiz-intake/src/waitlist.ts`; browser tests in
 `tests/ai-cohort-waitlist.spec.ts`.
 
+## Quiz result: "Not ready to reserve?"
+
+The quiz itself no longer asks for name or contact, so every quiz row is
+anonymous. The ask sits on the result screen instead, under the reserve button,
+once people have seen their track: optional name, plus email or WhatsApp
+number. It POSTs to `POST /api/ai-quiz/waitlist` with `source: quiz:<track>`
+(`foundations`, `applied` or `builder`), so the row lands in `cohort_waitlist`
+next to the guides sign-ups. It is not linked to the quiz row. Browser test:
+`tests/ai-quiz.spec.ts`.
+
 ## Guides: "tell me when the next cohort opens"
 
 The guides hub (`/ai-guides/`, under "When you want more") and the call to
