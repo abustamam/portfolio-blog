@@ -1,0 +1,29 @@
+---
+title: The five-part prompt
+description: "Build a clear AI prompt from five short parts, with examples to start from and a copy button."
+lead: "A good prompt is five short answers: who you are, what you want, what to work from, how it should look, and how it should check itself. Fill in the boxes and copy the result into any AI tool."
+step: 2
+minutes: 4
+tool: Prompt builder
+ctaLine: "Writing that one sentence is where the first session starts. The hands-on training takes it from a sentence to a prompt that works on your own task, with feedback."
+---
+import PromptBuilder from '../../components/guides/PromptBuilder.astro';
+import { Content as PromptShared } from '../ai-partials/prompt.md';
+
+## Build your prompt
+
+Fill in the five boxes. Your prompt appears underneath as you type, and Copy puts it on your clipboard. Not sure where to start? Tap an example and change it.
+
+<PromptBuilder storageKey="prompt" id="prompt-builder" />
+
+## Prefer to paste the template yourself?
+
+{/* The template, the worked example and the Check lines are shared with the cohort handout /ai-cohort/prompt/ so the two cannot drift. Edit them in src/content/ai-partials/prompt.md. */}
+
+<PromptShared />
+
+## Your task in one sentence
+
+Pick one thing you do every week. Fill in the blanks. This sentence is the starting point for a prompt that works on your own task.
+
+<PromptBuilder part="sentence" storageKey="prompt-sentence" id="prompt-sentence" />
