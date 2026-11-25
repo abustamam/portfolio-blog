@@ -1,8 +1,23 @@
 // Onward paths and labels added in the content review pass: every tool ends
 // with a next step, the Scrubber does not call its output safe, and the
 // model table stacks on a phone.
+import { readdirSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
 import { nextGuide } from '../src/utils/startHere';
+
+const SRC = fileURLToPath(new URL('../src/content/guides/', import.meta.url));
+
+/** Which hub lists render, in hub order, from the published guides' frontmatter (not from the page). */
+const LIST_IDS = { start: 'start-from-zero', guides: 'guides', reference: 'look-something-up' } as const;
+const publishedGroups = new Set(
+  readdirSync(SRC)
+    .filter((f) => f.endsWith('.mdx'))
+    .map((f) => readFileSync(SRC + f, 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '')
+    .filter((fm) => !/^draft:\s*true\s*$/m.test(fm))
+    .map((fm) => fm.match(/^group:\s*['"]?(\w+)/m)?.[1] ?? 'guides'),
+);
+const FIRST_LIST = (['start', 'guides', 'reference'] as const).find((k) => publishedGroups.has(k)) ?? 'guides';
 
 test.describe('"next guide" in step order, never a reference guide (pure)', () => {
   const L = [
@@ -60,8 +75,14 @@ test('at 375px the model table fits the column instead of scrolling sideways', a
   expect(scroll).toBeLessThanOrEqual(client);
 });
 
-test('the hub offers a way past the questions to the guide list', async ({ page }) => {
+test('the hub offers a way past the questions to the first guide list', async ({ page }) => {
   await page.goto('/ai-guides/');
-  await expect(page.locator('[data-start-here] a[href="#guides"]')).toBeVisible();
-  await expect(page.locator('ol#guides[data-guide-list]')).toHaveCount(1);
+  const link = page.locator('[data-start-here] a[href^="#"]');
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('href', `#${LIST_IDS[FIRST_LIST]}`);
+  // the target exists, is the first rendered list, and is the list for that group
+  const target = page.locator(`ol#${LIST_IDS[FIRST_LIST]}[data-hub-list="${FIRST_LIST}"]`);
+  await expect(target).toHaveCount(1);
+  expect(await page.locator('[data-hub-list]').first().getAttribute('id')).toBe(LIST_IDS[FIRST_LIST]);
+  await expect(page.locator('[data-guide-list]')).toHaveCount(publishedGroups.has('guides') ? 1 : 0);
 });
