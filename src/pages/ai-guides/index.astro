@@ -6,9 +6,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getGuides, guidePath } from './_guides';
 import StartHere from '../../components/guides/StartHere.astro';
 import NotifyForm from '../../components/guides/NotifyForm.astro';
+import { groupGuides } from '../../utils/startHere';
 import '../../styles/ai.css';
 
-const guides = await getGuides();
+const grouped = groupGuides((await getGuides()).map((g) => ({ id: g.id, step: g.data.step, group: g.data.group, g })));
+// Three lists: start from zero, the guides (the list the "Start here" questions reorder), look something up.
+// A list with no published guide does not render.
+const sections = [
+  { key: 'start', heading: 'Never used AI? Start from zero', id: 'start-from-zero', list: false },
+  { key: 'guides', heading: '', id: 'guides', list: true },
+  { key: 'reference', heading: 'Look something up', id: 'look-something-up', list: false },
+] as const;
+const firstList = sections.find((sec) => grouped[sec.key].length > 0)?.id ?? 'guides';
 ---
 
 <BaseLayout
@@ -27,25 +36,30 @@ const guides = await getGuides();
       <p class="hub-counting ai-label" data-rise style="--i:2" data-counting-line>No trackers and no cookies. I count page requests from the server's own logs, as weekly totals.</p>
     </header>
 
-    <StartHere />
+    <StartHere firstList={firstList} />
 
-    <ol id="guides" class="hub-list" data-rise style="--i:3" aria-label="Guides" data-guide-list>
-      {guides.map((g) => (
-        <li data-guide-id={g.id} data-step={g.data.step}>
-          <a class="ai-card hub-card" href={guidePath(g.id)} data-guide-card={g.id}>
-            <span class="hub-card__badges">
-              <span class="hub-card__badge" data-start-badge hidden>Start here</span>
-              <span class="hub-card__badge hub-card__badge--done" data-visited-tick hidden>&#10003; Read</span>
-            </span>
-            <span class="hub-card__title">{g.data.title}</span>
-            <span class="hub-card__line">{g.data.description}</span>
-            <span class="ai-label hub-card__meta">
-              {g.data.minutes} min read{g.data.tool && <> · <span data-guide-tool>{g.data.tool}</span></>}
-            </span>
-          </a>
-        </li>
-      ))}
-    </ol>
+    {sections.map((sec) => grouped[sec.key].length > 0 && (
+      <>
+        {sec.heading && <h2 class="ai-label hub-next" data-hub-group-heading={sec.key}>{sec.heading}</h2>}
+        <ol id={sec.id} class="hub-list" data-rise style="--i:3" aria-label={sec.heading || 'Guides'} data-hub-list={sec.key} data-guide-list={sec.list ? '' : undefined}>
+          {grouped[sec.key].map(({ g }) => (
+            <li data-guide-id={g.id} data-step={g.data.step}>
+              <a class="ai-card hub-card" href={guidePath(g.id)} data-guide-card={g.id}>
+                <span class="hub-card__badges">
+                  <span class="hub-card__badge" data-start-badge hidden>Start here</span>
+                  <span class="hub-card__badge hub-card__badge--done" data-visited-tick hidden>&#10003; Read</span>
+                </span>
+                <span class="hub-card__title">{g.data.title}</span>
+                <span class="hub-card__line">{g.data.description}</span>
+                <span class="ai-label hub-card__meta">
+                  {g.data.minutes} min read{g.data.tool && <> · <span data-guide-tool>{g.data.tool}</span></>}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </>
+    ))}
 
     <p class="hub-reset" data-hub-reset hidden>
       <button type="button" class="ai-link hub-reset__btn" data-reset-progress>Reset what I've read</button>

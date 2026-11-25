@@ -9,6 +9,7 @@ import { GUIDE_STORE_KEY, createGuideStore, parseGuideStore, type StorageLike } 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const SRC = fileURLToPath(new URL('../src/content/guides/', import.meta.url));
 const HUB = '/ai-guides/';
+const GROUP_ORDER = ['start', 'guides', 'reference'];
 
 /** Built guide pages, as paths like /ai-guides/never-paste/. */
 const GUIDES = existsSync(`${DIST}ai-guides`)
@@ -17,7 +18,7 @@ const GUIDES = existsSync(`${DIST}ai-guides`)
       .map((d) => `/ai-guides/${d.name}/`)
   : [];
 
-/** Published guides from the MDX frontmatter, in hub (step) order. */
+/** Published guides from the MDX frontmatter, in hub order: start, guides, reference; each in step order. */
 function publishedFromSource() {
   return readdirSync(SRC)
     .filter((f) => f.endsWith('.mdx'))
@@ -26,11 +27,12 @@ function publishedFromSource() {
       return {
         path: `/ai-guides/${f.replace(/\.mdx$/, '')}/`,
         step: Number(fm.match(/^step:\s*([\d.]+)/m)?.[1]),
+        group: fm.match(/^group:\s*['"]?(\w+)/m)?.[1] ?? 'guides',
         draft: /^draft:\s*true\s*$/m.test(fm),
       };
     })
     .filter((g) => !g.draft)
-    .sort((a, b) => a.step - b.step || a.path.localeCompare(b.path))
+    .sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group) || a.step - b.step || a.path.localeCompare(b.path))
     .map((g) => g.path);
 }
 
@@ -91,7 +93,7 @@ test.describe('free AI guides: pages', () => {
     });
   }
 
-  test('the hub lists every published guide in step order, then the quiz and the training page', async ({ page }) => {
+  test('the hub lists every published guide in step order, grouped (start, guides, reference), then the quiz and the training page', async ({ page }) => {
     await page.goto(HUB);
     const cards = await page.locator('[data-guide-card]').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
     expect(cards).toEqual(publishedFromSource());

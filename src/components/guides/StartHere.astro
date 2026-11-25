@@ -3,11 +3,13 @@
 // Hidden until the script runs, so without JavaScript the hub is just the list
 // in step order. Answers are kept only through guideStore (this browser).
 import { FIELDS, EXPERIENCE } from '../../utils/startHere';
+// Id of the first list the hub renders (decided at build time, no JavaScript).
+const { firstList = 'guides' } = Astro.props;
 ---
 
 <section class="start-here" data-start-here hidden aria-labelledby="start-here-title">
   <h2 id="start-here-title" class="ai-label">Start here</h2>
-  <p class="start-here__hint">Two taps and I'll put the best first guide on top. Or <a href="#guides">go straight to the guides</a>.</p>
+  <p class="start-here__hint">Two taps and I'll put the best first guide on top. Or <a href={`#${firstList}`}>go straight to the guides</a>.</p>
 
   <fieldset class="start-here__group">
     <legend>What do you do?</legend>
@@ -50,15 +52,16 @@ import { FIELDS, EXPERIENCE } from '../../utils/startHere';
 
 <script>
   import { guideStore } from '../../utils/guideStore';
-  import { orderGuides, isField, isExperience, type StartAnswers } from '../../utils/startHere';
+  import { arrangeHub, isField, isExperience, type StartAnswers } from '../../utils/startHere';
 
   const root = document.querySelector<HTMLElement>('[data-start-here]');
-  const list = document.querySelector<HTMLElement>('[data-guide-list]');
-  if (root && list) {
+  const lists = Array.from(document.querySelectorAll<HTMLElement>('[data-hub-list]'));
+  if (root && lists.length) {
     root.hidden = false;
     const status = root.querySelector<HTMLElement>('[data-start-status]')!;
-    const items = () => Array.from(list.querySelectorAll<HTMLLIElement>(':scope > li[data-guide-id]'));
-    const guides = items().map((li) => ({ id: li.dataset.guideId!, step: Number(li.dataset.step), li }));
+    const itemsOf = (ol: HTMLElement) => Array.from(ol.querySelectorAll<HTMLLIElement>(':scope > li[data-guide-id]'));
+    const byKey = Object.fromEntries(lists.map((ol) => [ol.dataset.hubList!, ol]));
+    const data = Object.fromEntries(lists.map((ol) => [ol.dataset.hubList!, itemsOf(ol).map((li) => ({ id: li.dataset.guideId!, step: Number(li.dataset.step), li }))]));
 
     const saved = guideStore.getDraft<{ experience?: unknown }>('start-here');
     const answers: StartAnswers = {
@@ -69,19 +72,22 @@ import { FIELDS, EXPERIENCE } from '../../utils/startHere';
     const render = () => {
       root.querySelectorAll<HTMLButtonElement>('[data-field]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.field === answers.field)));
       root.querySelectorAll<HTMLButtonElement>('[data-experience]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.experience === answers.experience)));
-      const ordered = orderGuides(answers, guides);
-      const hasAnswer = answers.field || answers.experience;
-      ordered.forEach((g, i) => {
-        list.appendChild(g.li);
-        const mark = i === 0 && !!hasAnswer;
-        g.li.toggleAttribute('data-recommended', mark);
-        const badge = g.li.querySelector<HTMLElement>('[data-start-badge]');
-        if (badge) badge.hidden = !mark;
-      });
-      const top = ordered[0] && hasAnswer ? g(ordered[0].li) : '';
+      const { order, badged } = arrangeHub(answers, data);
+      let top = '';
+      for (const [key, ids] of Object.entries(order)) {
+        const lis = new Map(data[key].map((g) => [g.id, g.li]));
+        ids.forEach((id) => {
+          const li = lis.get(id)!;
+          byKey[key].appendChild(li);
+          const mark = id === badged;
+          li.toggleAttribute('data-recommended', mark);
+          const badge = li.querySelector<HTMLElement>('[data-start-badge]');
+          if (badge) badge.hidden = !mark;
+          if (mark) top = li.querySelector('.hub-card__title')?.textContent ?? '';
+        });
+      }
       status.textContent = top ? `Start with: ${top}` : '';
     };
-    const g = (li: HTMLElement) => li.querySelector('.hub-card__title')?.textContent ?? '';
 
     root.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');

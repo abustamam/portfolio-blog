@@ -7,6 +7,7 @@ import BaseLayout from './BaseLayout.astro';
 import CopyButton from '../components/CopyButton.astro';
 import GuideCta from '../components/guides/GuideCta.astro';
 import { guidePath, type Guide } from '../pages/ai-guides/_guides';
+import { nextGuide } from '../utils/startHere';
 import '../styles/ai.css';
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
 const { guide, guides } = Astro.props;
 const { title, description, lead, minutes, updatedDate, ctaLine } = guide.data;
 const others = guides.filter((g) => g.id !== guide.id);
-const next = guides[guides.findIndex((g) => g.id === guide.id) + 1];
+const next = nextGuide(guides.map((g) => ({ id: g.id, step: g.data.step, group: g.data.group, g })), guide.id)?.g;
 const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
 

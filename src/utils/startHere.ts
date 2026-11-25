@@ -45,9 +45,9 @@ export interface StartAnswers {
 export const isField = (x: unknown): x is Field => FIELDS.some((f) => f.value === x);
 export const isExperience = (x: unknown): x is Experience => EXPERIENCE.some((e) => e.value === x);
 
-// Guide ids as planned in #79: never-paste, prompt, when-ai-is-wrong, which-tool, job-search, examples.
+// Guide ids as planned in #79 (what-is-ai is the first of the "start from zero" set): never-paste, prompt, when-ai-is-wrong, which-tool, job-search, examples.
 const BY_EXPERIENCE: Record<Experience, string[]> = {
-  never: ['never-paste', 'prompt', 'which-tool'],
+  never: ['what-is-ai', 'never-paste', 'prompt', 'which-tool'],
   some: ['prompt', 'when-ai-is-wrong', 'never-paste'],
   often: ['when-ai-is-wrong', 'never-paste', 'examples'],
 };
@@ -60,6 +60,33 @@ const BY_FIELD: Record<Field, string[]> = {
   'volunteer-coordinator': ['examples', 'prompt'],
   other: [],
 };
+
+export type GuideGroup = 'start' | 'guides' | 'reference';
+
+export interface GroupedGuideRef extends GuideRef {
+  group: GuideGroup;
+}
+
+/** The three hub lists, each in step order (ties by id). */
+export function groupGuides<T extends GroupedGuideRef>(guides: readonly T[]): Record<GuideGroup, T[]> {
+  const sorted = byStep(guides);
+  return {
+    start: sorted.filter((g) => g.group === 'start'),
+    guides: sorted.filter((g) => g.group === 'guides'),
+    reference: sorted.filter((g) => g.group === 'reference'),
+  };
+}
+
+/**
+ * The guide offered as "next" after `id`: the following guide in step order,
+ * skipping `reference` guides (you look those up; you do not read on into them).
+ */
+export function nextGuide<T extends GroupedGuideRef>(guides: readonly T[], id: string): T | undefined {
+  const sorted = byStep(guides);
+  const at = sorted.findIndex((g) => g.id === id);
+  if (at < 0) return undefined;
+  return sorted.slice(at + 1).find((g) => g.group !== 'reference');
+}
 
 /** Guides in hub order: by step, ties by id. */
 export function byStep<T extends GuideRef>(guides: readonly T[]): T[] {
@@ -95,6 +122,30 @@ export function orderGuides<T extends GuideRef>(answers: StartAnswers, guides: r
   const sorted = byStep(guides);
   const first = recommend(answers, sorted);
   return first ? [first, ...sorted.filter((g) => g.id !== first.id)] : sorted;
+}
+
+export interface HubArrangement {
+  /** Guide ids per list, in the order that list shows them. */
+  order: Record<string, string[]>;
+  /** The recommended guide (it gets the badge), or null with no answers. */
+  badged: string | null;
+}
+
+/**
+ * The hub across all its lists. The recommendation is computed over every guide
+ * on the hub; the recommended guide moves to the top of its own list only and a
+ * guide never changes list. With no answers every list stays in step order.
+ */
+export function arrangeHub<T extends GuideRef>(answers: StartAnswers, lists: Record<string, readonly T[]>): HubArrangement {
+  const all = Object.values(lists).flat();
+  const pick = recommend(answers, all);
+  const order: Record<string, string[]> = {};
+  for (const [key, list] of Object.entries(lists)) {
+    const sorted = byStep(list);
+    const first = pick && sorted.find((g) => g.id === pick.id);
+    order[key] = (first ? [first, ...sorted.filter((g) => g.id !== first.id)] : sorted).map((g) => g.id);
+  }
+  return { order, badged: pick ? pick.id : null };
 }
 
 /** Canonical form of a page URL for sharing: no query string, no fragment. */
