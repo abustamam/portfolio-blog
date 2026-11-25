@@ -101,8 +101,20 @@ test.describe('example cards: built page', () => {
     }
   });
 
-  test('"My field isn\'t here" links the quiz, and there is one builder with the cards as presets', () => {
-    expect(html).toMatch(/My field isn't here: <a href="\/ai-quiz\/" data-ex-missing/);
+  test('no quiz link above the GuideCta; the missing-field line links the prompt guide', () => {
+    const ctaAt = html.indexOf('data-guide-cta');
+    expect(ctaAt).toBeGreaterThan(0);
+    expect(html.slice(0, ctaAt)).not.toContain('/ai-quiz');
+    expect(text).toContain("Your job isn't here? The same five parts work for any weekly task: the five-part prompt shows how.");
+    expect(html).toMatch(/<a href="\/ai-guides\/prompt\/" data-ex-missing>the five-part prompt<\/a> shows how/);
+  });
+
+  test('the call-to-action line makes no promise about working without me', () => {
+    expect(text).toContain('In the hands-on training I work through one task from your own week with you.');
+    expect(text).not.toContain('until you can do it without me');
+  });
+
+  test('there is one builder with the cards as presets', () => {
     expect(html.match(/data-prompt-builder/g)).toHaveLength(1);
     expect(html).toContain('id="examples-builder"');
     expect(html).toContain('data-storage-key="examples"');
@@ -254,6 +266,6 @@ test.describe('example cards: without JavaScript', () => {
     }
     await expect(page.locator('[data-ex-filter]')).toBeHidden();
     await expect(page.locator('[data-ex-note]')).toBeVisible();
-    await expect(page.locator('a[data-ex-missing][href="/ai-quiz/"]')).toBeVisible();
+    await expect(page.locator('a[data-ex-missing][href="/ai-guides/prompt/"]')).toBeVisible();
   });
 });
