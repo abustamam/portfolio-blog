@@ -177,9 +177,9 @@ how many lines were filtered.
 Own visits look like anyone else's. To drop them, set `DIGEST_EXCLUDE_IPS`
 (comma-separated). Lines whose address or `X-Forwarded-For` contains one of
 them are counted as "own visits excluded". The address is compared in memory
-and never stored. Whether `X-Forwarded-For` holds the visitor's address
-depends on Caddy's trusted proxies (ASSUMED; check one of your own lines in
-Loki first).
+and never stored. `X-Forwarded-For` holds the visitor's address first, then
+the Cloudflare edge (MEASURED 2026-11-25 on the live log), so an excluded
+address matches.
 
 ### What it cannot see
 
@@ -189,7 +189,7 @@ volume (tens a week), a change of a few from last week is noise.
 
 ### Owner steps (one time)
 
-1. **Read access to quiz counts.** The app role can only insert. Let it read
+1. **Read access to quiz counts.** Done 2026-11-25. The app role could only insert. Let it read
    the track and time, and nothing else (also at the bottom of `schema.sql`):
 
    ```bash
@@ -206,16 +206,16 @@ volume (tens a week), a change of a few from last week is noise.
    Checkout Sessions is enough for the digest). Without them, step 3/4 reads
    "Unavailable".
 
-3. **Reach Loki.** Loki listens on `:3100` inside its Docker network. Add that
-   network to the `ai-quiz-intake` service in compose and set the URL:
+3. **Reach Loki.** Done 2026-11-25. `ai-quiz-intake` and Loki are both on
+   `srv-network`, and Loki answers there as `loki` (MEASURED: `/ready` from
+   inside the container). No network change is needed. `/srv/docker-compose.yml`
+   now sets these for the service, and the next deploy picks them up
+   (`deploy-blog` runs `docker compose up --force-recreate`):
 
    ```yaml
-     ai-quiz-intake:
-       environment:
          LOKI_URL: http://loki:3100
          # Optional: your own address(es), dropped from page views.
-         DIGEST_EXCLUDE_IPS: ${DIGEST_EXCLUDE_IPS}
-       networks: [default, <loki's network>]
+         DIGEST_EXCLUDE_IPS: ${DIGEST_EXCLUDE_IPS:-}
    ```
 
 4. **Check it**, then schedule it. `--dry-run` prints the message without
@@ -225,10 +225,11 @@ volume (tens a week), a change of a few from last week is noise.
    docker exec ai-quiz-intake bun services/ai-quiz-intake/src/digest.ts --dry-run
    ```
 
-   Then a weekly cron entry on the box (Monday 08:00 server time):
+   Then a weekly cron entry on the box. The box runs on UTC, so 16:00 UTC is
+   Monday 08:00 Pacific (09:00 during daylight time):
 
    ```cron
-   0 8 * * 1  docker exec ai-quiz-intake bun services/ai-quiz-intake/src/digest.ts >> /var/log/funnel-digest.log 2>&1
+   0 16 * * 1  docker exec ai-quiz-intake bun services/ai-quiz-intake/src/digest.ts >> /var/log/funnel-digest.log 2>&1
    ```
 
 A source that fails shows as "Unavailable: <reason>" in the message instead of
