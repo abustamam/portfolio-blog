@@ -5,6 +5,17 @@ import TrackGlyph from '../components/ai/TrackGlyph.astro';
 import '../styles/ai.css';
 import { AI_QUIZ_ENDPOINT, WHATSAPP_HREF } from '../consts/aiQuiz';
 import { WAITLIST_LIMITS } from '../../services/ai-quiz-intake/src/waitlist';
+import { getGuides, guidePath } from './ai-guides/_guides';
+import { SUGGESTABLE_GUIDES } from '../utils/aiQuiz';
+
+// Every guide the result screen can suggest, rendered hidden; the script shows
+// the ones that fit. A suggested id with no published guide fails the build.
+const published = await getGuides();
+const suggestable = SUGGESTABLE_GUIDES.map((id) => {
+  const g = published.find((p) => p.id === id);
+  if (!g) throw new Error(`ai-quiz suggests guide "${id}", which is not a published guide in src/content/guides/`);
+  return g;
+});
 
 // Same service and Caddy route as the quiz. Empty in dev builds.
 const api = AI_QUIZ_ENDPOINT.replace(/\/$/, '');
@@ -339,8 +350,20 @@ const steps = 9; // 6 skill + free text + privacy + logistics
         <p id="result-notify-status" class="quiz-status m-0" role="status"></p>
       </form>
 
+      <h2 id="result-guides-title" class="font-mono text-12 text-faint tracking-caps uppercase m-0 mb-3">free guides to start with</h2>
+      <ol id="result-guide-list" class="quiz-guides" aria-labelledby="result-guides-title">
+        {suggestable.map((g) => (
+          <li data-quiz-guide={g.id} hidden>
+            <a class="ai-card quiz-guide" href={guidePath(g.id)}>
+              <span class="quiz-guide__title">{g.data.title}</span>
+              <span class="quiz-guide__line">{g.data.description}</span>
+              <span class="ai-label">{g.data.minutes} min read</span>
+            </a>
+          </li>
+        ))}
+      </ol>
       <p class="m-0 mb-8">
-        <a id="result-guides" href="/ai-guides/" class="ai-link">Or start with the free guides →</a>
+        <a id="result-guides" href="/ai-guides/" class="ai-link">All the free guides →</a>
       </p>
 
       <p id="result-status" class="quiz-status" role="status"></p>
@@ -353,8 +376,21 @@ const steps = 9; // 6 skill + free text + privacy + logistics
   </div>
 </BaseLayout>
 
+<style>
+  .quiz-guides { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .75rem; }
+  .quiz-guides li[hidden] { display: none; }
+  .quiz-guide {
+    display: grid; gap: .35rem; padding: 1rem 1.25rem; text-decoration: none; color: var(--color-ink);
+    transition: border-color .18s ease;
+  }
+  .quiz-guide:hover { border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line)); }
+  .quiz-guide:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .quiz-guide__title { font-family: var(--font-serif); font-weight: 500; font-size: 1.1875rem; line-height: 1.25; }
+  .quiz-guide__line { font-family: var(--font-serif); font-size: 1rem; line-height: 1.5; color: var(--color-mute); }
+</style>
+
 <script>
-  import { scoreQuiz, skillScores, SKILL_LABELS, MAX_PER_SKILL, TRACKS, type QuizAnswers } from '../utils/aiQuiz';
+  import { scoreQuiz, skillScores, suggestGuides, SKILL_LABELS, MAX_PER_SKILL, TRACKS, type QuizAnswers } from '../utils/aiQuiz';
 
   const form = document.getElementById('ai-quiz') as HTMLFormElement;
   const steps = Array.from(form.querySelectorAll<HTMLFieldSetElement>('.quiz-step'));
@@ -506,6 +542,19 @@ const steps = 9; // 6 skill + free text + privacy + logistics
     document.getElementById('result-privacy')!.hidden = !(result.privacyGap && result.track !== 'foundations');
     document.getElementById('result-notify-track')!.textContent = t.name;
     notify.dataset.source = `quiz:${result.track}`;
+
+    // Show the suggested guides, in suggestion order.
+    const guideList = document.getElementById('result-guide-list')!;
+    const cards = new Map(
+      Array.from(guideList.querySelectorAll<HTMLElement>('[data-quiz-guide]')).map((li) => [li.dataset.quizGuide!, li]),
+    );
+    cards.forEach((li) => (li.hidden = true));
+    for (const id of suggestGuides(a)) {
+      const li = cards.get(id);
+      if (!li) continue;
+      li.hidden = false;
+      guideList.append(li);
+    }
 
     form.hidden = true;
     document.getElementById('quiz-intro')!.hidden = true;
