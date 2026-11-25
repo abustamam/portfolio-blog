@@ -157,6 +157,43 @@ test.describe('usage-limits: page, with JavaScript', () => {
     await expect(page.locator('[data-scenario="large"]')).toContainText('only 3 of 5');
   });
 
+  test('the static bars are drawn to scale: 45% and 63% of the track, the large model fills it and overflows', async ({ page }) => {
+    await page.goto(PAGE);
+    const geometry = async (id: string) =>
+      page.locator(`[data-scenario="${id}"]`).evaluate((row) => {
+        const track = row.querySelector('[data-al-track]')!.getBoundingClientRect();
+        const used = row.querySelector('[data-al-used]')!.getBoundingClientRect();
+        const over = row.querySelector('[data-al-over]')?.getBoundingClientRect();
+        return { fill: used.width / track.width, overRatio: over ? over.width / track.width : 0, overLeft: over ? over.left - track.right : null, track: track.width };
+      });
+    const everyday = await geometry('new');
+    const long = await geometry('long');
+    const large = await geometry('large');
+    expect(Math.abs(everyday.fill - 0.45)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(long.fill - 0.63)).toBeLessThanOrEqual(0.01);
+    expect(large.fill).toBeGreaterThanOrEqual(0.99);
+    expect(everyday.overRatio).toBe(0);
+    expect(long.overRatio).toBe(0);
+    // 135 - 100 = 35 units past the end, drawn at 35% of the track width, starting where the track ends.
+    expect(Math.abs(large.overRatio - 0.35)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(large.overLeft!)).toBeLessThanOrEqual(1);
+    await expect(page.locator('[data-scenario="large"] [data-al-over]')).toBeVisible();
+    await expect(page.locator('[data-scenario="new"] [data-al-over]')).toHaveCount(0);
+  });
+
+  test('the live region is visually hidden but still announces', async ({ page }) => {
+    await page.goto(PAGE);
+    const live = page.locator('[data-allowance] [data-al-live]');
+    const box = await live.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { w: r.width, h: r.height };
+    });
+    expect(box.w).toBeLessThanOrEqual(1);
+    expect(box.h).toBeLessThanOrEqual(1);
+    await page.locator('[data-allowance] [data-al-action="short"]').click();
+    await expect(live).toContainText('Spent 1. 99 of 100 left.');
+  });
+
   test('the meter drains by the same numbers, multiplies with the switches and refills after the wait', async ({ page }) => {
     await page.goto(PAGE);
     const meter = page.locator('[data-allowance]');
@@ -276,6 +313,12 @@ test.describe('usage-limits: JavaScript off', () => {
     const totals = await page.locator('[data-scenario] [data-al-total]').allTextContents();
     expect(totals).toEqual(['45', '63', '135']);
     await expect(page.locator('[data-scenario="large"]')).toContainText('cut off at 100');
+    const ratios = await page.locator('[data-scenario]').evaluateAll((rows) =>
+      rows.map((r) => r.querySelector('[data-al-used]')!.getBoundingClientRect().width / r.querySelector('[data-al-track]')!.getBoundingClientRect().width),
+    );
+    expect(Math.abs(ratios[0] - 0.45)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(ratios[1] - 0.63)).toBeLessThanOrEqual(0.01);
+    await expect(page.locator('[data-scenario="large"] [data-al-over]')).toBeVisible();
     await expect(page.locator('.allowance__made-up')).toBeVisible();
     await expect(page.locator('[data-limits-table]')).toBeVisible();
   });

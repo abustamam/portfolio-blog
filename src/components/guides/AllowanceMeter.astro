@@ -18,8 +18,12 @@ const bars = scenarioTotals().map(({ scenario, result }) => {
       return { cost, drawn, cut, first: i === 0 };
     })
     .filter((s) => s.drawn > 0);
-  return { scenario, result, segments };
+  const over = Math.max(0, result.total - ALLOWANCE);
+  return { scenario, result, segments, over, usedPct: (Math.min(result.total, ALLOWANCE) / ALLOWANCE) * 100 };
 });
+// Every row shares one scale: the track is the allowance, and a column beside it
+// is as wide as the biggest overflow, so the bars compare honestly.
+const maxOver = Math.max(0, ...bars.map((b) => b.over));
 ---
 
 <section class="allowance" aria-label="Allowance meter">
@@ -28,7 +32,7 @@ const bars = scenarioTotals().map(({ scenario, result }) => {
       The same job three ways: attach a 40-page PDF and ask one question, then ask {JOB_FOLLOW_UPS} more about it. Each bar is a
       day's allowance of {ALLOWANCE}.
     </p>
-    {bars.map(({ scenario, result, segments }) => (
+    {bars.map(({ scenario, result, segments, over, usedPct }) => (
       <figure class="allowance__row" data-scenario={scenario.id} data-total={result.total} data-spent={result.spent}>
         <figcaption class="allowance__caption">
           <span class="allowance__name">{scenario.label}</span>
@@ -44,13 +48,23 @@ const bars = scenarioTotals().map(({ scenario, result }) => {
             )}
           </span>
         </figcaption>
-        <div class="allowance__track" role="img" aria-label={`${scenario.label}: ${result.total} of ${ALLOWANCE}${result.cutOffAtMessage === null ? '' : ', cut off at ' + ALLOWANCE}`}>
-          {segments.map((s) => (
-            <span
-              class:list={['allowance__seg', { 'allowance__seg--cut': s.cut, 'allowance__seg--pdf': s.first }]}
-              style={`flex: ${s.drawn} 0 0`}
-            />
-          ))}
+        <div class="allowance__scale" style={`grid-template-columns: ${ALLOWANCE}fr ${maxOver}fr; --over-total: ${maxOver}`}>
+          <div class="allowance__track" data-al-track role="img" aria-label={`${scenario.label}: ${result.total} of ${ALLOWANCE}${result.cutOffAtMessage === null ? '' : ', cut off at ' + ALLOWANCE + ', ' + over + ' more than a day allows'}`}>
+            <div class="allowance__used" data-al-used style={`width:${usedPct}%`}>
+              {segments.map((s) => (
+                <span
+                  class:list={['allowance__seg', { 'allowance__seg--cut': s.cut, 'allowance__seg--pdf': s.first }]}
+                  style={`flex: ${s.drawn} 0 0`}
+                />
+              ))}
+            </div>
+          </div>
+          <div class="allowance__over-col">
+            {over > 0 && (
+              <span class="allowance__over" data-al-over style={`width:${(over / maxOver) * 100}%`} aria-hidden="true">+{over}</span>
+            )}
+          </div>
+          <span class="allowance__edge" aria-hidden="true">{ALLOWANCE}</span>
         </div>
         <p class="allowance__note">
           {scenario.note}
@@ -103,7 +117,7 @@ const bars = scenarioTotals().map(({ scenario, result }) => {
       conversation before it answers.
     </p>
 
-    <p class="allowance__status" role="status" aria-live="polite" data-al-live></p>
+    <p class="allowance__status sr-only" role="status" aria-live="polite" data-al-live></p>
 
     <div class="allowance__limit" data-al-limit hidden>
       <p class="allowance__msg">You've reached your limit. Try again at 4:00 pm.</p>
@@ -215,11 +229,25 @@ const bars = scenarioTotals().map(({ scenario, result }) => {
   .allowance__name { font-family: var(--font-serif); font-size: 1.05rem; color: var(--color-ink); }
   .allowance__num { font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); }
   .allowance__num b { font-size: 1.1rem; color: var(--color-ink); }
+  .allowance__scale { position: relative; display: grid; align-items: stretch; padding-bottom: 1.1rem; }
   .allowance__track {
-    display: flex; gap: 2px; height: 1.5rem; border: 1px solid var(--color-line); border-radius: 4px; overflow: hidden;
+    box-sizing: border-box; height: 1.5rem; border: 1px solid var(--color-line); border-radius: 4px 0 0 4px; overflow: hidden;
     background: var(--color-bg);
   }
-  .allowance__seg { display: block; min-width: 0; background: var(--color-accent); }
+  .allowance__used { display: flex; height: 100%; }
+  .allowance__over-col { display: flex; align-items: stretch; height: 1.5rem; min-width: 0; }
+  .allowance__over {
+    box-sizing: border-box; display: flex; align-items: center; justify-content: center; min-width: 0; overflow: hidden;
+    border: 1px dashed var(--color-danger); border-left: 0; border-radius: 0 4px 4px 0; font-family: var(--font-mono); font-size: 12px;
+    color: var(--color-danger);
+    background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--color-danger) 35%, transparent) 0 5px, transparent 5px 9px);
+  }
+  .allowance__edge {
+    position: absolute; bottom: 0; left: calc(100% * 100 / (100 + var(--over-total, 0))); transform: translateX(-100%);
+    font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--color-mute);
+  }
+  .allowance__seg { display: block; min-width: 0; background: var(--color-accent); border-right: 2px solid var(--color-surface); }
+  .allowance__seg:last-child { border-right: 0; }
   .allowance__seg--pdf { background: var(--color-accent-ink); }
   .allowance__seg--cut {
     background: repeating-linear-gradient(135deg, var(--color-danger) 0 5px, transparent 5px 9px);
@@ -254,6 +282,7 @@ const bars = scenarioTotals().map(({ scenario, result }) => {
   .allowance__btn:disabled { opacity: .5; cursor: not-allowed; }
   .allowance__cost { flex: none; font-family: var(--font-mono); font-size: 13px; color: var(--color-accent); }
   .allowance__why { margin: 0 0 1rem; font-size: 1rem; }
+  .allowance .sr-only { min-height: 0; position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .allowance__status { min-height: 1.5em; margin: 0 0 .75rem; font-family: var(--font-mono); font-size: 13px; color: var(--color-mute); }
   .allowance__limit { margin: 0 0 1rem; padding: 1rem; border-left: 2px solid var(--color-danger); background: var(--color-bg); border-radius: 0 6px 6px 0; }
   .allowance__msg { margin: 0 0 1rem; font-weight: 600; color: var(--color-ink); }
