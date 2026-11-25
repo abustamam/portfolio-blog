@@ -117,9 +117,11 @@ test.describe('projects: page', () => {
 for (const [name, size] of [['phone', { width: 375, height: 812 }], ['desktop', { width: 1280, height: 900 }]] as const) {
   for (const scheme of ['light', 'dark'] as const) {
     test(`${name}, ${scheme}: no horizontal scroll and the visual fits the viewport`, async ({ browser }) => {
-      const ctx = await browser.newContext({ viewport: size, colorScheme: scheme });
+      const ctx = await browser.newContext({ viewport: size, reducedMotion: 'reduce' });
       const page = await ctx.newPage();
       await page.goto(PAGE);
+      // The site's dark mode is the .dark class on <html>, not the OS setting.
+      await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), scheme === 'dark');
       const m = await page.evaluate(() => {
         const v = document.querySelector('[data-two-chats]')!.getBoundingClientRect();
         return { sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, left: v.left, right: v.right };
