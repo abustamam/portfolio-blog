@@ -181,7 +181,7 @@ test.describe('does-it-remember: the boxes figure and the page', () => {
   test('links the three pages the issue names', async ({ page }) => {
     await page.goto(PAGE);
     for (const href of ['/ai-guides/never-paste/', '/ai-guides/usage-limits/', '/ai-guides/glossary/']) {
-      await expect(page.locator(`article a[href="${href}"]`), href).toHaveCount(1);
+      await expect(page.locator(`article a[href="${href}"]:not(.term)`), href).toHaveCount(1);
     }
   });
 
