@@ -119,7 +119,7 @@ const steps = 9; // 6 skill + free text + privacy + logistics
 
 <BaseLayout
   title="AI training quiz — Rasheed Bustamam"
-  description="Nine short questions to find the right track for a small, hands-on AI cohort in Roseville and online."
+  description="Nine short questions to find the right track for a small, hands-on AI cohort, online."
   chromePath="/ai-quiz"
   chrome="letterhead"
 >
@@ -197,15 +197,6 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       <fieldset class="quiz-step">
         <legend class="quiz-legend">Last one: logistics</legend>
         <p class="quiz-hint">This helps me plan sessions and set a fair price.</p>
-
-        <div class="quiz-group">
-          <div class="quiz-sublabel">Format</div>
-          <div class="quiz-options">
-            <label class="quiz-option"><input type="radio" name="format" value="onsite" /><span>In-person, Roseville</span></label>
-            <label class="quiz-option"><input type="radio" name="format" value="online" /><span>Online</span></label>
-            <label class="quiz-option"><input type="radio" name="format" value="either" /><span>Either works</span></label>
-          </div>
-        </div>
 
         <div class="quiz-group">
           <div class="quiz-sublabel">When</div>
@@ -377,7 +368,6 @@ const steps = 9; // 6 skill + free text + privacy + logistics
       connected: one('connected'),
       weeklyTask: one('weeklyTask').trim(),
       neverPaste: many('neverPaste'),
-      format: one('format'),
       schedule: many('schedule'),
       price: one('price'),
       context: one('context'),

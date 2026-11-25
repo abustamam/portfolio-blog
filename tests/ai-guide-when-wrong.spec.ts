@@ -181,6 +181,8 @@ test.describe('when-ai-is-wrong: the page', () => {
     await expect(page.locator('[data-end] [data-score]')).toHaveText('You found 4 of 5 on the first try.');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
+    await expect(page.locator('[data-stm-next] a')).toBeFocused();
+    await page.keyboard.press('Tab');
     await expect(page.locator('[data-restart]')).toBeFocused();
     await page.keyboard.press(' ');
     await expect(page.locator('[data-round="0"] [data-part]').first()).toBeFocused();

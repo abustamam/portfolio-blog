@@ -49,7 +49,7 @@ export const SESSIONS: CohortSession[] = [
     tryThis: "Run your prompt once on this week's real task, made safe first, and note one place it was wrong.",
     handouts: [
       { label: 'The five-part prompt', href: COHORT_LINKS.prompt },
-      { label: 'Never paste these', href: COHORT_LINKS.neverPaste },
+      { label: "What's safe to paste", href: COHORT_LINKS.neverPaste },
     ],
   },
   {
@@ -152,7 +152,7 @@ export const TRACKS: Track[] = [
       },
     ],
     end: 'Your inbox and calendar doing more of the routine work, and a write-up of how it runs.',
-    needs: 'A Google or Microsoft 365 account you use for work. Your employer may need to allow its AI features.',
+    needs: 'A Google or Microsoft 365 account you use for work. Your employer may need to allow its AI features. On a personal account, Gemini in Gmail and Copilot in Outlook need a paid plan, from about $5 to $10 a month.',
   },
   {
     id: 'build',

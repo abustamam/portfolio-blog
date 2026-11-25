@@ -1,0 +1,168 @@
+---
+// The example cards for /ai-guides/examples/ (#78): an "I'm a…" filter, one
+// card per field with a before/after toggle, and "Try this prompt", which
+// fills the PromptBuilder whose id is `builderId` (through PromptBuilder's own
+// data-prompt-fill hook) and scrolls to it.
+//
+// Without JavaScript every card shows with both before and after, and the
+// filter, toggles and Try buttons stay hidden. The chosen field is kept only
+// through guideStore.setField, so the hub's Start Here shows the same choice.
+import { EXAMPLE_CARDS, type ExampleCard } from '../../consts/guides/examples';
+
+interface Props {
+  builderId: string;
+  cards?: ExampleCard[];
+}
+
+const { builderId, cards = EXAMPLE_CARDS } = Astro.props;
+---
+
+<section class="ex" data-examples aria-label="Examples by field">
+  <p class="ex-note" data-ex-note>
+    These are made-up examples. The people and tasks aren't real, and PERSON-1 stands in for a name. I also haven't put
+    a number on how much time each one saves.
+  </p>
+
+  <div class="ex-filter" data-ex-filter hidden>
+    <p class="ex-filter__label" id="ex-filter-label">I'm a…</p>
+    <div class="ex-filter__opts" role="group" aria-labelledby="ex-filter-label">
+      <button type="button" class="ex-opt" data-ex-all aria-pressed="true">Show all</button>
+      {cards.map((c) => (
+        <button type="button" class="ex-opt" data-ex-field={c.field} aria-pressed="false">{c.label}</button>
+      ))}
+    </div>
+  </div>
+  <p class="ex-missing">Your job isn't here? The same five parts work for any weekly task: <a href="/ai-guides/prompt/" data-ex-missing>the five-part prompt</a> shows how.</p>
+  <p class="ex-status" data-ex-status role="status"></p>
+
+  <ul class="ex-cards" role="list">
+    {cards.map((c) => (
+      <li class="ex-card" id={`example-${c.id}`} data-ex-card={c.id} data-field={c.field}>
+        <p class="ai-label ex-card__field">{c.label}</p>
+        <h3 class="ex-card__task">{c.summary}</h3>
+
+        <div class="ex-card__block">
+          <p class="ex-card__head">From the prompt</p>
+          <p class="ex-card__line"><span class="ex-card__part">Task:</span> {c.task}</p>
+          <p class="ex-card__line"><span class="ex-card__part">Check:</span> {c.check}</p>
+        </div>
+
+        <div class="ex-card__block">
+          <p class="ex-card__head">What you check yourself</p>
+          <p class="ex-card__line">{c.youCheck}</p>
+        </div>
+
+        <div class="ex-card__ba">
+          <div class="ex-toggle" data-ex-toggle hidden role="group" aria-label={`Before or after, ${c.label}`}>
+            <button type="button" class="ex-toggle__btn" data-ex-show="before" aria-pressed="true">Before</button>
+            <button type="button" class="ex-toggle__btn" data-ex-show="after" aria-pressed="false">After</button>
+          </div>
+          <div class="ex-card__view" data-ex-view="before">
+            <p class="ex-card__head">Before</p>
+            <p class="ex-card__line">{c.before}</p>
+          </div>
+          <div class="ex-card__view" data-ex-view="after">
+            <p class="ex-card__head">After</p>
+            <p class="ex-card__line">{c.after}</p>
+          </div>
+        </div>
+
+        <button type="button" class="ex-try" data-ex-try hidden data-prompt-fill={c.id} data-prompt-target={builderId}>
+          Try this prompt
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .ex { margin: 1.5rem 0 2rem; min-width: 0; }
+  .ex-note {
+    margin: 0 0 1.25rem; padding: .85rem 1rem; border-left: 3px solid var(--color-accent);
+    background: var(--color-accent-bg); color: var(--color-ink); font-size: 1rem; line-height: 1.5; border-radius: 0 4px 4px 0;
+  }
+  .ex-filter[hidden], .ex-toggle[hidden], .ex-try[hidden] { display: none; }
+  .ex-filter__label { font-family: var(--font-serif); font-size: 1.125rem; margin: 0 0 .5rem; }
+  .ex-filter__opts, .ex-toggle { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .ex-opt, .ex-toggle__btn {
+    font: inherit; font-size: 1rem; line-height: 1.3; color: var(--color-ink); background: var(--color-bg);
+    border: 1px solid var(--color-line); border-radius: 999px; padding: .5rem .9rem; min-height: 44px; cursor: pointer;
+  }
+  .ex-opt:hover, .ex-toggle__btn:hover { border-color: var(--color-accent); }
+  .ex-opt[aria-pressed='true'], .ex-toggle__btn[aria-pressed='true'] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
+  .ex-opt:focus-visible, .ex-toggle__btn:focus-visible, .ex-try:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .ex-missing { margin: .75rem 0 0; font-size: 1rem; color: var(--color-mute); }
+  .ex-status { margin: .25rem 0 0; min-height: 1.5em; font-size: .95rem; color: var(--color-mute); }
+
+  .ex-cards { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 1rem; }
+  .ex-cards > li { margin: 0; padding: 0; }
+  .ex-card { border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-surface); padding: 1.1rem 1rem 1.25rem !important; min-width: 0; }
+  .ex-card[hidden] { display: none; }
+  @media (min-width: 640px) { .ex-card { padding: 1.35rem 1.5rem 1.5rem !important; } }
+  .ex-card__field { margin: 0 0 .35rem; }
+  .ex-card .ex-card__task { margin: 0 0 1rem; font-size: 1.25rem; line-height: 1.3; }
+  .ex-card__block { margin: 0 0 .9rem; }
+  .ex-card__head {
+    margin: 0 0 .25rem; font-family: var(--font-mono); font-size: var(--text-12, 12px); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--color-faint);
+  }
+  .ex-card .ex-card__line { margin: 0 0 .35rem; font-size: 1rem; line-height: 1.55; overflow-wrap: anywhere; }
+  .ex-card__part { font-weight: 600; }
+  .ex-card__ba { margin: 1rem 0 0; padding-top: .9rem; border-top: 1px solid var(--color-line-soft); }
+  .ex-toggle { margin: 0 0 .75rem; }
+  .ex-card__view { margin: 0 0 .5rem; }
+  .ex-card__view[hidden] { display: none; }
+  .ex-try {
+    margin-top: .75rem; font-family: var(--font-mono); font-size: 14px; letter-spacing: .02em; min-height: 48px; padding: 0 1.25rem;
+    border-radius: 4px; border: 1px solid var(--color-accent); background: var(--color-accent); color: var(--color-bg); cursor: pointer;
+  }
+</style>
+
+<script>
+  import { guideStore } from '../../utils/guideStore';
+  import { EXAMPLE_CARDS, visibleCardIds } from '../../consts/guides/examples';
+
+  const root = document.querySelector<HTMLElement>('[data-examples]');
+  if (root) {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-ex-card]')];
+    const fieldBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-ex-field]')];
+    const allBtn = root.querySelector<HTMLButtonElement>('[data-ex-all]')!;
+    const status = root.querySelector<HTMLElement>('[data-ex-status]')!;
+    const hasCard = (f: string | null) => cards.some((c) => c.dataset.field === f);
+
+    root.querySelector<HTMLElement>('[data-ex-filter]')!.hidden = false;
+    root.querySelectorAll<HTMLElement>('[data-ex-toggle], [data-ex-try]').forEach((el) => { el.hidden = false; });
+
+    // A field saved on the hub that has no card here (e.g. "other") shows every card and is left as it is.
+    const saved = guideStore.getField();
+    let field: string | null = hasCard(saved) ? saved : null;
+
+    const render = () => {
+      const show = new Set(visibleCardIds(EXAMPLE_CARDS, field));
+      for (const c of cards) c.hidden = !show.has(c.dataset.exCard!);
+      for (const b of fieldBtns) b.setAttribute('aria-pressed', String(b.dataset.exField === field));
+      allBtn.setAttribute('aria-pressed', String(field === null));
+      const label = fieldBtns.find((b) => b.dataset.exField === field)?.textContent;
+      status.textContent = label ? `Showing the ${label.toLowerCase()} example.` : '';
+    };
+
+    const show = (card: HTMLElement, which: string) => {
+      card.querySelectorAll<HTMLElement>('[data-ex-view]').forEach((v) => { v.hidden = v.dataset.exView !== which; });
+      card.querySelectorAll<HTMLButtonElement>('[data-ex-show]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.exShow === which)));
+    };
+    cards.forEach((c) => show(c, 'before'));
+
+    root.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+      if (!btn) return;
+      if (btn.dataset.exField || btn.hasAttribute('data-ex-all')) {
+        field = btn.dataset.exField ?? null;
+        guideStore.setField(field);
+        render();
+      } else if (btn.dataset.exShow) {
+        show(btn.closest<HTMLElement>('[data-ex-card]')!, btn.dataset.exShow);
+      }
+    });
+    render();
+  }
+</script>

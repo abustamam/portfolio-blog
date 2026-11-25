@@ -2,6 +2,7 @@
 title: "AI Literacy Is Not a Competition"
 description: "You don't need to master AI. You need to know how to use it — and how to tell when it's wrong."
 pubDate: '2026-05-06'
+updatedDate: '2026-11-24'
 dek: "The pressure to keep up with every model release is a distraction. AI is infrastructure, not a skill tree."
 tag: "AI"
 audience: "general"
@@ -36,11 +37,11 @@ If mastery isn't the goal, what is?
 
 **Knowing what to ask.** AI can generate code, essays, business plans, legal documents, meal plans, workout routines. But it can't tell you which of those things you actually need. It can't tell you if the code it wrote has a subtle security flaw, if the business plan ignores your actual market constraints, or if the legal document would hold up in court.
 
-**Knowing when it's wrong.** AI is confidently wrong on a regular basis. It cites papers that don't exist. It generates code with subtle bugs. It gives medical advice that sounds plausible but isn't. The critical skill isn't knowing how to make AI generate *something* — it's knowing whether that something is *correct*.
+**Knowing when it's wrong.** AI is confidently wrong on a regular basis. It cites papers that don't exist. It generates code with subtle bugs. It gives medical advice that sounds plausible but isn't. The critical skill isn't knowing how to make AI generate *something* — it's knowing whether that something is *correct*. I wrote a short guide on [how to check it](/ai-guides/when-ai-is-wrong/).
 
 **Having deep domain knowledge.** This is the one that matters most. AI democratizes execution, but it doesn't democratize judgment. A non-technical person can now spin up a web app in an afternoon. But they can't tell if it's secure, scalable, or maintainable. They don't know what they don't know.
 
-Amazon is learning this [the hard way](https://fortune.com/2026/03/12/amazon-retail-site-outages-ai-agent-inaccurate-advice/). After laying off tens of thousands of corporate workers, they suffered a string of severe outages — including one that locked shoppers out of checkout for six hours. Internal documents initially flagged "GenAI-assisted changes" as a factor. The company now says it needs more humans in the loop, not fewer. AI can write code, but it takes experience to know if it's writing the *right* code. That's true for software engineering, and it's true for everything else.
+Amazon had a taste of this [in March](https://fortune.com/2026/03/12/amazon-retail-site-outages-ai-agent-inaccurate-advice/). After laying off tens of thousands of corporate workers, it had a string of severe outages — including one that locked shoppers out of checkout for six hours. An internal document initially flagged "GenAI-assisted changes" as a factor, a line that was removed before the meeting about it. Amazon disputes that reading: it says only one incident involved AI tools, and that the cause was an engineer following inaccurate advice an AI agent had inferred from an outdated wiki. Even on Amazon's own account, someone had to know the advice was wrong. AI can write code, but it takes experience to know if it's writing the *right* code. That's true for software engineering, and it's true for everything else.
 
 ---
 
@@ -96,7 +97,7 @@ Then Wikipedia happened, and smartphones. Now you can access most of human knowl
 
 Some people lamented this. They said it would make people lazy, that memorization was a virtue, that the library was sacred. And sure, there's something lost when you don't wander the stacks and stumble on unexpected books. Libraries are still beautiful, useful places.
 
-But no one serious argues we should go back. The internet and Wikipedia didn't make us dumber — they changed what being informed looks like. Even though we all have computers more powerful than the one that sent man on the moon in 1969, we still learn fundamentals, like arithmetic.
+But no one serious argues we should go back. The internet and Wikipedia didn't make us dumber — they changed what being informed looks like. Even though we all have computers more powerful than the one that put a man on the moon in 1969, we still learn fundamentals, like arithmetic.
 
 Not using AI will soon feel like not using the internet. Not because you're a Luddite, but because you're choosing a slower, more limited way to work with information. You can still do it. But you'll be making your own life harder than it needs to be, just like going to the library to check out an encyclopedia.
 
@@ -108,6 +109,8 @@ I tell her she's fine. I tell her that using AI as a writing tool and a thinking
 
 I tell her that the people who will benefit most from AI are the ones who know their domain deeply and use AI to amplify that knowledge. Not the ones who treat every model release like a sports draft.
 
-I tell her that AI literacy is not a competition. It's not a leaderboard. It's just... literacy. You learn enough to use the tool. You keep using it. You get better over time without trying to "keep up." Just like learning anything in school. You can make it through most of life knowing basic arithmetic. You aren't "behind" because you don't understand derivatives. Learn as much (or as little) as interests you, and tune out the rest. You don't need to be aware of the latest mathematical discovery if you only need basic arithmetic in your life. 
+I tell her that AI literacy is not a competition. It's not a leaderboard. It's just... literacy. You learn enough to use the tool. You keep using it. You get better over time without trying to "keep up." Just like learning anything in school. You can make it through most of life knowing basic arithmetic. You aren't "behind" because you don't understand derivatives. Learn as much (or as little) as interests you, and tune out the rest. You don't need to be aware of the latest mathematical discovery if you only need basic arithmetic in your life.
 
 And then I send her this blog post, which is much longer than the wall of text I promised to spare her. Sorry-not-sorry!
+
+*If you want the "enough to use the tool" part without the news cycle, I keep a few short [free guides](/ai-guides/): what's safe to paste, how to ask, and how to check the answer.*

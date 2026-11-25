@@ -1,9 +1,9 @@
 ---
 title: When AI gets it wrong
 description: Five mistakes AI makes, the 30-second check for each, and a game to practise spotting them.
-lead: AI answers sound sure of themselves whether they are right or not. You can't tell by reading the tone, but you can catch most mistakes with a short check against the source.
+lead: AI answers sound sure of themselves whether they are right or not. You can't tell by reading the tone, but a short check against the source catches the common mistakes.
 step: 3
-minutes: 6
+minutes: 8
 tool: Spot the mistake
 ctaLine: A general checklist catches general mistakes. In the hands-on training you build the check for your own file.
 ---
@@ -13,7 +13,7 @@ import SpotTheMistake from '../../components/guides/SpotTheMistake.astro';
 
 When an answer looks off, most of us ask again, or ask "are you sure?", until it looks right. That isn't checking. The tool will happily agree with itself, or swap one confident answer for another, and it knows no more about what's true the second time. Asking again tells you how the answer *sounds*. Only the source tells you whether it's *right*.
 
-Checking every answer by hand against the source does work, but it doesn't scale: the more you use AI, the more answers there are to check. The better move is to build the check into how you work. Below are the five mistakes that check is looking for, each with a quick check you can do in 30 seconds, and then how to build the check in.
+Checking every answer by hand against the source does work, but it doesn't scale: the more you use AI, the more answers there are to check. The better move is to build the check into how you work. Below are the five mistakes that check is looking for, each with a quick check you can do in 30 seconds, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
 
 ## Five mistakes and the check for each
 
@@ -33,11 +33,11 @@ You ask for every row that matches, and some are missing. The rows it does list 
 
 **The 30-second check:** count the matching rows yourself, with a filter or a sort in the sheet, and compare the count with the answer.
 
-We haven't found a documented public case of this one to link, so the game has the only example on this page. It's still worth the check: a list with a row missing looks exactly like a full list.
+I haven't found a documented public case of this one to link, so the game has the only example on this page. It's still worth the check: a list with a row missing looks exactly like a full list.
 
 ### Summaries of things it didn't read
 
-A summary that sounds right but says something the document doesn't, often because it leans on the start and misses a line further down: the decision, the exception, the "but".
+A summary that sounds right but says something the document doesn't, for example when it leans on the start and misses a line further down: the decision, the exception, the "but".
 
 **The 30-second check:** for each line of the summary, find the line in the original it came from. Read the decisions and the end of the document yourself.
 
@@ -71,7 +71,7 @@ Five rounds, one for each mistake above. Each answer has one part that's wrong. 
 
 ## Build the check in
 
-People who use AI a lot don't hunt for mistakes after the fact. They set things up so mistakes get caught by default, as part of the work.
+I don't hunt for mistakes after the fact. I set things up so they get caught by default, as part of the work.
 
 I don't check every answer by hand any more. Over time I've set things up so the AI has to show where each claim came from, does its sums somewhere I can see them, and gets checked by a second pass before I trust it. None of that is magic, and you can start with the habits below today. Getting it to run on your own work takes some setting up, and that's what we do in the hands-on training.
 
@@ -79,7 +79,7 @@ Habits you can start today, with no setup:
 
 - **Ask for the line behind each claim.** Ask the AI to quote the line in your source behind every number or claim, and to say what it couldn't find.
 - **Do the sums in a spreadsheet,** not in the chat.
-- **Get a second pass.** Open a fresh chat, or a second tool, and ask it to check the first answer against the source.
+- **Get a second pass.** Open a fresh chat, or a second tool, give it the source, and ask it to check the first answer against it. That isn't the same as asking the first chat if it's sure: the second pass has the source in front of it.
 - **Keep a check you paste in.** For a task you do often, keep a short check and paste it in with every task of that kind. For example: "Quote the line behind each number. List anything you couldn't find."
 
 ## The checklist
@@ -97,5 +97,5 @@ Before you use an answer from AI:
 
 - **When you can't check the answer and being wrong would hurt.** Legal, medical and money questions are the usual ones. Ask a person who knows and can be held to it.
 - **When the exact number is the point and you already have the sheet.** Let the sheet add it up.
-- **When the only way to ask is to paste something private.** See [Never paste these](/ai-guides/never-paste/) first.
+- **When the only way to ask is to paste something private.** See [what's safe to paste into AI](/ai-guides/never-paste/) first.
 - **When checking would take longer than doing it yourself.** A short reply you could write in a minute doesn't need a draft you then have to check.
