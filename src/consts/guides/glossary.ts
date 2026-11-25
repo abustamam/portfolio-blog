@@ -176,7 +176,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     id: 'temperature',
     term: 'temperature',
     short: 'The setting for how much chance goes into each word. Low keeps answers predictable; high makes them more varied. Chat apps set it for you.',
-    why: 'You will see this word in tool settings and articles, and it only controls how varied the wording is.',
+    why: "You'll see this word in app settings and articles about AI; it's one reason the same question can get a different answer twice.",
   },
 ];
 
