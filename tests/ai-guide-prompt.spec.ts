@@ -38,6 +38,9 @@ test.describe('prompt builder: pure functions', () => {
     expect(parseDraft({ x: 1 })).toBeNull();
     expect(parseDraft({ task: 'T', input: 5 })).toEqual({ ...Object.fromEntries(PROMPT_FIELDS.map((f) => [f, ''])), task: 'T' });
     expect(parseSentence('x')).toBeNull();
+    expect(parseSentence({})).toBeNull();
+    expect(parseSentence({ what: 5 })).toBeNull();
+    expect(parseSentence({ what: 'a' })).toEqual({ what: 'a', using: '', time: '', done: '' });
     expect(assembleSentence({ what: 'the rota' })).toBe('Every week I do the rota using ________, it takes ________, and done means ________.');
   });
 
@@ -143,7 +146,10 @@ test.describe('prompt guide page', () => {
       b.dataset.promptTarget = 'prompt-builder';
       document.body.prepend(b);
     });
-    await page.locator('#host-btn').click();
+    // Start far from the builder so only a deliberate scroll can bring it into view.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.locator('#prompt-builder')).not.toBeInViewport();
+    await page.evaluate(() => document.getElementById('host-btn')!.click());
     await expect(field(page, 'situation')).toHaveValue(PROMPT_EXAMPLES[1].situation);
     await expect(field(page, 'situation')).toBeFocused();
     await expect(page.locator('#prompt-builder')).toBeInViewport();
@@ -155,6 +161,18 @@ test.describe('prompt guide page', () => {
     );
     await expect(field(page, 'task')).toHaveValue('From an event.');
     await expect(field(page, 'situation')).toHaveValue('');
+
+    // scroll: false fills without moving the page.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.locator('#prompt-builder')).not.toBeInViewport();
+    await page.evaluate(() =>
+      document.dispatchEvent(new CustomEvent('prompt-builder:fill', {
+        detail: { target: 'prompt-builder', parts: { task: 'No scroll.' }, scroll: false },
+      })),
+    );
+    await expect(field(page, 'task')).toHaveValue('No scroll.');
+    await page.waitForTimeout(800);
+    await expect(page.locator('#prompt-builder')).not.toBeInViewport();
   });
 
   test('the guide holds the template with one copy button and the never-paste reminder', async ({ page }) => {
