@@ -54,6 +54,8 @@ test.describe('glossary data', () => {
     }
     expect(findTerm('Chatbot')?.id).toBe('chat-app');
     expect(findTerm('free tier')?.id).toBe('plan');
+    expect(findTerm('personalization')?.id).toBe('memory');
+    expect(findTerm('personalisation')?.id).toBe('memory');
     expect(findTerm('not a term')).toBeUndefined();
     expect(findTerm('')).toBeUndefined();
   });
@@ -61,5 +63,9 @@ test.describe('glossary data', () => {
   test('every guide value is a published guide or one of the five planned slugs', () => {
     const ok = new Set([...published, ...PLANNED]);
     for (const t of GLOSSARY) if (t.guide) expect(ok.has(t.guide), `${t.id} -> ${t.guide}`).toBe(true);
+  });
+
+  test('no entry promises a per-day limit', () => {
+    for (const t of GLOSSARY) expect(`${t.short} ${t.why}`, t.id).not.toMatch(/\b(day|daily)\b/i);
   });
 });

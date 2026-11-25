@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
 import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
-import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUrl, byStep, groupGuides } from '../src/utils/startHere';
+import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUrl, byStep, groupGuides, arrangeHub } from '../src/utils/startHere';
 
 // The hub as the front door (#79). Run after `bun run build`: the page tests
 // read dist/ through the preview server.
@@ -36,6 +36,39 @@ const NO_FIRST = FULL.slice(1); // a hub where the safety guide is missing
 const SHUFFLED = [FULL[3], FULL[0], FULL[5], FULL[1], FULL[4], FULL[2]];
 
 const pairs = [null, ...FIELDS.map((f) => f.value)].flatMap((field) => [null, ...EXPERIENCE.map((e) => e.value)].map((experience) => ({ field, experience })));
+
+test.describe('start here: across all three lists', () => {
+  const lists = {
+    start: [{ id: 'what-is-ai', step: 0.1 }, { id: 'first-ten-minutes', step: 0.2 }],
+    guides: FULL,
+    reference: [{ id: 'glossary', step: 90 }],
+  };
+  test('"never" badges the start guide and moves it to the top of the start list only', () => {
+    const { order, badged } = arrangeHub({ experience: 'never' }, { ...lists, start: [lists.start[1], lists.start[0]] });
+    expect(badged).toBe('what-is-ai');
+    expect(order.start).toEqual(['what-is-ai', 'first-ten-minutes']);
+    expect(order.guides).toEqual(ALL_IDS); // step order, never-paste not moved
+    expect(order.reference).toEqual(['glossary']);
+  });
+  test('a recommendation in the guides list leaves the other lists in step order', () => {
+    const { order, badged } = arrangeHub({ experience: 'often' }, lists);
+    expect(badged).toBe('when-ai-is-wrong');
+    expect(order.guides[0]).toBe('when-ai-is-wrong');
+    expect(order.start).toEqual(['what-is-ai', 'first-ten-minutes']);
+  });
+  test('with no answers nothing is badged and every list is in step order', () => {
+    const { order, badged } = arrangeHub({}, { ...lists, guides: SHUFFLED });
+    expect(badged).toBeNull();
+    expect(order.guides).toEqual(ALL_IDS);
+    expect(order.start).toEqual(['what-is-ai', 'first-ten-minutes']);
+  });
+  test('the "go straight to the guides" link targets a list that exists', async ({ page }) => {
+    await page.goto('/ai-guides/');
+    const href = await page.locator('[data-start-here] .start-here__hint a').getAttribute('href');
+    const first = await page.locator('[data-hub-list]').first().getAttribute('id');
+    expect(href).toBe(`#${first}`);
+  });
+});
 
 test.describe('start here: pure ordering', () => {
   for (const [name, list] of [['the real list', REAL], ['all six guides', FULL], ['only never-paste', ONLY_FIRST], ['without never-paste', NO_FIRST], ['out of order', SHUFFLED]] as const) {

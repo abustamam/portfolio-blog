@@ -78,7 +78,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'plan',
     also: ['free plan', 'free tier', 'paid plan', 'subscription'],
     short: 'What your account includes. The free plan costs nothing and has smaller limits; a paid plan is a monthly charge for more.',
-    why: 'It decides how much you can do each day and which models you can use, so check yours before you rely on the app for a task.',
+    why: 'It decides how much you can do before the app asks you to wait, and which models you can use, so check yours before you rely on the app for a task.',
     guide: 'usage-limits',
   },
   {
@@ -92,7 +92,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'memory',
     term: 'memory',
-    also: ['saved memory', 'personalisation'],
+    also: ['saved memory', 'personalisation', 'personalization'],
     short: 'A setting that lets the app keep a few facts about you between chats. You can read, edit or turn it off.',
     why: 'It decides whether the app carries things about you from one chat to the next, so you should know whether it is on.',
     guide: 'does-it-remember',
@@ -141,7 +141,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'thinking setting',
     also: ['reasoning', 'extended thinking'],
     short: 'A switch that makes the model work through a problem before answering. Slower, and it uses more of your limit.',
-    why: 'It can give a better answer to a hard question, but you pay for it in waiting time and in your daily limit.',
+    why: 'It can give a better answer to a hard question, but you pay for it in waiting time and in your limit.',
     guide: 'which-model',
   },
   {

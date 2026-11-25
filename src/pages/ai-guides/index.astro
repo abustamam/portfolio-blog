@@ -16,6 +16,7 @@ const sections = [
   { key: 'guides', heading: '', id: 'guides', list: true },
   { key: 'reference', heading: 'Look something up', id: 'look-something-up', list: false },
 ] as const;
+const firstList = sections.find((sec) => grouped[sec.key].length > 0)?.id ?? 'guides';
 ---
 
 <BaseLayout
@@ -34,12 +35,12 @@ const sections = [
       <p class="hub-counting ai-label" data-rise style="--i:2" data-counting-line>No trackers and no cookies. I count page requests from the server's own logs, as weekly totals.</p>
     </header>
 
-    <StartHere />
+    <StartHere firstList={firstList} />
 
     {sections.map((sec) => grouped[sec.key].length > 0 && (
       <>
         {sec.heading && <h2 class="ai-label hub-next" data-hub-group-heading={sec.key}>{sec.heading}</h2>}
-        <ol id={sec.id} class="hub-list" data-rise style="--i:3" aria-label={sec.heading || 'Guides'} data-guide-list={sec.list ? '' : undefined}>
+        <ol id={sec.id} class="hub-list" data-rise style="--i:3" aria-label={sec.heading || 'Guides'} data-hub-list={sec.key} data-guide-list={sec.list ? '' : undefined}>
           {grouped[sec.key].map(({ g }) => (
             <li data-guide-id={g.id} data-step={g.data.step}>
               <a class="ai-card hub-card" href={guidePath(g.id)} data-guide-card={g.id}>

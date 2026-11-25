@@ -124,6 +124,30 @@ export function orderGuides<T extends GuideRef>(answers: StartAnswers, guides: r
   return first ? [first, ...sorted.filter((g) => g.id !== first.id)] : sorted;
 }
 
+export interface HubArrangement {
+  /** Guide ids per list, in the order that list shows them. */
+  order: Record<string, string[]>;
+  /** The recommended guide (it gets the badge), or null with no answers. */
+  badged: string | null;
+}
+
+/**
+ * The hub across all its lists. The recommendation is computed over every guide
+ * on the hub; the recommended guide moves to the top of its own list only and a
+ * guide never changes list. With no answers every list stays in step order.
+ */
+export function arrangeHub<T extends GuideRef>(answers: StartAnswers, lists: Record<string, readonly T[]>): HubArrangement {
+  const all = Object.values(lists).flat();
+  const pick = recommend(answers, all);
+  const order: Record<string, string[]> = {};
+  for (const [key, list] of Object.entries(lists)) {
+    const sorted = byStep(list);
+    const first = pick && sorted.find((g) => g.id === pick.id);
+    order[key] = (first ? [first, ...sorted.filter((g) => g.id !== first.id)] : sorted).map((g) => g.id);
+  }
+  return { order, badged: pick ? pick.id : null };
+}
+
 /** Canonical form of a page URL for sharing: no query string, no fragment. */
 export function canonicalShareUrl(url: string): string {
   try {
