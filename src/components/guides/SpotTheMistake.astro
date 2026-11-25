@@ -1,0 +1,241 @@
+---
+// "Spot the mistake": five rounds, one per kind of mistake. Each round shows
+// what was asked, an answer split into tappable parts, and the source to
+// compare it with (beside the answer on a wide screen, below it on a phone).
+// Every round is an illustration (see src/consts/guides/mistakeRounds.ts).
+// Nothing is saved and nothing is sent: state lives in memory only.
+import { MISTAKE_ROUNDS, MISTAKE_TYPES } from '../../consts/guides/mistakeRounds';
+
+const total = MISTAKE_ROUNDS.length;
+const typeLabel = (id: string) => MISTAKE_TYPES.find((t) => t.id === id)!.label;
+---
+
+<div class="stm" data-spot-the-mistake>
+  <p class="stm-note" data-illustrations-note>
+    <strong>These rounds are illustrations.</strong> Each one is written by hand to show a real kind of mistake. None is
+    copied from an AI tool.
+  </p>
+
+  <noscript><p class="stm-note">The game needs JavaScript. The five checks above work without it.</p></noscript>
+
+  {
+    MISTAKE_ROUNDS.map((round, r) => (
+      <section
+        class="stm-round"
+        data-round={r}
+        data-type={round.type}
+        aria-labelledby={`stm-round-${r}-title`}
+        hidden={r !== 0}
+      >
+        <p class="stm-progress ai-label" id={`stm-round-${r}-title`}>
+          Round {r + 1} of {total}
+        </p>
+        <p class="stm-ask">
+          <span class="stm-tag">Asked</span> {round.ask}
+        </p>
+
+        <div class="stm-grid">
+          <div class="stm-answer">
+            <p class="stm-tag">The answer · tap the part that's wrong</p>
+            <div class="stm-parts" role="group" aria-label={`Parts of the answer, round ${r + 1}`}>
+              {round.parts.map((part, p) => (
+                <button type="button" class="stm-part" data-part={p}>
+                  {part.text}
+                </button>
+              ))}
+            </div>
+            <p class="stm-feedback" data-feedback aria-live="polite" />
+          </div>
+
+          <figure class="stm-source">
+            <figcaption class="stm-tag">The source · {round.source.caption}</figcaption>
+            {round.source.kind === 'table' ? (
+              <table>
+                <thead>
+                  <tr>
+                    {round.source.headers.map((h) => (
+                      <th scope="col">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {round.source.rows.map((row) => (
+                    <tr>
+                      {row.map((cell) => (
+                        <td>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div class="stm-passage">
+                {round.source.paragraphs.map((para) => (
+                  <p>{para}</p>
+                ))}
+              </div>
+            )}
+          </figure>
+        </div>
+
+        <div class="stm-reveal" data-reveal hidden tabindex="-1">
+          <p class="stm-reveal__type">{typeLabel(round.type)}</p>
+          <p>
+            <strong>What's wrong:</strong> {round.explanation}
+          </p>
+          <p>
+            <strong>The check:</strong> {round.check}
+          </p>
+          <button type="button" class="quiz-btn stm-next" data-next>
+            {r === total - 1 ? 'See your score' : 'Next round'}
+          </button>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="stm-end" data-end hidden tabindex="-1" aria-labelledby="stm-end-title">
+    <p class="stm-progress ai-label" id="stm-end-title">Your score</p>
+    <p class="stm-score" data-score></p>
+    <div data-missed hidden>
+      <p>Read these again:</p>
+      <ul>
+        {
+          MISTAKE_TYPES.map((t) => (
+            <li data-missed-type={t.id} hidden>
+              <a href={`#${t.anchor}`}>{t.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <p data-perfect hidden>You caught every one on the first try. Now do the same with the next answer you're about to use.</p>
+    <button type="button" class="quiz-btn quiz-btn-ghost" data-restart>Play again</button>
+  </section>
+</div>
+
+<script>
+  import { MISTAKE_ROUNDS } from '../../consts/guides/mistakeRounds';
+  import { isOver, missedTypes, newGame, nextRound, score, tap, type GameState } from '../../utils/spotTheMistake';
+
+  const root = document.querySelector<HTMLElement>('[data-spot-the-mistake]');
+  if (root) {
+    const rounds = MISTAKE_ROUNDS;
+    const sections = Array.from(root.querySelectorAll<HTMLElement>('[data-round]'));
+    const end = root.querySelector<HTMLElement>('[data-end]')!;
+    let state: GameState = newGame(rounds);
+
+    function resetRound(section: HTMLElement) {
+      section.querySelectorAll<HTMLButtonElement>('[data-part]').forEach((b) => {
+        b.removeAttribute('data-state');
+        b.removeAttribute('aria-pressed');
+        b.disabled = false;
+      });
+      section.querySelector<HTMLElement>('[data-feedback]')!.textContent = '';
+      section.querySelector<HTMLElement>('[data-reveal]')!.hidden = true;
+    }
+
+    function show(focus: boolean) {
+      sections.forEach((s, i) => (s.hidden = i !== state.round));
+      end.hidden = !isOver(state, rounds);
+      if (isOver(state, rounds)) {
+        const n = score(state);
+        end.querySelector<HTMLElement>('[data-score]')!.textContent =
+          `You found ${n} of ${rounds.length} on the first try.`;
+        const missed = missedTypes(state, rounds);
+        end.querySelector<HTMLElement>('[data-missed]')!.hidden = missed.length === 0;
+        end.querySelectorAll<HTMLElement>('[data-missed-type]').forEach((li) => {
+          li.hidden = !missed.includes(li.dataset.missedType as (typeof missed)[number]);
+        });
+        end.querySelector<HTMLElement>('[data-perfect]')!.hidden = missed.length > 0;
+        if (focus) end.focus();
+      } else if (focus) {
+        sections[state.round].querySelector<HTMLButtonElement>('[data-part]')?.focus();
+      }
+    }
+
+    sections.forEach((section, r) => {
+      const feedback = section.querySelector<HTMLElement>('[data-feedback]')!;
+      const reveal = section.querySelector<HTMLElement>('[data-reveal]')!;
+
+      section.querySelectorAll<HTMLButtonElement>('[data-part]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (state.round !== r) return;
+          const result = tap(state, rounds, Number(button.dataset.part));
+          state = result.state;
+          if (result.result === 'look-again') {
+            button.dataset.state = 'ok';
+            button.setAttribute('aria-pressed', 'true');
+            feedback.textContent = 'Look again: that part matches the source.';
+          } else if (result.result === 'found') {
+            button.dataset.state = 'wrong';
+            button.setAttribute('aria-pressed', 'true');
+            section.querySelectorAll<HTMLButtonElement>('[data-part]').forEach((b) => (b.disabled = true));
+            feedback.textContent = state.missed[r] ? 'Found it.' : 'Found it on the first try.';
+            reveal.hidden = false;
+            reveal.focus();
+          }
+        });
+      });
+
+      section.querySelector<HTMLButtonElement>('[data-next]')!.addEventListener('click', () => {
+        state = nextRound(state, rounds);
+        show(true);
+      });
+    });
+
+    root.querySelector<HTMLButtonElement>('[data-restart]')!.addEventListener('click', () => {
+      state = newGame(rounds);
+      sections.forEach(resetRound);
+      show(true);
+    });
+
+    show(false);
+  }
+</script>
+
+<style>
+  .stm { margin: 1.5rem 0 2.5rem; }
+  .stm-note {
+    font-size: 1rem; padding: .75rem 1rem; margin: 0 0 1.5rem;
+    border-left: 3px solid var(--color-accent); background: var(--color-accent-bg); color: var(--color-ink);
+  }
+  .stm-round, .stm-end {
+    border: 1px solid var(--color-line); border-radius: 10px; padding: 1.25rem; background: var(--color-surface);
+  }
+  .stm-round[hidden], .stm-end[hidden], .stm-reveal[hidden] { display: none; }
+  .stm-progress { margin: 0 0 .75rem; }
+  .stm-ask { font-size: 1.05rem; margin: 0 0 1.25rem; }
+  .stm-tag {
+    display: block; font-family: var(--font-mono); font-size: var(--text-12, 12px); letter-spacing: .04em;
+    text-transform: uppercase; color: var(--color-mute); margin: 0 0 .5rem;
+  }
+  .stm-grid { display: grid; gap: 1.25rem; min-width: 0; }
+  @media (min-width: 760px) { .stm-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .stm-answer, .stm-source { min-width: 0; margin: 0; }
+  .stm-parts { display: flex; flex-direction: column; gap: .5rem; }
+  .stm-part {
+    font: inherit; font-size: 1rem; line-height: 1.45; text-align: left; cursor: pointer;
+    padding: .75rem .9rem; border: 1px solid var(--color-line); border-radius: 8px;
+    background: transparent; color: var(--color-ink); min-height: 44px; overflow-wrap: anywhere;
+  }
+  .stm-part:hover:not(:disabled) { border-color: var(--color-accent); }
+  .stm-part:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .stm-part:disabled { cursor: default; }
+  .stm-part[data-state='ok'] { border-style: dashed; color: var(--color-mute); }
+  .stm-part[data-state='wrong'] {
+    border-color: var(--color-accent); background: var(--color-accent-bg); box-shadow: inset 0 0 0 1px var(--color-accent);
+    text-decoration: line-through; text-decoration-color: var(--color-accent);
+  }
+  .stm-feedback { min-height: 1.5em; margin: .75rem 0 0; font-size: 1rem; color: var(--color-mute); }
+  .stm-source table { width: 100%; margin: 0; font-size: .95rem; }
+  .stm-passage { font-size: 1rem; border-left: 2px solid var(--color-line); padding-left: .9rem; }
+  .stm-passage p { margin: 0 0 .6rem; }
+  .stm-reveal { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-line-soft); }
+  .stm-reveal:focus { outline: none; }
+  .stm-reveal p { font-size: 1rem; margin: 0 0 .75rem; }
+  .stm-reveal__type { font-family: var(--font-mono); font-size: var(--text-13, 13px); color: var(--color-accent); }
+  .stm-next, .stm-end .quiz-btn { margin-top: .5rem; }
+  .stm-end:focus { outline: none; }
+  .stm-score { font-family: var(--font-serif); font-size: 1.5rem; margin: 0 0 1rem; }
+</style>
