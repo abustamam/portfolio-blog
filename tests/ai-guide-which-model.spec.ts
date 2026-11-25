@@ -132,3 +132,53 @@ test.describe('which-model: page', () => {
     expect(text).not.toMatch(new RegExp(`${compare}[^.\\n]{0,60}${vendor}`, 'i'));
   });
 });
+
+// Voice: the GuideCta at the bottom is the page's one call to action, and the
+// guide is written as "I". Nothing above the CTA, and nothing the tool says,
+// mentions the training, a course, a cohort or a track, or says "we"/"our".
+const COURSE_WORDS = /\b(?:tracks?|training|courses?|cohorts?)\b/i;
+const WE_WORDS = /\b(?:we|our|ours|ourselves)\b/i;
+
+/** Every string "Read my menu" can show: labels, each option's line, every result line. */
+function toolStrings(): string[] {
+  const out = new Set<string>([EMPLOYER_LINE, ...ACCOUNTS.map((a) => a.label), ...TASKS.map((t) => t.label)]);
+  for (const m of AI_MODELS) out.add(m.pickWhen);
+  for (const v of VENDORS) {
+    for (const a of ACCOUNTS) {
+      for (const t of TASKS) recommend(AI_MODELS, v, a.id, t.id).lines.forEach((l) => out.add(l));
+    }
+  }
+  return [...out];
+}
+
+test.describe('which-model: voice', () => {
+  test('the page above the call to action never mentions the training and never says "we"', async ({ page }) => {
+    await page.goto(PAGE);
+    // The header (title, lead, date) and the article, including the tool's hidden menus.
+    const text = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-guide] > header, [data-guide] > article')].map((el) => el.textContent ?? '').join('\n'),
+    );
+    expect(text.length).toBeGreaterThan(2000);
+    expect(await page.locator('[data-guide] > article [data-guide-cta]').count()).toBe(0);
+    expect(text.match(COURSE_WORDS)?.[0], 'course word above the CTA').toBeUndefined();
+    expect(text.match(WE_WORDS)?.[0], '"we" in the prose').toBeUndefined();
+    await expect(page.locator('[data-guide] > article a[href^="/ai-training"]')).toHaveCount(0);
+    // The CTA itself is still there, below the article.
+    await expect(page.locator('[data-guide-cta]')).toHaveCount(1);
+  });
+
+  test('nothing the tool shows mentions the training or says "we"', () => {
+    for (const s of toolStrings()) {
+      expect(s, 'course word in a tool string').not.toMatch(COURSE_WORDS);
+      expect(s, '"we" in a tool string').not.toMatch(WE_WORDS);
+    }
+  });
+
+  test('"Does a better model stop making things up?" links When AI gets it wrong', async ({ page }) => {
+    await page.goto(PAGE);
+    const q = page.locator('article h3', { hasText: 'Does a better model stop making things up?' });
+    await expect(q).toHaveCount(1);
+    const answer = q.locator('xpath=following-sibling::p[1]');
+    await expect(answer.locator('a[href="/ai-guides/when-ai-is-wrong/"]')).toHaveCount(1);
+  });
+});

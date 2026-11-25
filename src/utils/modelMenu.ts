@@ -48,13 +48,13 @@ function reason(task: Task, pick: AiModel): string {
   }
   if (task === 'long') {
     return kind === 'large'
-      ? 'Long, detailed material is what the large option is for; expect it to be slower.'
+      ? 'The large option is made for long, detailed material, so expect it to be slower.'
       : 'The everyday option handles most documents and spreadsheets; step up only if it misses things.';
   }
   const what = task === 'code' ? 'Code' : 'A problem with several steps';
   if (kind === 'thinking') return `${what} goes better when the app takes time to work it through before answering.`;
-  if (kind === 'large') return `${what} is what the large option is for; it is slower and uses more of your limit.`;
-  return 'This is the best fit on your plan.';
+  if (kind === 'large') return `${what} is a good use of the large option, though it is slower and uses more of your limit.`;
+  return 'This is the closest fit your plan includes.';
 }
 
 const matches = (m: AiModel, want: Want) => (want === 'thinking' ? !!m.thinking : m.size === want && !m.thinking);

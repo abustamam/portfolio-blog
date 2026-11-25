@@ -7,8 +7,7 @@ import { AI_MODELS, VENDORS } from '../../consts/guides/aiModels';
 import { ACCOUNTS, TASKS, SIZE_LABELS, FREE_LABELS, menuFor } from '../../utils/modelMenu';
 ---
 
-<section class="model-menu" data-model-menu aria-labelledby="model-menu-title">
-  <h2 id="model-menu-title" class="model-menu__title">Read my menu</h2>
+<section class="model-menu" data-model-menu aria-label="Read my menu">
   <form class="quiz" data-mm-form>
     <fieldset class="quiz-group">
       <legend class="quiz-sublabel">1. Which app are you using?</legend>
@@ -30,7 +29,7 @@ import { ACCOUNTS, TASKS, SIZE_LABELS, FREE_LABELS, menuFor } from '../../utils/
 
     {VENDORS.map((v) => (
       <div class="model-menu__menu" data-mm-vendor={v} hidden>
-        <p class="quiz-sublabel">What {v}'s menu means</p>
+        <p class="quiz-sublabel">{v}'s options, in sizes</p>
         <ul>
           {menuFor(AI_MODELS, v).map((m) => (
             <li data-mm-option={m.name}>
@@ -107,7 +106,6 @@ import { ACCOUNTS, TASKS, SIZE_LABELS, FREE_LABELS, menuFor } from '../../utils/
     margin: 2rem 0 2.5rem; padding: 1.25rem; border: 1px solid var(--color-line); border-radius: 10px;
     background: var(--color-bg);
   }
-  .model-menu__title { margin-top: 0 !important; }
   .model-menu fieldset { border: 0; margin: 0 0 1.5rem; padding: 0; min-width: 0; }
   .model-menu__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
   .model-menu__menu { margin: 0 0 1.5rem; }

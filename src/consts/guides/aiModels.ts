@@ -135,7 +135,7 @@ export const AI_MODELS: readonly AiModel[] = [
   },
   {
     vendor: 'Copilot', name: 'Study and learn', size: 'other', freePlan: 'yes', paidPlan: 'yes',
-    pickWhen: 'Learning a topic: it explains and quizzes instead of just answering.',
+    pickWhen: 'Learning a topic: it explains and quizzes you rather than handing over the answer.',
     source: COPILOT, checked: CHECKED,
   },
   {
