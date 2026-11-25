@@ -1,0 +1,301 @@
+Date,Vendor,Category,Amount,Paid by
+2025-01-01,Example Workshop,Training,439.40,Staff A
+2025-01-03,Example Furniture,Equipment,75.41,Staff A
+2025-01-03,Sample Electronics,Equipment,148.39,Staff C
+2025-01-10,Demo Hardware,Equipment,804.60,Staff C
+2025-01-10,Example Deli,Meals,78.87,Staff E
+2025-01-12,Test Taxi Co,Travel,390.90,Staff D
+2025-01-14,Sample Learning,Training,459.80,Staff A
+2025-01-15,Demo Hardware,Equipment,438.64,Staff B
+2025-01-18,Sample Stationers,Office Supplies,117.32,Staff D
+2025-01-18,Sample Learning,Training,259.72,Staff B
+2025-01-20,Example Furniture,Equipment,758.78,Staff D
+2025-01-20,Demo Design App,Software,121.09,Staff E
+2025-01-20,Demo Design App,Software,38.98,Staff A
+2025-01-21,Demo Design App,Software,192.49,Staff A
+2025-01-22,Demo Courses,Training,464.51,Staff A
+2025-01-23,Demo Hardware,Equipment,715.87,Staff C
+2025-01-24,Example Furniture,Equipment,234.90,Staff C
+2025-01-26,Sample Cafe,Meals,21.54,Staff A
+2025-01-26,Demo Catering,Meals,62.66,Staff E
+2025-01-27,Sample Electronics,Equipment,586.31,Staff C
+2025-01-28,Sample Airlines,Travel,153.05,Staff C
+2025-01-29,Example Office Store,Office Supplies,125.77,Staff C
+2025-01-30,Example Workshop,Training,254.51,Staff C
+2025-02-01,Demo Paper Co,Office Supplies,130.94,Staff B
+2025-02-03,Sample Cloud Tools,Software,73.35,Staff D
+2025-02-03,Demo Paper Co,Office Supplies,97.32,Staff B
+2025-02-03,Demo Courses,Training,253.64,Staff E
+2025-02-05,Example Deli,Meals,26.64,Staff B
+2025-02-05,Demo Catering,Meals,62.66,Staff B
+2025-02-06,Sample Cloud Tools,Software,60.81,Staff B
+2025-02-06,Test Taxi Co,Travel,285.88,Staff E
+2025-02-06,Demo Design App,Software,154.48,Staff D
+2025-02-06,Demo Courses,Training,311.51,Staff E
+2025-02-06,Example Office Store,Office Supplies,67.80,Staff B
+2025-02-08,Sample Stationers,Office Supplies,78.98,Staff A
+2025-02-10,Sample Stationers,Office Supplies,38.50,Staff E
+2025-02-11,Sample Stationers,Office Supplies,33.73,Staff A
+2025-02-12,Sample Airlines,Travel,585.86,Staff C
+2025-02-16,Demo Courses,Training,449.38,Staff B
+2025-02-17,Demo Catering,Meals,16.60,Staff A
+2025-02-17,Example Docs Suite,Software,91.27,Staff B
+2025-02-19,Sample Cafe,Meals,54.80,Staff A
+2025-02-20,Sample Cloud Tools,Software,42.91,Staff E
+2025-02-22,Sample Electronics,Equipment,155.87,Staff D
+2025-02-22,Demo Rail,Travel,412.35,Staff E
+2025-02-22,Example Office Store,Office Supplies,110.64,Staff B
+2025-02-24,Example Docs Suite,Software,93.50,Staff C
+2025-02-27,Sample Learning,Training,399.58,Staff D
+2025-02-27,Sample Learning,Training,256.13,Staff E
+2025-02-28,Demo Courses,Training,476.76,Staff C
+2025-03-01,Example Furniture,Equipment,710.57,Staff C
+2025-03-02,Demo Hardware,Equipment,223.58,Staff B
+2025-03-02,Example Furniture,Equipment,105.07,Staff B
+2025-03-04,Sample Electronics,Equipment,291.04,Staff E
+2025-03-04,Demo Courses,Training,396.28,Staff D
+2025-03-05,Sample Stationers,Office Supplies,102.46,Staff D
+2025-03-06,Demo Hardware,Equipment,398.66,Staff E
+2025-03-07,Sample Electronics,Equipment,829.89,Staff C
+2025-03-08,Example Furniture,Equipment,515.64,Staff B
+2025-03-08,Example Docs Suite,Software,166.75,Staff D
+2025-03-10,Example Office Store,Office Supplies,51.16,Staff E
+2025-03-12,Demo Design App,Software,225.47,Staff C
+2025-03-13,Demo Catering,Meals,61.55,Staff D
+2025-03-13,Sample Learning,Training,298.10,Staff C
+2025-03-14,Example Furniture,Equipment,461.00,Staff A
+2025-03-14,Test Taxi Co,Travel,607.08,Staff D
+2025-03-16,Sample Electronics,Equipment,239.42,Staff B
+2025-03-19,Sample Learning,Training,341.51,Staff C
+2025-03-21,Example Docs Suite,Software,123.06,Staff B
+2025-03-22,Demo Hardware,Equipment,112.03,Staff D
+2025-03-22,Sample Cafe,Meals,79.62,Staff D
+2025-03-24,Demo Hardware,Equipment,402.72,Staff A
+2025-03-24,Example Office Store,Supplies,57.02,Staff B
+2025-03-26,Sample Airlines,Travel,277.47,Staff C
+2025-03-26,Demo Design App,Software,105.52,Staff B
+2025-03-26,Example Office Store,Supplies,115.11,Staff D
+2025-03-27,Sample Cafe,Meals,79.41,Staff A
+2025-04-02,Sample Stationers,Office Supplies,56.98,Staff B
+2025-04-03,Sample Airlines,Travel,618.12,Staff C
+2025-04-05,Test Taxi Co,Travel,369.75,Staff C
+2025-04-06,Sample Cafe,Meals,61.08,Staff A
+2025-04-06,Demo Hardware,Equipment,352.30,Staff E
+2025-04-08,Sample Electronics,Equipment,413.45,Staff A
+2025-04-09,Test Taxi Co,Travel,587.41,Staff C
+2025-04-10,Demo Hardware,Equipment,651.87,Staff B
+2025-04-11,Example Furniture,Equipment,87.66,Staff C
+2025-04-12,Sample Learning,Training,162.90,Staff D
+2025-04-15,Test Taxi Co,Travel,360.38,Staff A
+2025-04-16,Demo Paper Co,Office Supplies,139.59,Staff B
+2025-04-16,Sample Airlines,Travel,436.88,Staff A
+2025-04-16,Sample Cloud Tools,Software,88.97,Staff D
+2025-04-16,Example Office Store,Office Supplies,68.95,Staff D
+2025-04-19,Sample Cloud Tools,Software,44.67,Staff C
+2025-04-20,Example Docs Suite,Software,99.68,Staff E
+2025-04-21,Demo Hardware,Equipment,865.66,Staff D
+2025-04-23,Demo Paper Co,Office Supplies,36.55,Staff E
+2025-04-25,Sample Electronics,Equipment,695.09,Staff A
+2025-04-25,Example Hotel,Travel,340.45,Staff B
+2025-04-27,Demo Design App,Software,138.57,Staff B
+2025-04-28,Demo Rail,Travel,173.49,Staff E
+2025-04-28,Demo Design App,Software,35.50,Staff D
+2025-04-30,Example Office Store,Office Supplies,86.45,Staff A
+2025-05-02,Demo Courses,Training,412.01,Staff B
+2025-05-05,Demo Courses,Training,253.80,Staff A
+2025-05-06,Example Furniture,Equipment,291.18,Staff A
+2025-05-06,Demo Hardware,Equipment,510.60,Staff D
+2025-05-08,Example Docs Suite,Software,72.27,Staff B
+2025-05-08,Demo Hardware,Equipment,230.19,Staff B
+2025-05-08,Sample Cloud Tools,Software,212.53,Staff E
+2025-05-10,Sample Airlines,Travel,412.16,Staff B
+2025-05-12,Demo Courses,Training,318.57,Staff E
+2025-05-12,Demo Design App,Software,103.56,Staff B
+2025-05-12,Example Deli,Meals,16.70,Staff E
+2025-05-13,Demo Design App,Software,145.18,Staff B
+2025-05-15,Demo Design App,Software,156.08,Staff A
+2025-05-20,Sample Cafe,Meals,,Staff B
+2025-05-22,Demo Hardware,Equipment,742.71,Staff B
+2025-05-23,Demo Catering,Meals,58.49,Staff C
+2025-05-24,Sample Electronics,Equipment,820.67,Staff A
+2025-05-25,Demo Catering,Meals,83.87,Staff A
+2025-05-28,Sample Cafe,Meals,18.27,Staff C
+2025-05-29,Demo Design App,Software,134.30,Staff E
+2025-05-29,Sample Electronics,Equipment,649.78,Staff D
+2025-05-30,Example Hotel,Travel,117.87,Staff E
+2025-05-30,Demo Design App,Software,196.37,Staff D
+2025-06-03,Test Taxi Co,Travel,299.01,Staff C
+2025-06-03,Example Workshop,Training,439.35,Staff A
+2025-06-03,Demo Paper Co,Office Supplies,31.34,Staff A
+2025-06-04,Example Office Store,Office Supplies,17.23,Staff D
+2025-06-05,Example Furniture,Equipment,570.59,Staff E
+2025-06-08,Demo Design App,Software,195.37,Staff D
+2025-06-08,Sample Electronics,Equipment,435.73,Staff A
+2025-06-09,Demo Rail,Travel,256.45,Staff B
+2025-06-09,Demo Rail,Travel,86.40,Staff E
+2025-06-10,Example Workshop,Training,432.12,Staff E
+2025-06-10,Demo Design App,Software,37.34,Staff A
+2025-06-10,Example Workshop,Training,261.64,Staff B
+2025-06-11,Demo Courses,Training,326.29,Staff A
+2025-06-13,Demo Paper Co,Office Supplies,64.94,Staff C
+2025-06-15,Demo Hardware,Equipment,856.92,Staff E
+2025-06-16,Example Workshop,Training,285.75,Staff E
+2025-06-16,Example Furniture,Equipment,265.42,Staff E
+2025-06-16,Example Office Store,Office Supplies,22.18,Staff C
+2025-06-18,Sample Learning,Training,216.24,Staff D
+2025-06-18,Demo Paper Co,Office Supplies,68.54,Staff C
+2025-06-19,Demo Design App,Software,164.62,Staff C
+2025-06-19,Sample Airlines,Travel,112.21,Staff A
+2025-06-24,Demo Paper Co,Office Supplies,112.46,Staff A
+2025-06-27,Demo Catering,Meals,91.58,Staff E
+2025-07-01,Example Furniture,Equipment,565.64,Staff C
+2025-07-01,Example Workshop,Training,177.84,Staff D
+2025-07-02,Example Deli,Meals,35.35,Staff D
+2025-07-02,Demo Hardware,Equipment,709.33,Staff A
+2025-07-03,Sample Cloud Tools,Software,137.42,Staff E
+2025-07-04,Demo Design App,Software,175.47,Staff B
+2025-07-04,Sample Learning,Training,195.75,Staff D
+2025-07-05,Sample Cloud Tools,Software,33.40,Staff B
+2025-07-08,Example Furniture,Equipment,431.32,Staff C
+2025-07-09,Sample Electronics,Equipment,732.87,Staff C
+2025-07-10,Sample Cloud Tools,Software,150.45,Staff A
+2025-07-12,Example Docs Suite,Software,196.44,Staff B
+2025-07-13,Example Office Store,Office Supplies,66.36,Staff E
+2025-07-16,Demo Catering,Meals,63.96,Staff D
+2025-07-21,Sample Cloud Tools,Software,95.03,Staff B
+2025-07-22,Example Office Store,Office Supplies,107.23,Staff D
+2025-07-23,Example Deli,Meals,22.82,Staff B
+2025-07-24,Sample Cloud Tools,Software,203.70,Staff D
+2025-07-25,Sample Cloud Tools,Software,201.57,Staff A
+2025-07-25,Sample Learning,Training,145.84,Staff A
+2025-07-26,Sample Electronics,Equipment,869.66,Staff E
+2025-07-28,Demo Design App,Software,123.46,Staff E
+2025-07-28,Example Hotel,Travel,560.40,Staff B
+2025-07-28,Example Deli,Meals,89.87,Staff E
+2025-08-01,Sample Cafe,Meals,55.67,Staff C
+2025-08-02,Sample Learning,Training,368.98,Staff C
+2025-08-03,Demo Courses,Training,421.80,Staff A
+2025-08-03,Sample Stationers,Office Supplies,101.04,Staff C
+2025-08-03,Example Deli,Meals,45.00,Staff E
+2025-08-04,Sample Cafe,Meals,23.10,Staff D
+2025-08-07,Sample Cafe,Meals,64.97,Staff B
+2025-08-08,Demo Paper Co,Office Supplies,111.69,Staff A
+2025-08-10,Sample Cloud Tools,Software,73.37,Staff B
+2025-08-10,Sample Learning,Training,420.98,Staff D
+2025-08-11,Demo Hardware,Equipment,434.93,Staff A
+2025-08-14,Example Office Store,Office Supplies,62.35,Staff D
+2025-08-18,Demo Paper Co,Office Supplies,114.31,Staff A
+2025-08-18,Demo Rail,Travel,352.66,Staff A
+2025-08-19,Sample Electronics,Equipment,436.48,Staff A
+2025-08-23,Example Office Store,Office Supplies,55.09,Staff B
+2025-08-25,Demo Paper Co,Office Supplies,132.22,Staff C
+2025-08-25,Example Office Store,Office Supplies,100.76,Staff C
+2025-08-27,Demo Design App,Software,139.28,Staff E
+2025-08-29,Sample Airlines,Travel,582.37,Staff C
+2025-08-30,Sample Stationers,Office Supplies,18450.00,Staff B
+2025-08-30,Example Workshop,Training,241.78,Staff D
+2025-08-31,Example Workshop,Training,294.21,Staff C
+2025-08-31,Demo Hardware,Equipment,145.70,Staff A
+2025-09-02,Sample Stationers,Office Supplies,117.59,Staff A
+2025-09-03,Demo Design App,Software,229.34,Staff E
+2025-09-05,Demo Paper Co,Office Supplies,78.51,Staff D
+2025-09-05,Sample Electronics,Equipment,854.87,Staff A
+2025-09-05,Demo Paper Co,Office Supplies,31.76,Staff E
+2025-09-06,Demo Catering,Meals,57.70,Staff E
+2025-09-06,Example Workshop,Training,356.93,Staff A
+2025-09-07,Sample Cafe,Meals,49.49,Staff A
+2025-09-08,Sample Cloud Tools,Software,69.54,Staff E
+2025-09-08,Example Docs Suite,Software,71.72,Staff A
+2025-09-10,Demo Courses,Training,332.73,Staff E
+2025-09-12,Example Furniture,Equipment,506.41,Staff B
+2025-09-12,Demo Design App,Software,194.97,Staff E
+2025-09-12,Demo Design App,Software,194.97,Staff E
+2025-09-14,Sample Stationers,Supplies,29.52,Staff C
+2025-09-14,Sample Electronics,Equipment,573.97,Staff B
+2025-09-16,Demo Paper Co,Office Supplies,51.01,Staff B
+2025-09-18,Example Docs Suite,Software,157.75,Staff E
+2025-09-19,Sample Electronics,Equipment,715.12,Staff D
+2025-09-20,Sample Learning,Training,133.70,Staff E
+2025-09-21,Demo Hardware,Equipment,667.47,Staff D
+2025-09-23,Example Workshop,Training,166.62,Staff E
+2025-09-23,Demo Catering,Meals,13.26,Staff B
+2025-09-24,Sample Cloud Tools,Software,30.35,Staff C
+2025-09-25,Demo Paper Co,Office Supplies,18.98,Staff D
+2025-09-26,Demo Hardware,Equipment,337.08,Staff D
+2025-09-27,Example Hotel,Travel,501.13,Staff E
+2025-09-30,Example Workshop,Training,446.31,Staff E
+2025-10-02,Example Workshop,Training,342.51,Staff D
+2025-10-02,Sample Stationers,Office Supplies,130.62,Staff C
+2025-10-04,Demo Paper Co,Office Supplies,90.77,Staff A
+2025-10-05,Test Taxi Co,Travel,336.67,Staff D
+2025-10-05,Example Workshop,Training,185.23,Staff A
+2025-10-05,Sample Learning,Training,329.71,Staff A
+2025-10-06,Example Hotel,Travel,247.63,Staff E
+2025-10-10,Sample Cloud Tools,Software,36.76,Staff B
+2025-10-11,Demo Paper Co,Office Supplies,47.65,Staff C
+2025-10-12,Sample Cloud Tools,Software,170.90,Staff C
+2025-10-13,Demo Paper Co,Office Supplies,25.95,Staff D
+2025-10-13,Sample Learning,Training,133.76,Staff E
+2025-10-13,Demo Design App,Software,155.30,Staff D
+2025-10-13,Demo Hardware,Equipment,866.17,Staff D
+2025-10-13,Demo Paper Co,Office Supplies,68.39,Staff A
+2025-10-14,Example Deli,Meals,90.78,Staff E
+2025-10-16,Example Workshop,Training,377.06,Staff D
+2025-10-22,Sample Cafe,Meals,75.03,Staff B
+2025-10-23,Demo Rail,Travel,516.22,Staff D
+2025-10-25,Sample Cafe,Meals,40.79,Staff A
+2025-10-25,Sample Stationers,Office Supplies,116.15,Staff C
+2025-10-28,Example Office Store,Supplies,12.79,Staff A
+2025-10-29,Demo Hardware,Equipment,605.44,Staff A
+2025-10-31,Sample Cloud Tools,Software,155.48,Staff A
+2025-11-01,Demo Rail,Travel,409.73,Staff B
+2025-11-01,Sample Learning,Training,448.60,Staff A
+2025-11-03,Demo Hardware,Equipment,656.79,Staff B
+2025-11-04,Sample Airlines,Travel,398.61,Staff B
+2025-11-05,Demo Catering,Meals,85.33,Staff C
+2025-11-06,Test Taxi Co,Travel,288.65,Staff C
+2025-11-08,Example Furniture,Equipment,779.53,Staff D
+2025-11-10,Test Taxi Co,Travel,150.93,Staff B
+2025-11-11,Sample Airlines,Travel,307.11,Staff E
+2025-11-11,Demo Paper Co,Office Supplies,130.00,Staff B
+2025-11-14,Demo Design App,Software,110.14,Staff E
+2025-11-14,Sample Electronics,Equipment,366.22,Staff E
+2025-11-15,Demo Paper Co,Office Supplies,27.96,Staff A
+2025-11-16,Sample Learning,Training,174.83,Staff C
+2025-11-16,Demo Courses,Training,462.80,Staff C
+2025-11-16,Sample Stationers,Office Supplies,33.08,Staff B
+2025-11-18,Demo Catering,Meals,48.95,Staff E
+2025-11-19,Example Workshop,Training,209.92,Staff E
+2025-11-19,Example Furniture,Equipment,896.89,Staff A
+2025-11-22,Example Workshop,Training,193.14,Staff A
+2025-11-22,Demo Paper Co,Office Supplies,131.16,Staff A
+2025-11-23,Sample Cafe,Meals,69.65,Staff E
+2025-11-25,Sample Learning,Training,299.26,Staff E
+2025-11-28,Example Docs Suite,Software,129.42,Staff C
+2025-11-30,Sample Cafe,Meals,82.88,Staff D
+2025-12-03,Demo Catering,Meals,84.54,Staff A
+2025-12-03,Demo Catering,Meals,44.87,Staff C
+2025-12-05,Demo Rail,Travel,98.83,Staff B
+2025-12-06,Example Office Store,Office Supplies,120.58,Staff A
+2025-12-08,Example Deli,Meals,36.27,Staff B
+2025-12-08,Sample Electronics,Equipment,312.89,Staff D
+2025-12-10,Demo Design App,Software,19.95,Staff E
+2025-12-10,Sample Airlines,Travel,374.19,Staff D
+2025-12-10,Example Deli,Meals,82.23,Staff C
+2025-12-12,Sample Cloud Tools,Software,55.29,Staff D
+2025-12-13,Demo Paper Co,Office Supplies,107.49,Staff D
+2025-12-13,Sample Cloud Tools,Software,53.23,Staff D
+2025-12-13,Sample Electronics,Equipment,88.67,Staff E
+2025-12-16,Example Furniture,Equipment,321.47,Staff B
+2025-12-16,Demo Design App,Software,197.17,Staff C
+2025-12-17,Example Furniture,Equipment,449.56,Staff B
+2025-12-18,Demo Rail,Travel,244.12,Staff C
+2025-12-19,Sample Cafe,Meals,17.61,Staff A
+2025-12-20,Example Deli,Meals,56.50,Staff C
+2025-12-21,Demo Design App,Software,49.08,Staff A
+2025-12-21,Demo Courses,Training,379.40,Staff E
+2025-12-22,Sample Cloud Tools,Software,156.70,Staff B
+2025-12-22,Example Docs Suite,Software,48.05,Staff A
+2025-12-24,Demo Paper Co,Office Supplies,82.16,Staff C
+2025-12-26,Sample Cafe,Meals,87.50,Staff E
+2025-12-29,Demo Paper Co,Office Supplies,106.58,Staff D

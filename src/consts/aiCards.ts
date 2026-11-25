@@ -92,6 +92,14 @@ export const AI_CARDS: AiCard[] = [
     subtitle: 'Scrub first, then analyze · kit for IT',
     motif: 'never-paste',
   },
+  {
+    id: 'data-analysis',
+    path: '/ai-cohort/data-analysis/',
+    eyebrow: 'AI training · resource',
+    title: 'Analyse a spreadsheet with AI, and check it',
+    subtitle: 'Sample file · four prompts · the true answers',
+    motif: 'never-paste',
+  },
 ];
 
 /** What guideCards() needs from each published guide (the collection entry fits). */

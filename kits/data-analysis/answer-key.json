@@ -1,0 +1,74 @@
+{
+  "file": "expenses-2025.csv",
+  "columns": [
+    "Date",
+    "Vendor",
+    "Category",
+    "Amount",
+    "Paid by"
+  ],
+  "rowsInFile": 300,
+  "rowsAfterRemovingDuplicate": 299,
+  "oddities": {
+    "duplicate": {
+      "rows": [
+        211,
+        212
+      ],
+      "line": "2025-09-12,Demo Design App,Software,194.97,Staff E"
+    },
+    "blank": {
+      "row": 117,
+      "column": "Amount"
+    },
+    "outlier": {
+      "row": 195,
+      "amount": 18450,
+      "likelyAmount": 184.5
+    },
+    "category": {
+      "canonical": "Office Supplies",
+      "variant": "Supplies",
+      "rows": [
+        74,
+        77,
+        213,
+        248
+      ]
+    }
+  },
+  "totals": {
+    "asInFile": 89754.86,
+    "outlierKept": 89559.89,
+    "afterFixes": 71294.39
+  },
+  "byCategory": {
+    "Equipment": 29972.69,
+    "Meals": 2298.46,
+    "Office Supplies": 4426.21,
+    "Software": 6935.42,
+    "Training": 15409.19,
+    "Travel": 12252.42
+  },
+  "byMonth": {
+    "2025-01": 6943.51,
+    "2025-02": 4821.89,
+    "2025-03": 7377.19,
+    "2025-04": 6972.4,
+    "2025-05": 5957.16,
+    "2025-06": 5649.72,
+    "2025-07": 6091.18,
+    "2025-08": 4963.24,
+    "2025-09": 6793.83,
+    "2025-10": 5157.76,
+    "2025-11": 6891.58,
+    "2025-12": 3674.93
+  },
+  "question": {
+    "text": "How much did we spend on Travel in March 2025?",
+    "category": "Travel",
+    "month": "2025-03",
+    "rows": 2,
+    "answer": 884.55
+  }
+}
