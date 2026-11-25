@@ -70,6 +70,8 @@ const handle = createHandler({
     await sql`select 1`;
   },
   limit: Number(process.env.RATE_LIMIT ?? 10),
+  // Optional: /api/ai-quiz/whatsapp redirects to this chat. Unset = the path is a 404.
+  whatsappNumber: process.env.WHATSAPP_NUMBER || undefined,
 });
 
 const server = Bun.serve({ port: Number(process.env.PORT ?? 3000), fetch: handle });

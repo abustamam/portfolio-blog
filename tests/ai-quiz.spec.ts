@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
 import { TRACKS } from '../src/utils/aiQuiz';
 
@@ -137,6 +139,8 @@ test.describe('AI quiz', () => {
     const notify = page.locator('#result-notify');
     await expect(notify).toBeVisible();
     await expect(notify).toContainText('Connect or Build');
+    await expect(page.locator('#result-whatsapp')).toHaveAttribute('href', '/api/ai-quiz/whatsapp');
+    await expect(page.locator('#result-whatsapp')).toHaveAttribute('target', '_blank');
     await notify.getByRole('button', { name: 'Tell me' }).click();
     await expect(page.locator('#result-notify-status')).toContainText('Please add');
     expect(notifyBody).toBeNull();
@@ -147,6 +151,18 @@ test.describe('AI quiz', () => {
     await expect(page.locator('#result-notify-status')).toContainText('Thank you');
     await expect(page.locator('#result-notify-contact')).toBeHidden();
     expect(notifyBody).toEqual({ name: 'Test Person', contact: 'test@example.com', source: 'quiz:builder', website: '' });
+  });
+
+  test('no WhatsApp number in any built file', () => {
+    // The number lives in the intake service's env and is reached through
+    // /api/ai-quiz/whatsapp, a redirect. No wa.me/<number> link and no long
+    // digit run that looks like a phone number may ship in the site's files.
+    // Share links like wa.me/?text= carry no number and are fine.
+    const dist = join(process.cwd(), 'dist');
+    const files = (readdirSync(dist, { recursive: true }) as string[]).filter((f) => /\.(html|js|json|xml|txt|md)$/.test(f));
+    expect(files.length).toBeGreaterThan(10);
+    const hits = files.filter((f) => /wa\.me\/\+?\d|api\.whatsapp\.com\/send\?phone=/.test(readFileSync(join(dist, f), 'utf8')));
+    expect(hits).toEqual([]);
   });
 
   test('is online only: no Roseville or in-person option, no format question', async ({ page }) => {

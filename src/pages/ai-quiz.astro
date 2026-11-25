@@ -5,8 +5,12 @@ import '../styles/ai.css';
 import { AI_QUIZ_ENDPOINT } from '../consts/aiQuiz';
 import { WAITLIST_LIMITS } from '../../services/ai-quiz-intake/src/waitlist';
 
-// Same service and Caddy route as the quiz: POST /api/ai-quiz/waitlist. Empty in dev builds.
-const notifyEndpoint = AI_QUIZ_ENDPOINT ? `${AI_QUIZ_ENDPOINT.replace(/\/$/, '')}/waitlist` : '';
+// Same service and Caddy route as the quiz. Both empty in dev builds.
+const api = AI_QUIZ_ENDPOINT.replace(/\/$/, '');
+const notifyEndpoint = api ? `${api}/waitlist` : '';
+// The service redirects this to the WhatsApp chat. The number is in the server's
+// env (WHATSAPP_NUMBER), never in the site's HTML or JS.
+const whatsappHref = api ? `${api}/whatsapp` : '';
 
 type Opt = { value: string; label: string };
 type Q = {
@@ -310,6 +314,11 @@ const steps = 9; // 6 skill + free text + privacy + logistics
           <input id="result-notify-contact" type="text" name="contact" autocomplete="email" inputmode="email" placeholder="Email or WhatsApp number" class="quiz-input" maxlength={WAITLIST_LIMITS.contact} />
           <button type="submit" class="quiz-btn justify-self-start">Tell me</button>
         </div>
+        {whatsappHref && (
+          <p class="font-serif text-base leading-[1.6] text-mute m-0">
+            Rather just ask me something? <a id="result-whatsapp" href={whatsappHref} target="_blank" rel="noopener nofollow" class="text-accent">Message me on WhatsApp</a>.
+          </p>
+        )}
         <!-- Spam trap: hidden from people, filled by bots. -->
         <input type="text" name="website" tabindex="-1" autocomplete="off" class="quiz-trap" aria-hidden="true" />
         <p id="result-notify-status" class="quiz-status m-0" role="status"></p>
