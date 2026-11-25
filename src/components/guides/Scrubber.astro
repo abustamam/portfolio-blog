@@ -30,9 +30,10 @@ const sampleOut = scrub(SAMPLE).text;
     <ul class="scrubber__chips" data-scrub-chips aria-label="Names being replaced"></ul>
   </div>
 
-  <label class="scrubber__label" for="scrub-out">Safe version</label>
+  <label class="scrubber__label" for="scrub-out">With emails, phones and long numbers swapped</label>
   <textarea id="scrub-out" class="scrubber__box" rows="6" readonly data-scrub-out>{sampleOut}</textarea>
-  <button type="button" class="scrubber__btn" data-copy-safe>Copy safe text</button>
+  <p class="scrubber__hint" data-scrub-still><strong>Read it before you copy it.</strong> The tool does not catch names you haven't added, street addresses, passwords or health details. Take those out yourself.</p>
+  <button type="button" class="scrubber__btn" data-copy-safe>Copy this text</button>
 
   <h3>Your key</h3>
   <p class="scrubber__hint">Keep this in your own file. Never paste it into the chat.</p>
@@ -143,7 +144,7 @@ const sampleOut = scrub(SAMPLE).text;
         addName();
       }
     });
-    $('[data-copy-safe]').addEventListener('click', () => copy(output.value, 'Safe text'));
+    $('[data-copy-safe]').addEventListener('click', () => copy(output.value, 'Text'));
     $('[data-copy-key]').addEventListener('click', () => copy(keyText, 'Key'));
     render();
   }

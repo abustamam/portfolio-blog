@@ -3,7 +3,7 @@ title: Which model to pick in the menu
 description: The model menu in ChatGPT, Gemini, Copilot and Claude, translated into plain sizes, with when to switch and when not to bother.
 lead: Every AI app has a menu of models, and the names change every few months. Underneath, each app offers much the same few sizes. Once you know the sizes, you can read any app's menu, including next year's.
 step: 4.5
-minutes: 5
+minutes: 6
 tool: Read my menu
 ctaLine: The hands-on training is about getting AI to do a task from your own week and checking what it gives you.
 ---
@@ -57,6 +57,7 @@ Tap your app and your account to see what each option in its menu is. Then pick 
 
 This is what each app's menu showed on the day I last checked, taken from each company's own help or product pages. "Limited" means the free plan includes it with tighter limits or only some of the time. "Not stated" means the company's page doesn't say, so check your app.
 
+<div class="model-table">
 <table data-model-table>
   <thead>
     <tr><th>App</th><th>In the menu</th><th>Size</th><th>Free plan</th><th>Pick it when</th><th>Source</th></tr>
@@ -64,29 +65,41 @@ This is what each app's menu showed on the day I last checked, taken from each c
   <tbody>
     {AI_MODELS.map((m) => (
       <tr data-model-row data-vendor={m.vendor}>
-        <td>{m.vendor}</td>
-        <td>{m.name}</td>
-        <td>{SIZE_LABELS[m.size]}{m.thinking ? ' (thinking)' : ''}</td>
-        <td>{FREE_LABELS[m.freePlan]}</td>
-        <td>{m.pickWhen}</td>
-        <td><a href={m.source} data-model-source>{new URL(m.source).hostname.replace(/^www\./, '')}</a></td>
+        <td data-label="App">{m.vendor}</td>
+        <td data-label="In the menu">{m.name}</td>
+        <td data-label="Size">{SIZE_LABELS[m.size]}{m.thinking ? ' (thinking)' : ''}</td>
+        <td data-label="Free plan">{FREE_LABELS[m.freePlan]}</td>
+        <td data-label="Pick it when">{m.pickWhen}</td>
+        <td data-label="Source"><a href={m.source} data-model-source>{new URL(m.source).hostname.replace(/^www\./, '')}</a></td>
       </tr>
     ))}
   </tbody>
 </table>
+</div>
+
+<style>{`
+  @media (max-width: 47.99rem) {
+    .model-table table, .model-table tbody, .model-table tr, .model-table td { display: block; width: 100%; }
+    .model-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .model-table tr { margin: 0 0 1rem; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; }
+    .model-table td { border: 0; border-top: 1px solid var(--color-line-soft); display: grid; grid-template-columns: 7.5rem 1fr; gap: .5rem; }
+    .model-table td:first-child { border-top: 0; }
+    .model-table td::before { content: attr(data-label); font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-mute); }
+  }
+`}</style>
 
 Some details don't fit in the table:
 
-- In ChatGPT, most of the menu is a thinking level (Instant, Medium, High, Extra High, Pro), shown under "Latest" or "GPT-6". The free plan offers Instant and Think.
+- In ChatGPT, most of the menu is a thinking level (Instant, Medium, High, Extra High, Pro), shown under "Latest" or "GPT-6". The free plan has a shorter menu: Instant, and a single thinking option called Think.
 - In Gemini, once you choose a model yourself you can also choose a thinking level: Low, Medium or High. If you don't choose, it uses Low.
 - Copilot calls these "conversation modes", and some only appear when you're signed in.
-- In Claude, "More models" holds older versions. Effort and thinking are separate settings in the same menu.
+- In Claude, "More models" holds older versions. The same menu has an Effort setting. The four current models always think before they answer, so only older models show a Thinking switch.
 
 ## "Thinking" or "reasoning" settings
 
 With thinking turned on, the app spends time breaking the problem down and planning before it answers. Some apps show a summary of that working, which can help you see how it got there.
 
-ChatGPT puts its thinking level in the model menu. Gemini offers Low, Medium and High after you pick a model. Claude has an Effort setting and a Thinking switch in the same menu. Copilot has Think Deeper.
+ChatGPT puts its thinking level in the model menu. Gemini offers Low, Medium and High after you pick a model. Claude has an Effort setting in the same menu; its current models always think, and Effort sets how much. Copilot has Think Deeper.
 
 It helps with:
 
@@ -97,7 +110,7 @@ It helps with:
 
 For quick questions, simple rewrites and everyday writing, it mostly makes you wait. Higher levels also use up your limit faster, so I leave it at medium or the default unless the answer needs more.
 
-For my own work I start on Claude's largest model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet. That's a coding setup. In the chat app, the default is fine.
+For my own work I start on a large Claude model, Opus, even for quick questions, and let it hand the smaller pieces to Sonnet. That's a coding setup. In the chat app, the default is fine.
 
 ## Common questions
 

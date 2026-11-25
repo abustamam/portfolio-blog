@@ -18,6 +18,7 @@ interface Props {
 const { guide, guides } = Astro.props;
 const { title, description, lead, minutes, updatedDate, ctaLine } = guide.data;
 const others = guides.filter((g) => g.id !== guide.id);
+const next = guides[guides.findIndex((g) => g.id === guide.id) + 1];
 const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
 
@@ -44,6 +45,13 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
     <GuideCta line={ctaLine} />
 
     <nav class="guide-more" aria-labelledby="guide-more-title" data-more-guides>
+      {next && (
+        <p class="guide-next" data-next-guide>
+          <span class="ai-label">Next guide</span>
+          <a href={guidePath(next.id)}>{next.data.title}</a>
+          <span class="ai-label">{next.data.minutes} min</span>
+        </p>
+      )}
       <h2 id="guide-more-title" class="ai-label">More free guides</h2>
       {others.length > 0 && (
         <ol>
@@ -102,6 +110,8 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
 </script>
 
 <style>
+  .guide-next { display: grid; gap: .25rem; margin: 0 0 2rem; }
+  .guide-next a { font-family: var(--font-serif); font-size: 1.375rem; line-height: 1.2; }
   .guide-kicker-link { color: inherit; text-decoration: none; }
   .guide-kicker-link:hover { text-decoration: underline; text-underline-offset: 3px; }
   .guide-share { margin-top: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }

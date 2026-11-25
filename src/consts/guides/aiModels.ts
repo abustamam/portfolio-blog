@@ -56,7 +56,8 @@ const COPILOT = 'https://support.microsoft.com/en-us/microsoft-copilot/conversat
 export const AI_MODELS: readonly AiModel[] = [
   // ChatGPT: the menu is a thinking slider (Instant, Medium, High, Extra High,
   // Pro) under "Latest" (or "GPT-6" / "GPT-6.2"), plus a separate GPT-5.6 Sol
-  // option. Free and Go get Instant and Think; Medium and up start at Plus.
+  // option. Free and Go get Instant and Think; Medium and High start at Plus; Extra
+  // High and Pro need Pro, Business or Enterprise.
   // Medium comes before Think so a paid reader is offered Medium first.
   {
     vendor: 'ChatGPT', name: 'Instant', size: 'everyday', freePlan: 'yes', paidPlan: 'yes',
@@ -144,8 +145,8 @@ export const AI_MODELS: readonly AiModel[] = [
     source: COPILOT, checked: CHECKED,
   },
 
-  // Claude: four current models. Effort and thinking are separate settings in
-  // the same menu. "More models" holds older versions, not listed here.
+  // Claude: four current models. Effort is a setting in the same menu. Thinking
+  // cannot be turned off on these four; only older models show the switch. "More models" holds older versions, not listed here.
   {
     vendor: 'Claude', name: 'Haiku 5.5', size: 'small', freePlan: 'yes', paidPlan: 'yes',
     pickWhen: 'Quick, simple jobs: a short answer, a summary, a tidy-up.',

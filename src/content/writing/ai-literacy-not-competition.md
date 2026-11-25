@@ -2,6 +2,7 @@
 title: "AI Literacy Is Not a Competition"
 description: "You don't need to master AI. You need to know how to use it — and how to tell when it's wrong."
 pubDate: '2026-05-06'
+updatedDate: '2026-11-24'
 dek: "The pressure to keep up with every model release is a distraction. AI is infrastructure, not a skill tree."
 tag: "AI"
 audience: "general"
@@ -40,7 +41,7 @@ If mastery isn't the goal, what is?
 
 **Having deep domain knowledge.** This is the one that matters most. AI democratizes execution, but it doesn't democratize judgment. A non-technical person can now spin up a web app in an afternoon. But they can't tell if it's secure, scalable, or maintainable. They don't know what they don't know.
 
-Amazon is learning this [the hard way](https://fortune.com/2026/03/12/amazon-retail-site-outages-ai-agent-inaccurate-advice/). After laying off tens of thousands of corporate workers, they suffered a string of severe outages — including one that locked shoppers out of checkout for six hours. Internal documents initially flagged "GenAI-assisted changes" as a factor. The company now says it needs more humans in the loop, not fewer. AI can write code, but it takes experience to know if it's writing the *right* code. That's true for software engineering, and it's true for everything else.
+Amazon had a taste of this [in March](https://fortune.com/2026/03/12/amazon-retail-site-outages-ai-agent-inaccurate-advice/). After laying off tens of thousands of corporate workers, it had a string of severe outages — including one that locked shoppers out of checkout for six hours. An internal document initially flagged "GenAI-assisted changes" as a factor, a line that was removed before the meeting about it. Amazon disputes that reading: it says only one incident involved AI tools, and that the cause was an engineer following inaccurate advice an AI agent had inferred from an outdated wiki. Even on Amazon's own account, someone had to know the advice was wrong. AI can write code, but it takes experience to know if it's writing the *right* code. That's true for software engineering, and it's true for everything else.
 
 ---
 
@@ -111,3 +112,5 @@ I tell her that the people who will benefit most from AI are the ones who know t
 I tell her that AI literacy is not a competition. It's not a leaderboard. It's just... literacy. You learn enough to use the tool. You keep using it. You get better over time without trying to "keep up." Just like learning anything in school. You can make it through most of life knowing basic arithmetic. You aren't "behind" because you don't understand derivatives. Learn as much (or as little) as interests you, and tune out the rest. You don't need to be aware of the latest mathematical discovery if you only need basic arithmetic in your life.
 
 And then I send her this blog post, which is much longer than the wall of text I promised to spare her. Sorry-not-sorry!
+
+*If you want the "enough to use the tool" part without the news cycle, I keep a few short [free guides](/ai-guides/): what's safe to paste, how to ask, and how to check the answer.*
