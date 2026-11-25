@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { GUIDE_STORE_KEY } from '../src/utils/guideStore';
 import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUrl, byStep, groupGuides, arrangeHub } from '../src/utils/startHere';
 
@@ -10,7 +10,12 @@ import { FIELDS, EXPERIENCE, orderGuides, recommend, shareText, canonicalShareUr
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const SRC = fileURLToPath(new URL('../src/content/guides/', import.meta.url));
 
-/** Published guides from the MDX frontmatter (same rule as the collection). */
+type Group = 'start' | 'guides' | 'reference';
+const GROUP_KEYS: Group[] = ['start', 'guides', 'reference'];
+const HEADINGS: Record<Group, string> = { start: 'Never used AI? Start from zero', guides: '', reference: 'Look something up' };
+const SECTION_IDS: Record<Group, string> = { start: 'start-from-zero', guides: 'guides', reference: 'look-something-up' };
+
+/** Published guides from the MDX frontmatter (same rule as the collection), with their hub group. */
 const REAL = readdirSync(SRC)
   .filter((f) => f.endsWith('.mdx'))
   .map((f) => {
@@ -18,16 +23,20 @@ const REAL = readdirSync(SRC)
     return {
       id: f.replace(/\.mdx$/, ''),
       step: Number(fm.match(/^step:\s*([\d.]+)/m)?.[1]),
+      group: (fm.match(/^group:\s*['"]?(\w+)/m)?.[1] ?? 'guides') as Group,
       draft: /^draft:\s*true\s*$/m.test(fm),
     };
   })
   .filter((g) => !g.draft);
 
-const REAL_GROUPS = readdirSync(SRC)
-  .filter((f) => f.endsWith('.mdx'))
-  .map((f) => readFileSync(SRC + f, 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '')
-  .filter((fm) => !/^draft:\s*true\s*$/m.test(fm))
-  .map((fm) => fm.match(/^group:\s*['"]?(\w+)/m)?.[1] ?? 'guides');
+/** The published guides per hub list. */
+const LISTS: Record<Group, typeof REAL> = {
+  start: REAL.filter((g) => g.group === 'start'),
+  guides: REAL.filter((g) => g.group === 'guides'),
+  reference: REAL.filter((g) => g.group === 'reference'),
+};
+/** The groups that have at least one published guide, in hub order. */
+const PRESENT = GROUP_KEYS.filter((k) => LISTS[k].length > 0);
 
 const ALL_IDS = ['never-paste', 'prompt', 'when-ai-is-wrong', 'which-tool', 'job-search', 'examples'];
 const FULL = ALL_IDS.map((id, i) => ({ id, step: i + 1 }));
@@ -175,38 +184,67 @@ test.describe('links in', () => {
 });
 
 test.describe('hub in the page', () => {
-  test('with no start or reference guide published, the hub has only the guides list', async ({ page }) => {
-    test.skip(REAL_GROUPS.some((g) => g !== 'guides'), 'a start or reference guide is published');
+  test('the hub renders exactly the lists whose group has published guides, in order start, guides, reference', async ({ page }) => {
     await page.goto('/ai-guides/');
-    await expect(page.locator('ol.hub-list#guides[data-guide-list]')).toHaveCount(1);
-    await expect(page.locator('#start-from-zero, #look-something-up')).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: /Start from zero|Look something up/ })).toHaveCount(0);
+    const rendered = await page.locator('[data-hub-list]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.hubList));
+    expect(rendered).toEqual(PRESENT);
+    for (const key of GROUP_KEYS) {
+      const list = page.locator(`ol.hub-list#${SECTION_IDS[key]}[data-hub-list="${key}"]`);
+      const heading = page.locator(`[data-hub-group-heading="${key}"]`);
+      if (!LISTS[key].length) {
+        await expect(list).toHaveCount(0);
+        await expect(heading).toHaveCount(0);
+        continue;
+      }
+      await expect(list).toHaveCount(1);
+      if (HEADINGS[key]) {
+        await expect(heading).toHaveText(HEADINGS[key]);
+        // the heading sits directly before its list
+        expect(await heading.evaluate((h) => (h.nextElementSibling as HTMLElement | null)?.dataset.hubList)).toBe(key);
+      } else {
+        await expect(heading).toHaveCount(0);
+      }
+    }
+    // only the guides list is the one the Start here questions are documented against
+    await expect(page.locator('[data-guide-list]')).toHaveCount(LISTS.guides.length ? 1 : 0);
+    await expect(page.locator('[data-guide-list]')).toHaveAttribute('data-hub-list', 'guides');
+    if (!LISTS.start.length) await expect(page.getByRole('heading', { name: 'Never used AI? Start from zero' })).toHaveCount(0);
+    if (!LISTS.reference.length) await expect(page.getByRole('heading', { name: 'Look something up' })).toHaveCount(0);
   });
 
-  test('answering the two questions moves the recommended guide to the top, and the answer survives a reload', async ({ page }) => {
+  /** Guide ids per list as the page shows them now; an absent list is []. */
+  const shownOrder = (page: Page) =>
+    page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, Array.from(document.querySelectorAll<HTMLElement>(`[data-hub-list="${k}"] > li`)).map((li) => li.dataset.guideId)])), GROUP_KEYS);
+  const stepOrderPerList = () => Object.fromEntries(GROUP_KEYS.map((k) => [k, byStep(LISTS[k]).map((g) => g.id)]));
+
+  test('answering the two questions moves the recommended guide to the top of its list, and the answer survives a reload', async ({ page }) => {
     await page.goto('/ai-guides/');
-    const cards = page.locator('[data-guide-list] > li');
-    const stepOrder = await cards.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.guideId));
-    expect(stepOrder).toEqual(byStep(REAL).map((g) => g.id)); // untouched until the reader answers
+    const stepOrder = await shownOrder(page);
+    expect(stepOrder).toEqual(stepOrderPerList()); // untouched until the reader answers
     await expect(page.locator('[data-recommended]')).toHaveCount(0);
 
     await page.locator('[data-start-here] [data-experience="never"]').click();
-    const first = await cards.first().evaluate((e) => (e as HTMLElement).dataset.guideId);
-    expect(first).toBe(recommend({ experience: 'never' }, REAL)!.id);
+    const first = arrangeHub({ experience: 'never' }, LISTS);
+    expect(first.badged).toBe(recommend({ experience: 'never' }, REAL)!.id);
+    const afterNever = await shownOrder(page);
+    for (const k of GROUP_KEYS) expect(afterNever[k]).toEqual(first.order[k] ?? []);
     await expect(page.locator('[data-recommended]')).toHaveCount(1);
-    await expect(cards.first().locator('[data-start-badge]')).toBeVisible();
-    await expect(cards).toHaveCount(REAL.length); // reorder, never drop
+    await expect(page.locator(`[data-guide-id="${first.badged}"] [data-start-badge]`)).toBeVisible();
+    await expect(page.locator('[data-hub-list] > li')).toHaveCount(REAL.length); // reorder, never drop
 
     await page.locator('[data-start-here] [data-field="job-seeker"]').click();
     await page.reload();
     await expect(page.locator('[data-start-here] [data-field="job-seeker"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('[data-start-here] [data-experience="never"]')).toHaveAttribute('aria-pressed', 'true');
-    expect(await cards.first().evaluate((e) => (e as HTMLElement).dataset.guideId)).toBe(recommend({ field: 'job-seeker', experience: 'never' }, REAL)!.id);
+    const both = arrangeHub({ field: 'job-seeker', experience: 'never' }, LISTS);
+    expect(both.badged).toBe(recommend({ field: 'job-seeker', experience: 'never' }, REAL)!.id);
+    const afterReload = await shownOrder(page);
+    for (const k of GROUP_KEYS) expect(afterReload[k]).toEqual(both.order[k] ?? []);
 
     // tapping an answer again clears it, and with none the hub is back in step order
     await page.locator('[data-start-here] [data-field="job-seeker"]').click();
     await page.locator('[data-start-here] [data-experience="never"]').click();
-    expect(await cards.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.guideId))).toEqual(stepOrder);
+    expect(await shownOrder(page)).toEqual(stepOrder);
   });
 
   test('with several guides published, the recommended one moves to the top and back', async ({ page }) => {
@@ -275,10 +313,12 @@ test.describe('hub in the page', () => {
     const ctx = await browser.newContext({ javaScriptEnabled: false, baseURL });
     const page = await ctx.newPage();
     await page.goto('/ai-guides/');
-    const hrefs = await page.locator('[data-guide-list] a[data-guide-card]').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-    expect(hrefs).toEqual(byStep(REAL).map((g) => `/ai-guides/${g.id}/`));
-    const cardLinks = page.locator('[data-guide-list] a[data-guide-card]');
-    expect(await cardLinks.count()).toBe(REAL.length);
+    for (const key of GROUP_KEYS) {
+      const hrefs = await page.locator(`[data-hub-list="${key}"] a[data-guide-card]`).evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+      expect(hrefs).toEqual(byStep(LISTS[key]).map((g) => `/ai-guides/${g.id}/`)); // empty when the group has no guides
+    }
+    const cardLinks = page.locator('[data-hub-list] a[data-guide-card]');
+    expect(await cardLinks.count()).toBe(REAL.length); // every published guide, across all three lists
     for (const link of await cardLinks.all()) await expect(link).toBeVisible(); // listed and actually shown, not just in the markup
     await expect(page.locator('[data-start-here]')).toBeHidden(); // needs JS, so it stays out of the way
     await expect(page.locator('[data-visited-tick]:visible')).toHaveCount(0);
