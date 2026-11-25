@@ -1,6 +1,8 @@
 ---
-// Where people go once cohort 1 is sold out: the Stripe payment link's
-// sold-out message and the WhatsApp group point here. Unlisted like the other
+// Where people go once a track is sold out: /ai-training/ links a full track
+// here, and so do the Stripe payment link's sold-out message and the WhatsApp
+// group. The other tracks may still be open, so the copy says "track", not
+// "cohort", and links back to them. Unlisted like the other
 // /ai-cohort/ pages: noindex, out of the sitemap, not in the nav.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Rosette from '../../components/ai/Rosette.astro';
@@ -23,11 +25,12 @@ const endpoint = AI_QUIZ_ENDPOINT ? `${AI_QUIZ_ENDPOINT.replace(/\/$/, '')}/wait
     <header id="waitlist-intro" class="mb-8">
       <div class="ai-kicker" data-rise style="--i:0">hands-on AI cohort · waitlist</div>
       <h1 class="ai-title ai-title--page" data-rise style="--i:1">
-        This cohort is full
+        This track is full
       </h1>
       <p class="ai-lead" data-rise style="--i:2">
-        All 8 seats are taken. Leave your name and I'll message you first if a seat opens up or when the next cohort
-        is scheduled. It takes under a minute, and joining doesn't commit you to anything.
+        All 8 seats in this track are taken. Leave your name and I'll message you first if a seat opens up or when its
+        next cohort is scheduled. It takes under a minute, and joining doesn't commit you to anything.
+        The <a href="/ai-training/#tracks" class="text-accent">other tracks</a> may still have seats.
       </p>
     </header>
 

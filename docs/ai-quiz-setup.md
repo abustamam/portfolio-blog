@@ -117,9 +117,11 @@ redirects.
 The guides hub (`/ai-guides/`, under "When you want more") and the call to
 action under every guide (`src/components/guides/GuideCta.astro`) carry one
 optional field: email or WhatsApp number. The form is
-`src/components/guides/NotifyForm.astro`. It says what the contact is for (one
-message when a track opens, nothing else), and the guides read the same without
-it, so "Free · no sign-up" stays true.
+`src/components/guides/NotifyForm.astro`. It is titled "Not ready to reserve?"
+and first says that reserving is open now, with the first slot from
+`TRAINING.slots` and a link to the tracks. It then says what the contact is for
+(one message when the next cohort has dates, nothing else), and the guides read
+the same without it, so "Free · no sign-up" stays true.
 
 It POSTs `{ contact, source, website }` to the cohort waitlist endpoint
 (`POST /api/ai-quiz/waitlist`), with the same honeypot, body limit and per-IP
