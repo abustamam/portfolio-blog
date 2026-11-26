@@ -171,7 +171,7 @@ export const AI_TOOLS: AiTool[] = [
         // "Prompts, responses, and your file contents when using the Microsoft
         // Copilot app aren't used to train foundation models." The privacy FAQ
         // (`more`) now covers only the older app, where training has an opt-out.
-        text: "Signed in to the current Copilot app (released August 18, 2026), Microsoft says your prompts, responses and files aren't used to train its foundation models. The older app could use your chats for training unless you opted out in its privacy settings.",
+        text: "Signed in to the current Copilot app (released August 18, 2026), Microsoft says your prompts, responses and files aren't used to train its foundation models. The older app could use your chats for training unless you opted out in its privacy settings. If you aren't sure which app you have, or you aren't signed in, check the privacy settings in the app.",
         source: 'https://support.microsoft.com/en-us/privacy/microsoft-copilot/activity-history',
         checked: CHECKED,
         confirmed: true,

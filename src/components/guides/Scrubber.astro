@@ -51,12 +51,6 @@ const sampleOut = scrub(SAMPLE).text;
 <script>
   import { scrub, keyToText } from '../../utils/scrub';
 
-  // The "check before you press Enter" list is shared markup rendered with
-  // disabled boxes. Make it tickable here; the ticks are not saved anywhere.
-  document.querySelectorAll<HTMLInputElement>('article .task-list-item input[type="checkbox"]').forEach((box) => {
-    box.disabled = false;
-  });
-
   const root = document.querySelector<HTMLElement>('[data-scrubber]');
   if (root) {
     const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;

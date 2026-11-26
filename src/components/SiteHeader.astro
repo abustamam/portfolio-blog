@@ -81,7 +81,7 @@ const ariaCurrent = (item: (typeof NAV)[number]) =>
   </div>
   <nav class="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
     {NAV.map((item) => (
-      <a href={item.href} class="text-ink no-underline py-3 border-b border-line-soft" aria-current={ariaCurrent(item)}>{item.label}</a>
+      <a href={item.href} class:list={['text-ink no-underline py-3 border-b border-line-soft', isCurrent(item.match) && 'font-semibold']} aria-current={ariaCurrent(item)}>{item.label}</a>
     ))}
   </nav>
   <div class="mt-5">

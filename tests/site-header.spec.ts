@@ -37,6 +37,13 @@ test.describe('site header: current section', () => {
         .locator('nav[aria-label="Primary"] a')
         .evaluateAll((as) => as.filter((a) => a.classList.contains('text-ink')).map((a) => a.textContent?.trim()));
       expect(inked).toEqual(label === null ? [] : [label]);
+      // The drawer links are all ink, so the current one is set in a heavier weight.
+      const heavier = await page.locator('nav[aria-label="Mobile primary"] a').evaluateAll((as) => {
+        const weight = (a: Element) => Number(getComputedStyle(a).fontWeight);
+        const base = Math.min(...as.map(weight));
+        return as.filter((a) => weight(a) > base).map((a) => a.textContent?.trim());
+      });
+      expect(heavier).toEqual(label === null ? [] : [label]);
     });
   }
 });
