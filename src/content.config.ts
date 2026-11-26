@@ -133,7 +133,12 @@ const guides = defineCollection({
 		tool: z.string().optional(), // name of the interactive tool on the page, e.g. "Scrubber"
 		cardSubtitle: z.string().optional(), // social card subtitle; defaults to minutes and tool
 		ctaLine: z.string().optional(), // the line above the call to action
-		updatedDate: z.coerce.date().optional(),
+		// The day the guide's advice was last reviewed, shown under the title as "Last updated".
+		// Required: a guide cannot publish without it. Bump it whenever the prose or the
+		// facts it renders change (tests/ai-guides.spec.ts fails if a "Last checked" date
+		// on the page is newer than this). A string or a YAML date only: a bare
+		// `updatedDate:` (null) or a number would otherwise coerce to 1970.
+		updatedDate: z.union([z.string(), z.date()]).pipe(z.coerce.date()),
 		draft: z.boolean().optional(),
 	}),
 });

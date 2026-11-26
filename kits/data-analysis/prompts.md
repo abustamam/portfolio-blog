@@ -20,7 +20,7 @@ Format: First, one short paragraph: how many rows, which columns, the date range
 Check: Look for duplicate rows, blank cells, amounts far bigger or smaller than the rest, and one category written two different ways. Do not fix anything or change any numbers. If you are not sure something is a problem, say "not sure" instead of leaving it out.
 ```
 
-## 2. Summarise by category and month
+## 2. Summarize by category and month
 
 ```text
 Situation: I am an office worker and I need to report where our team's 2025 expenses went. I have the file and want totals I can check.

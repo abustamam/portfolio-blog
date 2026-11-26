@@ -6,6 +6,7 @@ step: 6
 minutes: 12
 tool: Prompt builder
 ctaLine: "The hands-on training works on a task from your own week, and a job application can be that task."
+updatedDate: '2026-11-25'
 ---
 import Term from '../../components/guides/Term.astro';
 import PromptBuilder from '../../components/guides/PromptBuilder.astro';
@@ -38,17 +39,17 @@ The same goes for anything else you paste. See [what's safe to paste into AI](/a
 
 <p class="ai-label">Illustration</p>
 
-Every <Term>prompt</Term> on this page uses one invented person and one invented job. Nothing in them is real. The person is going back to work after five years at home with their children, and is applying to be a front desk coordinator at a community health clinic. Their résumé has two roles: office assistant at a dental practice from 2015 to 2019, and volunteer coordinator at a weekend school since 2021, where they build the monthly volunteer rota in Google Sheets for about 30 families. Read each prompt to see the shape, then swap in your own résumé and your own posting.
+Every <Term>prompt</Term> on this page uses one invented person and one invented job. Nothing in them is real. The person is going back to work after five years at home with their children, and is applying to be a front desk coordinator at a community health clinic. Their résumé has two roles: office assistant at a dental practice from 2017 to 2021, and volunteer coordinator at a weekend school since 2022, where they build the monthly volunteer rota in Google Sheets for about 30 families. Read each prompt to see the shape, then swap in your own résumé and your own posting.
 
 ## What to search for
 
-Before there is a posting to tailor anything to, there is the search. The hard part for me is often knowing what to type into the job board, because the job I'd be good at may go by a title I'd never think of. So I give the tool my experience and ask for job titles to search for, plus the words postings for those titles tend to use. Then I search the job boards myself.
+The hard part for me is often knowing what to type into the job board, because the job I'd be good at may go by a title I'd never think of. So I give the tool my experience and ask for job titles to search for, plus the words postings for those titles tend to use. Then I search the job boards myself.
 
 <pre><code>{assemblePrompt(FIND_TITLES)}</code></pre>
 
 <p><button type="button" class="ai-link" data-prompt-fill="find-titles" data-prompt-target="job-search-builder">Put this in the prompt builder ↓</button></p>
 
-<p data-search-warning>Don't ask an AI tool to find or list open jobs for you. It can invent postings that don't exist, or show ones that have already closed, and they look as real as the rest of the answer. When a title looks right, find the actual posting on the employer's own site or on a job board. [When AI gets it wrong](/ai-guides/when-ai-is-wrong/) has more on mistakes like this.</p>
+<p data-search-warning>Be careful asking an AI tool to find or list open jobs for you. Without web search it can invent postings that don't exist. With it, it can still show ones that have already closed, and they look as real as the rest of the answer. Treat anything it finds as a lead: open the actual posting on the employer's own site or on a job board before you do anything with it. [When AI gets it wrong](/ai-guides/when-ai-is-wrong/) has more on mistakes like this.</p>
 
 ## 1. Tailor your résumé to one posting
 
@@ -105,7 +106,7 @@ Tap one of the four examples, then replace the invented details with your own: y
 
 ## 4. A sheet for your applications
 
-I'd keep a plain sheet with one row per application. These are the columns:
+I'd keep a plain sheet with one row per application, with these columns:
 
 <table data-tracker-columns>
   <thead><tr><th>Column</th><th>What goes in it</th></tr></thead>

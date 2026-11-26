@@ -6,6 +6,8 @@ import {
   RESET_MESSAGES,
   CAPTION,
   COMPACTION_FACTS,
+  MEMORY_CHECKED,
+  MEMORY_FACTS,
   COMPACTION_CHECKED,
   windowFor,
   isVisible,
@@ -174,8 +176,8 @@ test.describe('does-it-remember: the boxes figure and the page', () => {
     const fig = page.locator('[data-cw-boxes]');
     for (const t of ['This chat', 'Past chats', 'Saved memory', 'A new chat']) await expect(fig).toContainText(t);
     await expect(fig.locator('[data-cwb="saved"]')).toContainText('Can read');
-    await expect(fig.locator('[data-cwb="this"]')).toContainText('Cannot read');
-    await expect(fig.locator('[data-cwb="past"]')).toContainText('Only in apps that offer it');
+    await expect(fig.locator('[data-cwb="this"]')).toContainText('Not carried over');
+    await expect(fig.locator('[data-cwb="past"]')).toContainText('Depends on app and settings');
   });
 
   test('links the three pages the issue names', async ({ page }) => {
@@ -202,11 +204,11 @@ test.describe('does-it-remember: the boxes figure and the page', () => {
     const text = await page.locator('[data-guide] > header, [data-guide] > article').evaluateAll((els) => els.map((e) => (e as HTMLElement).innerText).join('\n'));
     expect(text).not.toContain('!');
     expect(text).not.toMatch(/personalis|summaris|colour|behaviour|neighbour/i);
-    // Vendor names appear only in the one sourced section.
+    // Vendor names appear only in the two sourced sections.
     const rest = await page.locator('[data-guide] > header, [data-guide] > article').evaluateAll((els) =>
       els.map((e) => {
         const c = e.cloneNode(true) as HTMLElement;
-        c.querySelectorAll('[data-shortened]').forEach((n) => n.remove());
+        c.querySelectorAll('[data-shortened], [data-memory-apps]').forEach((n) => n.remove());
         return c.textContent ?? '';
       }).join('\n'),
     );
@@ -233,6 +235,37 @@ test.describe('does-it-remember: the boxes figure and the page', () => {
     await expect(checked).toHaveText('November 25, 2026');
     // The word is explained where it is used, and is not a glossary term.
     await expect(sec.locator('.term, [data-term]')).toHaveCount(0);
+  });
+
+  test('the saved-memory section names all four apps with their sources and shows the checked date', async ({ page }) => {
+    await page.goto(PAGE);
+    const sec = page.locator('[data-memory-apps]');
+    await expect(sec).toHaveCount(1);
+    expect(MEMORY_FACTS.map((f) => f.app)).toEqual(['ChatGPT', 'Gemini', 'Copilot', 'Claude']);
+    const own: Record<string, string[]> = {
+      ChatGPT: ['openai.com'],
+      Gemini: ['google.com'],
+      Copilot: ['microsoft.com'],
+      Claude: ['claude.com', 'anthropic.com'],
+    };
+    for (const f of MEMORY_FACTS) {
+      const row = sec.locator(`[data-memory-app="${f.app}"]`);
+      await expect(row).toContainText(f.text);
+      for (const url of [f.source, ...(f.more ?? [])]) {
+        await expect(row.locator(`a[href="${url}"]`)).toHaveCount(1);
+        const host = new URL(url).hostname;
+        expect(new URL(url).protocol).toBe('https:');
+        expect(own[f.app].some((d) => host === d || host.endsWith(`.${d}`)), `${f.app}: ${host}`).toBe(true);
+      }
+      expect(f.confirmed).toBe(true);
+      expect(f.checked).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+    const checked = sec.locator('[data-memory-checked] time');
+    await expect(checked).toHaveAttribute('datetime', MEMORY_CHECKED);
+    // The page no longer tells readers memory is off unless they turn it on.
+    const article = page.locator('[data-guide] > article');
+    await expect(article).toContainText(/Don.t assume it.s off\./);
+    await expect(article).not.toContainText('leave it off');
   });
 
   test('the status line is visually hidden but still in the page, and the disabled button looks disabled', async ({ page }) => {

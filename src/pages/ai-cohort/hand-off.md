@@ -40,7 +40,7 @@ What in this task's files must never reach the AI, and how I remove it:
 | Sign | Likely cause | What I do |
 |---|---|---|
 | The output looks generic | The input or context is missing | |
-| The numbers don't match | It did the maths itself | Ask for a formula instead |
+| The numbers don't match | It did the math itself | Ask for a formula instead |
 | A step stopped working | The tool or its plan changed | |
 
 **Monthly 5-minute check:** run it once on a known input and compare with last month's result.

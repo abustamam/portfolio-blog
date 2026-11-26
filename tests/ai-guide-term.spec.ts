@@ -57,6 +57,7 @@ test.describe('build', () => {
           'lead: Test.',
           'step: 98',
           'minutes: 1',
+          "updatedDate: '2026-11-25'",
           '---',
           "import Term from '../../components/guides/Term.astro';",
           '',

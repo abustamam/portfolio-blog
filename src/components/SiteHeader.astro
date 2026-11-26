@@ -1,6 +1,25 @@
 ---
 // SiteHeader.astro — responsive primary nav + drawer below lg
 import BrandLogo from './BrandLogo.astro';
+
+// The section the current page belongs to, so the nav marks the right item.
+// Series are groups of posts, so they belong to writing; the quiz and the
+// cohort pages belong to AI training. The home page and the colophon belong
+// to no section, so nothing is marked there.
+const NAV = [
+  { href: '/writing', label: 'writing', match: ['/writing', '/series'] },
+  { href: '/work', label: 'work', match: ['/work'] },
+  { href: '/about', label: 'about', match: ['/about'] },
+  { href: '/ai-guides/', label: 'ai guides', match: ['/ai-guides'] },
+  { href: '/ai-training/', label: 'ai training', match: ['/ai-training', '/ai-quiz', '/ai-cohort'] },
+  { href: '/contact', label: 'contact', match: ['/contact'] },
+];
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isCurrent = (match: string[]) => match.some((m) => path === m || path.startsWith(`${m}/`));
+// aria-current="page" is for the link to this very page; a link to the section
+// a deeper page sits in gets "true".
+const ariaCurrent = (item: (typeof NAV)[number]) =>
+  isCurrent(item.match) ? (path === item.href.replace(/\/+$/, '') ? 'page' : 'true') : undefined;
 ---
 
 <header class="border-b border-line bg-bg">
@@ -15,7 +34,7 @@ import BrandLogo from './BrandLogo.astro';
 
     <button
       type="button"
-      class="lg:hidden shrink-0"
+      class="lg:hidden shrink-0 p-3 -mr-3"
       id="site-nav-open"
       aria-expanded="false"
       aria-controls="site-nav-panel"
@@ -27,12 +46,10 @@ import BrandLogo from './BrandLogo.astro';
     </button>
 
     <nav class="hidden lg:flex items-center gap-7 font-mono text-xs" aria-label="Primary">
-      <a href="/writing" class="text-ink no-underline">writing</a>
-      <a href="/work" class="text-mute no-underline">work</a>
-      <a href="/about" class="text-mute no-underline">about</a>
-      <a href="/ai-guides/" class="text-mute no-underline">ai guides</a>
-      <a href="/ai-training/" class="text-mute no-underline">ai training</a>
-      <a href="/contact" class="text-mute no-underline">contact</a>
+      {NAV.map((item) => {
+        const current = isCurrent(item.match);
+        return <a href={item.href} class:list={[current ? 'text-ink' : 'text-mute', 'no-underline']} aria-current={ariaCurrent(item)}>{item.label}</a>;
+      })}
       <div class="flex items-center gap-1.5 py-1.25 px-2.5 border border-line rounded-sm text-faint text-13 cursor-default">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/>
@@ -63,12 +80,9 @@ import BrandLogo from './BrandLogo.astro';
     </button>
   </div>
   <nav class="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
-    <a href="/writing" class="text-ink no-underline py-3 border-b border-line-soft">writing</a>
-    <a href="/work" class="text-ink no-underline py-3 border-b border-line-soft">work</a>
-    <a href="/about" class="text-ink no-underline py-3 border-b border-line-soft">about</a>
-    <a href="/ai-guides/" class="text-ink no-underline py-3 border-b border-line-soft">ai guides</a>
-    <a href="/ai-training/" class="text-ink no-underline py-3 border-b border-line-soft">ai training</a>
-    <a href="/contact" class="text-ink no-underline py-3 border-b border-line-soft">contact</a>
+    {NAV.map((item) => (
+      <a href={item.href} class:list={['text-ink no-underline py-3 border-b border-line-soft', isCurrent(item.match) && 'font-semibold']} aria-current={ariaCurrent(item)}>{item.label}</a>
+    ))}
   </nav>
   <div class="mt-5">
     <label for="nav-search-input" class="font-mono text-12 text-faint tracking-caps uppercase block mb-2">search posts</label>

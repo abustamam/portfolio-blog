@@ -22,7 +22,7 @@ export const FIND_TITLES: PromptPreset = {
   task:
     'Suggest six to eight job titles I could search for, based on my experience below. For each title, list the keywords that postings for that title often use. Do not look up or list open jobs. I will search the job boards myself.',
   input:
-    'My experience: office assistant at a dental practice from 2015 to 2019, answering phones, booking appointments and keeping patient files in order. Volunteer coordinator at a weekend school since 2021, where I build the monthly volunteer rota in Google Sheets for about 30 families.',
+    'My experience: office assistant at a dental practice from 2017 to 2021, answering phones, booking appointments and keeping patient files in order. Volunteer coordinator at a weekend school since 2022, where I build the monthly volunteer rota in Google Sheets for about 30 families.',
   format:
     'A table with three columns: job title, keywords postings use, and the part of my experience that fits it.',
   check:
@@ -38,7 +38,7 @@ export const TAILOR_RESUME: PromptPreset = {
     'Make my résumé better for this one posting. Reorder and reword what is already there so the parts that match the posting come first. Do not add any experience, skill, qualification, number or date that is not in my résumé.',
   input: POSTING,
   format:
-    'Plain text, one page: a three-line summary at the top, then each role with three or four bullet points. Keep my dates and job titles exactly as they are.',
+    'Plain text, one page: a three-line summary at the top, then each role with up to four bullet points. Keep my dates and job titles exactly as they are.',
   check:
     'After the résumé, list anything in it that is not in my original: a skill, number, date, job title or claim. If there is nothing, say so.',
 };
@@ -67,7 +67,7 @@ export const INTERVIEW_PRACTICE: PromptPreset = {
     'Interview me for this job. Ask one question at a time and wait for my answer. After each answer, ask one follow-up question the way a real interviewer would, then tell me in two or three sentences what was clear and what was vague.',
   input: POSTING,
   format:
-    'Five questions in total, including one about the gap in my work history. Keep each question short. At the end, a short list: my two strongest answers and the one to practice again.',
+    'Five main questions, including one about the gap in my work history. Keep each question short. At the end, a short list: my two strongest answers and the one to practice again.',
   check:
     'Base your feedback only on what I actually said. Tell me when you are guessing what the employer wants.',
 };

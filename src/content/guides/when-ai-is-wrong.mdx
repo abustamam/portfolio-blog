@@ -5,7 +5,8 @@ lead: AI answers sound sure of themselves whether they are right or not. You can
 step: 3
 minutes: 8
 tool: Spot the mistake
-ctaLine: A general checklist catches general mistakes. In the hands-on training you build the check for your own file.
+ctaLine: In the hands-on training you build the check for your own file.
+updatedDate: '2026-11-25'
 ---
 import Term from '../../components/guides/Term.astro';
 import SpotTheMistake from '../../components/guides/SpotTheMistake.astro';
@@ -14,7 +15,7 @@ import SpotTheMistake from '../../components/guides/SpotTheMistake.astro';
 
 When an answer looks off, most of us ask again, or ask "are you sure?", until it looks right. That isn't checking. The <Term id="chat-app">tool</Term> will happily agree with itself, or swap one confident answer for another, and it knows no more about what's true the second time. Asking again tells you how the answer *sounds*. Only the source tells you whether it's *right*.
 
-Checking every answer by hand against the source does work, but it doesn't scale: the more you use <Term>AI</Term>, the more answers there are to check. The better move is to build the check into how you work. Below are the five mistakes that check is looking for, each with a quick check you can do in 30 seconds, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
+Checking every answer by hand against the source does work, but it doesn't scale: the more you use <Term>AI</Term>, the more answers there are to check. So build the check into how you work. These are the five mistakes to check for, at about 30 seconds a claim, and then how to build the check in. Or [go straight to the game](#spot-the-mistake).
 
 ## Five mistakes and the check for each
 
@@ -49,7 +50,7 @@ A summary that sounds right but says something the document doesn't, for example
 
 The answer points to a case, a book, a law or a page that doesn't exist. Made-up sources look like real ones: a name, a year, a number.
 
-**The 30-second check:** open every source the answer names. If you can't find it, take it out.
+**The 30-second check:** open every source the answer names and find the part that says what the answer claims. If you can't find the source, or it doesn't say that, take the claim out, not just the citation.
 
 **It has happened:**
 - In 2023, a US federal judge sanctioned two lawyers and their firm for submitting court opinions that did not exist, with fake quotes and citations created by ChatGPT, and for standing by them after the court questioned them. ([Mata v. Avianca, opinion and order on sanctions](https://storage.courtlistener.com/recap/gov.uscourts.nysd.575368/gov.uscourts.nysd.575368.54.0_1.pdf))
@@ -59,7 +60,7 @@ The answer points to a case, a book, a law or a page that doesn't exist. Made-up
 
 Totals, averages and percentages that are close to right, which is what makes them easy to believe.
 
-**The 30-second check:** redo any number that matters with a calculator or the sheet's own SUM. Don't ask the <Term>chat</Term> to check its own maths.
+**The 30-second check:** redo any number that matters with a calculator or the sheet's own SUM. Don't ask the <Term>chat</Term> to check its own math.
 
 **It has happened:**
 - An AI-written CNET article on compound interest said that if you put $10,000 in an account earning 3% a year, you'd earn $10,300 in the first year. You'd earn $300. By the time Engadget reported it, in January 2023, the article had been corrected. ([Engadget](https://www.engadget.com/cnet-reviewing-ai-written-articles-serious-errors-113041405.html))
@@ -72,16 +73,14 @@ Five rounds, one for each mistake above. Each answer has one part that's wrong. 
 
 ## Build the check in
 
-I don't hunt for mistakes after the fact. I set things up so they get caught by default, as part of the work.
-
 I don't check every answer by hand any more. Over time I've set things up so the AI has to show where each claim came from, does its sums somewhere I can see them, and gets checked by a second pass before I trust it. None of that is magic, and you can start with the habits below today. Getting it to run on your own work takes some setting up, and that's what we do in the hands-on training.
 
 Habits you can start today, with no setup:
 
-- **Ask for the line behind each claim.** Ask the AI to quote the line in your source behind every number or claim, and to say what it couldn't find.
+- **Ask for the line behind each claim.** Have the AI quote the line in your source behind every number, and say what it couldn't find.
 - **Do the sums in a spreadsheet,** not in the chat.
-- **Get a second pass.** Open [a fresh chat](/ai-guides/does-it-remember/), or a second tool, give it the source, and ask it to check the first answer against it. That isn't the same as asking the first chat if it's sure: the second pass has the source in front of it.
-- **Keep a check you paste in.** For a task you do often, keep a short check and paste it in with every task of that kind. For example: "Quote the line behind each number. List anything you couldn't find."
+- **Get a second pass.** Open [a fresh chat](/ai-guides/does-it-remember/), or a second tool, give it the source, and ask it to check the first answer against it. That isn't the same as asking the first chat if it's sure: the second pass has the source in front of it. A second pass can miss things too, so for anything that matters, look at the source yourself. The same rules apply to what you paste into a second tool.
+- **Keep a check you paste in.** For a task you do often, write one short check and paste it in every time. For example: "Quote the line behind each number. List anything you couldn't find."
 
 ## The checklist
 
@@ -90,7 +89,7 @@ Before you use an answer from AI:
 - [ ] **Facts:** can I point to where each claim I'm relying on comes from?
 - [ ] **Lists:** does the count match what I get when I filter the source myself?
 - [ ] **Summaries:** did I read the decisions and the end of the original?
-- [ ] **Sources:** did I open every link, book, case or law it names?
+- [ ] **Sources:** did I open every link, book, case or law it names, and find the claim in it?
 - [ ] **Numbers:** did I redo the totals that matter with a calculator or the sheet?
 - [ ] **Asking again:** did I check against the source, not just ask the chat if it's sure?
 

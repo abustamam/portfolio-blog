@@ -1,0 +1,16 @@
+---
+// Markdown task lists ("- [ ] ...") render as disabled checkboxes with no label,
+// so a reader cannot tick them. This enables them and wraps each item in a
+// <label>, so the text is clickable and names the box. Nothing is saved.
+---
+
+<script>
+  for (const li of document.querySelectorAll<HTMLLIElement>('.cohort-prose li.task-list-item')) {
+    const box = li.querySelector<HTMLInputElement>(':scope > input[type="checkbox"]');
+    if (!box) continue; // already inside a <label>
+    box.disabled = false;
+    const label = document.createElement('label');
+    label.append(...Array.from(li.childNodes));
+    li.append(label);
+  }
+</script>

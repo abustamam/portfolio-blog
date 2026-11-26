@@ -296,7 +296,8 @@ const requiredExtras = JSON.stringify(Object.fromEntries(Object.entries(TRACK_EX
     const p = payload();
     const gaps = missing(p);
     if (gaps.length) {
-      error.textContent = `Please add ${gaps.join(', ')}.`;
+      const list = gaps.length > 1 ? `${gaps.slice(0, -1).join(', ')} and ${gaps[gaps.length - 1]}` : gaps[0];
+      error.textContent = `Please add ${list}.`;
       error.hidden = false;
       return;
     }

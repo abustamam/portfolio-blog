@@ -6,6 +6,7 @@
 // noindex, and take their own description.
 import BaseLayout from './BaseLayout.astro';
 import CopyButton from '../components/CopyButton.astro';
+import TaskLists from '../components/guides/TaskLists.astro';
 import { COHORT_LINKS } from '../consts/aiCohort';
 import '../styles/ai.css';
 
@@ -59,6 +60,7 @@ const nav = [
     <article class="post-prose cohort-prose" data-rise style="--i:3">
       <slot />
     </article>
+    <TaskLists />
   </div>
   <CopyButton />
 </BaseLayout>

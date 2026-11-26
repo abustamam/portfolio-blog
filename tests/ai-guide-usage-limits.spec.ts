@@ -85,9 +85,9 @@ test.describe('usage-limits: data', () => {
         expect(f.text.trim().length, where).toBeGreaterThan(0);
       }
     }
-    // ChatGPT's usage page, and Copilot's refill and usage page, are not stated by the vendor,
-    // and neither is caching for ChatGPT, Gemini or Copilot.
-    expect(allUsageFacts().filter((f) => !f.confirmed).length).toBe(6);
+    // ChatGPT's usage page and Copilot's refill are not stated by the vendor, and neither is
+    // caching for ChatGPT, Gemini or Copilot. (Copilot's usage page is stated, for paid plans.)
+    expect(allUsageFacts().filter((f) => !f.confirmed).length).toBe(5);
   });
 
   test('CACHING has one fact per app, each on that company\'s own domain with a checked date; only Claude\'s is confirmed', () => {

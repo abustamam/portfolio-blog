@@ -1,12 +1,13 @@
 ---
-title: "\"You've reached your limit\""
+title: "“You’ve reached your limit”"
 description: "Why an AI app stops answering and asks you to wait or pay. Free and paid plans, what uses your allowance faster, when it refills, and what to do meanwhile."
 lead: "Sooner or later an AI app tells you that you've reached your limit. Every account has an allowance, some things use it faster than others, and it refills by itself."
 group: start
 step: 0.3
 minutes: 7
 tool: Allowance meter
-ctaLine: "In the hands-on training we get a real task done on a free plan, so you know whether paying is worth it."
+ctaLine: "The Everyday AI track of the hands-on training gets a real task done on a free plan, so you know whether paying is worth it."
+updatedDate: '2026-11-25'
 ---
 import Term from '../../components/guides/Term.astro';
 import AllowanceMeter from '../../components/guides/AllowanceMeter.astro';
@@ -21,24 +22,24 @@ import { fmtLongDate } from '../../utils/date';
 
 You're typing to a <Term>chat app</Term>, and it stops. It says you've reached your limit and offers to let you wait, or pay. That's normal, and it isn't a penalty.
 
-Short version: wait for it to refill, or use a different app in the meantime.
+Wait for it to refill, or use a different app in the meantime.
 
 Every account gets an allowance. You used it up, for now. I'll call it an allowance, but you will see the same idea under other names: a **usage limit**, a **quota**, a **cap**. They all mean how much you can use the app before it asks you to wait or pay.
 
-Two more words come up on the way:
+Two more words:
 
-- A **plan** is what your account includes. The **free plan** (also called the free tier) costs nothing and has the smaller allowance. A **paid plan** is a **subscription**: a monthly charge for a bigger one.
+- A **plan** is what your account includes. The **free plan** (also called the free tier) costs nothing and has the smaller allowance. A **paid plan** is a **subscription**: a monthly or yearly charge for a bigger one.
 - A **reset** is the moment the allowance refills. Some apps refill after a few hours, some after a week, and some do both.
 
 ## Why there is a limit at all
 
 Every answer is written fresh, by a very large program running on computers the company pays for. A longer, harder request takes more of that computing time than a short one. A limit is how the company stops a free account from using a lot of it for nothing. I think of it like a prepaid card for a photocopier at the library: a few pages free, then wait or pay.
 
-Apps count your use in **tokens**. A token is a short word or a piece of a longer one, and it's the unit your allowance is measured in. You generally don't need to count them. There's [a plain-words entry in the glossary](/ai-guides/glossary/#token) if you want one.
+Behind the scenes, apps measure your use in **tokens**. A token is a short word or a piece of a longer one. Your app may show you messages or a percentage instead, but underneath, more text means more tokens. You don't need to count them. There's [a plain-words entry in the glossary](/ai-guides/glossary/#token) if you want one.
 
 ## What uses it up faster
 
-Not every action costs the same. Four things use it up faster, and I find it helps to see them side by side. The first block below is the same job done three ways. The second lets you spend an allowance yourself.
+Not every action costs the same. Four things use it up faster. The first block below is the same job done three ways. The second lets you spend an allowance yourself.
 
 <AllowanceMeter />
 
@@ -57,7 +58,7 @@ I said the app rereads the whole chat each time you send a message. Some apps ha
 
 Claude is the only one of the four apps that says this in its help pages: content in a <Term>project</Term> "is cached and counts less against your limits when reused", and caches "expire after a period of inactivity" (<a href={CACHING.claude.source} rel="noopener">Anthropic</a>). It doesn't say how long that period is. ChatGPT, Gemini and Copilot don't mention caching for their apps at all, so I can't tell you whether they do it or how much it saves.
 
-It's still worth keeping in mind. A cache makes rereading cheaper, not free: a long chat still costs more per message than a new one, as the meter above shows. If you're working through a long chat or a big file, ask your follow-up questions in one sitting rather than spreading them over the day.
+A cache makes rereading cheaper, not free: a long chat still costs more per message than a new one, as the meter above illustrates. If you're working through a long chat or a big file, ask your follow-up questions in one sitting rather than spreading them over the day.
 
 ## When it comes back
 
@@ -77,7 +78,7 @@ The limit is on your account, not on the chat you're in. Once you're cut off, a 
 These help before you hit the limit, not after:
 
 - **Start a fresh chat for each new topic.** A long chat costs more per message. Paste in the two or three lines the new one needs to know. [Does it remember me?](/ai-guides/does-it-remember/) explains what carries over and what doesn't.
-- **Finish a job in one sitting.** Some apps charge less to reread a chat you were in a few minutes ago than one you left hours ago.
+- **Finish a job in one sitting.** At least one app counts content it read recently for less, and stops doing that once you go quiet.
 - **Use the smaller model for easy parts.** If you had the large model or the thinking setting on, turn it off for a quick question.
 
 ## Free or paid?
@@ -93,9 +94,9 @@ Before you pay anything, check two other places:
 
 ## The four apps side by side
 
-What each app says about its free plan, the refill and where to see your usage. The paid price is the same as in [the which-app table](/ai-guides/which-tool/#the-four-apps-side-by-side). Where a cell says "Check the company's page", that company's help pages didn't say, and I didn't want to guess. The link goes to the page to check.
+What each app says about its free plan, the refill and where to see your usage. The paid price is the same as in [the which-app table](/ai-guides/which-tool/#the-four-apps-side-by-side). Where a cell says "Check the company's page", that company's help pages didn't say. I linked the page instead of guessing.
 
-<div class="limits-table">
+<div class="limits-table guide-wide">
 <table data-limits-table>
   <thead>
     <tr>
@@ -130,7 +131,7 @@ What each app says about its free plan, the refill and where to see your usage. 
 
 <style>{`
   .limits-table table { display: table; width: 100%; font-size: 15px; }
-  .limits-table td { overflow-wrap: anywhere; }
+  .limits-table td { overflow-wrap: break-word; }
   .limits-table tbody th { font-family: var(--font-serif); font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--color-ink); }
   @media (max-width: 47.99rem) {
     .limits-table table, .limits-table tbody, .limits-table tr, .limits-table th, .limits-table td { display: block; width: 100%; }

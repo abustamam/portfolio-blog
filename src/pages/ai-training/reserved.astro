@@ -65,7 +65,7 @@ const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
     <section aria-labelledby="wait" class="reserved-section">
       <h2 class="ai-h2" id="wait">While you wait</h2>
-      <p class="ai-sub">A few free guides to read before we start. Each takes about five minutes.</p>
+      <p class="ai-sub">A few free guides to read before we start. Each is a short read.</p>
       <ul class="reserved-guides" data-only="generic">
         {GENERIC_GUIDES.map((g) => <li><a href={g.href}>{g.title}</a><span>{g.why}</span></li>)}
       </ul>
@@ -82,7 +82,7 @@ const shareHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         Each track needs {TRAINING.launchAt} people to launch, so a friend joining helps you too. Send them
         <a href="/ai-training/">bustamam.tech/ai-training</a>.
       </p>
-      <p><a class="cohort-cta" href={shareHref} target="_blank" rel="noopener">Share on WhatsApp</a></p>
+      <p class="mt-5"><a class="cohort-cta" href={shareHref} target="_blank" rel="noopener">Share on WhatsApp</a></p>
     </section>
 
     <section aria-labelledby="reach" class="reserved-section">

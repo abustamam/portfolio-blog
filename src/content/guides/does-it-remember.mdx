@@ -6,11 +6,12 @@ group: start
 step: 0.4
 minutes: 6
 tool: The window
-ctaLine: "In the hands-on training you make one weekly task repeatable, so the AI has what it needs each time without retyping it."
+ctaLine: "In the hands-on training we set up one weekly task so you stop re-explaining it to the AI every time."
+updatedDate: '2026-11-25'
 ---
 import ContextWindow from '../../components/guides/ContextWindow.astro';
 import Term from '../../components/guides/Term.astro';
-import { COMPACTION_FACTS, COMPACTION_CHECKED } from '../../consts/guides/contextWindow';
+import { COMPACTION_FACTS, COMPACTION_CHECKED, MEMORY_FACTS, MEMORY_CHECKED } from '../../consts/guides/contextWindow';
 import { formatChecked } from '../../utils/modelMenu';
 
 ## Three things people call memory
@@ -19,23 +20,23 @@ You tell a <Term>chat app</Term> something on Monday. On Tuesday you wonder whet
 
 - **This conversation.** A conversation, which most apps call a chat, is one back-and-forth with the <Term>AI</Term>, from your first message to your last. Everything said in it so far is what the AI works from. Start a new chat and it begins empty.
 - **Your past chats.** Your chat history is the list of your earlier chats, kept in your account. It's like a filing cabinet. You can reopen a chat, rename it or delete it.
-- **Saved memory.** In some apps, a setting called memory lets the app keep a few facts about you ("I cook for four", "keep answers short") and bring them into new chats. Memory, in this sense, is a feature you can switch on and off.
+- **Saved memory.** A setting called memory lets the app keep facts about you ("I cook for four", "keep answers short") and bring them into new chats. Several apps now turn it on for you. You can read what it has saved, and switch it off.
 
 The picture below shows what a brand-new chat can read from each.
 
 <ContextWindow part="boxes" />
 
-A new chat starts empty. It can read your saved memory, if the setting is on. It can't read the chat you just left. Whether it can read your past chats depends on the app. Some can, and some can't. The rest of this page is about why, starting with the one that trips people up most: the chat you have open.
+A new chat starts empty. It can read your saved memory, if the setting is on. The chat you just left isn't in front of it. Whether it can look back at your past chats depends on the app and your settings.
 
 ## Inside one chat, it rereads everything
 
 The AI doesn't hold a conversation in its head the way a person does. Each time you send a message, the app sends the whole chat so far back to the AI: your messages, its answers, and your new one on the end. The AI reads all of it again from the top, then writes the next reply.
 
-That's how it seems to remember what you said five messages ago. It reads it again every time. Think of a pen pal who forgets each letter as soon as they've replied. To get a sensible answer, you'd have to enclose the whole pile of earlier letters with every new one. That's close to what the app does for you.
+That's how it seems to remember what you said five messages ago. Think of a pen pal who forgets each letter as soon as they've replied. To get a sensible answer, you'd have to enclose the whole pile of earlier letters with every new one. That's close to what the app does for you.
 
 ## Why a very long chat goes wrong
 
-There's a limit to how much it can reread at once. That limit is called the context window: how much of the conversation the AI can keep in view at once. When a chat grows past it, the earliest parts fall out of view. The AI doesn't say so. It keeps answering, as sure of itself as ever, from whatever it can still see. (I wrote about that in [When AI gets it wrong](/ai-guides/when-ai-is-wrong/).)
+There's a limit to how much it can reread at once. That limit is called the context window: how much of the conversation the AI can keep in view at once. When a chat grows past it, the earliest parts fall out of view. Usually nothing tells you. The AI keeps answering, as sure of itself as ever, from whatever it can still see. (I wrote about that in [When AI gets it wrong](/ai-guides/when-ai-is-wrong/).)
 
 Below is a made-up chat about a family road trip. In the first message, you say your daughter is allergic to nuts. The frame holds eight messages, much smaller than a real one, so you can watch it happen. Press "Next message" to add one at a time. Nothing you do here is saved or sent anywhere.
 
@@ -75,7 +76,7 @@ This is the rule I use.
 
 Starting fresh loses everything, so bring the important part with you. Before you leave, ask: "Summarize what we've decided so far in five lines. Include anything I told you to avoid." Read it. Fix anything wrong. Check that the rule you care about is in it. Then paste it as the first message of the new chat, followed by your next question.
 
-That's what the "start a new chat with a summary" button does above. The new chat is two lines long, but it has the allergy in it, so the answer is nut-free.
+That's what the "start a new chat with a summary" button does above. The new chat is two lines long, but it has the allergy in it, so the answer is nut-free. (With a real allergy, you still read the labels.)
 
 If you start the same kind of chat again and again, a [project](/ai-guides/projects/) saves that background so you don't write the summary each time.
 
@@ -90,11 +91,25 @@ Most apps keep a list of your earlier chats. Look for it in a side panel. On a p
 
 ## Saved memory and personalization
 
-Some apps have a setting that saves facts about you between chats: where you live, that you're vegetarian, that you like short answers. Some save things on their own as you chat. Some save only when you say "remember this." Personalization is the wider name for settings that shape answers to you, like instructions you write once. Not every app has these, and they differ from app to app, so I won't describe a particular one.
+Most apps now have a setting that saves facts about you between chats: where you live, that you're vegetarian, that you like short answers. Some save things on their own as you chat. Some save only when you say "remember this." Some can also draw on your earlier chats. Personalization is the wider name for settings that shape answers to you, like instructions you write once.
 
-To see what yours has stored, open the app's settings and look for a section called memory or personalization. If it's there, it usually shows a list of what it saved. You can read each item and edit or delete it, and there's normally a switch to turn the whole thing off. If you can't find it, the app may not offer it, or it may be tied to a type of account, so check the app's help page. On a work account your employer may have set it already.
+Don't assume it's off. This is what each company's own page says.
 
-It's worth turning on for facts that don't change and that you'd otherwise type again and again. It's the wrong place for anything private, or anything that was true only last week. A saved fact keeps shaping answers until you remove it, so look at the list now and then. If you're not sure you want it, leave it off. You can turn it on later.
+<div data-memory-apps>
+
+<ul>
+{MEMORY_FACTS.map((f) => (
+  <li data-memory-app={f.app}><strong>{f.app}.</strong> {f.text} <a href={f.source} rel="noopener">The company's own page</a>{(f.more ?? []).map((url) => <>{', and '}<a href={url} rel="noopener">a second page</a></>)}.</li>
+))}
+</ul>
+
+<p class="ai-label" data-memory-checked={MEMORY_CHECKED}>Last checked <time datetime={MEMORY_CHECKED}>{formatChecked(MEMORY_CHECKED)}</time>. These settings are changing fast, so check yours.</p>
+
+</div>
+
+To see what yours has stored, open the app's settings and look for a section called memory or personalization. If it's there, it usually shows a list of what it saved. You can read each item and edit or delete it, and there's normally a switch to turn the whole thing off. If you can't find it, it may be tied to a type of account, so check the app's help page. On a work account your employer may have set it already.
+
+It's worth having on for facts that don't change and that you'd otherwise type again and again. It's the wrong place for anything private, or anything that was true only last week. A saved fact keeps shaping answers until you remove it, so look at the list now and then. If you're not sure you want it, turn it off. You can turn it back on later.
 
 ## What the company keeps
 

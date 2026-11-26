@@ -69,7 +69,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     before:
       'Each unmatched line becomes its own back-and-forth message, worded differently every week, and the answers trickle in.',
     after:
-      'One list goes out at once, with the amounts already checked against the statement, and the owner answers all of it in one reply.',
+      'One list goes out at once, with the amounts already checked against the statement, and the owner can answer all of it in one reply.',
   },
   {
     id: 'office-admin-inbox',
@@ -105,7 +105,7 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     before:
       'The reminder gets written from scratch each week, and finding the gaps means scanning the sign-up sheet by eye.',
     after:
-      'The reminder and the list of gaps come back together. You check the counts against the sheet and post the message.',
+      'The reminder and the list of gaps come back together. You check the counts against the sheet, put the real names back if the message needs them, and post it.',
   },
   {
     id: 'job-seeker-cover-letter',

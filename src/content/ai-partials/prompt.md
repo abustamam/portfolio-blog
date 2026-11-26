@@ -30,3 +30,5 @@ Check:     Before you answer, ________________________________.
 - Don't do the arithmetic yourself. Give me the spreadsheet formula instead.
 - Ask me up to three questions first if anything is unclear.
 - Point out anything in my input that looks wrong or inconsistent.
+
+A Check line is a request to flag problems, not proof that every problem was found. You still read the answer.

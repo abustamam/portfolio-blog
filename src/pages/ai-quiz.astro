@@ -89,7 +89,7 @@ const skillQuestions: Q[] = [
       {
         value: 'rich',
         label:
-          '"This is last month\'s volunteer sign-ups. The board wants to know which events were short-staffed and the trend since spring. Give me five bullet points and flag anything you\'re unsure about."',
+          '"These are last month\'s volunteer sign-ups. The board wants to know which events were short-staffed and the trend since spring. Give me five bullet points and flag anything you\'re unsure about."',
       },
     ],
   },
@@ -171,7 +171,7 @@ const steps = 10; // 6 skill + goal + free text + privacy + logistics
         Which AI track fits you?
       </h1>
       <p class="ai-lead" data-rise style="--i:2">
-        Ten short questions about what you actually do with AI. No right answers. It takes about four minutes, and
+        Ten short questions about how you use AI now. No right answers. It takes about four minutes, and
         you'll get a result at the end.
       </p>
     </header>
@@ -255,7 +255,7 @@ const steps = 10; // 6 skill + goal + free text + privacy + logistics
           <div class="quiz-options">
             <label class="quiz-option"><input type="radio" name="start" value="within-month" /><span>Within a month</span></label>
             <label class="quiz-option"><input type="radio" name="start" value="1-3-months" /><span>In 1–3 months</span></label>
-            <label class="quiz-option"><input type="radio" name="start" value="later" /><span>Later this year or after</span></label>
+            <label class="quiz-option"><input type="radio" name="start" value="later" /><span>More than 3 months from now</span></label>
             <label class="quiz-option"><input type="radio" name="start" value="exploring" /><span>Just exploring for now</span></label>
           </div>
         </div>
@@ -327,8 +327,7 @@ const steps = 10; // 6 skill + goal + free text + privacy + logistics
       <ul id="result-covers" class="list-disc font-serif text-base leading-[1.6] text-ink m-0 mb-6 pl-5"></ul>
 
       <p id="result-privacy" class="font-serif text-base leading-[1.6] text-mute m-0 mb-6" hidden>
-        One more thing: your privacy answer tells me we should start with what never to paste into an AI tool. It's a
-        short session and it'll save you trouble.
+        Your privacy answer tells me we should start with what never to paste into an AI tool. It's a short session.
       </p>
 
       <!-- One per track, rendered hidden; the script shows the recommended track's. -->
@@ -521,7 +520,9 @@ const steps = 10; // 6 skill + goal + free text + privacy + logistics
     document.getElementById('result-summary')!.textContent = t.summary;
 
     const task = a.weeklyTask ?? '';
-    const shortTask = task.length > 160 ? `${task.slice(0, 157)}…` : task;
+    // Drop the reader's own closing punctuation so the quote does not end `.".`
+    const trimmed = task.trim().replace(/[.!?\s]+$/, '');
+    const shortTask = trimmed.length > 160 ? `${trimmed.slice(0, 157)}…` : trimmed;
     document.getElementById('result-build')!.textContent = shortTask
       ? `You said you'd like this to take half the time: "${shortTask}". In the cohort you'd bring it and leave with ${t.build}.`
       : `You'd bring one real task from your week and leave with ${t.build}.`;

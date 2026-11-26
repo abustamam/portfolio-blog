@@ -52,7 +52,7 @@ export const FACT_ORDER: FactKey[] = ['free', 'paid', 'work', 'sees', 'training'
 /** Shown in place of a fact the vendor page did not confirm. */
 export const UNCONFIRMED = "Check the company's page";
 
-const CHECKED = '2026-11-24';
+const CHECKED = '2026-11-25';
 
 export const AI_TOOLS: AiTool[] = [
   {
@@ -81,13 +81,13 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       sees: {
-        text: 'Gmail, Google Calendar, Docs and Drive, once you connect them in Connected Apps. It cannot see comments or images in Docs or Gmail.',
+        text: 'Gmail, Google Calendar, Docs and Drive, once you connect them in Connected Apps (History has to be on). It cannot see comments or images in Docs or Gmail.',
         source: 'https://support.google.com/gemini/answer/15229592?hl=en',
         checked: CHECKED,
         confirmed: true,
       },
       training: {
-        text: 'On by default if you are over 18, and some chats are read by human reviewers. Turn it off at gemini.google.com: Settings, then History, then untick "Chat content including text & uploads". Turning History off is a separate switch; chats are still kept for about two months.',
+        text: 'On by default if you are over 18, and some chats are read by human reviewers. Turn it off at gemini.google.com: Settings, then History, then untick "Chat content including text & uploads". Google says it still uses chats to answer you and for safety, including human review, whatever you set. Turning History off is a separate switch; chats are still kept for about two months.',
         source: 'https://support.google.com/gemini/answer/13278892?hl=en',
         checked: CHECKED,
         confirmed: true,
@@ -121,14 +121,14 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       sees: {
-        text: 'Gmail, Google Calendar and Google Drive (and other apps), once you connect them yourself. What you can connect depends on your plan and region.',
-        source: 'https://help.openai.com/en/articles/10408842-google-app-for-chatgpt-data-controls-faq',
+        text: "Gmail, Google Calendar and Google Drive (and other apps), once you connect them yourself. What it can reach follows your Google account's permissions.",
+        source: 'https://help.openai.com/en/articles/10408842-google-app-data-controls-faq',
         checked: CHECKED,
         confirmed: true,
       },
       training: {
         text: 'On by default for Free, Plus and Pro. Turn it off in Settings, then Data controls, then "Improve the model for everyone". Business accounts are not used for training by default.',
-        source: 'https://help.openai.com/en/articles/7730893-data-controls-faq',
+        source: 'https://help.openai.com/en/articles/7730893-data-controls-in-chatgpt',
         checked: CHECKED,
         confirmed: true,
       },
@@ -155,7 +155,7 @@ export const AI_TOOLS: AiTool[] = [
       },
       work: {
         text: 'Copilot Chat is available at no additional cost when you sign in with a work account that has an eligible Microsoft 365 subscription. Microsoft describes the no-cost version as web-grounded chat; more needs the paid Microsoft 365 Copilot license.',
-        source: 'https://www.microsoft.com/en-us/microsoft-365-copilot/chat',
+        source: 'https://www.microsoft.com/en-us/copilot/features/chat',
         checked: CHECKED,
         confirmed: true,
       },
@@ -166,13 +166,16 @@ export const AI_TOOLS: AiTool[] = [
         confirmed: true,
       },
       training: {
-        // confirmed: the FAQ wording below was read on the page. Microsoft's privacy pages describe the training opt-out only for the
-        // older Copilot app (replaced August 18, 2026); the page for the current
-        // app did not say whether chats are used for training or where to turn it off.
-        text: "Assume it is on. Microsoft's privacy FAQ says personal Copilot chats can be used to train its AI unless you opt out, but that page now covers only the older app (replaced August 18, 2026) and its page for the new app does not say. Check the privacy settings in the app.",
-        source: 'https://support.microsoft.com/en-us/microsoft-copilot/privacy-faq-for-microsoft-copilot',
+        // Two apps, two answers. The activity-history page covers the current app
+        // (released August 18, 2026), signed in with a personal Microsoft account:
+        // "Prompts, responses, and your file contents when using the Microsoft
+        // Copilot app aren't used to train foundation models." The privacy FAQ
+        // (`more`) now covers only the older app, where training has an opt-out.
+        text: "Signed in to the current Copilot app (released August 18, 2026), Microsoft says your prompts, responses and files aren't used to train its foundation models. The older app could use your chats for training unless you opted out in its privacy settings. If you aren't sure which app you have, or you aren't signed in, check the privacy settings in the app.",
+        source: 'https://support.microsoft.com/en-us/privacy/microsoft-copilot/activity-history',
         checked: CHECKED,
         confirmed: true,
+        more: ['https://support.microsoft.com/en-us/microsoft-copilot/privacy-faq-for-microsoft-copilot'],
       },
     },
   },

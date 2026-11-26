@@ -6,8 +6,10 @@
 import BaseLayout from './BaseLayout.astro';
 import CopyButton from '../components/CopyButton.astro';
 import GuideCta from '../components/guides/GuideCta.astro';
+import TaskLists from '../components/guides/TaskLists.astro';
 import { guidePath, type Guide } from '../pages/ai-guides/_guides';
 import { nextGuide } from '../utils/startHere';
+import { curlQuotes } from '../utils/typography';
 import '../styles/ai.css';
 
 interface Props {
@@ -20,7 +22,8 @@ const { guide, guides } = Astro.props;
 const { title, description, lead, minutes, updatedDate, ctaLine } = guide.data;
 const others = guides.filter((g) => g.id !== guide.id);
 const next = nextGuide(guides.map((g) => ({ id: g.id, step: g.data.step, group: g.data.group, g })), guide.id)?.g;
-const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const updated = updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const updatedIso = updatedDate.toISOString().slice(0, 10);
 ---
 
 <BaseLayout title={`${title} — Free AI guides`} description={description} chromePath={guidePath(guide.id)} chrome="letterhead">
@@ -29,14 +32,15 @@ const updated = updatedDate?.toLocaleDateString('en-US', { year: 'numeric', mont
       <div class="ai-kicker" data-rise style="--i:0">
         <a href="/ai-guides/" class="guide-kicker-link">Free AI guides</a> · {minutes} min read
       </div>
-      <h1 class="ai-title ai-title--page" data-rise style="--i:1">{title}</h1>
-      <p class="ai-lead" data-rise style="--i:2">{lead}</p>
-      {updated && <p class="ai-label mt-4" data-rise style="--i:2">Updated <time datetime={updatedDate!.toISOString().slice(0, 10)}>{updated}</time></p>}
+      <h1 class="ai-title ai-title--page" data-rise style="--i:1">{curlQuotes(title)}</h1>
+      <p class="ai-lead" data-rise style="--i:2">{curlQuotes(lead)}</p>
+      <p class="ai-label mt-4" data-rise style="--i:2" data-guide-updated={updatedIso}>Last updated <time datetime={updatedIso}>{updated}</time></p>
     </header>
 
     <article class="post-prose cohort-prose" data-rise style="--i:3">
       <slot />
     </article>
+    <TaskLists />
 
     <div class="guide-share" data-guide-share hidden>
       <button type="button" class="guide-share__btn" data-share-button data-share-title={title} data-share-line={description}>Share this guide</button>
