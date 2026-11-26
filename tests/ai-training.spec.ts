@@ -46,6 +46,28 @@ test.describe('AI training page', () => {
     expect(text).not.toMatch(/meet\.google\.com/);
   });
 
+  test('answers what happens when a track misses the first cutoff', async ({ page }) => {
+    await page.goto(PAGE);
+    const item = page.locator('.training-faq details', { hasText: "What if my track doesn't reach 5 by Monday, December 21?" });
+    await expect(item).toHaveCount(1);
+    await item.locator('summary').click();
+    await expect(item.locator('p')).toBeVisible();
+    await expect(item.locator('p')).toContainText('keep your seat for the next slot');
+    await expect(item.locator('p')).toContainText('$25 back in full');
+    // The cutoff in the question is the one the first slot states.
+    await expect(page.locator('.training-slots > li').first()).toContainText('Monday, December 21');
+  });
+
+  test('answers how refunds work once a track has started', async ({ page }) => {
+    await page.goto(PAGE);
+    const item = page.locator('.training-faq details', { hasText: 'Can I get a refund once it starts?' });
+    await expect(item).toHaveCount(1);
+    await item.locator('summary').click();
+    await expect(item.locator('p')).toBeVisible();
+    await expect(item.locator('p')).toContainText('full refund up to the end of session 1');
+    await expect(item.locator('p')).toContainText('No refunds after that');
+  });
+
   test('shows live counts from the endpoint', async ({ page }) => {
     await page.route('**/api/ai-quiz/tracks', (r) =>
       r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, counts: { everyday: 1, connect: 5, build: 8 } }) }),
@@ -80,13 +102,13 @@ test.describe('AI training page', () => {
   test('every "message me" opens WhatsApp through the redirect, in a new tab', async ({ page }) => {
     const src = readFileSync(fileURLToPath(new URL('../src/pages/ai-training.astro', import.meta.url)), 'utf8');
     const inSource = src.match(/message me/gi) ?? [];
-    expect(inSource.length).toBe(3);
+    expect(inSource.length).toBe(4);
     await page.goto(PAGE);
     const text = await page.locator('main').textContent() ?? '';
     const total = (text.match(/message me/gi) ?? []).length;
-    expect(total).toBe(3);
+    expect(total).toBe(4);
     const links = page.locator('main a[href="/api/ai-quiz/whatsapp"][target="_blank"]', { hasText: /message me/i });
-    await expect(links).toHaveCount(3);
+    await expect(links).toHaveCount(4);
   });
 
   test('a full track links to the waitlist and its Reserve button goes there', async ({ page }) => {

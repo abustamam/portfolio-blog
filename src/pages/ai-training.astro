@@ -7,7 +7,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Rosette from '../components/ai/Rosette.astro';
 import WorkedExample from '../components/ai/WorkedExample.astro';
 import profilePic from '../assets/profile-pic.jpeg';
-import { COHORT, COHORT_LINKS, CONTACT_EMAIL, INCLUDED, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../consts/aiCohort';
+import { COHORT, COHORT_LINKS, CONTACT_EMAIL, FIRST_SLOT_CUTOFF, INCLUDED, TRACKS, TRACKS_ENDPOINT, TRAINING } from '../consts/aiCohort';
 import { WHATSAPP_HREF } from '../consts/aiQuiz';
 import '../styles/ai.css';
 
@@ -218,8 +218,22 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
           </p>
         </details>
         <details>
+          <summary>What if my track doesn't reach {TRAINING.launchAt} by {FIRST_SLOT_CUTOFF}?</summary>
+          <p>
+            I'll message everyone who reserved it that week. You choose: keep your seat for the next slot, or get
+            your {TRAINING.deposit} back in full.
+          </p>
+        </details>
+        <details>
           <summary>How do I pay the rest?</summary>
           <p>When your track launches, I send you a link for the balance. Nothing else is charged until then.</p>
+        </details>
+        <details>
+          <summary>Can I get a refund once it starts?</summary>
+          <p>
+            Yes. A full refund up to {COHORT.refundUntil} if it isn't for you; just
+            <a {...messageMe}>message me</a>. No refunds after that.
+          </p>
         </details>
         <details>
           <summary>Which track is right for me?</summary>

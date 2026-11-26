@@ -88,13 +88,16 @@ export const SESSIONS: CohortSession[] = [
 // deposit. A track launches at `launchAt` deposits and takes the next open
 // slot, so tracks run back to back. Live counts come from GET TRACKS_ENDPOINT
 // (the ai-quiz-intake service reads Stripe; see docs/ai-quiz-setup.md).
+/** The day a track must have `launchAt` deposits to take the first slot. */
+export const FIRST_SLOT_CUTOFF = 'Monday, December 21';
+
 export const TRAINING = {
   deposit: '$25',
   launchAt: 5,
   maxSeats: 8,
   sessionLength: '90 minutes',
   slots: [
-    { when: 'Mondays, January 11 – February 1, 2027', note: '6:30–8:00pm Pacific, for a track that launches by Monday, December 21' },
+    { when: 'Mondays, January 11 – February 1, 2027', note: `6:30–8:00pm Pacific, for a track that launches by ${FIRST_SLOT_CUTOFF}` },
     { when: 'After Ramadan, late March 2027', note: 'for the next track to launch' },
     { when: 'May 2027', note: 'for the track after that' },
   ],
