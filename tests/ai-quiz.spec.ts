@@ -164,13 +164,13 @@ test.describe('AI quiz', () => {
     expect(body).not.toHaveProperty('price');
   });
 
-  test('a beginner who wants help with email lands on Connect, with its price and the first slot', async ({ page }) => {
+  test('a beginner who wants help with email lands on Connect, with its price and the spring slot', async ({ page }) => {
     // What /ai-training/ says about Connect is what the result must repeat.
     await page.goto('/ai-training/');
     const price = (await page.locator('#connect .track-price').innerText()).trim();
-    const slot = (await page.locator('.training-slots li strong').first().innerText()).trim();
+    const slot = (await page.locator('.training-slots li strong').nth(1).innerText()).trim();
     expect(price).toMatch(/^\$\d+$/);
-    expect(slot.length).toBeGreaterThan(5);
+    expect(slot).toContain('After Ramadan');
 
     await page.goto('/ai-quiz');
     await page.evaluate(() => {
@@ -192,7 +192,9 @@ test.describe('AI quiz', () => {
     await expect(offer).toHaveAttribute('data-result-offer', 'connect');
     await expect(offer).toContainText(price);
     await expect(offer).toContainText('$25');
-    await expect(offer).toContainText(slot);
+    await expect(offer).toContainText('late March 2027');
+    await expect(offer).toContainText('Sunday, January 31');
+    await expect(offer).not.toContainText('December 21');
   });
 
   test('routes on what the person wants, and falls back on what they already do', () => {

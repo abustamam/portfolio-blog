@@ -6,7 +6,7 @@
 // slot is listed, so the form says so first: the old "tell me when the next
 // cohort opens" read as if nothing was on sale yet.
 import { AI_QUIZ_ENDPOINT } from '../../consts/aiQuiz';
-import { CONTACT_EMAIL, TRAINING } from '../../consts/aiCohort';
+import { CONTACT_EMAIL, TRACKS } from '../../consts/aiCohort';
 import { WAITLIST_LIMITS } from '../../../services/ai-quiz-intake/src/waitlist';
 
 interface Props {
@@ -18,14 +18,14 @@ const { source } = Astro.props;
 // Same service and Caddy route as the quiz: POST /api/ai-quiz/waitlist. Empty in dev builds.
 const endpoint = AI_QUIZ_ENDPOINT ? `${AI_QUIZ_ENDPOINT.replace(/\/$/, '')}/waitlist` : '';
 const id = `notify-${source.replace(/[^a-z0-9-]/g, '-')}`;
-// The same slot the training page lists first, so the two cannot disagree.
-const slot = TRAINING.slots[0];
+// The same confirmed run the training page lists first, so the two cannot disagree.
+const run = TRACKS.find((t) => t.confirmed)!.confirmed!;
 ---
 
 <form class="notify" data-notify-form data-endpoint={endpoint} data-source={source} novalidate aria-labelledby={`${id}-title`}>
   <h2 id={`${id}-title`} class="notify__title">Not ready to reserve?</h2>
   <p class="notify__line" data-notify-open>
-    Reserving is open now. The first slot is {slot.when}, {slot.note}.
+    Reserving is open now. Everyday AI is confirmed for {run.when}, and the last day to join is {run.joinBy}.
     <a class="notify__link" href="/ai-training/#tracks">See the tracks →</a>
   </p>
   <p class="notify__line" data-notify-promise>

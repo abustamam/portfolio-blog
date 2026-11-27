@@ -84,19 +84,31 @@ export const SESSIONS: CohortSession[] = [
 ];
 
 
+// Everyday AI is confirmed: it runs on these dates whatever the headcount.
+const EVERYDAY_RUN = {
+  when: 'Mondays, January 11 – February 1, 2027',
+  joinBy: 'Monday, December 21',
+  balanceBy: 'Monday, January 4, 2027',
+} as const;
+
 // The public /ai-training/ page: three tracks, each reserved with a $25
-// deposit. A track launches at `launchAt` deposits and takes the next open
-// slot, so tracks run back to back. Live counts come from GET TRACKS_ENDPOINT
-// (the ai-quiz-intake service reads Stripe; see docs/ai-quiz-setup.md).
+// deposit. Everyday AI (the `confirmed` track) is already on the calendar and
+// takes the first slot. Connect and Build launch at `launchAt` deposits and
+// compete for the slot after Ramadan: the first to reach `launchAt` by
+// `launchBy` takes it, and if both do, the other takes May 2027. Tracks never
+// run at the same time. Live counts come from GET TRACKS_ENDPOINT (the
+// ai-quiz-intake service reads Stripe; see docs/ai-quiz-setup.md).
 export const TRAINING = {
   deposit: '$25',
   launchAt: 5,
+  /** Connect and Build need `launchAt` reservations by this date to take the spring slot. */
+  launchBy: 'Sunday, January 31, 2027',
   maxSeats: 8,
   sessionLength: '90 minutes',
   slots: [
-    { when: 'Mondays, January 11 – February 1, 2027', note: '6:30–8:00pm Pacific, for a track that launches by Monday, December 21' },
-    { when: 'After Ramadan, late March 2027', note: 'for the next track to launch' },
-    { when: 'May 2027', note: 'for the track after that' },
+    { when: EVERYDAY_RUN.when, note: `Everyday AI, confirmed. ${COHORT.time}. Last day to join is ${EVERYDAY_RUN.joinBy}` },
+    { when: 'After Ramadan, late March 2027', note: 'the first of Connect or Build to reach 5 reservations by Sunday, January 31' },
+    { when: 'May 2027', note: 'the other of Connect or Build, if it also reaches 5 reservations' },
   ],
 } as const;
 
@@ -115,6 +127,8 @@ export interface Track {
   sessions: { title: string; outcome: string }[];
   end: string;
   needs: string;
+  /** Set when the track runs whatever the headcount. */
+  confirmed?: { when: string; joinBy: string; balanceBy: string };
 }
 
 export const TRACKS: Track[] = [
@@ -132,6 +146,7 @@ export const TRACKS: Track[] = [
     sessions: SESSIONS.map((s) => ({ title: s.title, outcome: s.outcome })),
     end: 'One real weekly task that AI handles, a way to check its work, and a write-up so you can keep it running.',
     needs: "A laptop and any AI account (Gemini, ChatGPT, Copilot or Claude). Free is enough. No file of your own? I'll bring realistic samples for your field.",
+    confirmed: EVERYDAY_RUN,
   },
   {
     id: 'connect',
