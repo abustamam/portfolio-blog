@@ -37,7 +37,7 @@ test.describe('AI training page', () => {
   test('says what every track includes, how launch works, and links the quiz', async ({ page }) => {
     await page.goto(PAGE);
     await expect(page.locator('.training-included')).toContainText('private WhatsApp group');
-    await expect(page.locator('body')).toContainText('Tracks run one at a time');
+    await expect(page.locator('body')).toContainText('Tracks never run at the same time');
     await expect(page.locator('.training-slots > li')).toHaveCount(3);
     await expect(page.locator('.training-slots')).toContainText('After Ramadan');
     await expect(page.locator('a[href="/ai-quiz/"]').first()).toBeVisible();
@@ -46,12 +46,42 @@ test.describe('AI training page', () => {
     expect(text).not.toMatch(/meet\.google\.com/);
   });
 
+  test('Everyday AI is confirmed with its dates and join-by date; Connect and Build keep the 5-reservation rule', async ({ page }) => {
+    await page.goto(PAGE);
+    const card = page.locator('#everyday');
+    await expect(card.locator('.track-confirmed')).toContainText('Confirmed');
+    await expect(card.locator('.track-confirmed')).toContainText('Mondays, January 11 – February 1, 2027');
+    await expect(card.locator('.track-confirmed')).toContainText('Monday, December 21');
+    await expect(card.locator('.track-small')).toContainText('Monday, January 4, 2027');
+    await expect(card.locator('.track-small')).toContainText('Full refund until the end of session 1');
+    await expect(card).not.toContainText(/5 people|reserved to launch/);
+    await expect(page.locator('.track-confirmed')).toHaveCount(1);
+    await expect(page.locator('section[aria-labelledby="how"]')).not.toContainText('A track launches once 5 people');
+    await expect(page.locator('.training-slots > li').first()).toContainText('Everyday AI, confirmed');
+    await expect(page.locator('.training-slots')).toContainText('Connect or Build');
+    await expect(page.locator('section[aria-labelledby="how"]')).toContainText('5 people');
+    await expect(page.locator('section[aria-labelledby="how"]')).toContainText('Sunday, January 31');
+    await expect(page.locator('body')).not.toContainText('for a track that launches by Monday, December 21');
+  });
+
+  test('counts: Everyday AI reads as seats taken of 8, Connect as reserved to launch of 5', async ({ page }) => {
+    await page.route('**/api/ai-quiz/tracks', (r) =>
+      r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, counts: { everyday: 2, connect: 2, build: 0 } }) }),
+    );
+    await page.goto(PAGE);
+    const everyday = page.locator('.track-count[data-track="everyday"]');
+    await expect(everyday).toHaveText('2 of 8 seats taken');
+    await expect(everyday).toHaveCSS('--fill', '25%');
+    await expect(page.locator('.track-count[data-track="connect"]')).toHaveText('2 of 5 reserved to launch');
+    await expect(page.locator('.track-count[data-track="connect"]')).toHaveCSS('--fill', '40%');
+  });
+
   test('shows live counts from the endpoint', async ({ page }) => {
     await page.route('**/api/ai-quiz/tracks', (r) =>
       r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, counts: { everyday: 1, connect: 5, build: 8 } }) }),
     );
     await page.goto(PAGE);
-    await expect(page.locator('.track-count[data-track="everyday"]')).toHaveText('1 of 5 reserved to launch');
+    await expect(page.locator('.track-count[data-track="everyday"]')).toHaveText('1 of 8 seats taken');
     await expect(page.locator('.track-count[data-track="connect"]')).toHaveText('Launching · 5 of 8 seats taken');
     await expect(page.locator('.track-count[data-track="build"]')).toHaveText('Full. Join the waitlist.');
   });

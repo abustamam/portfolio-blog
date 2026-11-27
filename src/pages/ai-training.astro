@@ -1,7 +1,8 @@
 ---
-// Public sign-up page for every track. Each track is reserved with a $25 deposit
-// and launches at TRAINING.launchAt deposits; the first to launch takes the next
-// slot. Counters come from TRACKS_ENDPOINT and stay hidden if it doesn't answer.
+// Public sign-up page for every track. Each track is reserved with a $25 deposit.
+// Everyday AI is confirmed (TRACKS[].confirmed) and takes the first slot. Connect and
+// Build launch at TRAINING.launchAt deposits and compete for the spring slot by
+// TRAINING.launchBy. Counters come from TRACKS_ENDPOINT and stay hidden if it doesn't answer.
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Rosette from '../components/ai/Rosette.astro';
@@ -18,6 +19,7 @@ const messageMe = WHATSAPP_HREF
   : { href: `mailto:${CONTACT_EMAIL}` };
 
 // The lowest track price, for the line under the hero ("From $79 a track").
+const everyday = TRACKS.find((t) => t.id === 'everyday')!;
 const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g, ''))));
 ---
 
@@ -108,7 +110,12 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
               <div class="track-kicker"><span class="track-price">{t.price}</span><span class="track-meta"> · 4 sessions</span></div>
               <h3 class="track-name">{t.name}</h3>
               <p class="track-tagline">{t.tagline}</p>
-              <p class="track-count" data-track={t.id} hidden></p>
+              {t.confirmed && (
+                <p class="track-confirmed">
+                  <strong>Confirmed.</strong> {t.confirmed.when}, {COHORT.time}. Last day to join: {t.confirmed.joinBy}.
+                </p>
+              )}
+              <p class="track-count" data-track={t.id} data-confirmed={t.confirmed ? 'true' : undefined} hidden></p>
             </header>
 
             <h4 class="ai-label">It's for you if</h4>
@@ -133,7 +140,14 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
 
             <footer class="track-foot">
               <a class="cohort-cta" href={t.depositUrl} data-track={t.id}>Reserve {t.name} · {TRAINING.deposit}</a>
-              <p class="track-small">{TRAINING.deposit} now, counted toward the {t.price} price. Fully refundable.</p>
+              {t.confirmed ? (
+                <p class="track-small">
+                  {TRAINING.deposit} now, counted toward the {t.price} price. I send a link for the rest by {t.confirmed.balanceBy}.
+                  Full refund until {COHORT.refundUntil}.
+                </p>
+              ) : (
+                <p class="track-small">{TRAINING.deposit} now, counted toward the {t.price} price. Fully refundable.</p>
+              )}
             </footer>
           </section>
         ))}
@@ -152,18 +166,24 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
         </li>
         <li>
           <span class="training-steps__n" aria-hidden="true">2</span>
-          <h3>Launch</h3>
-          <p>A track launches once <strong>{TRAINING.launchAt} people</strong> reserve it. Each is capped at {TRAINING.maxSeats}.</p>
+          <h3>Everyday AI runs</h3>
+          <p>Everyday AI is confirmed for <strong>{everyday.confirmed?.when}</strong>, with any number of people up to {TRAINING.maxSeats}. Last day to join is {everyday.confirmed?.joinBy}.</p>
         </li>
         <li>
           <span class="training-steps__n" aria-hidden="true">3</span>
-          <h3>Dates</h3>
-          <p>The first track to launch takes the next open slot. Tracks run one at a time.</p>
+          <h3>Connect and Build launch</h3>
+          <p>
+            They launch once <strong>{TRAINING.launchAt} people</strong> reserve them. The first to reach {TRAINING.launchAt}
+            by {TRAINING.launchBy} takes the slot after Ramadan. If both do, the other takes May 2027.
+          </p>
         </li>
         <li>
           <span class="training-steps__n" aria-hidden="true">4</span>
           <h3>Begin</h3>
-          <p>When your track launches, I message you with the dates and a link for the rest of the price.</p>
+          <p>
+            I message you with the dates and a link for the rest of the price. For Everyday AI that is by {everyday.confirmed?.balanceBy}.
+            Tracks never run at the same time.
+          </p>
         </li>
       </ol>
       <ul class="training-slots">
@@ -180,7 +200,8 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
         <div>
           <h3>No risk to reserve</h3>
           <p>
-            If your track doesn't launch, or the dates don't work for you, <strong>your {TRAINING.deposit} comes back in
+            Everyday AI is confirmed, and you get a <strong>full refund until {COHORT.refundUntil}</strong>. For Connect and
+            Build, if the track doesn't launch or the dates don't work for you, <strong>your {TRAINING.deposit} comes back in
             full</strong>. Just <a {...messageMe}>message me</a>.
           </p>
         </div>
@@ -204,6 +225,14 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
           <p>Watch the recording of the teaching part, then bring your questions to office hours. Recordings go only to your cohort.</p>
         </details>
         <details>
+          <summary>Which track starts first?</summary>
+          <p>
+            Everyday AI. It is confirmed for {everyday.confirmed?.when} and doesn't need a minimum number of people. Connect and
+            Build need {TRAINING.launchAt} reservations each. The first to reach {TRAINING.launchAt} by {TRAINING.launchBy} takes the
+            slot after Ramadan (late March 2027). If the other reaches {TRAINING.launchAt} too, it takes May 2027.
+          </p>
+        </details>
+        <details>
           <summary>I'm job hunting. Is this for me?</summary>
           <p>
             Yes: take <a href="#everyday">Everyday AI</a>. Your job search becomes your weekly task: tailoring your
@@ -219,7 +248,10 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
         </details>
         <details>
           <summary>How do I pay the rest?</summary>
-          <p>When your track launches, I send you a link for the balance. Nothing else is charged until then.</p>
+          <p>
+            For Everyday AI, I send you a link for the rest by {everyday.confirmed?.balanceBy}, along with the intake form. For
+            Connect and Build, I send it when your track launches. Nothing else is charged until then.
+          </p>
         </details>
         <details>
           <summary>Which track is right for me?</summary>
@@ -246,7 +278,8 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
 </BaseLayout>
 
 <script>
-  // Fills each "N of 5 reserved" line from the live counts. Any failure leaves them hidden.
+  // Fills each count line from the live counts: "N of 8 seats taken" for a confirmed track,
+  // "N of 5 reserved to launch" for the others. Any failure leaves them hidden.
   const box = document.getElementById('training-tracks');
   const endpoint = box?.dataset.endpoint;
   const launchAt = Number(box?.dataset.launchAt ?? 5);
@@ -259,6 +292,7 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
         for (const el of box.querySelectorAll<HTMLElement>('.track-count')) {
           const n = body.counts?.[el.dataset.track ?? ''];
           if (typeof n !== 'number') continue;
+          const confirmed = el.dataset.confirmed === 'true';
           if (n >= max) {
             const link = document.createElement('a');
             link.href = waitlist;
@@ -271,12 +305,13 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
             }
           } else {
             el.textContent =
-              n >= launchAt
-                ? `Launching · ${n} of ${max} seats taken`
+              confirmed || n >= launchAt
+                ? `${confirmed ? '' : 'Launching · '}${n} of ${max} seats taken`
                 : `${n} of ${launchAt} reserved to launch`;
           }
           el.hidden = false;
-          el.style.setProperty('--fill', `${Math.min(100, (n / launchAt) * 100)}%`);
+          const size = confirmed ? max : launchAt;
+          el.style.setProperty('--fill', `${Math.min(100, (n / size) * 100)}%`);
         }
       })
       .catch(() => {});
@@ -349,6 +384,8 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
   @media (min-width: 1080px) {
     @supports (grid-template-rows: subgrid) {
       .training-track { display: grid; grid-template-rows: subgrid; grid-row: span 8; row-gap: 0; }
+      /* Footers differ in height (the confirmed track has longer small print), so pin each to the top of its shared row. */
+      .training-track .track-foot { margin-top: 0; }
     }
   }
   .track-head { padding-bottom: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-line-soft); }
@@ -357,6 +394,7 @@ const fromPrice = Math.min(...TRACKS.map((t) => Number(t.price.replace(/[^\d.]/g
   .track-meta { font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-loose); text-transform: uppercase; color: var(--color-faint); }
   .track-name { font-size: 1.625rem; font-weight: 500; letter-spacing: -.015em; line-height: 1.15; margin: 1rem 0 .375rem; color: var(--color-accent); }
   .track-tagline { font-size: 1.125rem; line-height: 1.4; color: var(--color-mute); margin: 0; }
+  .track-confirmed { font-size: .9375rem; line-height: 1.45; color: var(--color-accent-ink); background: var(--color-accent-bg); border-radius: 6px; padding: .5rem .75rem; margin: 1rem 0 0; }
   .track-count :global(a) { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
   .track-count {
     position: relative; font-family: var(--font-mono); font-size: var(--text-13); color: var(--color-ink);

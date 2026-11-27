@@ -2,7 +2,7 @@
 title: "I'm Running a Small, Hands-On AI Cohort"
 description: "Bring one real task, leave with AI handling it and a way to check its work. A small online AI cohort, up to 8 people per track. Take the quiz to find your track."
 pubDate: '2026-11-22'
-updatedDate: '2026-11-25'
+updatedDate: '2026-11-26'
 dek: "Not a course about AI. A few sessions where you point AI at your actual work and leave with something that runs."
 tag: "AI"
 audience: "general"
@@ -17,7 +17,7 @@ So I'm running a small, hands-on AI cohort. The [quiz](/ai-quiz) tells me who's 
 
 **[Take the quiz →](/ai-quiz)** It's ten questions and takes about four minutes.
 
-Already know which track you want? **[Reserve a seat →](/ai-training/)** Reserving is open now: a $25 deposit, fully refundable, holds your place, and the first slot starts Monday, January 11, 2027.
+Already know which track you want? **[Reserve a seat →](/ai-training/)** Reserving is open now: a $25 deposit, fully refundable, holds your place, and Everyday AI is confirmed to start Monday, January 11, 2027.
 
 ---
 
@@ -57,7 +57,7 @@ The quiz points you to a track. It measures what you actually do with AI, not ho
 
 People have asked both. It's online, on Google Meet, in the evening (6:30–8:00pm Pacific).
 
-Everyday AI is $79, Connect is $99 and Build is $149. You hold a seat with a $25 deposit that counts toward the price and is fully refundable. A track launches once 5 people reserve it. The first slot is Mondays, January 11 – February 1, 2027, for a track that launches by Monday, December 21. The full details are on the [training page](/ai-training/).
+Everyday AI is $79, Connect is $99 and Build is $149. You hold a seat with a $25 deposit that counts toward the price and is fully refundable. Everyday AI is confirmed: it runs Mondays, January 11 – February 1, 2027, and the last day to join is Monday, December 21. Connect and Build launch once 5 people reserve them. The first to reach 5 by Sunday, January 31 takes the slot after Ramadan (late March 2027). If the other reaches 5 too, it takes May 2027. The full details are on the [training page](/ai-training/).
 
 ---
 
