@@ -341,7 +341,7 @@ const steps = 10; // 6 skill + goal + free text + privacy + logistics
           <p class="font-serif text-base leading-[1.6] text-ink m-0 mb-2">
             {t.confirmed
               ? `Confirmed: ${t.confirmed.when}, ${COHORT.time}. The last day to join is ${t.confirmed.joinBy}.`
-              : `Launches once ${TRAINING.launchAt} people reserve it. The first of Connect or Build to get there by ${TRAINING.launchBy} takes the slot after Ramadan (late March 2027), and the other takes May 2027.`}
+              : `Launches once ${TRAINING.launchAt} people reserve it. The first of Connect or Build to get there by ${TRAINING.launchBy} takes the slot after Ramadan (late March 2027). If the other reaches ${TRAINING.launchAt} too, it takes May 2027.`}
           </p>
           <p class="font-serif text-base leading-[1.6] text-mute m-0"><strong>You'll need:</strong> {t.needs}</p>
         </div>

@@ -57,7 +57,7 @@ The quiz points you to a track. It measures what you actually do with AI, not ho
 
 People have asked both. It's online, on Google Meet, in the evening (6:30–8:00pm Pacific).
 
-Everyday AI is $79, Connect is $99 and Build is $149. You hold a seat with a $25 deposit that counts toward the price and is fully refundable. Everyday AI is confirmed: it runs Mondays, January 11 – February 1, 2027, and the last day to join is Monday, December 21. Connect and Build launch once 5 people reserve them. The first to reach 5 by Sunday, January 31 takes the slot after Ramadan (late March 2027), and the other takes May 2027. The full details are on the [training page](/ai-training/).
+Everyday AI is $79, Connect is $99 and Build is $149. You hold a seat with a $25 deposit that counts toward the price and is fully refundable. Everyday AI is confirmed: it runs Mondays, January 11 – February 1, 2027, and the last day to join is Monday, December 21. Connect and Build launch once 5 people reserve them. The first to reach 5 by Sunday, January 31 takes the slot after Ramadan (late March 2027). If the other reaches 5 too, it takes May 2027. The full details are on the [training page](/ai-training/).
 
 ---
 
