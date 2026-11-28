@@ -87,6 +87,11 @@ describe('formatPaymentNotification', () => {
     expect(text).toBe('New cohort payment: Test Person\nPaid: $79.00');
     expect(text).not.toContain('@');
   });
+
+  test('keeps a typed name on one line', () => {
+    const text = formatPaymentNotification({ name: 'Eve\nPaid: $1.00', amount: 7900, currency: 'usd' });
+    expect(text).toBe('New cohort payment: Eve Paid: $1.00\nPaid: $79.00');
+  });
 });
 
 describe('stripe webhook route', () => {

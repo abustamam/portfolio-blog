@@ -30,6 +30,10 @@ the endpoint in any build.
   `answers`, and from the skill answers when the goal is `unsure` or missing.
   Rows from before the goal question have no `goal`.
 - The hidden `website` honeypot field gets a fake `ok` and nothing is stored.
+- Form posts must be `Content-Type: application/json`; anything else gets a
+  `415` before it counts against the rate limit. The site's pages always send
+  JSON. A plain form on another site cannot, so it cannot submit through a
+  visitor's browser.
 - Limits each IP to 10 submissions an hour (`RATE_LIMIT`), keyed on
   `X-Real-IP`, which Caddy sets from `Cf-Connecting-Ip`.
 - Never echoes database errors to the client.

@@ -4,6 +4,7 @@ import { OFFER_NAMES } from '../../../src/utils/aiQuiz';
 import type { Row } from './validate';
 import { INTAKE_OPTIONS, type IntakeRow } from './intake';
 import type { WaitlistRow } from './waitlist';
+import { oneLine } from './text';
 import { formatPaymentNotification, type Payment } from './stripe';
 
 const TRACK_NAMES = { foundations: 'Foundations', applied: 'Applied', builder: 'Builder' } as const;
@@ -16,12 +17,12 @@ export function formatNotification(row: Row): string {
   const a = row.answers;
   const one = (k: string) => (typeof a[k] === 'string' ? (a[k] as string) : '—');
   return [
-    `New AI quiz response: ${row.name ?? '(no name)'}`,
+    `New AI quiz response: ${oneLine(row.name ?? '(no name)')}`,
     // The track the result screen named, and the answer that picked it ("—" when they were not sure or not asked).
     `Recommended: ${OFFER_NAMES[row.recommend]} · Goal: ${one('goal')}`,
     `Level: ${TRACK_NAMES[row.track]} (score ${row.score}/15)${row.privacyGap ? ', privacy gap' : ''}`,
     `Payer: ${one('payer')} · Start: ${one('start')}`,
-    `Task: ${row.weeklyTask}`,
+    `Task: ${oneLine(row.weeklyTask)}`,
     row.contact ? 'Left contact details: yes' : 'Left contact details: no',
   ].join('\n');
 }
@@ -34,12 +35,12 @@ const label = (k: 'platform' | 'account' | 'os' | 'coding', v?: string) =>
 /** Same rules as formatNotification: plain text, and no contact details. */
 export function formatIntakeNotification(row: IntakeRow): string {
   return [
-    `New cohort intake: ${row.name}`,
+    `New cohort intake: ${oneLine(row.name)}`,
     `Track: ${INTAKE_TRACKS[row.track] ?? row.track}`,
     `Time now: ${TIME_LABELS[row.timeTaken]}`,
-    `Task: ${row.weeklyTask}`,
+    `Task: ${oneLine(row.weeklyTask)}`,
     ...setupLine(row.extras),
-    ...(row.extras?.buildIdea ? [`Wants to build: ${row.extras.buildIdea}`] : []),
+    ...(row.extras?.buildIdea ? [`Wants to build: ${oneLine(row.extras.buildIdea)}`] : []),
   ].join('\n');
 }
 
@@ -55,9 +56,9 @@ function setupLine(x: IntakeRow['extras'] | undefined): string[] {
  */
 export function formatWaitlistNotification(row: WaitlistRow): string {
   const head = row.source
-    ? `New "tell me when the next cohort opens" signup from ${row.source}${row.name ? `: ${row.name}` : ''}`
-    : `New cohort waitlist signup: ${row.name}`;
-  return [head, ...(row.note ? [`Note: ${row.note}`] : [])].join('\n');
+    ? `New "tell me when the next cohort opens" signup from ${row.source}${row.name ? `: ${oneLine(row.name)}` : ''}`
+    : `New cohort waitlist signup: ${row.name ? oneLine(row.name) : row.name}`;
+  return [head, ...(row.note ? [`Note: ${oneLine(row.note)}`] : [])].join('\n');
 }
 
 interface TelegramOpts {
