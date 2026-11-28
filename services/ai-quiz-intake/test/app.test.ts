@@ -36,7 +36,7 @@ function setup(limit = 10) {
     handle(
       new Request(`http://x${PATH}`, {
         method: 'POST',
-        headers: { 'x-real-ip': ip },
+        headers: { 'x-real-ip': ip, 'content-type': 'application/json' },
         body: typeof body === 'string' ? body : JSON.stringify(body),
       }),
     );
@@ -125,9 +125,31 @@ describe('handler', () => {
       ping: async () => {},
       log: () => {},
     });
-    const res = await handle(new Request(`http://x${PATH}`, { method: 'POST', body: JSON.stringify(valid) }));
+    const res = await handle(new Request(`http://x${PATH}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(valid) }));
     expect(res.status).toBe(500);
     expect(await res.text()).not.toContain('password');
+  });
+
+  test('refuses a form post that is not JSON, before it counts against the rate limit', async () => {
+    const { rows, handle } = setup(1);
+    const send = (headers: Record<string, string>) =>
+      handle(new Request(`http://x${PATH}`, { method: 'POST', headers: { 'x-real-ip': '7.7.7.7', ...headers }, body: JSON.stringify(valid) }));
+    // What a plain HTML form on another site can send without a preflight.
+    expect((await send({ 'content-type': 'text/plain' })).status).toBe(415);
+    expect((await send({ 'content-type': 'application/x-www-form-urlencoded' })).status).toBe(415);
+    // No explicit header: a string body defaults to text/plain.
+    expect((await send({})).status).toBe(415);
+    expect(rows).toHaveLength(0);
+    // The limit is 1 and none of the refusals used it.
+    expect((await send({ 'content-type': 'application/json; charset=utf-8' })).status).toBe(200);
+    expect(rows).toHaveLength(1);
+  });
+
+  test('answers no CORS preflight, so another site cannot send JSON either', async () => {
+    const { handle } = setup();
+    const res = await handle(new Request(`http://x${PATH}`, { method: 'OPTIONS', headers: { origin: 'https://other.example' } }));
+    expect(res.status).toBe(405);
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
   });
 
   test('health reports the database state', async () => {

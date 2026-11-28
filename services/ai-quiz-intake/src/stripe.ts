@@ -1,6 +1,7 @@
 // Stripe webhook for the cohort payment link: verifies the signature and turns
 // a completed, paid checkout into a short Telegram message. No Stripe SDK and
 // no API key: the event body carries everything the message needs.
+import { oneLine } from './text';
 
 /** Stripe's default tolerance for the signed timestamp. */
 const TOLERANCE_S = 5 * 60;
@@ -85,5 +86,5 @@ export function formatPaymentNotification(p: Payment): string {
   const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: p.currency.toUpperCase() }).format(
     p.amount / 100,
   );
-  return [`New cohort payment: ${p.name}`, `Paid: ${money}`, ...(p.track ? [`Track: ${p.track}`] : [])].join('\n');
+  return [`New cohort payment: ${oneLine(p.name)}`, `Paid: ${money}`, ...(p.track ? [`Track: ${p.track}`] : [])].join('\n');
 }

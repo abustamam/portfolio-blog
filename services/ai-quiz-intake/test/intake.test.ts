@@ -72,7 +72,7 @@ function setup(limit = 10) {
     handle(
       new Request(`http://x${path}`, {
         method: 'POST',
-        headers: { 'x-real-ip': ip },
+        headers: { 'x-real-ip': ip, 'content-type': 'application/json' },
         body: typeof body === 'string' ? body : JSON.stringify(body),
       }),
     );
@@ -219,7 +219,7 @@ describe('intake handler', () => {
       ping: async () => {},
       log: () => {},
     });
-    const res = await handle(new Request(`http://x${INTAKE_PATH}`, { method: 'POST', body: JSON.stringify(valid) }));
+    const res = await handle(new Request(`http://x${INTAKE_PATH}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(valid) }));
     expect(res.status).toBe(500);
     expect(await res.text()).not.toContain('permission');
     expect(notified).toHaveLength(0);
@@ -231,7 +231,7 @@ describe('intake handler', () => {
       insert: async () => {}, insertIntake: async () => {}, ping: async () => {}, log: (m) => void logs.push(m),
       notifyIntake: async () => { throw new Error('telegram down'); },
     });
-    const res = await handle(new Request(`http://x${INTAKE_PATH}`, { method: 'POST', body: JSON.stringify(valid) }));
+    const res = await handle(new Request(`http://x${INTAKE_PATH}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(valid) }));
     expect(res.status).toBe(200);
     await new Promise((r) => setTimeout(r, 0));
     expect(logs).toContain('intake notify failed');
@@ -252,6 +252,22 @@ describe('intake notifications', () => {
     );
     expect(text).not.toContain('555');
     expect(text).not.toContain('Volunteer phone numbers');
+  });
+
+  test('keeps a typed name, task and build idea on their own lines', () => {
+    const text = formatIntakeNotification({
+      ...row,
+      name: 'Eve\nTrack: Build',
+      weeklyTask: 'one\ntwo',
+      extras: { ...row.extras, buildIdea: 'a bot\nPaid: $149.00' },
+    });
+    expect(text.split('\n')).toEqual([
+      'New cohort intake: Eve Track: Build',
+      'Track: Everyday AI',
+      'Time now: 1–2 hours',
+      'Task: one two',
+      'Wants to build: a bot Paid: $149.00',
+    ]);
   });
 
   test('adds the setup and build idea for the technical tracks', () => {

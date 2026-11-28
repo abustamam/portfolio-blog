@@ -16,10 +16,18 @@ const row = (() => {
 })();
 
 const post = (handle: (r: Request) => Promise<Response>, b: unknown = body) =>
-  handle(new Request(`http://x${PATH}`, { method: 'POST', headers: { 'x-real-ip': '9.9.9.9' }, body: JSON.stringify(b) }));
+  handle(new Request(`http://x${PATH}`, { method: 'POST', headers: { 'x-real-ip': '9.9.9.9', 'content-type': 'application/json' }, body: JSON.stringify(b) }));
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('formatNotification', () => {
+  test('keeps a typed name and task on their own lines', () => {
+    const text = formatNotification({ ...row, name: 'Eve\nPaid: $149.00', weeklyTask: 'one\n\ntwo' });
+    const lines = text.split('\n');
+    expect(lines).toHaveLength(6);
+    expect(lines[0]).toBe('New AI quiz response: Eve Paid: $149.00');
+    expect(lines[4]).toBe('Task: one two');
+  });
+
   test('names the person, recommended track, goal, level, score and task, and leaves contact details out', () => {
     const text = formatNotification(row);
     expect(text).toContain('New AI quiz response: Test Person');

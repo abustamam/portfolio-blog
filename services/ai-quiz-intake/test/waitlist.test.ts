@@ -23,7 +23,7 @@ function setup(limit = 10) {
     handle(
       new Request(`http://x${path}`, {
         method: 'POST',
-        headers: { 'x-real-ip': ip },
+        headers: { 'x-real-ip': ip, 'content-type': 'application/json' },
         body: typeof body === 'string' ? body : JSON.stringify(body),
       }),
     );
@@ -112,7 +112,7 @@ describe('waitlist handler', () => {
       ping: async () => {},
       log: (m) => void logs.push(m),
     });
-    const res = await handle(new Request(`http://x${WAITLIST_PATH}`, { method: 'POST', body: JSON.stringify(valid) }));
+    const res = await handle(new Request(`http://x${WAITLIST_PATH}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(valid) }));
     expect(res.status).toBe(500);
     expect(await res.text()).not.toContain('cohort_waitlist');
     expect(notified).toHaveLength(0);
@@ -121,6 +121,19 @@ describe('waitlist handler', () => {
 });
 
 describe('waitlist notifications', () => {
+  test('typed line breaks cannot start a new line in the alert', () => {
+    const text = formatWaitlistNotification({
+      name: 'Eve\nNew cohort payment: Eve\r\nPaid: $149.00',
+      contact: 'e@example.com',
+      note: `first${String.fromCharCode(0x2028)}second\tthird`,
+      source: null,
+    });
+    expect(text.split('\n')).toEqual([
+      'New cohort waitlist signup: Eve New cohort payment: Eve Paid: $149.00',
+      'Note: first second third',
+    ]);
+  });
+
   test('names the person and their note, never the contact details', () => {
     const text = formatWaitlistNotification({ name: 'Test Person', contact: '+1 916 555 0100', note: 'Weeknights', source: null });
     expect(text).toBe('New cohort waitlist signup: Test Person\nNote: Weeknights');

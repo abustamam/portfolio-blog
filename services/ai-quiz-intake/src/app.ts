@@ -71,6 +71,9 @@ const json = (status: number, body: unknown) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });
 
+/** True for `application/json`, with or without parameters such as a charset. */
+const isJson = (contentType: string | null) => (contentType ?? '').split(';')[0].trim().toLowerCase() === 'application/json';
+
 export function createHandler(deps: Deps) {
   const allow = createRateLimiter(deps.limit ?? 10, deps.windowMs ?? 60 * 60 * 1000);
   const log = deps.log ?? ((m, e) => console.log(JSON.stringify({ msg: m, ...e })));
@@ -137,6 +140,12 @@ export function createHandler(deps: Deps) {
     const form = forms.get(url.pathname);
     if (url.pathname !== PATH && !form) return json(404, { ok: false, error: 'not found' });
     if (req.method !== 'POST') return json(405, { ok: false, error: 'method not allowed' });
+
+    // The site's own fetch() always sends JSON. A page on another site can only make a
+    // visitor's browser send text/plain, urlencoded or multipart without a preflight,
+    // and this service answers no preflight. Checked before the limiter, so a refused
+    // post costs the visitor none of their submissions.
+    if (!isJson(req.headers.get('content-type'))) return json(415, { ok: false, error: 'expected application/json' });
 
     // One limiter for every form. Caddy sets X-Real-IP from Cf-Connecting-Ip (see docs/ai-quiz-setup.md).
     const ip = req.headers.get('x-real-ip') ?? 'unknown';
