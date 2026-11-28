@@ -111,7 +111,7 @@ const terminalJson = JSON.stringify(terminalData).replace(/</g, '\\u003c');
       >next ›</button>
     </div>
   </div>
-  <form id="terminal-prompt-form" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
+  <form id="terminal-prompt-form" method="post" class="shrink-0 flex h-12 items-center gap-2 border-t border-line px-4">
     <span id="terminal-cwd" class="shrink-0 text-accent"></span>
     <div class="flex items-center flex-1 min-w-0 relative">
       <input

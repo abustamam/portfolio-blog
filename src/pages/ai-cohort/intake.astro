@@ -38,7 +38,7 @@ const requiredExtras = JSON.stringify(Object.fromEntries(Object.entries(TRACK_EX
       <p class="quiz-status" data-state="warn">This form needs JavaScript. If you can't turn it on, message Rasheed on WhatsApp and he'll send you the questions.</p>
     </noscript>
 
-    <form id="cohort-intake" class="quiz" novalidate data-endpoint={endpoint} data-required-extras={requiredExtras}>
+    <form id="cohort-intake" method="post" class="quiz" novalidate data-endpoint={endpoint} data-required-extras={requiredExtras}>
       <fieldset class="quiz-step">
         <legend class="quiz-legend">Your name</legend>
         <input type="text" name="name" autocomplete="name" required maxlength={INTAKE_LIMITS.name} class="quiz-input" />
