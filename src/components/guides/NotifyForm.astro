@@ -22,7 +22,7 @@ const id = `notify-${source.replace(/[^a-z0-9-]/g, '-')}`;
 const run = TRACKS.find((t) => t.confirmed)!.confirmed!;
 ---
 
-<form class="notify" data-notify-form data-endpoint={endpoint} data-source={source} novalidate aria-labelledby={`${id}-title`}>
+<form class="notify" method="post" data-notify-form data-endpoint={endpoint} data-source={source} novalidate aria-labelledby={`${id}-title`}>
   <h2 id={`${id}-title`} class="notify__title">Not ready to reserve?</h2>
   <p class="notify__line" data-notify-open>
     Reserving is open now. Everyday AI is confirmed for {run.when}, and the last day to join is {run.joinBy}.
